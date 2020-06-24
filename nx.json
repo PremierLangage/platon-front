@@ -1,5 +1,5 @@
 {
-  "npmScope": "platon-front",
+  "npmScope": "platon",
   "implicitDependencies": {
     "angular.json": "*",
     "package.json": {
@@ -18,5 +18,13 @@
       }
     }
   },
-  "projects": {}
+  "projects": {
+    "platon": {
+      "tags": []
+    },
+    "platon-e2e": {
+      "tags": [],
+      "implicitDependencies": ["platon"]
+    }
+  }
 }
