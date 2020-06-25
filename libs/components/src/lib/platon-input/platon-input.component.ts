@@ -25,6 +25,6 @@ export class PlatonInputComponent implements WebComponentLifeCycles<PlatonInput>
     ) {}
 
     onAfterDeserialize() {
-        this.changeDetector.markForCheck();
+        this.changeDetector.detectChanges();
     }
 }

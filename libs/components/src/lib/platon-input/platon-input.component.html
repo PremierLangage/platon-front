@@ -1,6 +1,6 @@
 <mat-form-field appearance="outline">
   <mat-label>Label</mat-label>
-  <input matInput [(ngModel)]="state!.value">
+  <input matInput [(ngModel)]="state!.value" (ngModelChange)="onAfterDeserialize()">
 </mat-form-field>
 <ng-container *ngIf="state.debug">
   {{ state|json }}
