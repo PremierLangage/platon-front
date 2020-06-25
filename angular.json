@@ -23,7 +23,12 @@
             "aot": true,
             "assets": [
               "apps/platon/src/favicon.ico",
-              "apps/platon/src/assets"
+              "apps/platon/src/assets",
+              {
+                "glob": "**/*",
+                "input": "libs/shared/assets/src",
+                "output": "./assets"
+              }
             ],
             "styles": [
               "apps/platon/src/styles.scss"
@@ -102,10 +107,7 @@
               "apps/platon/tsconfig.app.json",
               "apps/platon/tsconfig.spec.json"
             ],
-            "exclude": [
-              "**/node_modules/**",
-              "!apps/platon/**/*"
-            ]
+            "exclude": ["**/node_modules/**", "!apps/platon/**/*"]
           }
         },
         "test": {
@@ -142,11 +144,117 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "apps/platon-e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**",
-              "!apps/platon-e2e/**/*"
-            ]
+            "exclude": ["**/node_modules/**", "!apps/platon-e2e/**/*"]
           }
+        }
+      }
+    },
+    "shared-styles": {
+      "projectType": "library",
+      "root": "libs/shared/styles",
+      "sourceRoot": "libs/shared/styles/src",
+      "prefix": "styles",
+      "architect": {},
+      "schematics": {}
+    },
+    "shared-assets": {
+      "projectType": "library",
+      "root": "libs/shared/assets",
+      "sourceRoot": "libs/shared/assets/src",
+      "prefix": "assets",
+      "architect": {},
+      "schematics": {}
+    },
+    "shared-ui": {
+      "projectType": "library",
+      "root": "libs/shared/ui",
+      "sourceRoot": "libs/shared/ui/src",
+      "prefix": "ui",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/shared/ui/tsconfig.lib.json",
+              "libs/shared/ui/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/shared/ui/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/shared/ui/src/test.ts",
+            "tsConfig": "libs/shared/ui/tsconfig.spec.json",
+            "karmaConfig": "libs/shared/ui/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "shared-utils": {
+      "projectType": "library",
+      "root": "libs/shared/utils",
+      "sourceRoot": "libs/shared/utils/src",
+      "prefix": "utils",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/shared/utils/tsconfig.lib.json",
+              "libs/shared/utils/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/shared/utils/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/shared/utils/src/test.ts",
+            "tsConfig": "libs/shared/utils/tsconfig.spec.json",
+            "karmaConfig": "libs/shared/utils/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "shared-vendors": {
+      "projectType": "library",
+      "root": "libs/shared/vendors",
+      "sourceRoot": "libs/shared/vendors/src",
+      "prefix": "vendors",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/shared/vendors/tsconfig.lib.json",
+              "libs/shared/vendors/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/shared/vendors/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/shared/vendors/src/test.ts",
+            "tsConfig": "libs/shared/vendors/tsconfig.spec.json",
+            "karmaConfig": "libs/shared/vendors/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
         }
       }
     }
