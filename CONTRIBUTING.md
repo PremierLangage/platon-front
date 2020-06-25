@@ -1,4 +1,4 @@
-# Contributing to NG-ZORRO
+# Contributing to Platon Front
 
 We would love for you to contribute to platon-front and help make it even better than it is
 today! As a contributor, here are the guidelines we would like you to follow:
@@ -134,7 +134,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 
 We have very precise rules over how our git commit messages can be formatted.  This leads to **more
 readable messages** that are easy to follow when looking through the **project history**.  But also,
-we use the git commit messages to **generate the NG-ZORRO change log**.
+we use the git commit messages to **generate the Platon Front change log**.
 
 ### Commit Message Format
 Each commit message consists of a **header**, a **body** and a **footer**.  The header has a special
