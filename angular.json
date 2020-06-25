@@ -10,7 +10,7 @@
       },
       "root": "apps/platon",
       "sourceRoot": "apps/platon/src",
-      "prefix": "platon",
+      "prefix": "app",
       "architect": {
         "build": {
           "builder": "ngx-build-plus:browser",
