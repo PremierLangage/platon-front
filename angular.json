@@ -30,9 +30,7 @@
                 "output": "./assets"
               }
             ],
-            "styles": [
-              "apps/platon/src/styles.scss"
-            ],
+            "styles": ["apps/platon/src/styles.scss"],
             "scripts": [
               {
                 "bundleName": "polyfill-webcomp-es5",
@@ -249,6 +247,37 @@
             "main": "libs/shared/vendors/src/test.ts",
             "tsConfig": "libs/shared/vendors/tsconfig.spec.json",
             "karmaConfig": "libs/shared/vendors/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "components": {
+      "projectType": "library",
+      "root": "libs/components",
+      "sourceRoot": "libs/components/src",
+      "prefix": "platon",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/components/tsconfig.lib.json",
+              "libs/components/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/components/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/components/src/test.ts",
+            "tsConfig": "libs/components/tsconfig.spec.json",
+            "karmaConfig": "libs/components/karma.conf.js"
           }
         }
       },

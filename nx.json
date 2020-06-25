@@ -20,26 +20,30 @@
   },
   "projects": {
     "platon": {
-      "tags": []
+      "tags": ["scope:platon"],
+      "implicitDependencies": ["shared-styles", "shared-assets"]
     },
     "platon-e2e": {
       "tags": [],
       "implicitDependencies": ["platon"]
     },
     "shared-styles": {
-      "tags": ["scope:shared", "type=styles"]
+      "tags": ["scope:shared", "type:styles"]
     },
     "shared-assets": {
-      "tags": ["scope:shared", "type=assets"]
+      "tags": ["scope:shared", "type:assets"]
     },
     "shared-ui": {
-      "tags": ["scope:shared", "type=ui"]
+      "tags": ["scope:shared", "type:ui"]
     },
     "shared-utils": {
-      "tags": ["scope:shared", "type=utils"]
+      "tags": ["scope:shared", "type:utils"]
     },
     "shared-vendors": {
-      "tags": ["scope:shared", "type=vendors"]
+      "tags": ["scope:shared", "type:vendors"]
+    },
+    "components": {
+      "tags": ["scope:components"]
     }
   }
 }
