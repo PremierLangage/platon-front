@@ -10,62 +10,72 @@ import { ComponentLoaderService } from '@juristr/ngx-lazy-el';
 })
 export class WebComponentLoaderComponent implements OnInit, OnDestroy {
     private observer?: MutationObserver;
+    private listener?: () => void;
 
     constructor(
         private readonly componentLoader: ComponentLoaderService,
     ) {}
 
-    async ngOnInit() {
-        this.observeWebComponents(
-            await this.lazyLoadWebComponents()
-        );
+    ngOnInit() {
+        this.lazyLoadWebComponents()
+        this.observeWebComponents();
     }
 
     ngOnDestroy() {
         this.observer?.disconnect();
+        if (this.listener) {
+            this.listener();
+        }
     }
 
     /**
      * Detect the web components during the initial load of the page and lazy load them.
      * @returns A promise that resolves with a list of the remaining unloaded element selectors
      */
-    private async lazyLoadWebComponents() {
-        let unloadedSelectors = Array.from(this.componentLoader.getComponentsToLoad());
-        for (const tag of unloadedSelectors) {
-            const node = document.getElementsByTagName(tag);
-            if (node.length) {
-                await this.componentLoader.loadComponent(tag);
-                unloadedSelectors = unloadedSelectors.filter(e => e !== tag);
-            }
-        }
-        return unloadedSelectors;
+    private lazyLoadWebComponents() {
+        const listener = () => {
+            setTimeout(async () => {
+                let unloadedTags = Array.from(this.componentLoader.getComponentsToLoad());
+                for (const tagName of unloadedTags) {
+                    const tags = document.getElementsByTagName(tagName);
+                    if (tags?.length) {
+                        await this.componentLoader.loadComponent(tagName);
+                        unloadedTags = unloadedTags.filter(e => e !== tagName);
+                    }
+                }
+            });
+        };
+        document.addEventListener('DOMContentLoaded', listener);
+        this.listener = () => {
+            document.removeEventListener('DOMContentLoaded', listener);
+        };
     }
 
     /**
-     * Detect the web components after the initial load of the page and lazy load them.
-     * @param unloadedTags the list of unloaded elements.
+     * Detect the web components insertion in the dom using MutationObserver API.
+     * Each time a web component is inserted to the dom, this method will load the bundle associated
+     * to the web component if it's the first time.
      */
-    private observeWebComponents(unloadedTags: string[]) {
+    private observeWebComponents(): void {
         const target = document.body;
-        const config = {
-            childList: true,
-            subtree: true,
-        };
+        let unloadedTags = Array.from(this.componentLoader.getComponentsToLoad());
         this.observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                // handle mutations here
                 mutation.addedNodes.forEach((node) => {
-                    const element = node as HTMLElement;
-                    const tag = element.tagName.toLowerCase();
-                    if (unloadedTags.includes(tag)) {
-                        unloadedTags = unloadedTags.filter(e => e !== tag);
-                        this.componentLoader.loadComponent(tag).catch(console.error);
+                    if (node instanceof HTMLElement) {
+                        const tagName = node.tagName.toLowerCase();
+                        if (unloadedTags.includes(tagName)) {
+                            unloadedTags = unloadedTags.filter(e => e !== tagName);
+                            this.componentLoader.loadComponent(tagName).catch(console.error);
+                        }
                     }
                 });
             });
         });
-        this.observer.observe(target, config);
-        return unloadedTags;
+        this.observer.observe(target, {
+            subtree: true,
+            childList: true
+        });
     }
 
 }
