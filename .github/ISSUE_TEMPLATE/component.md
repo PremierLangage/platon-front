@@ -30,13 +30,12 @@ if needed.
 
 Example:
 
-`height: string`
-height of the editor in css unit (100px, 20%, 2rem...)
+| property | description |
+|----------|------------|
+|`height: string` | editor container height in css unit (100px, 20%, 2rem...)|
+| `automaton: string  Automaton` |  automaton in string or object notation |.
 
-`automaton: string|Automaton`
-representation of the automaton in string or object notation.
-
-***Object format***
+***Object notation***
 ```javascript
 {
     "alphabet": string[], // list of symbols of the automaton.
@@ -56,7 +55,7 @@ representation of the automaton in string or object notation.
     }
 }
 ```
-***String format***
+***String notation***
 
 ```txt
 #states
