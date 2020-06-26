@@ -20,8 +20,6 @@ Example:
   The student should be able to create|rename|delete automaton states and create
   transitions between the states by dragging the mouse cursor from a source state to a destination state.
 
-  The most important property of the component is the pro
-
 **Properties**
 A list of properties the component should expose.
 
