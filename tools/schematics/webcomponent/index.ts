@@ -73,6 +73,9 @@ export default function (schema: SchematicOptions): Rule {
         const sourceRoot = components.sourceRoot as string;
 
         schema.name = strings.dasherize(schema.name);
+        if (schema.name.startsWith('wc-')) {
+            schema.name = schema.name.substring(3, schema.name.length)
+        }
         schema.registryFilePath = 'libs/webcomponents/src/lib/web-components-registry.ts';
         schema.registryFileName = 'web-components-registry.ts';
 
