@@ -6,9 +6,11 @@ labels: WebComponent
 assignees: ''
 
 ---
-
 **Selector**
-Example: name => AutomatonEditor selector => &lg;wc-automaton-editor&gt;&lt;/wc-automaton-editor&gt;
+Html tag for the web component.
+
+Example:
+wc-automaton-editor
 
 **Goal**
 A clear and concise description of what you want to happen.
@@ -32,7 +34,7 @@ height of the editor in css unit (100px, 20%, 2rem...)
 representation of the automaton in string or object notation.
 
 ***Object format***
-
+```javascript
 {
     "alphabet": string[], // list of symbols of the automaton.
     "initialStates": string[], // A list of strings representing the initial states of the automaton.
@@ -50,7 +52,7 @@ representation of the automaton in string or object notation.
         }
     }
 }
-
+```
 ***String format***
 
 ```txt
