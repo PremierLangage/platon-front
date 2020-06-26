@@ -40,6 +40,12 @@ export interface WebComponentModel {
     selector: string;
 }
 
+export interface WebComponentEvents<T> {
+    state: T;
+    onAfterSerialize?(state: T): T;
+    onAfterDeserialize(): void;
+}
+
 /**
  * Decorator that marks a class as a web component and provides configuration metadata that determines how the component should be processed, instantiated, and used at runtime.
  * @param definition metadata informations about the component.
@@ -75,12 +81,6 @@ export function WebComponent(definition: Omit<WebComponentDefinition, 'construct
 
         return target;
     }
-}
-
-export interface WebComponentEvents<T> {
-    state: T;
-    onAfterSerialize?(state: T): T;
-    onAfterDeserialize(): void;
 }
 
 export function stateGetter(instance: any, definition: WebComponentDefinition) {
