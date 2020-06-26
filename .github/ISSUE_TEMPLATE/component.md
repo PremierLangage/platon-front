@@ -16,12 +16,17 @@ wc-automaton-editor
 A clear and concise description of what you want to happen.
 
 Example:
-  A visual automaton editor with drag & drop capabilities.
-  The student should be able to create|rename|delete automaton states and create
-  transitions between the states by dragging the mouse cursor from a source state to a destination state.
+  A visual automaton editor with drag & drop capabilities. A student should be able to create|rename|delete automaton states using the editor and add transitions between the states.
 
-**Properties**
-A list of properties the component should expose.
+***Features***:
+- create|rename|delete states
+- create|rename|delete transitions
+- zoom capabilities
+- reponsive on mobile device see #27 .
+
+**Properties (excluding the default properties cid, selector, debug...)**
+A list of important properties exposed by component. This list can be completed by the developer team
+if needed.
 
 Example:
 
@@ -89,10 +94,17 @@ class AutomatonEditor(Component):
         self.height = '400px'
         self.automaton = None
         super().__init__(**kwargs)
+
+    def mythod(self):
+      pass
 ```
 
 **Dependencies**
 Optional list of javascript or python (for grader) libraries used by the component.
+[Fado](https://pypi.org/project/FAdo/)
+
+**Example**
+Optional link to an exercise that reproduce the behavior of the component.
 
 **Additional Info**
 Add any other context, schemas or screenshots about the component request here.
