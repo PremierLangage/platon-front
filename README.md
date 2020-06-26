@@ -2,7 +2,23 @@
 
 A project for creating [custom web components](https://developer.mozilla.org/en/docs/Web/Web_Components) for [PLaTon](https://github.com/PremierLangage) project using [Angular elements](https://indepth.dev/web-components-with-angular-elements/).
 
-## 🖥 Environment Support
+**Table of contents:**
+
+1. [🖥 Environment Support](#environements)
+2. [📦 Installation](#installation)
+3. [🚀 Angular Quick Start](#ng-quickstart)
+4. [🚀 Nx Quick Start](#nx-quick-start)
+5. [⌨️ Development](#development)
+   - [IDE](#ide)
+   - [Serve](#serve)
+   - [Build](#build)
+   - [Running tests](#tests)
+   - [Understand the workspace](#workspace)
+   - [Further help](#help)
+6. [🤝 Contributing](#contributing)
+7. [🔨 Project Architecture](#architecture)
+
+## 🖥 Environment Support <a name="environements"></a>
 
 * Angular `^9.0.0`
 * Modern browsers and Internet Explorer 11+ (with [polyfills](https://angular.io/guide/browser-support))
@@ -11,7 +27,7 @@ A project for creating [custom web components](https://developer.mozilla.org/en/
 | --------- | --------- | --------- | --------- | --------- | --------- |
 | IE11, Edge | last 2 versions | last 2 versions | last 2 versions | last 2 versions
 
-## 📦 Installation
+## 📦 Installation <a name="installation"></a>
 
 - Open a terminal window and run the following commands
 
@@ -29,15 +45,15 @@ cd platon-front
 
 > You may need to run the script in sudo mode.
 
-## Angular Quick Start
-
-TODO CREATE CUSTOM GUIDE
+## 🚀 Angular Quick Start <a name="ng-quick-start"></a>
 
 [Angular beginner tutorial](https://angular-templates.io/tutorials/about/learn-angular-from-scratch-step-by-step)
 
 [Angular References](https://ngrefs.com)
 
-## Nx Quick Start
+TODO CUSTOM GUIDE COMING SOON
+
+## 🚀 Nx Quick Start <a name="nx-quick-start"></a>
 
 [Nx Documentation](https://nx.dev/angular)
 
@@ -45,9 +61,9 @@ TODO CREATE CUSTOM GUIDE
 
 [Nx Interactive Tutorial](https://nx.dev/angular/tutorial/01-create-application)
 
-## ⌨️ Development
+## ⌨️ Development <a name="development"></a>
 
-### IDE
+### IDE  <a name="ide"></a>
 
 We recommend you to use [Visual Studio Code](https://code.visualstudio.com/) as your code editor for your development environment.
 This code editor comes with an out of box support of Angular ecosystem.
@@ -55,13 +71,15 @@ This code editor comes with an out of box support of Angular ecosystem.
 Also we recommend you to install the [Angular Essentials](https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials) extension inside vscode.
 This extension provides a set of tools (snippets, graphical CLI, language service...) that power up Angular development.
 
+## Serve <a name="serve"></a>
+
 Run the script `./scripts/serve.sh` for an Angular dev server and navigate to `http://127.0.0.1:4200`. The app will automatically rebuild if you change any of the source files.
 
-## 🔨 Build
+## Build <a name="build"></a>
 
 Run the script `./scripts/build.sh` to build the project in a production mode. The build artifacts will be stored in the `dist` directory.
 
-## Running tests
+## Running tests <a name="tests"></a>
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
@@ -71,20 +89,60 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
 
-## Understand the workspace
+## Understand the workspace <a name="workspace"></a>
 
 Run `nx dep-graph` to see a diagram of the dependencies of the project.
 
-## Further help
+## Further help <a name="help"></a>
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
 
-## 🤝 Contributing
+## 🤝 Contributing <a name="contributing"></a>
 
 We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/PremierLangage/platon-front/blob/master/CONTRIBUTING.md) first. You can submit any ideas as [pull requests](https://github.com/PremierLangage/platon-front/pulls) or as [GitHub issues](PremierLangage/platon-front/issues).
 
-## Project Architecture
+## 🔨Project Architecture <a name="architecture"></a>
+
+```txt
+|   apps/
+|       platon/
+|           src/
+|               app/
+|                 pages/
+|                   app.component.[ts|scss|html]
+|                   app.module.ts
+|             assets/
+|             environments/
+|                 environment.ts
+|                 environment.prod.ts
+|             index.html
+|             styles.scss
+|           webpack.externals.js
+|        platon-e2e
+|   libs/
+|       core/
+|         src/
+|           lib/
+|       shared/
+|           src/
+|             lib/
+|               assets/
+|               styles/
+|               ui/
+|               utils/
+|               vendors/
+|       webcomponents/
+|           src/
+|             lib/
+|   tools/
+|     schematics/
+|       webcomponent
+| angular.json
+| nx.json
+| package.json
+| tsconfig.json
+```
 
 TODO...
