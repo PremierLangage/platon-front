@@ -5,10 +5,10 @@ import { ComponentLoaderService } from '@juristr/ngx-lazy-el';
  * Dynamically detect and lazy load web components in the dom.
  */
 @Component({
-    selector: 'platon-components-loader',
+    selector: 'wc-loader',
     template: '',
 })
-export class ComponentsLoaderComponent implements OnInit, OnDestroy {
+export class WebComponentLoaderComponent implements OnInit, OnDestroy {
     private observer?: MutationObserver;
 
     constructor(

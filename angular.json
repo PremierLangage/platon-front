@@ -256,28 +256,28 @@
         }
       }
     },
-    "components": {
+    "webcomponents": {
       "projectType": "library",
-      "root": "libs/components",
-      "sourceRoot": "libs/components/src",
-      "prefix": "platon",
+      "root": "libs/webcomponents",
+      "sourceRoot": "libs/webcomponents/src",
+      "prefix": "wc",
       "architect": {
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "libs/components/tsconfig.lib.json",
-              "libs/components/tsconfig.spec.json"
+              "libs/webcomponents/tsconfig.lib.json",
+              "libs/webcomponents/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/components/**/*"]
+            "exclude": ["**/node_modules/**", "!libs/webcomponents/**/*"]
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "libs/components/src/test.ts",
-            "tsConfig": "libs/components/tsconfig.spec.json",
-            "karmaConfig": "libs/components/karma.conf.js"
+            "main": "libs/webcomponents/src/test.ts",
+            "tsConfig": "libs/webcomponents/tsconfig.spec.json",
+            "karmaConfig": "libs/webcomponents/karma.conf.js"
           }
         }
       },

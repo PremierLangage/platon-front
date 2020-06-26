@@ -1,5 +1,5 @@
-import { WebComponentModel } from '../components';
+import { WebComponentModel } from '../web-components';
 
 export interface <%= classify(name) %> extends WebComponentModel {
-  /* ADD YOUR PROPERTIES HERE */
+  myproperty: string;
 }

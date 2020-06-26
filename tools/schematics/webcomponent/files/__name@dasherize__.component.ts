@@ -1,24 +1,24 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
-import { WebComponent, WebComponentLifeCycles } from '../components';
+import { WebComponent, WebComponentEvents } from '../web-components';
 import { <%= classify(name) %> } from './<%= name %>';
 
 @Component({
-    selector: '<%= name %>',
+    selector: 'wc-<%= name %>',
     templateUrl: '<%= name %>.component.html',
     styleUrls: ['<%= name %>.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent({
     name: '<%= classify(name) %>',
-    icon: '<%= name %>.svg',
-    selector: 'platon-<%= name %>',
+    icon: 'default.svg',
+    selector: 'wc-<%= name %>',
     description: '...',
     properties: {
-        // PROPERTY_NAME: { name: 'PROPERTY_NAME', 'type': 'string', default: '', description: '' }
+        // myproperty: { name: 'myproperty', 'type': 'string', default: '', description: '' }
         // ...
     }
 })
-export class <%= classify(name) %>Component implements WebComponentLifeCycles<<%= classify(name) %>> {
+export class <%= classify(name) %>Component implements WebComponentEvents<<%= classify(name) %>> {
 
     @Input() state!: <%= classify(name) %>;
 

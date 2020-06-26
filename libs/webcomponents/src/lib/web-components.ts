@@ -77,7 +77,7 @@ export function WebComponent(definition: Omit<WebComponentDefinition, 'construct
     }
 }
 
-export interface WebComponentLifeCycles<T> {
+export interface WebComponentEvents<T> {
     state: T;
     onAfterSerialize?(state: T): T;
     onAfterDeserialize(): void;
@@ -97,7 +97,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
         }
     });
 
-    const lifecyles = instance as WebComponentLifeCycles<any>;
+    const lifecyles = instance as WebComponentEvents<any>;
     if (lifecyles.onAfterSerialize) {
         lifecyles.onAfterSerialize(state);
     }
@@ -128,7 +128,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
     });
 
     instance.__state__ = currentState;
-    const lifecyles = instance as WebComponentLifeCycles<any>;
+    const lifecyles = instance as WebComponentEvents<any>;
     if (lifecyles.onAfterDeserialize) {
         lifecyles.onAfterDeserialize();
     }

@@ -5,7 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxLazyElModule } from '@juristr/ngx-lazy-el';
 
 // LIBS
-import { ComponentsModule, WEB_COMPONENTS_REGISTRY } from '@platon/components';
+import { WebComponentsModule, WEB_COMPONENTS_REGISTRY } from '@platon/webcomponents';
 import { SharedVendorsModule } from '@platon/shared/vendors';
 import { AppComponent } from './app.component';
 
@@ -15,7 +15,7 @@ import { AppComponent } from './app.component';
         BrowserModule,
         BrowserAnimationsModule,
         SharedVendorsModule,
-        ComponentsModule,
+        WebComponentsModule,
         NgxLazyElModule.forRoot([
             ...WEB_COMPONENTS_REGISTRY,
             /**

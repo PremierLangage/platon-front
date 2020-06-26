@@ -8,7 +8,7 @@ import {
     SchematicContext,
     template,
     Tree,
-    url
+    url,
 } from '@angular-devkit/schematics';
 import { getWorkspace } from '@schematics/angular/utility/config';
 import { join } from 'path';
@@ -16,7 +16,10 @@ import { join } from 'path';
 export default function (schema: SchematicOptions): Rule {
     return (host: Tree, context: SchematicContext) => {
         const workspace = getWorkspace(host);
-        const components = workspace.projects['components'];
+
+        schema.name = strings.dasherize(schema.name);
+
+        const components = workspace.projects['webcomponents'];
         const sourceRoot = components.sourceRoot as string;
         const moduleSource = apply(url('./files'), [
             template({
