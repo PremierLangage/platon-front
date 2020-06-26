@@ -62,6 +62,18 @@
           {
             "sourceTag": "*",
             "onlyDependOnLibsWithTags": ["*"]
+          },
+          {
+            "sourceTag": "scope:core",
+            "onlyDependOnLibsWithTags": ["scope:shared"]
+          },
+          {
+            "sourceTag": "scope:shared",
+            "onlyDependOnLibsWithTags": ["scope:shared"]
+          },
+          {
+            "sourceTag": "scope:webcomponent",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:core"]
           }
         ]
       }
