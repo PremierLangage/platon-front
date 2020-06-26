@@ -1,6 +1,6 @@
 # Platon Front
 
-A project for creating [custom web components](https://developer.mozilla.org/en/docs/Web/Web_Components) for [PLaTon](https://github.com/PremierLangage) project using [Angular elements](https://indepth.dev/web-components-with-angular-elements/).
+A project for creating angular applications and [custom web components](https://developer.mozilla.org/en/docs/Web/Web_Components) for [PLaTon](https://github.com/PremierLangage) project using [Angular elements](https://indepth.dev/web-components-with-angular-elements/).
 
 **Table of contents:**
 
@@ -15,8 +15,8 @@ A project for creating [custom web components](https://developer.mozilla.org/en/
    - [Running tests](#tests)
    - [Understand the workspace](#workspace)
    - [Further help](#help)
-6. [🤝 Contributing](#contributing)
-7. [🔨 Project Architecture](#architecture)
+6. [🔨 Project Architecture](#architecture)
+7. [🤝 Contributing](#contributing)
 
 ## 🖥 Environment Support <a name="environements"></a>
 
@@ -99,10 +99,6 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
 
-## 🤝 Contributing <a name="contributing"></a>
-
-We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/PremierLangage/platon-front/blob/master/CONTRIBUTING.md) first. You can submit any ideas as [pull requests](https://github.com/PremierLangage/platon-front/pulls) or as [GitHub issues](PremierLangage/platon-front/issues).
-
 ## 🔨Project Architecture <a name="architecture"></a>
 
 ```txt
@@ -121,6 +117,9 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 |             styles.scss
 |           webpack.externals.js
 |        platon-e2e
+|   dist/
+|     apps/
+|       platon
 |   libs/
 |       core/
 |         src/
@@ -136,6 +135,10 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 |       webcomponents/
 |           src/
 |             lib/
+|   scripts/
+|     build.sh
+|     install.sh
+|     serve.sh
 |   tools/
 |     schematics/
 |       webcomponent
@@ -146,3 +149,7 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 ```
 
 TODO...
+
+## 🤝 Contributing <a name="contributing"></a>
+
+We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/PremierLangage/platon-front/blob/master/CONTRIBUTING.md) first. You can submit any ideas as [pull requests](https://github.com/PremierLangage/platon-front/pulls) or as [GitHub issues](PremierLangage/platon-front/issues).
