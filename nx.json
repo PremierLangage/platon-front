@@ -47,6 +47,13 @@
     },
     "core": {
       "tags": ["scope:core"]
+    },
+    "ghpage": {
+      "tags": []
+    },
+    "ghpage-e2e": {
+      "tags": [],
+      "implicitDependencies": ["ghpage"]
     }
   }
 }

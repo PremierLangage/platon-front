@@ -25,8 +25,7 @@
     "update": "ng update @nrwl/workspace",
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
-    "help": "nx help",
-    "build:platon:externals": "ng build --extra-webpack-config apps/platon/webpack.externals.js --prod --project platon --single-bundle"
+    "help": "nx help"
   },
   "private": true,
   "dependencies": {
@@ -59,6 +58,7 @@
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "~8.9.4",
+    "angular-cli-ghpages": "^0.6.2",
     "codelyzer": "~5.0.1",
     "dotenv": "6.2.0",
     "eslint": "6.8.0",
@@ -73,6 +73,7 @@
     "protractor": "^7.0.0",
     "ts-node": "~7.0.0",
     "tslint": "~6.0.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "webpack-bundle-analyzer": "^3.8.0"
   }
 }

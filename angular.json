@@ -147,6 +147,158 @@
         }
       }
     },
+    "ghpage": {
+      "projectType": "application",
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/ghpage",
+      "sourceRoot": "apps/ghpage/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/apps/ghpage",
+            "index": "apps/ghpage/src/index.html",
+            "main": "apps/ghpage/src/main.ts",
+            "polyfills": "apps/ghpage/src/polyfills.ts",
+            "tsConfig": "apps/ghpage/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "apps/ghpage/src/favicon.ico",
+              "apps/ghpage/src/assets",
+              {
+                "glob": "**/*",
+                "input": "libs/shared/assets/src",
+                "output": "./assets"
+              }
+            ],
+            "styles": [
+              "apps/ghpage/src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "bundleName": "polyfill-webcomp-es5",
+                "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
+              },
+              {
+                "bundleName": "polyfill-webcomp",
+                "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js"
+              },
+              "node_modules/rxjs/bundles/rxjs.umd.js",
+              "node_modules/@angular/core/bundles/core.umd.js",
+              "node_modules/@angular/common/bundles/common.umd.js",
+              "node_modules/@angular/common/bundles/common-http.umd.js",
+              "node_modules/@angular/compiler/bundles/compiler.umd.js",
+              "node_modules/@angular/elements/bundles/elements.umd.js",
+              "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "apps/ghpage/src/environments/environment.ts",
+                  "with": "apps/ghpage/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "options": {
+            "browserTarget": "ghpage:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "ghpage:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "ghpage:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/ghpage/tsconfig.app.json",
+              "apps/ghpage/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!apps/ghpage/**/*"]
+          }
+        },
+        "test": {
+          "builder": "ngx-build-plus:karma",
+          "options": {
+            "main": "apps/ghpage/src/test.ts",
+            "tsConfig": "apps/ghpage/tsconfig.spec.json",
+            "karmaConfig": "apps/ghpage/karma.conf.js",
+            "polyfills": "apps/ghpage/src/polyfills.ts",
+            "styles": [],
+            "scripts": [],
+            "assets": []
+          }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy",
+          "options": {}
+        }
+      }
+    },
+    "ghpage-e2e": {
+      "root": "apps/ghpage-e2e",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "apps/ghpage-e2e/protractor.conf.js",
+            "devServerTarget": "ghpage:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "ghpage:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": "apps/ghpage-e2e/tsconfig.e2e.json",
+            "exclude": ["**/node_modules/**", "!apps/ghpage-e2e/**/*"]
+          }
+        }
+      }
+    },
     "shared-styles": {
       "projectType": "library",
       "root": "libs/shared/styles",
