@@ -176,9 +176,7 @@
                 "output": "./assets"
               }
             ],
-            "styles": [
-              "apps/ghpage/src/styles.scss"
-            ],
+            "styles": ["apps/ghpage/src/styles.scss"],
             "scripts": [
               {
                 "bundleName": "polyfill-webcomp-es5",
@@ -424,7 +422,10 @@
               "libs/features/web-components/tsconfig.lib.json",
               "libs/features/web-components/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/features/web-components/**/*"]
+            "exclude": [
+              "**/node_modules/**",
+              "!libs/features/web-components/**/*"
+            ]
           }
         },
         "test": {
@@ -464,6 +465,37 @@
             "main": "libs/core/src/test.ts",
             "tsConfig": "libs/core/tsconfig.spec.json",
             "karmaConfig": "libs/core/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "features-docs": {
+      "projectType": "library",
+      "root": "libs/features/docs",
+      "sourceRoot": "libs/features/docs/src",
+      "prefix": "docs",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/features/docs/tsconfig.lib.json",
+              "libs/features/docs/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/features/docs/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/features/docs/src/test.ts",
+            "tsConfig": "libs/features/docs/tsconfig.spec.json",
+            "karmaConfig": "libs/features/docs/karma.conf.js"
           }
         }
       },

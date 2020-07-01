@@ -1,8 +1,19 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { DocsPlayerRouteData } from '@platon/features/docs';
 
-const routes: Routes = [];
+const routes: Routes = [
+    {
+        path: '**',
+        pathMatch: 'full',
+        loadChildren: () => import(/* webpackChunkName: "docs" */ '@platon/features/docs').then(m => m.FeaturesDocsModule),
+        data: {
+            root: 'assets/docs/developer/'
+        } as DocsPlayerRouteData,
+
+    }
+];
 
 @NgModule({
     imports: [

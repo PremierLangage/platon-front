@@ -8,7 +8,7 @@ import { WebComponentLoaderComponent } from './web-components-loader.component';
     imports: [CommonModule],
     exports: [WebComponentLoaderComponent],
 })
-export class WebComponentsModule {
+export class FeaturesWebComponentsModule {
     constructor(
         private readonly injector: Injector
     ) {
