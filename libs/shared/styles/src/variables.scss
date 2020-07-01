@@ -1,11 +1,20 @@
 :root {
   // COLORS
+  --brand-color-primary: #171C8F;
+  --brand-color-primary-rgb: 23,28,143;
+  --brand-color-primary-contrast: #ffffff;
+  --brand-color-primary-contrast-rgb: 255,255,255;
+  --brand-color-primary-shade: #14197e;
+  --brand-color-primary-tint: #2e339a;
+
+  /*
   --brand-color-primary: #ed1b2e;
   --brand-color-primary-rgb: 237, 27, 46;
   --brand-color-primary-contrast: #ffffff;
   --brand-color-primary-contrast-rgb: 255, 255, 255;
   --brand-color-primary-shade: #d11828;
   --brand-color-primary-tint: #ef3243;
+  */
 
   --brand-color-secondary: #3466fe;
   --brand-color-secondary-rgb: 52, 102, 254;

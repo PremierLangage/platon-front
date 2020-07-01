@@ -59,7 +59,7 @@
                 }
               ],
               "optimization": true,
-              "outputHashing": "all",
+              "outputHashing": "none",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -207,7 +207,7 @@
                 }
               ],
               "optimization": true,
-              "outputHashing": "all",
+              "outputHashing": "none",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -411,28 +411,28 @@
         }
       }
     },
-    "webcomponents": {
+    "features-web-components": {
       "projectType": "library",
-      "root": "libs/webcomponents",
-      "sourceRoot": "libs/webcomponents/src",
+      "root": "libs/features/web-components",
+      "sourceRoot": "libs/features/web-components/src",
       "prefix": "wc",
       "architect": {
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "libs/webcomponents/tsconfig.lib.json",
-              "libs/webcomponents/tsconfig.spec.json"
+              "libs/features/web-components/tsconfig.lib.json",
+              "libs/features/web-components/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/webcomponents/**/*"]
+            "exclude": ["**/node_modules/**", "!libs/features/web-components/**/*"]
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "libs/webcomponents/src/test.ts",
-            "tsConfig": "libs/webcomponents/tsconfig.spec.json",
-            "karmaConfig": "libs/webcomponents/karma.conf.js"
+            "main": "libs/features/web-components/src/test.ts",
+            "tsConfig": "libs/features/web-components/tsconfig.spec.json",
+            "karmaConfig": "libs/features/web-components/karma.conf.js"
           }
         }
       },

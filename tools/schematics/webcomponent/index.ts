@@ -23,26 +23,34 @@ function addComponentToRegistry(source: ts.SourceFile, schema: SchematicOptions)
     for (const keyword of keywords) {
         if (ts.isVariableStatement(keyword)) {
             const [ declaration ] = keyword.declarationList.declarations;
-            if (ts.isVariableDeclaration(declaration) && declaration.initializer && declaration.name.getText() === 'WEB_COMPONENTS_REGISTRY') {
+            if (
+                ts.isVariableDeclaration(declaration) &&
+                declaration.initializer &&
+                declaration.name.getText() === 'WEB_COMPONENTS_REGISTRY'
+            ) {
                 const node = declaration.initializer.getChildAt(1);
-                const lastRouteNode = node.getLastToken();
+                const lastToken = node.getLastToken();
 
-                if (!lastRouteNode) {
+                if (!lastToken) {
                     break;
                 }
 
                 let trailingCommaFound = false;
-                if (lastRouteNode.kind === ts.SyntaxKind.CommaToken) {
+                if (lastToken.kind === ts.SyntaxKind.CommaToken) {
                     trailingCommaFound = true;
                 } else {
-                    changes.push(new InsertChange(schema.registryFilePath, lastRouteNode.getEnd(), ','));
+                    changes.push(new InsertChange(schema.registryFilePath, lastToken.getEnd(), ','));
                 }
 
+                const commas = trailingCommaFound ? ',' : '';
+                const fileName = schema.name;
+                const className = strings.classify(schema.name);
+                const toAdd = `    { selector: 'wc-${fileName}', loadChildren: () => import('./${fileName}/${fileName}.module').then(m => m.${className}Module) }${commas}\n`;
                 changes.push(
                     new InsertChange(
                         schema.registryFilePath,
-                        lastRouteNode.getEnd() + 1,
-                        `    { selector: 'wc-${schema.name}', loadChildren: () => import('./${schema.name}/${schema.name}.module').then( m => m.${strings.classify(schema.name)}Module) }${trailingCommaFound ? ',' : ''}\n`
+                        lastToken.getEnd() + 1,
+                        toAdd
                     )
                 );
                 break;
@@ -69,16 +77,15 @@ export default function (schema: SchematicOptions): Rule {
 
     return (tree: Tree) => {
         const workspace = getWorkspace(tree);
-        const components = workspace.projects['webcomponents'];
+        const components = workspace.projects['features-web-components'];
         const sourceRoot = components.sourceRoot as string;
 
         schema.name = strings.dasherize(schema.name);
         if (schema.name.startsWith('wc-')) {
             schema.name = schema.name.substring(3, schema.name.length)
         }
-        schema.registryFilePath = 'libs/webcomponents/src/lib/web-components-registry.ts';
+        schema.registryFilePath = 'libs/features/web-components/src/lib/web-components-registry.ts';
         schema.registryFileName = 'web-components-registry.ts';
-
         const moduleSource = apply(url('./files'), [
             template({
                 ...strings,
@@ -86,9 +93,9 @@ export default function (schema: SchematicOptions): Rule {
             }),
             move(join(sourceRoot, 'lib', schema.name)),
         ]);
-
         const registryFileContent = tree.read(schema.registryFilePath)?.toString('utf8') as string;
         const source  = ts.createSourceFile(schema.registryFileName, registryFileContent, ts.ScriptTarget.Latest, true);
+        addComponentToRegistry(source, schema);
 
         return chain([
             branchAndMerge(chain([

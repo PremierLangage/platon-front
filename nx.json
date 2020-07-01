@@ -27,6 +27,14 @@
       "tags": [],
       "implicitDependencies": ["platon"]
     },
+    "ghpage": {
+      "tags": ["scope:ghpage"],
+      "implicitDependencies": ["shared-styles", "shared-assets"]
+    },
+    "ghpage-e2e": {
+      "tags": [],
+      "implicitDependencies": ["ghpage"]
+    },
     "shared-styles": {
       "tags": ["scope:shared", "type:styles"]
     },
@@ -42,18 +50,11 @@
     "shared-vendors": {
       "tags": ["scope:shared", "type:vendors"]
     },
-    "webcomponents": {
-      "tags": ["scope:webcomponents"]
+    "features-web-components": {
+      "tags": ["scope:feature", "type:web-components"]
     },
     "core": {
       "tags": ["scope:core"]
-    },
-    "ghpage": {
-      "tags": []
-    },
-    "ghpage-e2e": {
-      "tags": [],
-      "implicitDependencies": ["ghpage"]
     }
   }
 }
