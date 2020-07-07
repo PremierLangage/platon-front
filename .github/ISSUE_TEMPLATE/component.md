@@ -40,6 +40,8 @@ Example:
 | `value: string \| number` | content of the inputbox  |
 | `disabled: boolean` | disable user interaction  |
 
+If you want a the **filter** markdown, latex applyed to the variable indicate it in the desciption.  
+
 **Controller**
 An optional python class attached to the component instance.
 
