@@ -20,7 +20,7 @@ import { AppRoutingModule } from './app-routing.module';
         AppRoutingModule,
 
         SharedVendorsModule,
-        FeaturesWebComponentsModule,
+        FeaturesWebComponentsModule.forRoot(),
 
         NgxLazyElModule.forRoot(WEB_COMPONENTS_BUNDLES)
     ],
