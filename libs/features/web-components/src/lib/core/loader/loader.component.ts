@@ -8,7 +8,7 @@ import { ComponentLoaderService } from '@juristr/ngx-lazy-el';
     selector: 'wc-loader',
     template: '',
 })
-export class WebComponentLoaderComponent implements OnInit, OnDestroy {
+export class LoaderComponent implements OnInit, OnDestroy {
     private observer?: MutationObserver;
     private listener?: () => void;
 

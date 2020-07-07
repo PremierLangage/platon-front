@@ -1,15 +1,16 @@
 import { defineWebComponent, WebComponentModel } from '../web-components';
 
 export interface TextInput extends WebComponentModel {
-    value: string|number;
+  myproperty: string;
 }
 
 export const TextInputComponentDefinition = defineWebComponent({
     name: 'TextInput',
-    icon: 'input.svg',
+    icon: 'default.svg',
     selector: 'wc-text-input',
-    description: 'Inputs provides a way for users to enter a data.',
+    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        value: { name: 'value', type: 'string', default: '', description: '' }
+        myproperty: { name: 'myproperty', 'type': 'string', default: '', description: '' }
+        // ...
     }
 });

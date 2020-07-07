@@ -78,20 +78,21 @@ function addElementInArray(args: {
                 ) {
                     const node = declaration.initializer.getChildAt(1);
                     const lastToken = node.getLastToken();
-                    if (!lastToken) {
-                        break;
+                    let commas = ',';
+                    let pos = node.getEnd() + 1;
+                    if (lastToken) {
+                        let trailingCommaFound = false;
+                        if (lastToken.kind === ts.SyntaxKind.CommaToken) {
+                            trailingCommaFound = true;
+                        } else {
+                            changes.push(new InsertChange(args.filePath, lastToken.getEnd(), ','));
+                        }
+                        commas = trailingCommaFound ? ',' : '';
+                        pos = lastToken.getEnd() + 1;
                     }
-                    let trailingCommaFound = false;
-                    if (lastToken.kind === ts.SyntaxKind.CommaToken) {
-                        trailingCommaFound = true;
-                    } else {
-                        changes.push(new InsertChange(args.filePath, lastToken.getEnd(), ','));
-                    }
-
-                    const commas = trailingCommaFound ? ',' : '';
                     changes.push(new InsertChange(
                         args.filePath,
-                        lastToken.getEnd() + 1,
+                        pos,
                         args.toAdd + commas + '\n'
                     ));
                     break;

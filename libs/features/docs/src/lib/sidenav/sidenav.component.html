@@ -1,6 +1,6 @@
-<mat-nav-list *ngIf="page">
+<mat-nav-list *ngIf="page?.navigation?.length; else: nonavigation">
   <mat-accordion displayMode="flat" multi="false">
-    <ng-container *ngFor="let menu of page.navigation">
+    <ng-container *ngFor="let menu of page!.navigation">
       <mat-list-item *ngIf="menu.document; else: expandable">
         <a class="link-title" [routerLink]="menu.document!" routerLinkActive="active">
           {{ menu.title }}
@@ -13,7 +13,7 @@
             </mat-expansion-panel-header>
             <ng-container *ngFor="let child of (menu.children || [])">
               <mat-list-item>
-                <a class="link-title" [routerLink]="child.document!|slice:0:-3" routerLinkActive="active">
+                <a class="link-title" [routerLink]="child.document!" routerLinkActive="active">
                   {{ child.title }}
                 </a>
               </mat-list-item>
@@ -24,3 +24,8 @@
     </ng-container>
   </mat-accordion>
 </mat-nav-list>
+<ng-template #nonavigation>
+  <ui-empty-state message="Aucun menu à afficher">
+    <mat-icon>list</mat-icon>
+  </ui-empty-state>
+</ng-template>

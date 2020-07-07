@@ -8,7 +8,7 @@ export const <%= classify(name) %>ComponentDefinition = defineWebComponent({
     name: '<%= classify(name) %>',
     icon: 'default.svg',
     selector: 'wc-<%= name %>',
-    description: '...',
+    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
         myproperty: { name: 'myproperty', 'type': 'string', default: '', description: '' }
         // ...

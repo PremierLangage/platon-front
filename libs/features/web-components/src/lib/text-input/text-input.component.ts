@@ -10,15 +10,19 @@ import { TextInput, TextInputComponentDefinition } from './text-input';
 })
 @WebComponent(TextInputComponentDefinition)
 export class TextInputComponent implements WebComponentEvents<TextInput> {
+
     @Input() state!: TextInput;
 
     constructor(
-        readonly changeDetector: ChangeDetectorRef,
+        private readonly changeDetector: ChangeDetectorRef
     ) {}
+
+    onAfterSerialize(state: TextInput) {
+        // state validation logic goes here
+        return state;
+    }
 
     onAfterDeserialize() {
         this.changeDetector.detectChanges();
     }
-
 }
-

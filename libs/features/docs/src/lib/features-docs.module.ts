@@ -13,6 +13,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatExpansionModule } from '@angular/material/expansion';
 
+import { SharedUiEmptyStateModule } from '@platon/shared/ui';
+
 
 // MODULE
 import { DocsComponent } from './docs.component';
@@ -45,6 +47,9 @@ import { SidenavComponent } from './sidenav/sidenav.component';
         MatToolbarModule,
         MatSidenavModule,
         MatExpansionModule,
+
+        SharedUiEmptyStateModule,
+
     ],
     schemas: [NO_ERRORS_SCHEMA]
 })

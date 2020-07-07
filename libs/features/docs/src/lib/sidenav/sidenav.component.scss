@@ -1,3 +1,7 @@
+:host {
+  position: relative;;
+}
+
 .spacer {
   flex: 1;
 }
@@ -36,4 +40,16 @@
       padding: 0 !important;
     }
   }
+}
+
+ui-empty-state {
+  ::ng-deep {
+    .mat-icon {
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
+    }
+
+  }
+ --icon-size: 48px;
 }

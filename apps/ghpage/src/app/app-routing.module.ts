@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { NgModule, Injector } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { createWebComponentsDoc } from '@platon/features/web-components';
+import { WebComponentsService } from '@platon/features/web-components';
 
 const routes: Routes = [
     {
@@ -21,7 +21,9 @@ const routes: Routes = [
             },
             pages: [
                 'assets/docs/developers/',
-                createWebComponentsDoc
+                (injector: Injector) => {
+                    return injector.get(WebComponentsService).createDocumentation();
+                }
             ],
         },
     },

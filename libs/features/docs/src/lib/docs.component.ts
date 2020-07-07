@@ -11,6 +11,7 @@ import { DocsService } from './docs.service';
 export class DocsComponent implements OnInit {
     readonly sitemap = this.docs.sitemap;
     readonly activePage = this.docs.activePage;
+    sideOpened = true;
 
     constructor(
         private readonly docs: DocsService,
