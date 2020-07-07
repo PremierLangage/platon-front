@@ -1,12 +1,12 @@
 // ANGULAR
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule, Injector } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // LIBS
 import { NgxLazyElModule } from '@juristr/ngx-lazy-el';
-import { FeaturesWebComponentsModule, WEB_COMPONENTS_REGISTRY } from '@platon/features/web-components';
+import { FeaturesWebComponentsModule, WEB_COMPONENTS_BUNDLES, WEB_COMPONENT_DEFINITIONS } from '@platon/features/web-components';
 import { SharedVendorsModule } from '@platon/shared/vendors';
 
 // MODULE
@@ -22,9 +22,9 @@ import { AppRoutingModule } from './app-routing.module';
         AppRoutingModule,
 
         SharedVendorsModule,
-        FeaturesWebComponentsModule,
+        FeaturesWebComponentsModule.forRoot(),
 
-        NgxLazyElModule.forRoot(WEB_COMPONENTS_REGISTRY)
+        NgxLazyElModule.forRoot(WEB_COMPONENTS_BUNDLES)
     ],
     providers: [],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],

@@ -1,2 +1,2 @@
 export * from './lib/features-docs.module';
-export * from './lib/docs-player/docs-player';
+export * from './lib/docs';

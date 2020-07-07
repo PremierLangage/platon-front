@@ -38,4 +38,4 @@ testem.log
 .DS_Store
 Thumbs.db
 
-apps/platon/src/app/drafts
+docs/env_docs

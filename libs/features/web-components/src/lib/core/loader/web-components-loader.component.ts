@@ -63,11 +63,7 @@ export class WebComponentLoaderComponent implements OnInit, OnDestroy {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node instanceof HTMLElement) {
-                        const tagName = node.tagName.toLowerCase();
-                        if (unloadedTags.includes(tagName)) {
-                            unloadedTags = unloadedTags.filter(e => e !== tagName);
-                            this.componentLoader.loadComponent(tagName).catch(console.error);
-                        }
+                        unloadedTags = this.checkWebcomponentInNode(node, unloadedTags);
                     }
                 });
             });
@@ -78,4 +74,23 @@ export class WebComponentLoaderComponent implements OnInit, OnDestroy {
         });
     }
 
+
+    private checkWebcomponentInNode(node: HTMLElement, unloadedTags: string[]) {
+        if (!unloadedTags.length) {
+            return unloadedTags;
+        }
+
+        const tagName = node.tagName.toLowerCase();
+        if (unloadedTags.includes(tagName)) {
+            unloadedTags = unloadedTags.filter(e => e !== tagName);
+            this.componentLoader.loadComponent(tagName).catch(console.error);
+        }
+
+        for (const child of Array.from(node.childNodes)) {
+            if (child instanceof HTMLElement) {
+                unloadedTags = this.checkWebcomponentInNode(child, unloadedTags);
+            }
+        }
+        return unloadedTags;
+    }
 }

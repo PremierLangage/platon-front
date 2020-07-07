@@ -20,26 +20,18 @@
   },
   "projects": {
     "platon": {
-      "tags": ["scope:platon"],
-      "implicitDependencies": ["shared-styles", "shared-assets"]
+      "tags": ["scope:platon"]
     },
     "platon-e2e": {
       "tags": [],
       "implicitDependencies": ["platon"]
     },
     "ghpage": {
-      "tags": ["scope:ghpage"],
-      "implicitDependencies": ["shared-styles", "shared-assets"]
+      "tags": ["scope:ghpage"]
     },
     "ghpage-e2e": {
       "tags": [],
       "implicitDependencies": ["ghpage"]
-    },
-    "shared-styles": {
-      "tags": ["scope:shared", "type:styles"]
-    },
-    "shared-assets": {
-      "tags": ["scope:shared", "type:assets"]
     },
     "shared-ui": {
       "tags": ["scope:shared", "type:ui"]

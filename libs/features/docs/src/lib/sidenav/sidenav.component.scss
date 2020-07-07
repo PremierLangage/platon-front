@@ -1,0 +1,39 @@
+.spacer {
+  flex: 1;
+}
+
+.mat-nav-list {
+  padding: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+.mat-list-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  &:hover {
+    background-color: rgba(66, 66, 66, 0.06);
+  }
+}
+.link-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+.mat-expansion-panel {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.mat-expansion-panel-header {
+  padding: 0 16px;
+}
+
+::ng-deep {
+  .mat-list-item-content {
+    width: 100%;
+  }
+  .mat-expansion-panel {
+    .mat-list-item-content {
+      padding: 0 !important;
+    }
+  }
+}

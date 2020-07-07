@@ -1,13 +1,13 @@
 import { defineWebComponent, WebComponentModel } from '../web-components';
 
-export interface <%= classify(name) %> extends WebComponentModel {
+export interface SortList extends WebComponentModel {
   myproperty: string;
 }
 
-export const <%= classify(name) %>ComponentDefinition = defineWebComponent({
-    name: '<%= classify(name) %>',
+export const SortListComponentDefinition = defineWebComponent({
+    name: 'SortList',
     icon: 'default.svg',
-    selector: 'wc-<%= name %>',
+    selector: 'wc-sort-list',
     description: '...',
     properties: {
         myproperty: { name: 'myproperty', 'type': 'string', default: '', description: '' }

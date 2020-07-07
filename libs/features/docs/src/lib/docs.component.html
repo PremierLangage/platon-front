@@ -1,0 +1,28 @@
+<ng-container *ngIf="sitemap|async as site">
+  <mat-drawer-container autosize>
+    <mat-drawer #drawer mode="side" opened="true">
+      <docs-sidenav [page]="activePage|async"></docs-sidenav>
+    </mat-drawer>
+    <mat-drawer-content class="mat-typography">
+      <mat-toolbar>
+        <mat-toolbar-row>
+          <button mat-icon-button aria-label="toggle sidebar" (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span>{{ site!.name }}</span>
+          <span class="spacer"></span>
+          <ng-container *ngFor="let page of site!.pages">
+            <ng-container *ngIf='isActivePage(page); else: notactive'>
+              <a mat-raised-button color="primary" [routerLink]="page.link">{{ page.name }}</a>
+            </ng-container>
+            <ng-template #notactive>
+              <a mat-raised-button [routerLink]="page.link">{{ page.name }}</a>
+            </ng-template>
+          </ng-container>
+        </mat-toolbar-row>
+      </mat-toolbar>
+      <router-outlet></router-outlet>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</ng-container>
+

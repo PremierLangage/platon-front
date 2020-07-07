@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Injector, NgModule } from '@angular/core';
+import { Injector, ModuleWithProviders, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
-import { WebComponentLoaderComponent } from './web-components-loader.component';
+import { WebComponentLoaderComponent } from './core/loader/web-components-loader.component';
+import { WEB_COMPONENTS_PROVIDERS } from './web-components-registry';
 
 @NgModule({
     declarations: [WebComponentLoaderComponent],
@@ -15,5 +16,12 @@ export class FeaturesWebComponentsModule {
         customElements.define('wc-loader', createCustomElement(
             WebComponentLoaderComponent, { injector: this.injector }
         ));
+    }
+
+    static forRoot(): ModuleWithProviders<FeaturesWebComponentsModule> {
+        return {
+            ngModule: FeaturesWebComponentsModule,
+            providers: WEB_COMPONENTS_PROVIDERS
+        };
     }
 }

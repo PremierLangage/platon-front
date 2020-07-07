@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { WebComponent, WebComponentEvents } from '../web-components';
-import { TextInput } from './text-input';
+import { TextInput, TextInputComponentDefinition } from './text-input';
 
 @Component({
     selector: 'wc-text-input',
@@ -8,20 +8,12 @@ import { TextInput } from './text-input';
     styleUrls: ['text-input.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-@WebComponent({
-    name: 'TextInput',
-    icon: 'input.svg',
-    selector: 'wc-input',
-    description: 'Inputs provides a way for users to enter a data.',
-    properties: {
-        value: { name: 'value', 'type': 'string', default: '', description: '' }
-    }
-})
+@WebComponent(TextInputComponentDefinition)
 export class TextInputComponent implements WebComponentEvents<TextInput> {
     @Input() state!: TextInput;
 
     constructor(
-        private readonly changeDetector: ChangeDetectorRef
+        readonly changeDetector: ChangeDetectorRef,
     ) {}
 
     onAfterDeserialize() {
@@ -29,3 +21,4 @@ export class TextInputComponent implements WebComponentEvents<TextInput> {
     }
 
 }
+

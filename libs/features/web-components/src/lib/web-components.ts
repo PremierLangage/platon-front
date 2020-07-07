@@ -1,3 +1,5 @@
+import { InjectionToken } from '@angular/core';
+
 /**
  * Configuration metadata that determines how a component should be processed, instantiated, and used at runtime.
  */
@@ -50,12 +52,9 @@ export interface WebComponentEvents<T> {
  * Decorator that marks a class as a web component and provides configuration metadata that determines how the component should be processed, instantiated, and used at runtime.
  * @param definition metadata informations about the component.
  */
-export function WebComponent(definition: Omit<WebComponentDefinition, 'constructor'>): ClassDecorator {
+export function WebComponent(definition: WebComponentDefinition): ClassDecorator {
     return function(target: any) {
-        injectDefaultProperties(definition);
-
         const prototype = target.prototype;
-
         // DYNAMICALLY DEFINE BACKED FIELD FOR `state` property.
         Object.defineProperty(prototype, '__state__', {
             value: {
@@ -65,8 +64,6 @@ export function WebComponent(definition: Omit<WebComponentDefinition, 'construct
             } as WebComponentModel,
             writable: true
         });
-
-
         // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
         Object.defineProperty(prototype, 'state', {
             get: function () {
@@ -75,10 +72,7 @@ export function WebComponent(definition: Omit<WebComponentDefinition, 'construct
             set: function(newState: any) {
                 stateSetter(this, definition, newState);
             }
-        })
-
-        defineWebComponentInDocument(definition);
-
+        });
         return target;
     }
 }
@@ -134,40 +128,34 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
     }
 }
 
-function injectDefaultProperties(definition: WebComponentDefinition) {
+/**
+ * Inject web components defaults properties (`cid`, `debug`...) to the given `definition` object.
+ * @param definition Definition object to modify.
+ *@returns The modified definition object.
+ */
+export function defineWebComponent(definition: WebComponentDefinition): WebComponentDefinition {
     definition.properties = {
         ...definition.properties,
         cid: {
             name: 'cid',
             default: '',
             type: 'string',
-            description: 'Unique identifier of the component'
+            description: 'Identifiant unique du composant.'
         },
         debug: {
             name: 'debug',
             default: false,
             type: 'boolean',
-            description: 'Prints the current properties of the component'
+            description: 'Affiche les propriétés du composant sur la page.'
         },
         selector: {
             name: 'selector',
-            default: '',
+            default: definition.selector,
             type: 'string',
-            description: 'Selector of the component.'
+            description: 'Nom de la balise HTML associée au composant.'
         },
     } as Record<string, WebComponentProperty>;
+    return definition;
 }
 
-/**
- * Store the given web component definition inside the property `document.platon.components` of the browserr document.
- * @param definition the web component metadata informations.
- */
-function defineWebComponentInDocument(definition: WebComponentDefinition) {
-    const platon = (document as any).platon || {};
-    platon.components
-        = platon.components
-        || new Map<string, WebComponentDefinition>()
-    ;
-    platon.components.set(definition.selector, definition);
-    (document as any).platon = platon;
-}
+export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<WebComponentDefinition[]>('WEB_COMPONENT_DEFINITIONS');

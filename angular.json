@@ -24,13 +24,13 @@
             "assets": [
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
-              {
-                "glob": "**/*",
-                "input": "libs/shared/assets/src",
-                "output": "./assets"
-              }
+              { "glob": "**/*", "input": "assets", "output": "./assets" },
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
             ],
-            "styles": ["apps/platon/src/styles.scss"],
+            "styles": [
+              "apps/platon/src/styles.scss",
+              "node_modules/katex/dist/katex.min.css"
+            ],
             "scripts": [
               {
                 "bundleName": "polyfill-webcomp-es5",
@@ -47,7 +47,10 @@
               "node_modules/@angular/compiler/bundles/compiler.umd.js",
               "node_modules/@angular/elements/bundles/elements.umd.js",
               "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
+
+              "node_modules/marked/lib/marked.js",
+              "node_modules/katex/dist/katex.min.js"
             ]
           },
           "configurations": {
@@ -170,13 +173,13 @@
             "assets": [
               "apps/ghpage/src/favicon.ico",
               "apps/ghpage/src/assets",
-              {
-                "glob": "**/*",
-                "input": "libs/shared/assets/src",
-                "output": "./assets"
-              }
+              { "glob": "**/*", "input": "assets", "output": "./assets" },
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
             ],
-            "styles": ["apps/ghpage/src/styles.scss"],
+            "styles": [
+              "apps/ghpage/src/styles.scss",
+              "node_modules/katex/dist/katex.min.css"
+            ],
             "scripts": [
               {
                 "bundleName": "polyfill-webcomp-es5",
@@ -193,7 +196,10 @@
               "node_modules/@angular/compiler/bundles/compiler.umd.js",
               "node_modules/@angular/elements/bundles/elements.umd.js",
               "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
+
+              "node_modules/marked/lib/marked.js",
+              "node_modules/katex/dist/katex.min.js"
             ]
           },
           "configurations": {
@@ -299,22 +305,6 @@
           }
         }
       }
-    },
-    "shared-styles": {
-      "projectType": "library",
-      "root": "libs/shared/styles",
-      "sourceRoot": "libs/shared/styles/src",
-      "prefix": "styles",
-      "architect": {},
-      "schematics": {}
-    },
-    "shared-assets": {
-      "projectType": "library",
-      "root": "libs/shared/assets",
-      "sourceRoot": "libs/shared/assets/src",
-      "prefix": "assets",
-      "architect": {},
-      "schematics": {}
     },
     "shared-ui": {
       "projectType": "library",
