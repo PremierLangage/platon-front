@@ -12,4 +12,4 @@ TODO
 
 ## API
 
-<wc-api-doc selector="wc-<%= name %>"></wc-api-doc>
+<wc-doc-props selector="wc-<%= name %>"></wc-doc-props>
