@@ -1,5 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild, Input, OnInit, OnDestroy } from '@angular/core';
 
+const ATTRIBUTE_PREFIX = 'prop-';
+
 @Component({
     selector: 'wc-base',
     templateUrl: './base.component.html',
@@ -38,14 +40,26 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
 
     onChangeContent() {
         const native: HTMLElement = this.container.nativeElement;
-        const xml = Array.from(
+        const nodes = Array.from(
             native.childNodes
-        ).find(node => {
-            return node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).tagName === 'XML';
-        });
-        if (xml) {
-            const state = this.xml2json(xml as HTMLElement);
-            this.stateChange.emit(state)
+        ).filter(node => {
+            return (node as HTMLElement).tagName?.startsWith(ATTRIBUTE_PREFIX.toUpperCase());
+        }) as HTMLElement[];
+
+        if (nodes.length) {
+            let xml = '<xml>'
+            nodes.forEach(node => {
+                const tag = node.tagName.toLocaleLowerCase()
+                .replace(ATTRIBUTE_PREFIX, '');
+                xml += `<${tag}>${node.innerHTML.trim()}</${tag}>`;
+            });
+            xml += '</xml>';
+
+            const document = new DOMParser().parseFromString(xml, 'text/xml');
+
+            this.stateChange.emit(
+                this.xml2json(document.childNodes[0] as HTMLElement)
+            );
         }
     }
 
@@ -58,7 +72,7 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
         for (const attribute of Array.from(attributes)) {
             if (this.isWebcomponentAttribute(attribute)) {
                 changed = true;
-                state[attribute.name.replace('wc-', '')] = this.parseText(attribute.value);
+                state[attribute.name.replace(ATTRIBUTE_PREFIX, '')] = this.parseText(attribute.value);
             }
         }
         if (changed) {
@@ -109,6 +123,6 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private isWebcomponentAttribute(attribute: Attr) {
-        return attribute.name.startsWith('wc-');
+        return attribute.name.startsWith(ATTRIBUTE_PREFIX);
     }
 }
