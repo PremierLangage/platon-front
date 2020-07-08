@@ -4,24 +4,24 @@
  */
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { TextInputComponent } from './text-input.component';
+import { PanelComponent } from './panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-describe('TextInputComponent', () => {
-    let fixture: ComponentFixture<TextInputComponent>;
-    let component: TextInputComponent;
+describe('NoteComponent', () => {
+    let fixture: ComponentFixture<PanelComponent>;
+    let component: PanelComponent;
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            declarations: [TextInputComponent],
+            declarations: [PanelComponent],
             imports: [CommonModule],
             schemas: [NO_ERRORS_SCHEMA]
         }).compileComponents();
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(TextInputComponent);
+        fixture = TestBed.createComponent(PanelComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

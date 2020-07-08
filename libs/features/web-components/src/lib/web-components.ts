@@ -1,4 +1,6 @@
 import { InjectionToken } from '@angular/core';
+import { deepCopy } from '@platon/shared/utils';
+import * as jsyaml from 'js-yaml';
 
 /**
  * Configuration metadata that determines how a component should be processed, instantiated, and used at runtime.
@@ -14,6 +16,8 @@ export interface WebComponentDefinition {
     description: string;
     /** Metadata informations about the properties of the component. */
     properties: Record<string, WebComponentProperty>;
+    /** Metadata informations about the`properties` of type object. */
+    types?: Record<string, WebComponentProperty>;
 }
 
 /**
@@ -23,7 +27,7 @@ export interface WebComponentProperty {
     /** Property name */
     name: string;
     /** Property type e.x: string, number, MyInterface... */
-    type: string;
+    type: any;
     /** Default value of the property. */
     default: any;
     /** Briefs description of the property. */
@@ -83,11 +87,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
         const property = definition.properties[propertyName];
         state[propertyName] = instance.__state__[propertyName];
         if (state[propertyName] == null && property.default != null) {
-            if (typeof(property.default) === 'function') {
-                state[propertyName] = property.default();
-            } else {
-                state[propertyName] = property.default;
-            }
+            state[propertyName] = deepCopy(property.default);
         }
     });
 
@@ -105,23 +105,25 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
 
     // CONVERT STRING TO OBJECT IF NEEDED
     if (typeof(newState) === 'string') {
-        newState = JSON.parse(newState);
+        if (newState.startsWith('{')) {
+            newState = JSON.parse(newState);
+        } else {
+            newState = jsyaml.safeLoad(newState);
+        }
     }
 
     const currentState = instance.__state__ || {};
     Object.keys(definition.properties).forEach(propertyName => {
         const property = definition.properties[propertyName];
-        currentState[propertyName] = newState[propertyName] ?? currentState[propertyName];
-        if (currentState[propertyName] == null && property.default != null) {
-            if (typeof(property.default) === 'function') {
-                currentState[propertyName] = property.default();
-            } else {
-                currentState[propertyName] = property.default;
-            }
+        if (propertyName in newState) {
+            currentState[propertyName] = newState[propertyName];
+        } else if (currentState[propertyName] == null && property.default != null) {
+            currentState[propertyName] = deepCopy(property.default);
         }
     });
 
-    instance.__state__ = currentState;
+    instance.__state__ = deepCopy(currentState);
+
     const lifecyles = instance as WebComponentEvents<any>;
     if (lifecyles.onAfterDeserialize) {
         lifecyles.onAfterDeserialize();

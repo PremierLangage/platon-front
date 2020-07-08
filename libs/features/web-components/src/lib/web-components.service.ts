@@ -14,13 +14,13 @@ export class WebComponentsService {
 
     createDocumentation() {
         return {
-            name: 'Components',
+            name: 'Composants',
             link: 'components',
             baseUrl: 'assets/docs/web-components',
             get: (path: string) => {
                 if (path.startsWith('wc-')) {
                     path = path.replace('wc-', '');
-                    path = `assets/docs/web-components/${path}/${path}`;
+                    path = `assets/docs/web-components/widgets/${path}/${path}`;
                 } else {
                     path = `assets/docs/web-components/${path}`;
                 }
