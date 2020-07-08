@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional } from '@angular/core';
-import { WebComponentDefinition, WEB_COMPONENT_DEFINITIONS } from './web-components';
+import { WebComponentDefinition, WEB_COMPONENT_DEFINITIONS, WebComponentTypes } from './web-components';
 
 @Injectable({providedIn: 'root'})
 export class WebComponentsService {
@@ -19,8 +19,9 @@ export class WebComponentsService {
             baseUrl: 'assets/docs/web-components',
             get: (path: string) => {
                 if (path.startsWith('wc-')) {
+                    const definition = this.findBySelector(path);
                     path = path.replace('wc-', '');
-                    path = `assets/docs/web-components/widgets/${path}/${path}`;
+                    path = `assets/docs/web-components/${definition?.type}s/${path}/${path}`;
                 } else {
                     path = `assets/docs/web-components/${path}`;
                 }
@@ -32,15 +33,23 @@ export class WebComponentsService {
             navigation: [
                 { title: 'Introduction', document: 'index.md' },
                 {
-                    title: 'Composants',
-                    children: this.definitions.map(component => {
+                    title: 'Forms',
+                    children: this.definitions.filter(e => e.type === WebComponentTypes.form).map(e => {
                         return {
-                            title: component.name,
-                            document: component.selector
+                            title: e.name,
+                            document: e.selector
                         }
                     })
-                }
-
+                },
+                {
+                    title: 'Widgets',
+                    children: this.definitions.filter(e => e.type === WebComponentTypes.widget).map(e => {
+                        return {
+                            title: e.name,
+                            document: e.selector
+                        }
+                    })
+                },
             ]
         };
     }

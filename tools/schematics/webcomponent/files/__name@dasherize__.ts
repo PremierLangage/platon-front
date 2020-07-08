@@ -1,10 +1,11 @@
-import { defineWebComponent, WebComponentModel } from '../../web-components';
+import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
 export interface <%= classify(name) %> extends WebComponentModel {
   myproperty: string;
 }
 
 export const <%= classify(name) %>ComponentDefinition = defineWebComponent({
+    type: WebComponentTypes.<%= type %>,
     name: '<%= classify(name) %>',
     icon: 'default.svg',
     selector: 'wc-<%= name %>',

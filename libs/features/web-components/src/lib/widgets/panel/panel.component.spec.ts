@@ -8,7 +8,7 @@ import { PanelComponent } from './panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-describe('NoteComponent', () => {
+describe('PanelComponent', () => {
     let fixture: ComponentFixture<PanelComponent>;
     let component: PanelComponent;
 

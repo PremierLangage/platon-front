@@ -2,6 +2,11 @@ import { InjectionToken } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
 import * as jsyaml from 'js-yaml';
 
+export enum WebComponentTypes {
+    form = 'form',
+    widget = 'widget',
+};
+
 /**
  * Configuration metadata that determines how a component should be processed, instantiated, and used at runtime.
  */
@@ -10,6 +15,8 @@ export interface WebComponentDefinition {
     icon: string;
     /** Name of the component */
     name: string;
+    /** Type of the component */
+    type: WebComponentTypes;
     /** Html selector of the component. */
     selector: string;
     /** Briefs description of the component. */
@@ -46,9 +53,37 @@ export interface WebComponentModel {
     selector: string;
 }
 
-export interface WebComponentEvents<T> {
+
+/**
+ * Keeps a track to the changes that occurs in a web component state `@Input`.
+ */
+export interface WebComponentState<T> {
+    /**
+     * The state of the component.
+     * The @WebComponent decorator create a getter and a setter during runtime to
+     * synchronize the changes and call the methods `onAfterSerialize` (after the getter runs)
+     * and `onAfterDeserialize` (after the setter runs).
+     */
     state: T;
+
+    /**
+     * This method is called immediately after the `state` getter runs with the object that
+     * will be returned by the getter.
+     * Define this method to handle any additional post validation tasks.
+     *
+     * @param state The object that will be returned by the getter.
+     * @returns the object or a computed version of the object.
+     */
     onAfterSerialize?(state: T): T;
+
+    /**
+     * A callback method that is invoked immediately after the `state` setter runs.
+     * Define this method to handle any additional validation and initialization tasks.
+     *
+     * Remark:
+     * You may need to run Angular change detection at the end of this method
+     * to refresh the view.
+     */
     onAfterDeserialize(): void;
 }
 
@@ -91,7 +126,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
         }
     });
 
-    const lifecyles = instance as WebComponentEvents<any>;
+    const lifecyles = instance as WebComponentState<any>;
     if (lifecyles.onAfterSerialize) {
         lifecyles.onAfterSerialize(state);
     }
@@ -124,7 +159,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
 
     instance.__state__ = deepCopy(currentState);
 
-    const lifecyles = instance as WebComponentEvents<any>;
+    const lifecyles = instance as WebComponentState<any>;
     if (lifecyles.onAfterDeserialize) {
         lifecyles.onAfterDeserialize();
     }

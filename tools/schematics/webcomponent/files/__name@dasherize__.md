@@ -2,13 +2,7 @@
 
 <wc-doc-header selector="wc-<%= name %>"></wc-doc-header>
 
-## But
-
-TODO
-
-## Utilisation
-
-TODO
+DOCUMENTATION GOES HERE
 
 ## API
 

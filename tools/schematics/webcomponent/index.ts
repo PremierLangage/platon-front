@@ -28,7 +28,6 @@ function readSourceFile(tree: Tree, filePath: string) {
     );
 }
 
-
 function addImport(args: {
     tree: Tree,
     filePath: string;
@@ -113,7 +112,7 @@ function addElementInArray(args: {
 function addComponentToRegistry(tree: Tree, schema: SchematicOptions): Rule {
     const fileName = schema.name;
     const className = strings.classify(schema.name);
-    const toAdd = `    { selector: 'wc-${fileName}', loadChildren: () => import('./${fileName}/${fileName}.module').then(m => m.${className}Module) }`;
+    const toAdd = `    { selector: 'wc-${schema.name}', loadChildren: () => import('${schema.modulePath}.module').then(m => m.${className}Module) }`;
     return addElementInArray({
         tree,
         toAdd,
@@ -137,6 +136,9 @@ export default function (schema: SchematicOptions): Rule {
     if (!schema.name) {
         throw new SchematicsException('name option is required.');
     }
+    if (!schema.type) {
+        throw new SchematicsException('type option is required.');
+    }
 
     return (tree: Tree) => {
         const workspace = getWorkspace(tree);
@@ -147,20 +149,24 @@ export default function (schema: SchematicOptions): Rule {
         if (schema.name.startsWith('wc-')) {
             schema.name = schema.name.substring(3, schema.name.length)
         }
+
+        schema.modulePath = `./${schema.type}s/${schema.name}/${schema.name}`;
         schema.registryFilePath = 'libs/features/web-components/src/lib/web-components-registry.ts';
+
         const sources = apply(url('./files'), [
             template({
                 ...strings,
                 ...schema,
             }),
-            move(join(sourceRoot, 'lib', schema.name)),
+            move(join(sourceRoot, 'lib', schema.type + 's', schema.name)),
         ]);
+
         return chain([
             addImport({
                 tree,
                 filePath: schema.registryFilePath,
                 symbolName: `${strings.classify(schema.name)}ComponentDefinition`,
-                importPath: `./${schema.name}/${schema.name}`,
+                importPath: schema.modulePath,
             }),
             addComponentToRegistry(tree, schema),
             addComponentToProviders(tree, schema),
@@ -171,6 +177,8 @@ export default function (schema: SchematicOptions): Rule {
 
 export interface SchematicOptions {
     name: string;
+    type: 'form' | 'widget';
     registryFilePath: string;
     registryFileName: string;
+    modulePath: string;
 }

@@ -10,7 +10,12 @@
         "$source": "argv",
         "index": 0
       }
+    },
+    "type": {
+      "type": "string",
+      "enum": ["form", "widget"],
+      "description": "The type of the web component."
     }
   },
-  "required": ["name"]
+  "required": ["name", "type"]
 }

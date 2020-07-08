@@ -1,4 +1,4 @@
-import { defineWebComponent, WebComponentModel } from '../../web-components';
+import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
 export enum PanelType {
     note = 'note',
@@ -24,6 +24,7 @@ export interface Panel extends WebComponentModel {
 }
 
 export const PanelComponentDefinition = defineWebComponent({
+    type: WebComponentTypes.widget,
     name: 'Panel',
     icon: 'default.svg',
     selector: 'wc-panel',
