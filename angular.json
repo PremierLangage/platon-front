@@ -25,7 +25,8 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+              { "glob": "**/*", "input": "./node_modules/ngx-monaco-editor/assets/monaco", "output": "./assets/monaco/" }
             ],
             "styles": [
               "apps/platon/src/styles.scss",
@@ -174,7 +175,8 @@
               "apps/ghpage/src/favicon.ico",
               "apps/ghpage/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+              { "glob": "**/*", "input": "./node_modules/ngx-monaco-editor/assets/monaco", "output": "./assets/monaco/" }
             ],
             "styles": [
               "apps/ghpage/src/styles.scss",

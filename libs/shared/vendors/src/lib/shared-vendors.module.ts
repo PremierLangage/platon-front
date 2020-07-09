@@ -3,9 +3,15 @@ import { NgModule, SecurityContext } from '@angular/core';
 // required by Angular Material https://www.npmjs.com/package/@angular/material
 import 'hammerjs';
 
-// NgxMarkdown https://www.npmjs.com/package/ngx-markdown
+//  https://www.npmjs.com/package/ngx-markdown
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 import { markedOptionsFactory } from './marked-options';
+
+
+// https://www.npmjs.com/package/ngx-monaco-editor
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { MONACO_CONFIG } from './monaco/monaco-config';
+import { VendorsMonacoModule } from './monaco';
 
 /**
  * 3rd party librairies integrations in the project.
@@ -19,6 +25,8 @@ import { markedOptionsFactory } from './marked-options';
             },
             sanitize: SecurityContext.NONE
         }),
+        MonacoEditorModule.forRoot(MONACO_CONFIG),
+        VendorsMonacoModule.forRoot(),
     ],
     exports: [
         MarkdownModule,

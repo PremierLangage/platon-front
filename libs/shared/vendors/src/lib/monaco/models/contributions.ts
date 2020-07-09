@@ -1,0 +1,33 @@
+export class Contributions {
+    static readonly colorDetector = 'editor.contrib.colorDetector';
+    static readonly contextmenu = 'editor.contrib.contextmenu';
+    static readonly cursorUndoRedoController = 'editor.contrib.cursorUndoRedoController';
+    static readonly dragAndDrop = 'editor.contrib.dragAndDrop';
+    static readonly autoFormat = 'editor.contrib.autoFormat';
+    static readonly formatOnPaste = 'editor.contrib.formatOnPaste';
+    static readonly smartSelectController = 'editor.contrib.smartSelectController';
+    static readonly iPadShowKeyboard = 'editor.contrib.iPadShowKeyboard';
+    static readonly bracketMatchingController = 'editor.contrib.bracketMatchingController';
+    static readonly codeLens = 'css.editor.codeLens';
+    static readonly findController = 'editor.contrib.findController';
+    static readonly folding = 'editor.contrib.folding';
+    static readonly inPlaceReplaceController = 'editor.contrib.inPlaceReplaceController';
+    static readonly linkDetector = 'editor.linkDetector';
+    static readonly messageController = 'editor.contrib.messageController';
+    static readonly quickFixController = 'editor.contrib.quickFixController';
+    static readonly multiCursorController = 'editor.contrib.multiCursorController';
+    static readonly selectionHighlighter = 'editor.contrib.selectionHighlighter';
+    static readonly parameterHints = 'editor.controller.parameterHints';
+    static readonly referenceController = 'editor.contrib.referenceController';
+    static readonly renameController = 'editor.contrib.renameController';
+    static readonly wordHighlighter = 'editor.contrib.wordHighlighter';
+    static readonly accessibilityHelpController = 'editor.contrib.accessibilityHelpController';
+    static readonly inspectTokens = 'editor.contrib.inspectTokens';
+    static readonly quickOpenController = 'editor.controller.quickOpenController';
+    static readonly gotodefinitionatposition = 'editor.contrib.gotodefinitionatposition';
+    static readonly referencesController = 'editor.contrib.referencesController';
+    static readonly markerController = 'editor.contrib.markerController';
+    static readonly hover = 'editor.contrib.hover';
+    static readonly snippetController2 = 'snippetController2';
+    static readonly suggestController = 'editor.contrib.suggestController';
+}

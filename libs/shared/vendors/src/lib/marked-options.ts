@@ -1,4 +1,5 @@
 import { MarkedOptions, MarkedRenderer } from 'ngx-markdown';
+import marked from 'marked';
 
 export function markedOptionsFactory(): MarkedOptions {
 
@@ -13,6 +14,20 @@ export function markedOptionsFactory(): MarkedOptions {
         return `<a href="${href}" target="_blank" >${text}</a>`;
     };
 
+    renderer.code = (code: string, language: string, isEscaped: boolean) => {
+        const state = {
+            code,
+            language
+        };
+        return `<wc-code-viewer state='${JSON.stringify(state)}'></wc-code-viewer>`;
+    }
+
+
+/*     marked.use({
+        walkTokens: (token: any) => {
+            console.log(token);
+        }
+    }) */
     return {
         renderer,
         gfm: true,

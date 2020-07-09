@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule} from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { NgJsonEditorModule } from 'ang-jsoneditor'
+import { VendorsMonacoModule } from '@platon/shared/vendors';
 
 // MODULE
 import { LoaderComponent } from './core/loader/loader.component';
@@ -31,6 +32,7 @@ import { WEB_COMPONENTS_PROVIDERS } from './web-components-registry';
         MatIconModule,
         MatButtonModule,
         NgJsonEditorModule,
+        VendorsMonacoModule,
     ],
 })
 export class FeaturesWebComponentsModule {
