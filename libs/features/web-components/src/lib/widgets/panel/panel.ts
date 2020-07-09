@@ -28,7 +28,7 @@ export const PanelComponentDefinition = defineWebComponent({
     name: 'Panel',
     icon: 'default.svg',
     selector: 'wc-panel',
-    description: 'Un panel permet d\'afficher un contenu dans un bloc avec style un prédéfinie.',
+    description: 'Un panel permet d\'afficher un contenu dans un bloc avec un style prédéfinie.',
     properties: {
         type: { name: 'type', type: 'PanelType', default: PanelType.note, description: 'Le type du panel.' },
         title: { name: 'title', type: 'string', default: '', description: 'Le titre du panel.' },

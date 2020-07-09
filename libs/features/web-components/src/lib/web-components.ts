@@ -34,7 +34,7 @@ export interface WebComponentProperty {
     /** Property name */
     name: string;
     /** Property type e.x: string, number, MyInterface... */
-    type: any;
+    type: string | { name: string, type: WebComponentProperty };
     /** Default value of the property. */
     default: any;
     /** Briefs description of the property. */

@@ -4,6 +4,8 @@
 @import 'app-dark';
 @import 'app-light';
 
+@import '~jsoneditor/dist/jsoneditor.min.css';
+
 html {
   width: 100vw;
   height: 100vh;
@@ -11,4 +13,14 @@ html {
   color: var(--brand-text-color);
   background-color: var(--brand-background-color);
   font-family: var(--brand-font);
+}
+
+code {
+  background-color: hsla(0, 0%, 96%, 1);
+  color: hsla(200, 18%, 26%, 1);
+  padding: 0 0.2941176471em;
+  font-size: 0.85em;
+  word-break: break-word;
+  box-decoration-break: clone;
+  border-radius: 0.1rem;
 }

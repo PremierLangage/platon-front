@@ -1,0 +1,26 @@
+.wc-showcase {
+  border: 1px solid #f5f5f5;
+  margin-bottom: 12px;
+}
+
+.wc-showcase-title {
+  position: relative;
+  margin: 1rem 0;
+  button {
+    position: absolute;
+    top: -38px;
+    margin: 0 12px;
+    background-color: var(--brand-background-color);
+  }
+}
+
+.wc-showcase-preview {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 1rem;
+}
+
+::ng-deep {
+  .jsoneditor {
+    min-height: 400px;
+  }
+}

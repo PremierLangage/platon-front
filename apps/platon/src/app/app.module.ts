@@ -21,8 +21,7 @@ import { AppRoutingModule } from './app-routing.module';
 
         SharedVendorsModule,
         FeaturesWebComponentsModule.forRoot(),
-
-        NgxLazyElModule.forRoot(WEB_COMPONENTS_BUNDLES)
+        NgxLazyElModule.forRoot(WEB_COMPONENTS_BUNDLES),
     ],
     providers: [],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],

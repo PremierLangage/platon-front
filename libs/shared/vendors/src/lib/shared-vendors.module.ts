@@ -1,7 +1,9 @@
 import { NgModule, SecurityContext } from '@angular/core';
 
-// Angular Material
+// required by Angular Material https://www.npmjs.com/package/@angular/material
 import 'hammerjs';
+
+// NgxMarkdown https://www.npmjs.com/package/ngx-markdown
 import { MarkdownModule, MarkedOptions } from 'ngx-markdown';
 import { markedOptionsFactory } from './marked-options';
 
@@ -11,12 +13,15 @@ import { markedOptionsFactory } from './marked-options';
 @NgModule({
     imports: [
         MarkdownModule.forRoot({
-        markedOptions: {
-            provide: MarkedOptions,
-            useFactory: markedOptionsFactory
-        },
-        sanitize: SecurityContext.NONE
-    })],
-    exports: [MarkdownModule]
+            markedOptions: {
+                provide: MarkedOptions,
+                useFactory: markedOptionsFactory
+            },
+            sanitize: SecurityContext.NONE
+        }),
+    ],
+    exports: [
+        MarkdownModule,
+    ]
 })
 export class SharedVendorsModule {}
