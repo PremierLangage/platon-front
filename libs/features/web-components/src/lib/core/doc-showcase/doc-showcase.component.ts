@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 
 @Component({
@@ -6,17 +6,18 @@ import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
   templateUrl: './doc-showcase.component.html',
   styleUrls: ['./doc-showcase.component.scss']
 })
-export class DocShowcaseComponent implements OnInit {
+export class DocShowcaseComponent implements OnInit, OnDestroy {
 
     @Input() selector = '';
 
     @ViewChild(JsonEditorComponent)
     readonly editor?: JsonEditorComponent;
-
     readonly options = new JsonEditorOptions();
 
-    showEditor = false;
+    private webcomponent?: any;
+    private interval?: number;
 
+    showEditor = false;
     state: Record<string, any> = {};
 
     constructor(
@@ -26,23 +27,32 @@ export class DocShowcaseComponent implements OnInit {
     ngOnInit() {
         this.options.modes = ['code', 'text', 'tree', 'view'];
         this.options.language = 'fr-FR';
-        setTimeout(() => {
-            const native: HTMLElement = this.element.nativeElement;
-            const webcomponent = native.querySelector(this.selector);
-                if (webcomponent) {
-                    this.state = (webcomponent as any).state;
-                    this.options.onChange = () => {
-                        try {
-                            const state = this.editor?.get();
-                            if (state) {
-                                (webcomponent as any).state = state;
-                            }
-                        } catch (error) {
-                            console.log(error);
-                        }
-                    }
+        this.options.onChange = this.onChangeEditorContent.bind(this);
+
+        this.interval = setInterval(() => {
+            this.webcomponent = this.element.nativeElement.querySelector(this.selector);
+            if (this.webcomponent) {
+                const state = this.webcomponent.state;
+                if (state) {
+                    this.state = state;
+                    clearInterval(this.interval);
                 }
-        }, 100);
+            }
+        }, 500);
     }
 
+    ngOnDestroy() {
+        clearInterval(this.interval);
+    }
+
+    private onChangeEditorContent() {
+        try {
+            const state = this.editor?.get();
+            if (state && this.webcomponent) {
+                this.webcomponent.state = state;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }

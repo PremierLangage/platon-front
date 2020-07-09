@@ -94,15 +94,6 @@ export interface WebComponentState<T> {
 export function WebComponent(definition: WebComponentDefinition): ClassDecorator {
     return function(target: any) {
         const prototype = target.prototype;
-        // DYNAMICALLY DEFINE BACKED FIELD FOR `state` property.
-        Object.defineProperty(prototype, '__state__', {
-            value: {
-                cid: '',
-                debug: false,
-                selector: definition.selector
-            } as WebComponentModel,
-            writable: true
-        });
         // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
         Object.defineProperty(prototype, 'state', {
             get: function () {
@@ -117,6 +108,12 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
 }
 
 export function stateGetter(instance: any, definition: WebComponentDefinition) {
+    instance.__state__ = instance.__state__ || {
+        cid: '',
+        debug: false,
+        selector: definition.selector
+    };
+
     const state = instance.__state__;
     Object.keys(definition.properties).forEach(propertyName => {
         const property = definition.properties[propertyName];
@@ -147,7 +144,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
         }
     }
 
-    const currentState = instance.__state__ || {};
+    const currentState = instance.state;
     Object.keys(definition.properties).forEach(propertyName => {
         const property = definition.properties[propertyName];
         if (propertyName in newState) {
@@ -158,7 +155,6 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
     });
 
     instance.__state__ = deepCopy(currentState);
-
     const lifecyles = instance as WebComponentState<any>;
     if (lifecyles.onAfterDeserialize) {
         lifecyles.onAfterDeserialize();
