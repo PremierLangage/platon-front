@@ -1,0 +1,69 @@
+<div class="container" [style.--nb-columns]="item.levels.length + 1">
+
+  <!-- BUTTONS -->
+  <mat-card-actions class="buttons">
+    <button
+      mat-icon-button
+      [disabled]="!canMoveUp"
+      (click)="moveUp.emit(item)">
+      <mat-icon class="icons">arrow_upward</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      [disabled]="!canDelete"
+      (click)="delete.emit(item)">
+      <mat-icon class="icons">delete</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      [disabled]="!canMoveDown"
+      (click)="moveDown.emit(item)">
+      <mat-icon class="icons">arrow_downward</mat-icon>
+    </button>
+  </mat-card-actions>
+
+  <!-- DESCRIPTION -->
+  <div class="criterion">
+    <textarea
+      placeholder="Ajouter une description au critere"
+      [(ngModel)]="item.description"
+      rows="6">
+    </textarea>
+  </div>
+
+  <!-- LEVELS -->
+  <ng-container *ngFor="let level of item.levels">
+    <div class="level">
+      <textarea
+        placeholder="Ajouter une description au niveau"
+        [(ngModel)]="level.description"
+        rows="3">
+      </textarea>
+
+      <div>
+        <input
+          class="numberpoints"
+          type="number"
+          placeholder="Points"
+          [(ngModel)]="level.points">
+        <div class="points"> points</div>
+        <button
+          mat-icon-button
+          [disabled]="disabled"
+          (click)="deleteLevel(level)"
+          style="float: right;">
+          <mat-icon class="icons">delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ADD LEVEL -->
+  <div class="button-add">
+    <button mat-icon-button (click)="addLevel()">
+      <mat-icon>add_box</mat-icon>
+    </button>
+  </div>
+
+</div>
+

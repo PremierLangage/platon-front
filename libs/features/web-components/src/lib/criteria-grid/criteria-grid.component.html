@@ -1,0 +1,26 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Création de la grille critériée</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <ng-container *ngFor="let item of items; let isFirst=first; let isLast=last; trackBy: trackBy">
+      <app-criterion
+        [item]="item"
+        [disabled]="item.levels.length <= 2"
+        [canMoveUp]="!isFirst"
+        [canMoveDown]="!isLast"
+        [canDelete]="items.length != 1"
+        (delete)="deleteCritere($event)"
+        (moveUp)="moveUp($event)"
+        (moveDown)="moveDown($event)">
+      </app-criterion>
+    </ng-container>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-icon-button (click)="addCritere()">
+      <mat-icon>add_circle</mat-icon>
+    </button>
+  </mat-card-actions>
+</mat-card>
