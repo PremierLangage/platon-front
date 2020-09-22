@@ -25,12 +25,10 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
-              { "glob": "**/*", "input": "./node_modules/ngx-monaco-editor/assets/monaco", "output": "./assets/monaco/" }
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
             ],
             "styles": [
-              "apps/platon/src/styles.scss",
-              "node_modules/katex/dist/katex.min.css"
+              "apps/platon/src/styles.scss"
             ],
             "scripts": [
               {
@@ -49,9 +47,6 @@
               "node_modules/@angular/elements/bundles/elements.umd.js",
               "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
               "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
-
-              "node_modules/marked/lib/marked.js",
-              "node_modules/katex/dist/katex.min.js"
             ]
           },
           "configurations": {
@@ -151,36 +146,34 @@
         }
       }
     },
-    "ghpage": {
+    "doc": {
       "projectType": "application",
       "schematics": {
         "@nrwl/angular:component": {
           "style": "scss"
         }
       },
-      "root": "apps/ghpage",
-      "sourceRoot": "apps/ghpage/src",
+      "root": "apps/doc",
+      "sourceRoot": "apps/doc/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/apps/ghpage",
-            "index": "apps/ghpage/src/index.html",
-            "main": "apps/ghpage/src/main.ts",
-            "polyfills": "apps/ghpage/src/polyfills.ts",
-            "tsConfig": "apps/ghpage/tsconfig.app.json",
+            "outputPath": "dist/apps/doc",
+            "index": "apps/doc/src/index.html",
+            "main": "apps/doc/src/main.ts",
+            "polyfills": "apps/doc/src/polyfills.ts",
+            "tsConfig": "apps/doc/tsconfig.app.json",
             "aot": true,
             "assets": [
-              "apps/ghpage/src/favicon.ico",
-              "apps/ghpage/src/assets",
+              "apps/doc/src/favicon.ico",
+              "apps/doc/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
               { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
-              { "glob": "**/*", "input": "./node_modules/ngx-monaco-editor/assets/monaco", "output": "./assets/monaco/" }
             ],
             "styles": [
-              "apps/ghpage/src/styles.scss",
-              "node_modules/katex/dist/katex.min.css"
+              "apps/doc/src/styles.scss"
             ],
             "scripts": [
               {
@@ -198,18 +191,15 @@
               "node_modules/@angular/compiler/bundles/compiler.umd.js",
               "node_modules/@angular/elements/bundles/elements.umd.js",
               "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
-
-              "node_modules/marked/lib/marked.js",
-              "node_modules/katex/dist/katex.min.js"
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"
             ]
           },
           "configurations": {
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "apps/ghpage/src/environments/environment.ts",
-                  "with": "apps/ghpage/src/environments/environment.prod.ts"
+                  "replace": "apps/doc/src/environments/environment.ts",
+                  "with": "apps/doc/src/environments/environment.prod.ts"
                 }
               ],
               "optimization": true,
@@ -238,37 +228,37 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "ghpage:build"
+            "browserTarget": "doc:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ghpage:build:production"
+              "browserTarget": "doc:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ghpage:build"
+            "browserTarget": "doc:build"
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "apps/ghpage/tsconfig.app.json",
-              "apps/ghpage/tsconfig.spec.json"
+              "apps/doc/tsconfig.app.json",
+              "apps/doc/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!apps/ghpage/**/*"]
+            "exclude": ["**/node_modules/**", "!apps/doc/**/*"]
           }
         },
         "test": {
           "builder": "ngx-build-plus:karma",
           "options": {
-            "main": "apps/ghpage/src/test.ts",
-            "tsConfig": "apps/ghpage/tsconfig.spec.json",
-            "karmaConfig": "apps/ghpage/karma.conf.js",
-            "polyfills": "apps/ghpage/src/polyfills.ts",
+            "main": "apps/doc/src/test.ts",
+            "tsConfig": "apps/doc/tsconfig.spec.json",
+            "karmaConfig": "apps/doc/karma.conf.js",
+            "polyfills": "apps/doc/src/polyfills.ts",
             "styles": [],
             "scripts": [],
             "assets": []
@@ -283,27 +273,27 @@
         }
       }
     },
-    "ghpage-e2e": {
-      "root": "apps/ghpage-e2e",
+    "doc-e2e": {
+      "root": "apps/doc-e2e",
       "projectType": "application",
       "architect": {
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
-            "protractorConfig": "apps/ghpage-e2e/protractor.conf.js",
-            "devServerTarget": "ghpage:serve"
+            "protractorConfig": "apps/doc-e2e/protractor.conf.js",
+            "devServerTarget": "doc:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "ghpage:serve:production"
+              "devServerTarget": "doc:serve:production"
             }
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": "apps/ghpage-e2e/tsconfig.e2e.json",
-            "exclude": ["**/node_modules/**", "!apps/ghpage-e2e/**/*"]
+            "tsConfig": "apps/doc-e2e/tsconfig.e2e.json",
+            "exclude": ["**/node_modules/**", "!apps/doc-e2e/**/*"]
           }
         }
       }

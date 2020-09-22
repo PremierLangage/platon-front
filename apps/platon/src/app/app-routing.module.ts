@@ -2,10 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-const routes: Routes = [
-    { path: 'drafts', loadChildren: () => import('./drafts/drafts.module').then(m => m.DraftsModule) },
-    { path: '**', redirectTo: 'drafts', pathMatch: 'full' }
-];
+const routes: Routes = [];
 
 @NgModule({
     imports: [

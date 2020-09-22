@@ -128,7 +128,7 @@ function addComponentToProviders(tree: Tree, schema: SchematicOptions): Rule {
         tree,
         toAdd,
         filePath: schema.registryFilePath,
-        arrayName: 'WEB_COMPONENTS_PROVIDERS',
+        arrayName: 'WEB_COMPONENTS_REGISTRY',
     });
 }
 

@@ -1,5 +1,5 @@
-import { Injectable, Inject, Optional } from '@angular/core';
-import { WebComponentDefinition, WEB_COMPONENT_DEFINITIONS, WebComponentTypes } from './web-components';
+import { Inject, Injectable, Optional } from '@angular/core';
+import { WebComponentDefinition, WebComponentTypes, WEB_COMPONENT_DEFINITIONS } from './web-components';
 
 @Injectable({providedIn: 'root'})
 export class WebComponentsService {
@@ -12,49 +12,20 @@ export class WebComponentsService {
         this.definitions = definitions || [];
     }
 
-    createDocumentation() {
-        return {
-            name: 'Composants',
-            link: 'components',
-            baseUrl: 'assets/docs/web-components',
-            get: (path: string) => {
-                if (path.startsWith('wc-')) {
-                    const definition = this.findBySelector(path);
-                    path = path.replace('wc-', '');
-                    path = `assets/docs/web-components/${definition?.type}s/${path}/${path}`;
-                } else {
-                    path = `assets/docs/web-components/${path}`;
-                }
-                if (!path.endsWith('.md')) {
-                    path += '.md';
-                }
-                return path;
-            },
-            navigation: [
-                { title: 'Introduction', document: 'index.md' },
-                {
-                    title: 'Forms',
-                    children: this.definitions.filter(e => e.type === WebComponentTypes.form).map(e => {
-                        return {
-                            title: e.name,
-                            document: e.selector
-                        }
-                    })
-                },
-                {
-                    title: 'Widgets',
-                    children: this.definitions.filter(e => e.type === WebComponentTypes.widget).map(e => {
-                        return {
-                            title: e.name,
-                            document: e.selector
-                        }
-                    })
-                },
-            ]
-        };
+    /**
+     * Finds the definition of the components of the given `type`.
+     * @param type the type to find.
+     */
+    ofType(type: WebComponentTypes) {
+        return this.definitions.filter(e => e.type === type);
     }
 
+    /**
+     * Finds the component with the given `selector`.
+     * @param selector the selector to find.
+     */
     findBySelector(selector: string): WebComponentDefinition|undefined {
         return this.definitions.find(e => e.selector === selector);
     }
+
 }

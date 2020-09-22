@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { ObserversModule } from '@angular/cdk/observers';
 import { BaseComponent } from './base/base.component';
 import { SharedUtilsPipesModule } from '@platon/shared/utils';
-
 @NgModule({
     imports: [
         CommonModule,
@@ -12,8 +11,8 @@ import { SharedUtilsPipesModule } from '@platon/shared/utils';
     ],
     exports: [
         CommonModule,
-        ObserversModule,
         SharedUtilsPipesModule,
+
         BaseComponent,
     ],
     declarations: [

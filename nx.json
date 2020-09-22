@@ -26,12 +26,12 @@
       "tags": [],
       "implicitDependencies": ["platon"]
     },
-    "ghpage": {
-      "tags": ["scope:ghpage"]
+    "doc": {
+      "tags": ["scope:doc"]
     },
-    "ghpage-e2e": {
+    "doc-e2e": {
       "tags": [],
-      "implicitDependencies": ["ghpage"]
+      "implicitDependencies": ["doc"]
     },
     "shared-ui": {
       "tags": ["scope:shared", "type:ui"]

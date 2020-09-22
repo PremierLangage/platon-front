@@ -11,7 +11,7 @@ export const <%= classify(name) %>ComponentDefinition = defineWebComponent({
     selector: 'wc-<%= name %>',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        myproperty: { name: 'myproperty', 'type': 'string', default: '', description: '' }
+        myproperty: { type: 'string', default: '', description: '' }
         // ...
     }
 });

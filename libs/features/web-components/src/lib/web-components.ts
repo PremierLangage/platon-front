@@ -1,6 +1,5 @@
 import { InjectionToken } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
-import * as jsyaml from 'js-yaml';
 
 export enum WebComponentTypes {
     form = 'form',
@@ -23,18 +22,14 @@ export interface WebComponentDefinition {
     description: string;
     /** Metadata informations about the properties of the component. */
     properties: Record<string, WebComponentProperty>;
-    /** Metadata informations about the`properties` of type object. */
-    types?: Record<string, WebComponentProperty>;
 }
 
 /**
  * Metadata informations about a web component property.
  */
 export interface WebComponentProperty {
-    /** Property name */
-    name: string;
     /** Property type e.x: string, number, MyInterface... */
-    type: string | { name: string, type: WebComponentProperty };
+    type: string;
     /** Default value of the property. */
     default: any;
     /** Briefs description of the property. */
@@ -52,7 +47,6 @@ export interface WebComponentModel {
     /** Html selector of the component. */
     selector: string;
 }
-
 
 /**
  * Keeps a track to the changes that occurs in a web component state `@Input`.
@@ -137,11 +131,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
 
     // CONVERT STRING TO OBJECT IF NEEDED
     if (typeof(newState) === 'string') {
-        if (newState.startsWith('{')) {
-            newState = JSON.parse(newState);
-        } else {
-            newState = jsyaml.safeLoad(newState);
-        }
+        newState = JSON.parse(newState);
     }
 
     const currentState = instance.state;
@@ -151,6 +141,16 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
             currentState[propertyName] = newState[propertyName];
         } else if (currentState[propertyName] == null && property.default != null) {
             currentState[propertyName] = deepCopy(property.default);
+        }
+
+        if (currentState[propertyName] !== null) {
+            if (property.type === 'string' && typeof(currentState[propertyName]) !== 'string') {
+                currentState[propertyName] = '' + currentState[propertyName];
+            }
+
+            if (property.type === 'number' && typeof(currentState[propertyName]) !== 'number') {
+                currentState[propertyName] = Number.parseFloat(currentState[propertyName]);
+            }
         }
     });
 

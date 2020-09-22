@@ -30,10 +30,10 @@ export const PanelComponentDefinition = defineWebComponent({
     selector: 'wc-panel',
     description: 'Un panel permet d\'afficher un contenu dans un bloc avec un style prédéfinie.',
     properties: {
-        type: { name: 'type', type: 'PanelType', default: PanelType.note, description: 'Le type du panel.' },
-        title: { name: 'title', type: 'string', default: '', description: 'Le titre du panel.' },
-        content: { name: 'content', type: 'string', default: '', description: 'Le contenu du panel.' },
-        expanded: { name: 'expanded', type: 'boolean', default: true, description: 'Indique si le panel est plié/déplié.' },
-        expandable: { name: 'expandable', type: 'boolean', default: false, description: 'Indique si le panel peut être plié/déplié.' },
+        type: { type: 'PanelType', default: PanelType.note, description: 'Le type du panel.' },
+        title: { type: 'string', default: '', description: 'Le titre du panel.' },
+        content: { type: 'string', default: '', description: 'Le contenu du panel.' },
+        expanded: { type: 'boolean', default: true, description: 'Indique si le panel est plié/déplié.' },
+        expandable: { type: 'boolean', default: false, description: 'Indique si le panel peut être plié/déplié.' },
     },
 });

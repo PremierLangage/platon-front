@@ -40,23 +40,34 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
 
     onChangeContent() {
         const native: HTMLElement = this.container.nativeElement;
+        const template = native.querySelector('template');
+        if (template) {
+            const code = decodeURIComponent(template.innerHTML);
+            const exec = new Function('state', code);
+            const state = {};
+            exec(state);
+            this.stateChange.emit(state);
+        } else {
+            this.loadFromXML();
+        }
+    }
+
+    private loadFromXML() {
+        const native: HTMLElement = this.container.nativeElement;
         const nodes = Array.from(
             native.childNodes
         ).filter(node => {
             return (node as HTMLElement).tagName?.startsWith(ATTRIBUTE_PREFIX.toUpperCase());
         }) as HTMLElement[];
-
         if (nodes.length) {
-            let xml = '<xml>'
+            let xml = '<xml>';
             nodes.forEach(node => {
                 const tag = node.tagName.toLocaleLowerCase()
-                .replace(ATTRIBUTE_PREFIX, '');
+                    .replace(ATTRIBUTE_PREFIX, '');
                 xml += `<${tag}>${node.innerHTML.trim()}</${tag}>`;
             });
             xml += '</xml>';
-
             const document = new DOMParser().parseFromString(xml, 'text/xml');
-
             this.stateChange.emit(
                 this.xml2json(document.childNodes[0] as HTMLElement)
             );
@@ -84,7 +95,7 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
      * This function coverts a DOM Tree into JavaScript Object.
      * @param srcDOM: DOM Tree to be converted.
      */
-    xml2json(srcDOM: HTMLElement) {
+    private xml2json(srcDOM: HTMLElement) {
         const children = Array.from(srcDOM.children);
 
         // base case for recursion.
@@ -125,4 +136,5 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     private isWebcomponentAttribute(attribute: Attr) {
         return attribute.name.startsWith(ATTRIBUTE_PREFIX);
     }
+
 }
