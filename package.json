@@ -50,7 +50,7 @@
     "monaco-editor": "^0.21.0",
     "nge-doc": "0.0.2",
     "nge-markdown": "0.0.5",
-    "nge-monaco": "0.0.3",
+    "nge-monaco": "0.0.4",
     "ngx-build-plus": "^9.0.6",
     "rxjs": "~6.5.4",
     "zone.js": "^0.10.2"
