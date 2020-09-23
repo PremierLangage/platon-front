@@ -1,5 +1,4 @@
 import {
-    NgeMarkdownModule,
     NgeMarkdownTabbedSetProvider,
     NgeMarkdownAdmonitionsProvider,
     NgeMarkdownLinkAnchorProvider,
