@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { ChangeDetectorRef, InjectionToken } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
 
 export enum WebComponentTypes {
@@ -51,7 +51,7 @@ export interface WebComponentModel {
 /**
  * Keeps a track to the changes that occurs in a web component state `@Input`.
  */
-export interface WebComponentState<T> {
+export interface WebComponentHooks<T> {
     /**
      * The state of the component.
      * The @WebComponent decorator create a getter and a setter during runtime to
@@ -68,7 +68,7 @@ export interface WebComponentState<T> {
      * @param state The object that will be returned by the getter.
      * @returns the object or a computed version of the object.
      */
-    onAfterSerialize?(state: T): T;
+    onGetState?(state: T): T;
 
     /**
      * A callback method that is invoked immediately after the `state` setter runs.
@@ -78,7 +78,7 @@ export interface WebComponentState<T> {
      * You may need to run Angular change detection at the end of this method
      * to refresh the view.
      */
-    onAfterDeserialize(): void;
+    onSetState?(): void;
 }
 
 /**
@@ -88,6 +88,21 @@ export interface WebComponentState<T> {
 export function WebComponent(definition: WebComponentDefinition): ClassDecorator {
     return function(target: any) {
         const prototype = target.prototype;
+
+        prototype.$__detectChange__$ = function() {
+            if (this.$__batch_write__$) {
+                return;
+            }
+
+            const hooks = this as WebComponentHooks<any>;
+            if (hooks.onSetState) {
+                hooks.onSetState();
+            }
+
+            const detector = this.injector.get(ChangeDetectorRef) as ChangeDetectorRef;
+            detector.detectChanges();
+        };
+
         // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
         Object.defineProperty(prototype, 'state', {
             get: function () {
@@ -102,63 +117,74 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
 }
 
 export function stateGetter(instance: any, definition: WebComponentDefinition) {
-    instance.__state__ = instance.__state__ || {
-        cid: '',
-        debug: false,
-        selector: definition.selector
-    };
+    // create a proxy to handles mutations of the state object.
+    if (!instance.$__state__$) {
+        const handler: ProxyHandler<any> = {
+            get(target: any, key: string) {
+                if (typeof target[key] === 'object' && target[key] !== null) {
+                    return new Proxy(target[key], handler);
+                }
+                return target[key];
+            },
+            set(target, key, value) {
+                target[key] = value;
+                instance.$__detectChange__$();
+                return true;
+            }
+        }
+        instance.$__state__$ = new Proxy({
+            cid: '',
+            debug: false,
+            selector: definition.selector
+        }, handler);
+    }
 
-    const state = instance.__state__;
+    // the following line ensure that onSetState hook will not be called
+    // for each mutation of the state until $__batch_write__$ is set to false.
+    instance.$__batch_write__$ = true;
+
+    // define missing required properties
+    const state = instance.$__state__$;
     Object.keys(definition.properties).forEach(propertyName => {
         const property = definition.properties[propertyName];
-        state[propertyName] = instance.__state__[propertyName];
         if (state[propertyName] == null && property.default != null) {
             state[propertyName] = deepCopy(property.default);
         }
     });
 
-    const lifecyles = instance as WebComponentState<any>;
-    if (lifecyles.onAfterSerialize) {
-        lifecyles.onAfterSerialize(state);
+    instance.$__batch_write__$ = false;
+
+    const hooks = instance as WebComponentHooks<any>;
+    if (hooks.onGetState) {
+        hooks.onGetState(state);
     }
+
     return state;
 }
 
 export function stateSetter(instance: any, definition: WebComponentDefinition, newState: any) {
     if (!newState) {
-        return;
+        throw new Error('[web-components]: A webcomponent state cannot be null');
     }
 
-    // CONVERT STRING TO OBJECT IF NEEDED
     if (typeof(newState) === 'string') {
         newState = JSON.parse(newState);
     }
 
-    const currentState = instance.state;
+    // the following line ensure that onSetState hook will not be called
+    // for each mutation of the state until $__batch_write__$ is set to false.
+    instance.$__batch_write__$ = true;
+
+    // copy only allowed properties from newState to state.
+    const state = instance.state;
     Object.keys(definition.properties).forEach(propertyName => {
-        const property = definition.properties[propertyName];
         if (propertyName in newState) {
-            currentState[propertyName] = newState[propertyName];
-        } else if (currentState[propertyName] == null && property.default != null) {
-            currentState[propertyName] = deepCopy(property.default);
-        }
-
-        if (currentState[propertyName] !== null) {
-            if (property.type === 'string' && typeof(currentState[propertyName]) !== 'string') {
-                currentState[propertyName] = '' + currentState[propertyName];
-            }
-
-            if (property.type === 'number' && typeof(currentState[propertyName]) !== 'number') {
-                currentState[propertyName] = Number.parseFloat(currentState[propertyName]);
-            }
+            state[propertyName] = newState[propertyName];
         }
     });
 
-    instance.__state__ = deepCopy(currentState);
-    const lifecyles = instance as WebComponentState<any>;
-    if (lifecyles.onAfterDeserialize) {
-        lifecyles.onAfterDeserialize();
-    }
+    instance.$__batch_write__$ = false;
+    instance.$__detectChange__$();
 }
 
 /**
