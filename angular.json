@@ -455,37 +455,6 @@
           "style": "scss"
         }
       }
-    },
-    "features-docs": {
-      "projectType": "library",
-      "root": "libs/features/docs",
-      "sourceRoot": "libs/features/docs/src",
-      "prefix": "docs",
-      "architect": {
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "libs/features/docs/tsconfig.lib.json",
-              "libs/features/docs/tsconfig.spec.json"
-            ],
-            "exclude": ["**/node_modules/**", "!libs/features/docs/**/*"]
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/features/docs/src/test.ts",
-            "tsConfig": "libs/features/docs/tsconfig.spec.json",
-            "karmaConfig": "libs/features/docs/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@nrwl/angular:component": {
-          "style": "scss"
-        }
-      }
     }
   },
   "cli": {
