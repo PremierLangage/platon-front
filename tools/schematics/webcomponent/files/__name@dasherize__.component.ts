@@ -38,12 +38,8 @@ export class <%= classify(name) %>Component implements WebComponentHooks<<%= cla
      * A callback method that is invoked immediately after the `state` setter runs.
      * Define this method to handle any additional validation and initialization tasks.
      *
-     * Remark:
-     * You may need to run Angular change detection at the end of this method
-     * to refresh the view.
      */
     onSetState() {
-        this.changeDetector.detectChanges();
     }
 
 }

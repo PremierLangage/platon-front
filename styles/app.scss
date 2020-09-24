@@ -13,21 +13,3 @@ html {
   background-color: var(--brand-background-color);
   font-family: var(--brand-font);
 }
-
-code {
-  background-color: hsla(0, 0%, 96%, 1);
-  //background-color: #272935;
-  //color: #F8F8F2;
-  //background-color: hsla(0, 0%, 96%, 1);
-  color: hsla(200, 18%, 26%, 1);
-  padding: 0 0.2941176471em;
-  font-size: 0.85em;
-  word-break: break-word;
-  box-decoration-break: clone;
-  border-radius: 0.1rem;
-}
-
-pre code {
-  display: block;
-  padding: 0;
-}
