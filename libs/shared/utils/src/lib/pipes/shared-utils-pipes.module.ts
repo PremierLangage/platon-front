@@ -1,10 +1,9 @@
 import { NgModule } from '@angular/core';
+import { IconGrPipe } from './icongr.pipe';
 import { SafePipe } from './safe.pipe';
 
 @NgModule({
-    imports: [],
-    exports: [SafePipe],
-    declarations: [SafePipe],
-    providers: [],
+    exports: [SafePipe, IconGrPipe],
+    declarations: [SafePipe, IconGrPipe],
 })
 export class SharedUtilsPipesModule { }
