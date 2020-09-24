@@ -2,5 +2,5 @@
   <ng-content></ng-content>
 </div>
 <ng-container *ngIf="state?.debug">
-  <pre>{{ state|json }}</pre>
+  <nge-monaco-viewer [code]="state|json" language="json"></nge-monaco-viewer>
 </ng-container>

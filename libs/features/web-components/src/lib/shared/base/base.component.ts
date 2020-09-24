@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild, Input, OnInit, OnDestroy } from '@angular/core';
+import { WebComponentDefinition } from '../../web-components';
+import { WebComponentsService } from '../../web-components.service';
 
-const ATTRIBUTE_PREFIX = 'prop-';
 
 @Component({
     selector: 'wc-base',
@@ -14,13 +15,17 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     @Output() stateChange = new EventEmitter<any>();
 
     private observer?: MutationObserver;
+    private definition?: WebComponentDefinition;
 
     constructor(
-        private readonly elementRef: ElementRef
+        private readonly api: WebComponentsService,
+        private readonly elementRef: ElementRef,
     ) {}
 
     ngOnInit() {
         const native: HTMLElement = this.elementRef.nativeElement;
+        const selector = native.parentElement?.tagName.toLowerCase();
+        this.definition = this.api.findBySelector(selector || '');
         this.observer = new MutationObserver(mutations => {
             mutations.forEach(this.onChangeAttributes.bind(this))
         });
@@ -53,18 +58,19 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private loadFromXML() {
+        const properties = this.definition?.properties || {};
         const native: HTMLElement = this.container.nativeElement;
         const nodes = Array.from(
             native.childNodes
         ).filter(node => {
-            return (node as HTMLElement).tagName?.startsWith(ATTRIBUTE_PREFIX.toUpperCase());
+            const selector = (node as HTMLElement).tagName as string;
+            return selector in properties;
         }) as HTMLElement[];
         if (nodes.length) {
             let xml = '<xml>';
             nodes.forEach(node => {
-                const tag = node.tagName.toLocaleLowerCase()
-                    .replace(ATTRIBUTE_PREFIX, '');
-                xml += `<${tag}>${node.innerHTML.trim()}</${tag}>`;
+                const selector = node.tagName.toLowerCase();
+                xml += `<${selector}>${node.innerHTML.trim()}</${selector}>`;
             });
             xml += '</xml>';
             const document = new DOMParser().parseFromString(xml, 'text/xml');
@@ -79,11 +85,12 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
         const parent = native.parentElement as HTMLElement;
         const attributes = parent.attributes;
         const state: Record<string, any> = {};
+        const properties = this.definition?.properties || {};
         let changed = false;
         for (const attribute of Array.from(attributes)) {
-            if (this.isWebcomponentAttribute(attribute)) {
+            if (attribute.name in properties) {
                 changed = true;
-                state[attribute.name.replace(ATTRIBUTE_PREFIX, '')] = this.parseText(attribute.value);
+                state[attribute.name] = this.parseText(attribute.value);
             }
         }
         if (changed) {
@@ -126,15 +133,11 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private parseText(text: string) {
-        if (text.trim().match(/^(true|false|\d+)$/)) {
+        if (text.trim().match(/^(true|false|\d+|\[|\{)/)) {
             return JSON.parse(text);
         } else {
             return text;
         }
-    }
-
-    private isWebcomponentAttribute(attribute: Attr) {
-        return attribute.name.startsWith(ATTRIBUTE_PREFIX);
     }
 
 }
