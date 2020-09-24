@@ -25,6 +25,7 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
+              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/themes", "output": "./assets/monaco/themes/" },
               { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
             ],
             "styles": [
@@ -170,7 +171,8 @@
               "apps/doc/src/favicon.ico",
               "apps/doc/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/themes", "output": "./assets/monaco/themes/" },
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
             ],
             "styles": [
               "apps/doc/src/styles.scss"

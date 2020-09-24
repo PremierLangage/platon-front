@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
-import { WebComponent, WebComponentState } from '../../web-components';
+import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { WebComponent, WebComponentHooks } from '../../web-components';
 import { <%= classify(name) %>, <%= classify(name) %>ComponentDefinition } from './<%= name %>';
 
 @Component({
@@ -9,7 +9,7 @@ import { <%= classify(name) %>, <%= classify(name) %>ComponentDefinition } from 
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(<%= classify(name) %>ComponentDefinition)
-export class <%= classify(name) %>Component implements WebComponentState<<%= classify(name) %>> {
+export class <%= classify(name) %>Component implements WebComponentHooks<<%= classify(name) %>> {
     /**
      * The state of the component.
      * The @WebComponent decorator create a getter and a setter during runtime to
@@ -19,7 +19,7 @@ export class <%= classify(name) %>Component implements WebComponentState<<%= cla
     @Input() state!: <%= classify(name) %>;
 
     constructor(
-        private readonly changeDetector: ChangeDetectorRef
+        readonly injector: Injector
     ) {}
 
     /**
@@ -30,7 +30,7 @@ export class <%= classify(name) %>Component implements WebComponentState<<%= cla
      * @param state The object that will be returned by the getter.
      * @returns the object or a computed version of the object.
      */
-    onAfterSerialize(state: <%= classify(name) %>) {
+    onGetState(state: <%= classify(name) %>) {
         return state;
     }
 
@@ -42,7 +42,7 @@ export class <%= classify(name) %>Component implements WebComponentState<<%= cla
      * You may need to run Angular change detection at the end of this method
      * to refresh the view.
      */
-    onAfterDeserialize() {
+    onSetState() {
         this.changeDetector.detectChanges();
     }
 
