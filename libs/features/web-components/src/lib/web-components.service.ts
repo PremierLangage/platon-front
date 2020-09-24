@@ -9,7 +9,9 @@ export class WebComponentsService {
         @Inject(WEB_COMPONENT_DEFINITIONS)
         private readonly definitions: WebComponentDefinition[]
     ) {
-        this.definitions = definitions || [];
+        this.definitions = (definitions || []).sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        });
     }
 
     /**
