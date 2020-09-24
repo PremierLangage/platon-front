@@ -4,24 +4,24 @@
  */
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { PanelComponent } from './panel.component';
+import { InputBoxComponent } from './input-box.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-describe('PanelComponent', () => {
-    let fixture: ComponentFixture<PanelComponent>;
-    let component: PanelComponent;
+describe('InputBoxComponent', () => {
+    let fixture: ComponentFixture<InputBoxComponent>;
+    let component: InputBoxComponent;
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            declarations: [PanelComponent],
+            declarations: [InputBoxComponent],
             imports: [CommonModule],
             schemas: [NO_ERRORS_SCHEMA]
         }).compileComponents();
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(PanelComponent);
+        fixture = TestBed.createComponent(InputBoxComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
