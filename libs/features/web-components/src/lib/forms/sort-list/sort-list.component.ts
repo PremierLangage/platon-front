@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { SortList, SortListComponentDefinition } from './sort-list';
+import { SortList, SortListComponentDefinition, SortListItem } from './sort-list';
+import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
     selector: 'wc-sort-list',
@@ -10,36 +11,32 @@ import { SortList, SortListComponentDefinition } from './sort-list';
 })
 @WebComponent(SortListComponentDefinition)
 export class SortListComponent implements WebComponentHooks<SortList> {
-    /**
-     * The state of the component.
-     * The @WebComponent decorator create a getter and a setter during runtime to
-     * synchronize the changes and call the methods `onAfterSerialize` (after the getter runs)
-     * and `onAfterDeserialize` (after the setter runs).
-     */
     @Input() state!: SortList;
 
     constructor(
         readonly injector: Injector
     ) {}
 
-    /**
-     * This method is called immediately after the `state` getter runs with the object that
-     * will be returned by the getter.
-     * Define this method to handle any additional post validation tasks.
-     *
-     * @param state The object that will be returned by the getter.
-     * @returns the object or a computed version of the object.
-     */
-    onGetState(state: SortList) {
-        return state;
-    }
-
-    /**
-     * A callback method that is invoked immediately after the `state` setter runs.
-     * Define this method to handle any additional validation and initialization tasks.
-     *
-     */
     onSetState() {
+        if (!this.state.items || !Array.isArray(this.state.items)) {
+            this.state.items = [];
+        }
+
+        this.state.items.forEach((item, index) => {
+            if (typeof item === 'string') {
+                item = this.state.items[index] = {
+                    id: 'item-' + index,
+                    content: item,
+                }
+            }
+        });
     }
 
+    drop(event: CdkDragDrop<SortListItem[]>) {
+        moveItemInArray(this.state.items, event.previousIndex, event.currentIndex);
+    }
+
+    trackBy(index: number, item: SortListItem) {
+        return item.id || index;
+    }
 }

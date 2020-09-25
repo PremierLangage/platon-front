@@ -1,7 +1,13 @@
 import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
+export interface SortListItem {
+    id: string;
+    content: string;
+}
+
 export interface SortList extends WebComponentModel {
-  myproperty: string;
+    items: SortListItem[];
+    disabled: boolean;
 }
 
 export const SortListComponentDefinition = defineWebComponent({
@@ -11,7 +17,7 @@ export const SortListComponentDefinition = defineWebComponent({
     selector: 'wc-sort-list',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+        items: { type: 'SortListItem[]', default: [], description: '' },
+        disabled: { type: 'boolean', default: false, description: '' },
     }
 });
