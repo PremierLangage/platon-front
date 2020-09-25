@@ -1,7 +1,15 @@
 import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
+export interface CheckboxItem {
+    id: string;
+    content: string;
+    checked?: boolean;
+}
+
 export interface CheckboxGroup extends WebComponentModel {
-  myproperty: string;
+    disabled: boolean;
+    horizontal: boolean;
+    items: CheckboxItem[];
 }
 
 export const CheckboxGroupComponentDefinition = defineWebComponent({
@@ -11,7 +19,8 @@ export const CheckboxGroupComponentDefinition = defineWebComponent({
     selector: 'wc-checkbox-group',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+        disabled: { type: 'boolean', default: false, description: '' },
+        horizontal: { type: 'boolean', default: false, description: '' },
+        items: { type: 'CheckboxItem[]', default: [], description: '' },
     }
 });

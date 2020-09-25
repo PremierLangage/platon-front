@@ -1,9 +1,19 @@
-<span>checkbox-group works</span>
+<div class="checkbox-group-component" [class.horizontal]="state.horizontal">
+  <ng-container *ngFor="let item of state.items; trackBy: trackBy">
+    <div
+      class="checkbox-item"
+      [class.checked]="item.checked"
+      (click)="onDidCheckboxChange($event, item)">
+      <mat-checkbox
+          color="primary"
+          [checked]="item.checked"
+          [disabled]="state.disabled">
+        <nge-markdown [data]="item.content"></nge-markdown>
+      </mat-checkbox>
+    </div>
+  </ng-container>
+</div>
 
-<!--
-  THE FOLLOWING CODE HANDLE THE LOGIC SHARED BY ALL THE COMPONENTS
-  YOU SHOULD NOT MODIFY/REMOVE IT OR PLACE IT INSIDE ANY OTHER ELEMENT
--->
 <wc-base [(state)]="state">
   <ng-content></ng-content>
 </wc-base>
