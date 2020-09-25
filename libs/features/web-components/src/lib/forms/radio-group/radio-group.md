@@ -3,7 +3,8 @@
 <wc-radio-group
   style="width: 300px;"
   debug="true"
-  horizontal="false"
+  disabled="true"
+  horizontal="true"
   items='[
     "Choix 1",
     "Choix 2",

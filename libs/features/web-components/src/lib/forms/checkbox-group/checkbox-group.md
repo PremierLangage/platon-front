@@ -2,7 +2,8 @@
 
 <wc-checkbox-group
   debug="true"
-  horizontal="false"
+  disabled="false"
+  horizontal="true"
   items='[
     "Choix 1",
     "Choix 2",

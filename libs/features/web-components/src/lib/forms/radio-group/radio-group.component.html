@@ -1,8 +1,9 @@
 <mat-radio-group
     class="radio-group-component"
+    [disabled]="state.disabled"
+    [class.disabled]="state.disabled"
     [class.horizontal]="state.horizontal"
-    [(ngModel)]="state.selection"
-    [disabled]="state.disabled">
+    [(ngModel)]="state.selection">
     <ng-container *ngFor="let item of state.items; let i = index; trackBy: trackBy">
         <div
             class="radio-item"
