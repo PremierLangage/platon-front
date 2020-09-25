@@ -2,6 +2,13 @@
   style="--editor-height: var(--height, 400px)"
  (ready)="onCreateEditor($event)">
 </nge-monaco-editor>
+<footer>
+  <span class="spacer"></span>
+  <span class="footer-item" [attr.aria-label]="'Ln ' + cursor.lineNumber + ',' + 'Col  ' + cursor.column" title="Cursor">
+    Ln {{cursor.lineNumber}}, Col {{cursor.column}}
+  </span>
+  <span class="footer-item" [attr.aria-label]="state.language" title="Language">{{state.language}}</span>
+</footer>
 <wc-base [(state)]="state">
   <ng-content></ng-content>
 </wc-base>
