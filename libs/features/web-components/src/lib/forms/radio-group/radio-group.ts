@@ -1,7 +1,15 @@
 import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
+export interface RadioGroupItem {
+    id: string;
+    content: string;
+}
+
 export interface RadioGroup extends WebComponentModel {
-  myproperty: string;
+    items: RadioGroupItem[];
+    disabled: boolean;
+    selection: string;
+    horizontal: boolean;
 }
 
 export const RadioGroupComponentDefinition = defineWebComponent({
@@ -11,7 +19,9 @@ export const RadioGroupComponentDefinition = defineWebComponent({
     selector: 'wc-radio-group',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+        items: { type: 'RadioGroupItem[]', default: [], description: '' },
+        disabled: { type: 'boolean', default: false, description: '' },
+        selection: { type: 'string', default: '', description: '' },
+        horizontal: { type: 'boolean', default: false, description: '' },
     }
 });
