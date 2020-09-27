@@ -93,7 +93,6 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
             if (this.$__batch_write__$) {
                 return;
             }
-
             const hooks = this as WebComponentHooks<any>;
             if (hooks.onSetState) {
                 hooks.onSetState();
@@ -141,6 +140,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
 
     // the following line ensure that onSetState hook will not be called
     // for each mutation of the state until $__batch_write__$ is set to false.
+    const batch = instance.$__batch_write__$ ?? false;
     instance.$__batch_write__$ = true;
 
     // define missing required properties
@@ -152,7 +152,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
         }
     });
 
-    instance.$__batch_write__$ = false;
+    instance.$__batch_write__$ = batch;
 
     const hooks = instance as WebComponentHooks<any>;
     if (hooks.onGetState) {
@@ -173,6 +173,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
 
     // the following line ensure that onSetState hook will not be called
     // for each mutation of the state until $__batch_write__$ is set to false.
+    const batch = instance.$__batch_write__$ ?? false;
     instance.$__batch_write__$ = true;
 
     // copy only allowed properties from newState to state.
@@ -183,7 +184,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
         }
     });
 
-    instance.$__batch_write__$ = false;
+    instance.$__batch_write__$ = batch;
     instance.$__detectChange__$();
 }
 
