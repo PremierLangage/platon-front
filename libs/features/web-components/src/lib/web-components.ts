@@ -93,13 +93,14 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
             if (this.$__batch_write__$) {
                 return;
             }
+            this.$__batch_write__$ = true;
             const hooks = this as WebComponentHooks<any>;
             if (hooks.onSetState) {
                 hooks.onSetState();
             }
-
             const detector = this.injector.get(ChangeDetectorRef) as ChangeDetectorRef;
             detector.detectChanges();
+            this.$__batch_write__$ = false;
         };
 
         // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
@@ -125,7 +126,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
                 }
                 return target[key];
             },
-            set(target, key, value) {
+            set(target, key, value, receiver) {
                 target[key] = value;
                 instance.$__detectChange__$();
                 return true;
