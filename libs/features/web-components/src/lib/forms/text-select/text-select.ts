@@ -1,7 +1,13 @@
 import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
 
+export interface TextSelectSelection {
+    position: number | number[];
+    content?: string;
+}
 export interface TextSelect extends WebComponentModel {
-  myproperty: string;
+    text: string;
+    mode: string;
+    selections: TextSelectSelection[];
 }
 
 export const TextSelectComponentDefinition = defineWebComponent({
@@ -11,7 +17,9 @@ export const TextSelectComponentDefinition = defineWebComponent({
     selector: 'wc-text-select',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+        text: { type: 'string', default: '', description: '' },
+        mode: { type: '"free" | "units" | string', default: 'free', description: '' },
+        selections: { type: 'TextSelectSelection[]', default: [], description: '' },
     }
 });
+
