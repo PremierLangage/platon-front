@@ -47,9 +47,6 @@
     },
     "core": {
       "tags": ["scope:core"]
-    },
-    "features-docs": {
-      "tags": ["scope:features", "type:docs"]
     }
   }
 }
