@@ -25,8 +25,13 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/themes", "output": "./assets/monaco/themes/" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+
+              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
+              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/", "output": "./assets/vendors/jsxgraph/" },
+              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
+              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/", "output": "./assets/vendors/nge-monaco/" }
             ],
             "styles": [
               "apps/platon/src/styles.scss"
@@ -47,7 +52,7 @@
               "node_modules/@angular/compiler/bundles/compiler.umd.js",
               "node_modules/@angular/elements/bundles/elements.umd.js",
               "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"
             ]
           },
           "configurations": {
@@ -171,8 +176,13 @@
               "apps/doc/src/favicon.ico",
               "apps/doc/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/themes", "output": "./assets/monaco/themes/" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" }
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+
+              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
+              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/", "output": "./assets/vendors/jsxgraph/" },
+              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
+              { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/", "output": "./assets/vendors/nge-monaco/" }
             ],
             "styles": [
               "apps/doc/src/styles.scss"
