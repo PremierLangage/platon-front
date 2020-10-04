@@ -2,7 +2,7 @@
 
 <wc-code-viewer
   debug="true"
-  lines="1"
+  lines='"1"'
   language="python"
   code="
   print('Hello world')
