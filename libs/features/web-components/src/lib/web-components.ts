@@ -65,8 +65,8 @@ export interface WebComponentHooks<T> {
      * will be returned by the getter.
      * Define this method to handle any additional post validation tasks.
      *
-     * @param state The object that will be returned by the getter.
-     * @returns the object or a computed version of the object.
+     * @param state The state that will be returned by the getter.
+     * @returns the state or a computed version of the state.
      */
     onGetState?(state: T): T;
 
@@ -75,8 +75,7 @@ export interface WebComponentHooks<T> {
      * Define this method to handle any additional validation and initialization tasks.
      *
      * Remark:
-     * You may need to run Angular change detection at the end of this method
-     * to refresh the view.
+     * Angular change detection is right after the end of this method refresh the view.
      */
     onSetState?(): void;
 }
@@ -90,17 +89,17 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
         const prototype = target.prototype;
 
         prototype.$__detectChange__$ = function() {
-            if (this.$__batch_write__$) {
+            if (this.$__suspend_change_detector__$) {
                 return;
             }
-            this.$__batch_write__$ = true;
+            this.$__suspend_change_detector__$ = true;
             const hooks = this as WebComponentHooks<any>;
             if (hooks.onSetState) {
                 hooks.onSetState();
             }
             const detector = this.injector.get(ChangeDetectorRef) as ChangeDetectorRef;
             detector.detectChanges();
-            this.$__batch_write__$ = false;
+            this.$__suspend_change_detector__$ = false;
         };
 
         // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
@@ -140,9 +139,9 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
     }
 
     // the following line ensure that onSetState hook will not be called
-    // for each mutation of the state until $__batch_write__$ is set to false.
-    const batch = instance.$__batch_write__$ ?? false;
-    instance.$__batch_write__$ = true;
+    // for each mutation of the state until $__suspend_change_detector__$ is set to false.
+    const batch = instance.$__suspend_change_detector__$ ?? false;
+    instance.$__suspend_change_detector__$ = true;
 
     // define missing required properties
     const state = instance.$__state__$;
@@ -153,7 +152,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
         }
     });
 
-    instance.$__batch_write__$ = batch;
+    instance.$__suspend_change_detector__$ = batch;
 
     const hooks = instance as WebComponentHooks<any>;
     if (hooks.onGetState) {
@@ -173,9 +172,9 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
     }
 
     // the following line ensure that onSetState hook will not be called
-    // for each mutation of the state until $__batch_write__$ is set to false.
-    const batch = instance.$__batch_write__$ ?? false;
-    instance.$__batch_write__$ = true;
+    // for each mutation of the state until $__suspend_change_detector__$ is set to false.
+    const batch = instance.$__suspend_change_detector__$ ?? false;
+    instance.$__suspend_change_detector__$ = true;
 
     // copy only allowed properties from newState to state.
     const state = instance.state;
@@ -185,7 +184,7 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
         }
     });
 
-    instance.$__batch_write__$ = batch;
+    instance.$__suspend_change_detector__$ = batch;
     instance.$__detectChange__$();
 }
 
