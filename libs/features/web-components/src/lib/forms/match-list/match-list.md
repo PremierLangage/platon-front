@@ -1,3 +1,3 @@
 # MatchList
 
-<wc-match-list></wc-match-list>
+<wc-match-list debug="true"></wc-match-list>
