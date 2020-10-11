@@ -8,9 +8,4 @@ import { WebComponentDefinition } from '../web-components';
 })
 export class DocsComponent {
     definition!: WebComponentDefinition;
-    get remoteUrl() {
-        const type = this.definition.type;
-        const name = this.definition.selector.replace('wc-', '');
-        return `https://github.com/PremierLangage/platon-front/blob/master/libs/features/web-components/src/lib/${type}s/${name}`;
-    }
 }

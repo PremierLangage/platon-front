@@ -30,4 +30,14 @@ export class WebComponentsService {
         return this.definitions.find(e => e.selector === selector);
     }
 
+    linkFromSelector(selector: string) {
+        const definition = this.findBySelector(selector);
+        if (!definition)
+            return undefined;
+        return this.linkFromDefinition(definition);
+    }
+
+    linkFromDefinition(def: WebComponentDefinition) {
+        return `/components/${def.type}s/${def.selector}`;
+    }
 }

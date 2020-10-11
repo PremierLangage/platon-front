@@ -11,12 +11,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [
     CommonModule,
     MatButtonModule,
+    MatTooltipModule,
     NgeMarkdownModule,
     NgJsonEditorModule,
-    MatTooltipModule,
   ],
   declarations: [DocsComponent, ShowcaseComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DocsModule {
     component = DocsComponent;
