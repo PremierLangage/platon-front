@@ -25,7 +25,8 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
 
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
@@ -176,7 +177,8 @@
               "apps/doc/src/favicon.ico",
               "apps/doc/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/web-components" },
+              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
 
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
