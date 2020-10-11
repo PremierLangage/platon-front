@@ -7,17 +7,17 @@ export const WebComponentsDocRoute =  {
     loadChildren: () => import('nge-doc').then(m => m.NgeDocModule),
     data: {
         meta: {
-            name: 'Components',
+            name: 'Composants PLaTon',
             root: '/components/',
+            logo: 'assets/logo/platon.svg',
             url: 'https://premierlangage.github.io/platon-front/',
             repo: {
                 name: 'platon-front',
                 url: 'https://github.com/PremierLangage/platon-front'
             },
-            copyright: 'Copyright © 2020 PLaTon'
         },
         pages: [
-            (injector) => {
+            (injector: any) => {
                 const api = injector.get(WebComponentsService);
                 return {
                     title: 'Forms',
@@ -26,7 +26,7 @@ export const WebComponentsDocRoute =  {
                     children: links(api, WebComponentTypes.form)
                 };
             },
-                (injector) => {
+            (injector: any) => {
                 const api = injector.get(WebComponentsService);
                 return {
                     title: 'Widgets',
@@ -35,19 +35,20 @@ export const WebComponentsDocRoute =  {
                     children: links(api, WebComponentTypes.widget)
                 };
             }
-        ],
-        markdownRenderer: import('nge-markdown').then(m => m.NgeMarkdownComponent)
+        ] ,
     } as NgeDocSettings,
 };
 
 function links(api: WebComponentsService, type: WebComponentTypes): NgeDocLink[] {
     return api.ofType(type).map(e => {
-        const name = e.selector.replace('wc-', '');
-        const path = `assets/docs/web-components/${type}s/${name}/${name}.md`;
         return {
             href: e.selector,
             title: e.name,
-            renderer: path,
+            icon: e.icon,
+            renderer: () => import('./docs.module').then(m => m.DocsModule),
+            inputs: {
+                definition: e
+            }
         }
     });
 }
