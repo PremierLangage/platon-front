@@ -112,10 +112,14 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
 
     private renderConnections() {
         this.state.links.forEach(link => {
+            if (!link.source || !link.target)
+                return;
+
             this.instance?.connect({
                 source: link.source,
                 target: link.target,
                 anchors: ['RightMiddle', 'LeftMiddle'],
+                cssClass: link.css
             });
         });
     }

@@ -1,9 +1,11 @@
-<div class="checkbox-group-component"
+<div class="checkbox-items"
   [class.disabled]="state.disabled"
   [class.horizontal]="state.horizontal">
   <ng-container *ngFor="let item of state.items; trackBy: trackBy">
     <div
       class="checkbox-item"
+      [ngClass]="item.css|css:'class'"
+      [ngStyle]="item.css|css:'style'"
       [class.checked]="item.checked"
       (click)="onDidCheckboxChange($event, item)">
       <mat-checkbox
@@ -15,7 +17,6 @@
     </div>
   </ng-container>
 </div>
-
 <wc-base [(state)]="state">
   <ng-content></ng-content>
 </wc-base>

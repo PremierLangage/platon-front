@@ -1,17 +1,18 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface Hint extends WebComponentModel {
+export interface Hint extends IWebComponent {
   myproperty: string;
 }
 
 export const HintComponentDefinition = defineWebComponent({
     type: WebComponentTypes.widget,
     name: 'Hint',
-    icon: 'default.svg',
+    icon: 'assets/images/components/widgets/hint/hint.svg',
     selector: 'wc-hint',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        properties: {}
     }
 });

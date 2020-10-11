@@ -1,13 +1,12 @@
-# RadioGroup
+Le format des éléments du tableau `items` est le suivant:
 
-<wc-radio-group
-  style="width: 300px;"
-  debug="true"
-  disabled="true"
-  horizontal="true"
-  items='[
-    "Choix 1",
-    "Choix 2",
-    "Choix 3"
-  ]'>
-</wc-radio-group>
+```typescript
+{
+    "css"?: string, // Voir API CSS.
+    "content": string, // Contenu en markdown.
+}
+```
+
+> Si vous voulez définir uniquement la propriété `content` d'un des éléments du tableau,
+> vous pouvez utiliser une chaine de caractère au lieu d'un objet, dans ce cas la propriété
+> `css` prendra sa valeur par défaut.

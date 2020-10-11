@@ -1,0 +1,22 @@
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+    name: 'css'
+})
+export class CssPipe implements PipeTransform {
+    transform(input: string | undefined, type: 'class' | 'style'): any {
+        const tokens = (input || '').split('<>');
+        if (type === 'class') {
+            return (tokens.find(e => !e.includes(':')) || '').trim();
+        }
+        const styles = (tokens.find(e => e.includes(':')) || '').trim()
+        const matches = styles.match(/([\w-]+)\s*:([^;]+)/gm);
+        return (matches || [])?.reduce((dict, match) => {
+            const tmp = match.split(':');
+            const prop = tmp[0].trim();
+            const value = tmp[1].trim();
+            dict[prop] = value;
+            return dict;
+        }, {} as Record<string, any>);
+    }
+}

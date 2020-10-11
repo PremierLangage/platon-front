@@ -1,6 +1,9 @@
 <div>
   <ul [class.disabled]="state.disabled" cdkDropList (cdkDropListDropped)="drop($any($event))">
-    <li cdkDrag *ngFor="let item of state.items; trackBy: trackBy">
+    <li
+      cdkDrag *ngFor="let item of state.items; trackBy: trackBy"
+      [ngClass]="item.css|css:'class'"
+      [ngStyle]="item.css|css:'style'">
       <nge-markdown [data]="item.content"></nge-markdown>
       <mat-icon>reorder</mat-icon>
     </li>

@@ -17,14 +17,12 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroup> {
     ) {}
 
     onSetState() {
-        if (!this.state.items || !Array.isArray(this.state.items)) {
+        if (!Array.isArray(this.state.items)) {
             this.state.items = [];
         }
-
         this.state.items.forEach((item, index) => {
             if (typeof item === 'string') {
                 item = this.state.items[index] = {
-                    id: 'item-' + index,
                     content: item,
                 }
             }
@@ -32,6 +30,6 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroup> {
     }
 
     trackBy(index: number, item: RadioGroupItem) {
-        return item.id || index;
+        return item.content || index;
     }
 }

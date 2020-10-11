@@ -1,17 +1,18 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface Timer extends WebComponentModel {
+export interface Timer extends IWebComponent {
   myproperty: string;
 }
 
 export const TimerComponentDefinition = defineWebComponent({
     type: WebComponentTypes.widget,
     name: 'Timer',
-    icon: 'default.svg',
+    icon: 'assets/images/components/widgets/timer/timer.svg',
     selector: 'wc-timer',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        properties: {}
     }
 });

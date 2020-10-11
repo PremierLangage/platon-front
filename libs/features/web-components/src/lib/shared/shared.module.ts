@@ -4,6 +4,7 @@ import { ObserversModule } from '@angular/cdk/observers';
 import { BaseComponent } from './base/base.component';
 import { SharedUtilsPipesModule } from '@platon/shared/utils';
 import { NgeMonacoModule } from 'nge-monaco';
+import { CssPipe } from './pipes/css.pipe';
 @NgModule({
     imports: [
         CommonModule,
@@ -15,9 +16,11 @@ import { NgeMonacoModule } from 'nge-monaco';
         CommonModule,
         SharedUtilsPipesModule,
         BaseComponent,
+        CssPipe,
     ],
     declarations: [
         BaseComponent,
+        CssPipe,
     ],
 })
 export class SharedModule { }

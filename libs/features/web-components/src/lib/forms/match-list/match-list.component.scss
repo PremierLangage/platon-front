@@ -7,7 +7,7 @@
   min-height: 100px;
   &.disabled {
     cursor: not-allowed;
-    border: dashed 1px #CCC;
+    border: dashed 1px #ccc;
   }
   &::ng-deep {
     svg.jtk-connector {
@@ -18,8 +18,28 @@
     }
 
     .jtk-endpoint.selected circle {
-        fill: #FF4500;
-        stroke: #FF4500;
+      fill: #ff4500;
+      stroke: #ff4500;
+    }
+
+    svg.error-state,
+    svg.warning-state,
+    svg.success-state {
+      background-color: unset !important;
+      border: unset !important;
+      border-radius: unset !important;
+    }
+
+    svg.error-state path {
+      stroke: #FF0000;
+    }
+
+    svg.warning-state path {
+      stroke: #FFFF00;
+    }
+
+    svg.success-state path {
+      stroke: #00FF00;
     }
   }
 }

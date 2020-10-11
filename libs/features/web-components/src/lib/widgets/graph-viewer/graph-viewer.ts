@@ -1,17 +1,18 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface GraphViewer extends WebComponentModel {
+export interface GraphViewer extends IWebComponent {
   myproperty: string;
 }
 
 export const GraphViewerComponentDefinition = defineWebComponent({
     type: WebComponentTypes.widget,
     name: 'GraphViewer',
-    icon: 'default.svg',
+    icon: 'assets/images/components/widgets/graph-viewer/graph-viewer.svg',
     selector: 'wc-graph-viewer',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        properties: {}
     }
 });

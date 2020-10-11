@@ -58,7 +58,7 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private loadFromXML() {
-        const properties = this.definition?.properties || {};
+        const properties = this.definition?.schema?.properties || {};
         const native: HTMLElement = this.container.nativeElement;
         const nodes = Array.from(
             native.childNodes
@@ -85,7 +85,7 @@ export class BaseComponent implements OnInit, OnDestroy, AfterViewInit {
         const parent = native.parentElement as HTMLElement;
         const attributes = parent.attributes;
         const state: Record<string, any> = {};
-        const properties = this.definition?.properties || {};
+        const properties = this.definition?.schema?.properties || {};
         let changed = false;
         for (const attribute of Array.from(attributes)) {
             if (attribute.name in properties) {

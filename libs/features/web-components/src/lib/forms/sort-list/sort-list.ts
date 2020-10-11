@@ -1,11 +1,15 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import {
+    defineWebComponent,
+    IWebComponent,
+    WebComponentTypes,
+} from '../../web-components';
 
 export interface SortListItem {
-    id: string;
+    css?: string;
     content: string;
 }
 
-export interface SortList extends WebComponentModel {
+export interface SortList extends IWebComponent {
     items: SortListItem[];
     disabled: boolean;
 }
@@ -13,11 +17,44 @@ export interface SortList extends WebComponentModel {
 export const SortListComponentDefinition = defineWebComponent({
     type: WebComponentTypes.form,
     name: 'SortList',
-    icon: 'default.svg',
+    icon: 'assets/images/components/forms/sort-list/sort-list.svg',
     selector: 'wc-sort-list',
-    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        items: { type: 'SortListItem[]', default: [], description: '' },
-        disabled: { type: 'boolean', default: false, description: '' },
-    }
+    description: 'Permets de créer une liste à ordonner.',
+    fullDescriptionUrl: 'assets/docs/components/forms/sort-list/sort-list.md',
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        title: 'SortList',
+        required: ['items'],
+        properties: {
+            items: {
+                type: 'array',
+                default: [],
+                description: 'La liste des éléments à ordonner.',
+                items: {
+                    type: ['string', 'object'],
+                    required: ['content'],
+                    additionalProperties: false,
+                    properties: {
+                        css: {
+                            type: 'string',
+                            description: 'Voir API CSS',
+                        },
+                        content: {
+                            type: 'string',
+                            description: 'Contenu en markdown.',
+                        },
+                    },
+                },
+            },
+            disabled: {
+                type: 'boolean',
+                default: false,
+                description: 'Désactiver le composant?',
+            },
+        },
+    },
+    showcase: {
+        items: ['Choix 1', 'Choix 2', 'Choix 3'],
+    },
 });

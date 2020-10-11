@@ -16,16 +16,13 @@ export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroup> 
         readonly injector: Injector
     ) {}
 
-
     onSetState() {
-        if (!this.state.items || !Array.isArray(this.state.items)) {
+        if (!Array.isArray(this.state.items)) {
             this.state.items = [];
         }
-
         this.state.items.forEach((item, index) => {
             if (typeof item === 'string') {
                 item = this.state.items[index] = {
-                    id: 'item-' + index,
                     content: item,
                     checked: false,
                 }
@@ -43,7 +40,7 @@ export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroup> 
     }
 
     trackBy(index: number, item: CheckboxItem) {
-        return item.id || index;
+        return item.content || index;
     }
 
 }

@@ -37,8 +37,24 @@ export class CodeEditorComponent implements OnDestroy, WebComponentHooks<CodeEdi
             this.state.language || 'plaintext',
         );
 
+        this.model.updateOptions({
+            tabSize: 4,
+            insertSpaces: true,
+            trimAutoWhitespace: true,
+        });
+
         editor.setModel(this.model);
-        editor.updateOptions(this.state.options);
+        editor.updateOptions({
+            autoIndent: 'advanced',
+            renderControlCharacters: true,
+            renderWhitespace: 'all',
+            quickSuggestions: true,
+            lineNumbers: 'on',
+            scrollbar: {
+                verticalScrollbarSize: 4,
+                verticalSliderSize: 4,
+            }
+        });
 
         this.disposables.push(this.model);
         this.disposables.push(this.editor);
@@ -70,8 +86,6 @@ export class CodeEditorComponent implements OnDestroy, WebComponentHooks<CodeEdi
                 this.state.language || 'plaintext'
             );
         }
-
-        this.editor?.updateOptions(this.state.options);
     }
 
 }

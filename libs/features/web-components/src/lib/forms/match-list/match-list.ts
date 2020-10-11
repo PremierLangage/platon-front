@@ -1,17 +1,17 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
+export interface MathListLink {
+    source: string;
+    target: string;
+    css?: string;
+}
 
 export interface MatchListItem {
     id: string;
     type: 'source' | 'target';
     content: string;
 }
-
-export interface MathListLink {
-    source: string;
-    target: string;
-}
-export interface MatchList extends WebComponentModel {
+export interface MatchList extends IWebComponent {
   disabled: boolean;
   links: MathListLink[];
   nodes: MatchListItem[];
@@ -20,13 +20,55 @@ export interface MatchList extends WebComponentModel {
 export const MatchListComponentDefinition = defineWebComponent({
     type: WebComponentTypes.form,
     name: 'MatchList',
-    icon: 'default.svg',
+    icon: 'assets/images/components/forms/match-list/match-list.svg',
     selector: 'wc-match-list',
-    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        disabled: { type: 'boolean', default: false, description: '' },
-        links: { type: 'MathListLink[]', default: [], description: '' },
-        nodes: { type: 'MatchListItem[]', default: [
+    description: `Permets de relier une liste de questions à une liste de réponses.`,
+    fullDescriptionUrl: 'assets/docs/components/forms/match-list/match-list.md',
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        title: 'MatchList',
+        properties: {
+            disabled: {
+                type: 'boolean',
+                default: false,
+                description: 'Désactiver l\'interaction avec le composant?',
+            },
+            links: {
+                type: 'array',
+                default: [],
+                description: 'La liste des associations.',
+                additionalProperties: false,
+                required: ['source', 'target'],
+                items: {
+                    type: 'object',
+                    properties: {
+                        source: { type: 'string', description: 'Identifiant du noeud source.' },
+                        target: { type: 'string', description: 'Identifiant du noeud cible.' },
+                        css: { type: 'string', description: 'Voir la page API CSS.' },
+                    }
+                }
+            },
+            nodes: {
+                type: 'array',
+                default: [],
+                description: 'La liste des noeuds.',
+                minItems: 2,
+                additionalProperties: false,
+                required: ['id', 'content', 'type'],
+                items: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', description: 'Identifiant unique du noeud.' },
+                        content: { type: 'string', description: 'Contenu du noeud en markdown.' },
+                        type: { type: 'string', enum: ['source', 'target'], description: 'Type du noeud.' },
+                    }
+                },
+            },
+        },
+    },
+    showcase: {
+        nodes: [
             { "id": "Node1", "type": "source", "content": "trois champs nom(char*), prénom(char*) et age(int)", },
             { "id": "Node2", "type": "source", "content": "Une matrice rectangulaire `m` par `n` (deux entiers)", },
             { "id": "Node3", "type": "source", "content": "Un noeud d'arbre de personnes (char* nom et char* prénom)" },
@@ -38,9 +80,6 @@ export const MatchListComponentDefinition = defineWebComponent({
             { "id": "Node8", "type": "target", "content": "deux mallocs" },
             { "id": "Node9", "type": "target", "content": "aucun malloc" },
             { "id": "Node10", "type": "target", "content": "un malloc" },
-
-            { "id": "Node11", "type": "source", "content": "![alt text](https://squidfunk.github.io/mkdocs-material/assets/images/illustration.png)" },
-            { "id": "Node12", "type": "target", "content": "$c = \\pm\\sqrt&#123;a^2 + b^2&#125;$" },
-        ], description: '' },
+        ]
     }
 });

@@ -12,8 +12,8 @@ import { TextSelect, TextSelectComponentDefinition } from './text-select';
 
 // https://javascript.info/selection-range
 
-const SELECT_INDEX_ATTRIBUTE = 'data-select-index';
-const HIGHLIGHT_CLASS_NAME = 'highlight-state';
+const INDEX = 'data-select-index';
+const HIGHLIGHT = 'highlight-state';
 
 @Component({
     selector: 'wc-text-select',
@@ -24,8 +24,6 @@ const HIGHLIGHT_CLASS_NAME = 'highlight-state';
 @WebComponent(TextSelectComponentDefinition)
 export class TextSelectComponent implements WebComponentHooks<TextSelect> {
     @Input() state!: TextSelect;
-
-    private lastText = '';
 
     get container() {
         const native = this.el.nativeElement;
@@ -47,19 +45,16 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
     ) {}
 
     onSetState() {
-        if (this.state.text !== this.lastText) {
-            this.lastText = this.state.text;
-            switch (this.state.mode) {
-                case 'units':
-                    this.renderModeUnits();
-                    break;
-                case 'free':
-                    this.renderModeFree();
-                    break;
-                default:
-                    this.renderModeRegex();
-                    break;
-            }
+        switch (this.state.mode) {
+            case 'units':
+                this.renderModeUnits();
+                break;
+            case 'free':
+                this.renderModeFree();
+                break;
+            default:
+                this.renderModeRegex();
+                break;
         }
         this.highlightSelections();
     }
@@ -80,11 +75,11 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         const endNode = selection?.focusNode?.parentElement;
 
         const idx1 = Number.parseInt(
-            startNode?.getAttribute(SELECT_INDEX_ATTRIBUTE) || '',
+            startNode?.getAttribute(INDEX) || '',
             10
         );
         const idx2 = Number.parseInt(
-            endNode?.getAttribute(SELECT_INDEX_ATTRIBUTE) || '',
+            endNode?.getAttribute(INDEX) || '',
             10
         );
         if (Number.isNaN(idx1) || Number.isNaN(idx2)) {
@@ -123,8 +118,8 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         if (container.isSameNode(node) || !container.contains(node))
             return;
 
-        // try to find the first parent of target that has ${SELECT_INDEX_ATTRIBUTE} attribute
-        while (node.getAttribute(SELECT_INDEX_ATTRIBUTE) == null) {
+        // try to find the first parent of target that has ${INDEX} attribute
+        while (node.getAttribute(INDEX) == null) {
             node = node.parentElement as HTMLElement;
             if (node == null)
                 return;
@@ -134,7 +129,7 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         }
 
         const index = Number.parseInt(
-            node.getAttribute(SELECT_INDEX_ATTRIBUTE) || '',
+            node.getAttribute(INDEX) || '',
             10
         );
 
@@ -163,7 +158,7 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
                     if (c === '\n') continue;
                     const span = document.createElement('span');
                     span.innerText = c;
-                    span.setAttribute(SELECT_INDEX_ATTRIBUTE, (index++).toString());
+                    span.setAttribute(INDEX, (index++).toString());
                     wrapper.appendChild(span);
                 }
                 node.parentElement?.replaceChild(wrapper, node);
@@ -181,7 +176,7 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         this.container.innerHTML = this.state.text.replace(
             /\{([^}]+?)\}/gm,
             (_, group) => {
-                return `<span ${SELECT_INDEX_ATTRIBUTE}="${index++}">${group}</span>`;
+                return `<span ${INDEX}="${index++}">${group}</span>`;
             }
         );
     }
@@ -190,8 +185,8 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         let index = 0;
         this.container.innerHTML = this.state.text
             .trim()
-            .replace(new RegExp(this.state.mode, 'gm'), (match) => {
-                return `<span ${SELECT_INDEX_ATTRIBUTE}="${index++}">${match}</span>`;
+            .replace(new RegExp(this.state.regex || '', 'gm'), (match) => {
+                return `<span ${INDEX}="${index++}">${match}</span>`;
             });
     }
 
@@ -199,9 +194,9 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         const container = this.container;
         const selectedText: string[] = [];
         for (let index = i; index <= j; index++) {
-            const node = container.querySelector(`[${SELECT_INDEX_ATTRIBUTE}="${index}"]`);
+            const node = container.querySelector(`[${INDEX}="${index}"]`);
             if (node) {
-                node.className = HIGHLIGHT_CLASS_NAME;
+                node.className = HIGHLIGHT;
                 selectedText.push(node.innerHTML);
             }
         }
@@ -210,15 +205,15 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
 
     private highlightSelections() {
         const container = this.container;
-        container.querySelectorAll(`[${SELECT_INDEX_ATTRIBUTE}]`).forEach(node => {
+        container.querySelectorAll(`[${INDEX}]`).forEach(node => {
             node.className = '';
         });
 
         this.state.selections.forEach(item => {
             if (typeof item.position === 'number') {
-                const node = container.querySelector(`[${SELECT_INDEX_ATTRIBUTE}="${item.position}"]`);
+                const node = container.querySelector(`[${INDEX}="${item.position}"]`);
                 if (node) {
-                    node.className = HIGHLIGHT_CLASS_NAME;
+                    node.className = HIGHLIGHT;
                     if (item.content !== node.textContent) {
                         item.content = node.textContent as string;
                     }

@@ -1,26 +1,65 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import {
+    defineWebComponent,
+    IWebComponent,
+    WebComponentTypes,
+} from '../../web-components';
 
 export interface CheckboxItem {
-    id: string;
+    css?: string;
     content: string;
     checked?: boolean;
 }
-
-export interface CheckboxGroup extends WebComponentModel {
+export interface CheckboxGroup extends IWebComponent {
+    items: CheckboxItem[];
     disabled: boolean;
     horizontal: boolean;
-    items: CheckboxItem[];
 }
 
 export const CheckboxGroupComponentDefinition = defineWebComponent({
     type: WebComponentTypes.form,
     name: 'CheckboxGroup',
-    icon: 'default.svg',
+    icon: 'assets/images/components/forms/checkbox-group/checkbox-group.svg',
     selector: 'wc-checkbox-group',
-    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        disabled: { type: 'boolean', default: false, description: '' },
-        horizontal: { type: 'boolean', default: false, description: '' },
-        items: { type: 'CheckboxItem[]', default: [], description: '' },
+    description: 'Permets de choisir plusieurs propositions parmi une liste.',
+    fullDescriptionUrl: 'assets/docs/components/forms/checkbox-group/checkbox-group.md',
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        title: 'CheckboxGroup',
+        properties: {
+            items: {
+                type: 'array',
+                default: [],
+                description: 'La liste des propositions.',
+                items: {
+                    type: ['string', 'object'],
+                    required: ['content'],
+                    additionalProperties: false,
+                    properties: {
+                        css: { type: 'string', description: 'Voir API CSS' },
+                        checked: { type: 'boolean', description: 'La proposition est sélectionnée?' },
+                        content: { type: 'string', description: 'Contenu en markdown.' },
+                    },
+                },
+            },
+            disabled: {
+                type: 'boolean',
+                default: false,
+                description: 'Désactiver la possibilité de sélectionner les propositions?',
+            },
+            horizontal: {
+                type: 'boolean',
+                default: false,
+                description: 'Afficher horizontalement les propositions?',
+            }
+        },
+        required: ['items']
+    },
+    showcase: {
+        items: [
+            'Choix 1',
+            'Choix 2',
+            'Choix 3',
+        ]
     }
 });

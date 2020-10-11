@@ -1,21 +1,22 @@
 <mat-radio-group
-    class="radio-group-component"
     [disabled]="state.disabled"
     [class.disabled]="state.disabled"
     [class.horizontal]="state.horizontal"
     [(ngModel)]="state.selection">
     <ng-container *ngFor="let item of state.items; let i = index; trackBy: trackBy">
-        <div
-            class="radio-item"
-            (click)="state.selection = item.id"
-            [class.selected]="state.selection === item.id">
-            <mat-radio-button
-                color="primary"
-                [name]="item.id"
-                [value]="item.id">
-                <nge-markdown [data]="item.content"></nge-markdown>
-            </mat-radio-button>
-        </div>
+      <div
+        class="radio-item"
+        [ngClass]="item.css|css:'class'"
+        [ngStyle]="item.css|css:'style'"
+        (click)="state.selection = item.content"
+        [class.selected]="state.selection === item.content">
+        <mat-radio-button
+            color="primary"
+            [name]="item.content"
+            [value]="item.content">
+            <nge-markdown [data]="item.content"></nge-markdown>
+        </mat-radio-button>
+      </div>
     </ng-container>
 </mat-radio-group>
 <wc-base [(state)]="state">

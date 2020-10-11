@@ -1,17 +1,18 @@
-import { defineWebComponent, WebComponentModel, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface AutomatonViewer extends WebComponentModel {
+export interface AutomatonViewer extends IWebComponent {
   myproperty: string;
 }
 
 export const AutomatonViewerComponentDefinition = defineWebComponent({
     type: WebComponentTypes.widget,
     name: 'AutomatonViewer',
-    icon: 'default.svg',
+    icon: 'assets/images/components/forms/automaton-editor/automaton-editor.svg',
     selector: 'wc-automaton-viewer',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    properties: {
-        myproperty: { type: 'string', default: '', description: '' }
-        // ...
+    schema: {
+        $schema: 'http://json-schema.org/draft-07/schema',
+        type: 'object',
+        properties: {}
     }
 });

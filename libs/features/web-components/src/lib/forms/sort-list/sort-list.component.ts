@@ -18,14 +18,12 @@ export class SortListComponent implements WebComponentHooks<SortList> {
     ) {}
 
     onSetState() {
-        if (!this.state.items || !Array.isArray(this.state.items)) {
+        if (!Array.isArray(this.state.items)) {
             this.state.items = [];
         }
-
         this.state.items.forEach((item, index) => {
             if (typeof item === 'string') {
                 item = this.state.items[index] = {
-                    id: 'item-' + index,
                     content: item,
                 }
             }
@@ -37,6 +35,6 @@ export class SortListComponent implements WebComponentHooks<SortList> {
     }
 
     trackBy(index: number, item: SortListItem) {
-        return item.id || index;
+        return item.content || index;
     }
 }
