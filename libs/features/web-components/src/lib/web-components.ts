@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, InjectionToken } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
+import { JSONSchema7 } from 'json-schema';
 
 export enum WebComponentTypes {
     form = 'form',
@@ -20,26 +21,20 @@ export interface WebComponentDefinition {
     selector: string;
     /** Briefs description of the component. */
     description: string;
-    /** Metadata informations about the properties of the component. */
-    properties: Record<string, WebComponentProperty>;
-}
-
-/**
- * Metadata informations about a web component property.
- */
-export interface WebComponentProperty {
-    /** Property type e.x: string, number, MyInterface... */
-    type: string;
-    /** Default value of the property. */
-    default: any;
-    /** Briefs description of the property. */
-    description: string;
+    /** Optional url to a markdown file containing the full description of the component. */
+    fullDescriptionUrl?: string;
+    /** JSONSchema describing the properties of the component. */
+    schema: Omit<JSONSchema7, 'properties'> & { // change properties map value types
+        properties: Record<string, JSONSchema7>
+    };
+    /** State to show in showcase section of the documentation page. */
+    showcase?: Record<string, any>;
 }
 
 /**
  * Basic representation of a web component model.
  */
-export interface WebComponentModel {
+export interface IWebComponent {
     /** Unique identifier of the component. */
     cid: string;
     /** Show current state of the component. */
@@ -87,7 +82,6 @@ export interface WebComponentHooks<T> {
 export function WebComponent(definition: WebComponentDefinition): ClassDecorator {
     return function(target: any) {
         const prototype = target.prototype;
-
         prototype.$__detectChange__$ = function() {
             if (this.$__suspend_change_detector__$) {
                 return;
@@ -101,8 +95,6 @@ export function WebComponent(definition: WebComponentDefinition): ClassDecorator
             detector.detectChanges();
             this.$__suspend_change_detector__$ = false;
         };
-
-        // DYNAMICALLY DEFINE GETTER AND SETTER FOR `state` PROPERTY
         Object.defineProperty(prototype, 'state', {
             get: function () {
                 return stateGetter(this, definition);
@@ -125,7 +117,7 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
                 }
                 return target[key];
             },
-            set(target, key, value, receiver) {
+            set(target, key, value) {
                 target[key] = value;
                 instance.$__detectChange__$();
                 return true;
@@ -145,8 +137,9 @@ export function stateGetter(instance: any, definition: WebComponentDefinition) {
 
     // define missing required properties
     const state = instance.$__state__$;
-    Object.keys(definition.properties).forEach(propertyName => {
-        const property = definition.properties[propertyName];
+    const properties = definition.schema.properties;
+    Object.keys(properties).forEach(propertyName => {
+        const property = properties[propertyName];
         if (state[propertyName] == null && property.default != null) {
             state[propertyName] = deepCopy(property.default);
         }
@@ -178,7 +171,8 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
 
     // copy only allowed properties from newState to state.
     const state = instance.state;
-    Object.keys(definition.properties).forEach(propertyName => {
+    // tslint:disable-next-line: no-non-null-assertion
+    Object.keys(definition.schema.properties!).forEach(propertyName => {
         if (propertyName in newState) {
             state[propertyName] = newState[propertyName];
         }
@@ -194,27 +188,31 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
  *@returns The modified definition object.
  */
 export function defineWebComponent(definition: WebComponentDefinition): WebComponentDefinition {
-    definition.properties = {
-        ...definition.properties,
+    definition.schema.properties = {
+        ...definition.schema.properties,
         cid: {
-            name: 'cid',
             default: '',
             type: 'string',
             description: 'Identifiant unique du composant.'
         },
         debug: {
-            name: 'debug',
             default: false,
             type: 'boolean',
-            description: 'Affiche les propriétés du composant sur la page.'
+            description: 'Afficher les propriétés du composant?.'
         },
         selector: {
-            name: 'selector',
             default: definition.selector,
+            readOnly: true,
             type: 'string',
             description: 'Nom de la balise HTML associée au composant.'
         },
-    } as Record<string, WebComponentProperty>;
+    };
+    definition.schema.additionalProperties = false;
+    definition.schema.required = [
+        ...(definition.schema.required || []),
+        'cid',
+        'selector',
+    ];
     return definition;
 }
 
