@@ -2,11 +2,31 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { WebComponentsDocRoute } from '@platon/features/web-components';
+import { NgeDocSettings } from 'nge-doc';
 
 const routes: Routes = [
     { path: '', loadChildren: () => import('./home/home.module').then(m => m.HomeModule) },
     WebComponentsDocRoute,
-    { path: '**', redirectTo: 'home', pathMatch: 'full' }
+    {
+        path: 'developers',
+        loadChildren: () => import('nge-doc').then(m => m.NgeDocModule),
+        data: {
+            meta: {
+                name: 'PLaTon pour les développeurs',
+                root: '/developers/',
+                logo: 'assets/logo/platon.svg',
+                url: 'https://premierlangage.github.io/platon-front/',
+                repo: {
+                    name: 'platon-front',
+                    url: 'https://github.com/PremierLangage/platon-front'
+                },
+            },
+         pages: [
+            { title: 'Présentation', href: 'presentation', renderer: 'assets/docs/developers/index.md' }
+         ],
+        } as NgeDocSettings
+    },
+    { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
 
 @NgModule({
