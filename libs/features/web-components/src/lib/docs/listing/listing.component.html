@@ -1,15 +1,13 @@
 <section>
   <div class="grid">
-    <ng-container *ngFor="let definition of definitions">
-      <a [routerLink]="linkOf(definition)">
-          <mat-card>
-              <img class="card-icon" [src]="definition.icon" [alt]="definition.name">
-              <mat-card-header>
-                  <mat-card-title>{{ definition.name }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>{{ definition.description }}</mat-card-content>
-          </mat-card>
-      </a>
-    </ng-container>
+    <a [routerLink]="linkOf(definition)"  *ngFor="let definition of definitions">
+        <mat-card>
+            <img class="card-icon" [src]="definition.icon" [alt]="definition.name">
+            <mat-card-header>
+                <mat-card-title>{{ definition.name }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>{{ definition.description }}</mat-card-content>
+        </mat-card>
+    </a>
   </div>
 </section>
