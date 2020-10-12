@@ -110,7 +110,6 @@ function addElementInArray(args: {
 }
 
 function addComponentToRegistry(tree: Tree, schema: SchematicOptions): Rule {
-    const fileName = schema.name;
     const className = strings.classify(schema.name);
     const toAdd = `    { selector: 'wc-${schema.name}', loadChildren: () => import('${schema.modulePath}.module').then(m => m.${className}Module) }`;
     return addElementInArray({
