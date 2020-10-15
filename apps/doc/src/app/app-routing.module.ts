@@ -16,6 +16,7 @@ const routes: Routes = [
                 root: '/developers/',
                 logo: 'assets/logo/platon.svg',
                 url: 'https://premierlangage.github.io/platon-front/',
+                backUrl: '/',
                 repo: {
                     name: 'platon-front',
                     url: 'https://github.com/PremierLangage/platon-front'
