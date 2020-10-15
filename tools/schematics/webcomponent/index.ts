@@ -1,6 +1,5 @@
 import {
     apply,
-    branchAndMerge,
     chain,
     mergeWith,
     move,
@@ -111,7 +110,8 @@ function addElementInArray(args: {
 
 function addComponentToRegistry(tree: Tree, schema: SchematicOptions): Rule {
     const className = strings.classify(schema.name);
-    const toAdd = `    { selector: 'wc-${schema.name}', loadChildren: () => import('${schema.modulePath}.module').then(m => m.${className}Module) }`;
+    const selector = "wc-" + schema.name;
+    const toAdd = `    { selector: '${selector}', loadChildren: () => import( /* webpackChunkName: "${selector}" */ '${schema.modulePath}.module').then(m => m.${className}Module) }`;
     return addElementInArray({
         tree,
         toAdd,
