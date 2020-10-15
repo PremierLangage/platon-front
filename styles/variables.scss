@@ -1,20 +1,10 @@
 :root {
-  // COLORS
   --brand-color-primary: #171C8F;
   --brand-color-primary-rgb: 23,28,143;
   --brand-color-primary-contrast: #ffffff;
   --brand-color-primary-contrast-rgb: 255,255,255;
   --brand-color-primary-shade: #14197e;
   --brand-color-primary-tint: #2e339a;
-
-  /*
-  --brand-color-primary: #ed1b2e;
-  --brand-color-primary-rgb: 237, 27, 46;
-  --brand-color-primary-contrast: #ffffff;
-  --brand-color-primary-contrast-rgb: 255, 255, 255;
-  --brand-color-primary-shade: #d11828;
-  --brand-color-primary-tint: #ef3243;
-  */
 
   --brand-color-secondary: #3466fe;
   --brand-color-secondary-rgb: 52, 102, 254;
@@ -30,8 +20,11 @@
   --brand-color-tertiary-shade: #633ce0;
   --brand-color-tertiary-tint: #7e57ff;
 
+  --brand-background-color: #FFFFFF;
+  --brand-text-color: #000000;
+  --brand-border-color: #dddddd;
+  --brand-box-shadow-color: rgba(0, 0, 0, 0.12);
 
-  // FONT
   --brand-font: 'Fira Sans', system-ui, -apple-system, BlinkMacSystemFont,
     'Fira Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
     'Droid Sans', 'Helvetica Neue', sans-serif;;

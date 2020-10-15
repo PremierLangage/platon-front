@@ -4,15 +4,7 @@
 @import 'app-dark';
 @import 'app-light';
 @import 'components';
-@import "~animate.css/animate.min.css";
-
-@import "~jsoneditor/dist/jsoneditor.min.css"; // TODO lazy load
-
-
-.animate__animated {
-  animation-duration: 2.5s;
-  animation-fill-mode: both;
-}
+@import "~jsoneditor/dist/jsoneditor.min.css"; // TODO lazy load in showcase component of web-components docs module
 
 html {
   width: 100vw;
@@ -22,10 +14,3 @@ html {
   background-color: var(--brand-background-color);
   font-family: var(--brand-font);
 }
-
-
-// TODO remove once nge-doc lib will remove font-familly: inherit rule from it's css
-mat-icon {
-  font-family: 'Material Icons' !important;
-}
-
