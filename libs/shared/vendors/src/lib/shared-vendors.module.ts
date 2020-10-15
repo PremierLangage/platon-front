@@ -4,7 +4,6 @@ import { NgModule, SecurityContext } from '@angular/core';
 import 'hammerjs';
 import { NgeMarkdownProviders } from './nge-markdown/nge-markdown';
 import { NgeMonacoImport } from './nge-monaco/nge-monaco';
-import { NGE_DOC_RENDERERS } from 'nge-doc';
 import { NgeDocRenderers } from './nge-doc/nge-doc';
 
 

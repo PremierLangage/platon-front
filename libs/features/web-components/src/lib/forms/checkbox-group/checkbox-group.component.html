@@ -10,7 +10,7 @@
       (click)="onDidCheckboxChange($event, item)">
       <mat-checkbox
           color="primary"
-          [checked]="item.checked"
+          [checked]="!!item.checked"
           [disabled]="state.disabled">
         <nge-markdown [data]="item.content"></nge-markdown>
       </mat-checkbox>

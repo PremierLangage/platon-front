@@ -22,6 +22,7 @@ $mat-typography: mat-typography-config(
 @include mat-core($mat-typography);
 
 //#region LIGHT THEME
+
 // FOREGROUND
 $dark-text: #000000;
 $dark-primary-text: rgba($dark-text, 0.87);
@@ -74,12 +75,13 @@ $mat-light-theme-background: (
   disabled-button-toggle: $light-bg-darker-10,
   unselected-chip: $light-bg-darker-10,
   disabled-list-option: $light-bg-darker-10,
-  tooltip: $light-bg-darker-30,
+  tooltip: $dark-bg-alpha-4,
 );
 
 //#endregion
 
 //#region DARK THEME
+
 // FOREGROUND
 $light-text: #FFFFFF;
 $light-primary-text: $light-text;

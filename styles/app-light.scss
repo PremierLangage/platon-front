@@ -1,9 +1,0 @@
-.light-theme {
-  --brand-background-color: #FFFFFF;
-  --brand-text-color: #000000;
-  --brand-border-color: #dddddd;
-  --brand-box-shadow-color: rgba(0, 0, 0, 0.12);
-
-    @import './material';
-    @include angular-material-theme($mat-light-theme);
-}
