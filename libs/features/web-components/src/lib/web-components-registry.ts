@@ -58,6 +58,6 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonViewerComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: GraphViewerComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: HintComponentDefinition },
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MarkdownComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MarkdownComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: TimerComponentDefinition },
 ];

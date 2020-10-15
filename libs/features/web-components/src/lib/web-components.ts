@@ -198,7 +198,7 @@ export function defineWebComponent(definition: WebComponentDefinition): WebCompo
         debug: {
             default: false,
             type: 'boolean',
-            description: 'Afficher les propriétés du composant?.'
+            description: 'Afficher les propriétés du composant?'
         },
         selector: {
             default: definition.selector,

@@ -1,9 +1,4 @@
-<span>markdown works</span>
-
-<!--
-  THE FOLLOWING CODE HANDLE THE LOGIC SHARED BY ALL THE COMPONENTS
-  YOU SHOULD NOT MODIFY/REMOVE IT OR PLACE IT INSIDE ANY OTHER ELEMENT
--->
+<nge-markdown [data]="state.data" [file]="state.file"></nge-markdown>
 <wc-base [(state)]="state">
   <ng-content></ng-content>
 </wc-base>
