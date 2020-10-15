@@ -281,13 +281,6 @@
             "scripts": [],
             "assets": []
           }
-        },
-        "deploy": {
-          "builder": "angular-cli-ghpages:deploy",
-          "options": {
-            "baseHref": "https://premierlangage.github.io/platon-front/",
-            "noBuild": true
-          }
         }
       }
     },
