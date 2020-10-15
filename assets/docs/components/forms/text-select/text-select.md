@@ -1,14 +1,15 @@
 
 * **Fonctionnement du mode `free`.**
+  Chaque caractère de `text` est transformée en unité sélectionnable.
+  On sélectionne les unités en faisant glisser le curseur de sélection comme dans une sélection de texte usuelle.
+  Les selections ajouté au tableau `selections` ont la forme suivante.
+
   ```typescript
   {
     "position": [number, number], // [position du premier caracère, position du dernier caractère]
     "content": string // Le texte de la partie sélectionnée
   }
   ```
-  est ajouté au tableau `selections` avec la position.
-  Chaque caractère de `text` est transformée en unité sélectionnable.
-  On sélectionne les unités en faisant glisser le curseur de sélection comme dans une sélection de texte usuelle.
 
 * **Fonctionnement du mode `units`.**
   Les parties de `text` entre accolades sont transformées en unités sélectionnables. Les autres parties ne sont pas sélectionnables.
