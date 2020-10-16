@@ -43,7 +43,7 @@ export const WEB_COMPONENTS_BUNDLES: LazyComponentDef[] = [
 
 export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonEditorComponentDefinition },
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonViewerComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonViewerComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: CheckboxGroupComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: CodeEditorComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: CodeViewerComponentDefinition },
@@ -53,7 +53,7 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: JsxComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MarkdownComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MatchListComponentDefinition },
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MathLiveComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MathLiveComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MatrixComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: PickerComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: RadioGroupComponentDefinition },
