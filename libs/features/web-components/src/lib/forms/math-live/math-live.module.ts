@@ -1,4 +1,4 @@
-import { NgModule, Type } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule, Type } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 
 import { MathLiveComponent } from './math-live.component';
@@ -9,6 +9,7 @@ import { MathLiveComponent } from './math-live.component';
         SharedModule
     ],
     exports: [MathLiveComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class MathLiveModule {
     customElementComponent: Type<any> = MathLiveComponent;
