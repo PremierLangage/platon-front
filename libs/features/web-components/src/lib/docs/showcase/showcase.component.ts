@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { LazyResourceService } from '@platon/shared/utils';
+import { AssetLoaderService } from '@platon/shared/utils';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { WebComponentDefinition } from '../../web-components';
 
@@ -20,12 +20,12 @@ export class ShowcaseComponent implements OnInit {
 
     constructor(
         private readonly el: ElementRef<HTMLElement>,
-        private readonly lazy: LazyResourceService,
+        private readonly assets: AssetLoaderService,
     ) {}
 
     async ngOnInit() {
-        this.lazy.loadAll([
-            ['style', 'assets/vendors/jsoneditor/jsoneditor.min.css']
+        this.assets.loadAllAsync([
+            ['style', '/assets/vendors/jsoneditor/jsoneditor.min.css']
         ]).toPromise().catch();
 
         const host = this.el.nativeElement.firstElementChild;
