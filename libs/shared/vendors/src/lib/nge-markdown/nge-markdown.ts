@@ -6,7 +6,7 @@ import {
     NgeMarkdownEmojiProvider,
     NgeMarkdownIconsProvider,
     NgeMarkdownHighlighterProvider,
-    NgeMarkdownHighlighterMonacoProvider
+    NgeMarkdownHighlighterMonacoProvider,
 } from 'nge-markdown';
 
 import { NgeMonacoColorizerService } from 'nge-monaco';
