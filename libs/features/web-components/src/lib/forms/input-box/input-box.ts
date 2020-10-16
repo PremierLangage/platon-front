@@ -48,12 +48,12 @@ export const InputBoxComponentDefinition = defineWebComponent({
             prefix: {
                 type: 'string',
                 default: '',
-                description: 'Une icon à afficher à gauche du champ de saisi.',
+                description: 'Une icône à afficher à gauche du champ de saisi.',
             },
             suffix: {
                 type: 'string',
                 default: '',
-                description: 'Une icon à afficher à droite du champ de saisi.',
+                description: 'Une icône à afficher à droite du champ de saisi.',
             },
             appearance: {
                 type: 'string',
