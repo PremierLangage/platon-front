@@ -68,7 +68,7 @@ export const InputBoxComponentDefinition = defineWebComponent({
             disabled: {
                 type: 'boolean',
                 default: false,
-                description: 'Désactiver le champs de saisi?',
+                description: 'Désactiver le champ de saisi?',
             },
             completion: {
                 type: 'array',

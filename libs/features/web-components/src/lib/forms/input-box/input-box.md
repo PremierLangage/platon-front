@@ -17,7 +17,6 @@ Le comportement de ce composant dépend de la valeur de sa propriété `type`.
 
 * `textarea`: Le même comportement que pour le type `text` sauf que la chaine peut être saisi sur plusieurs lignes.
 
-
 ### Les propriétés `prefix` et `suffix`
 
 Les propriétés `prefix` et `suffix` vous permettent d'afficher une icône à gauche et/ou à droite
