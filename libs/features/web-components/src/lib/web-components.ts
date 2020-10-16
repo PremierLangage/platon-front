@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, InjectionToken } from '@angular/core';
+import { ChangeDetectorRef, InjectionToken, Injector } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
 import { JSONSchema7 } from 'json-schema';
 
 export enum WebComponentTypes {
     form = 'form',
     widget = 'widget',
-};
+}
 
 /**
  * Configuration metadata that determines how a component should be processed, instantiated, and used at runtime.
@@ -24,8 +24,9 @@ export interface WebComponentDefinition {
     /** Optional url to a markdown file containing the full description of the component. */
     fullDescriptionUrl?: string;
     /** JSONSchema describing the properties of the component. */
-    schema: Omit<JSONSchema7, 'properties'> & { // change properties map value types
-        properties: Record<string, JSONSchema7>
+    schema: Omit<JSONSchema7, 'properties'> & {
+        // change properties map value types
+        properties: Record<string, JSONSchema7>;
     };
     /** State to show in showcase section of the documentation page. */
     showcase?: Record<string, any>;
@@ -55,6 +56,8 @@ export interface WebComponentHooks<T> {
      */
     state: T;
 
+    readonly injector: Injector;
+
     /**
      * This method is called immediately after the `state` getter runs with the object that
      * will be returned by the getter.
@@ -69,117 +72,66 @@ export interface WebComponentHooks<T> {
      * A callback method that is invoked immediately after the `state` setter runs.
      * Define this method to handle any additional validation and initialization tasks.
      *
-     * Remark:
-     * Angular change detection is right after the end of this method refresh the view.
+     * Remarks:
+     * - `ngOnInit` hook is always called before this one.
+     * - change detector is triggered right after the end of this method refresh the view.
      */
     onSetState?(): void;
+}
+
+/**
+ * Injection token to get the list of defined web components.
+ */
+export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<
+    WebComponentDefinition[]
+>('WEB_COMPONENT_DEFINITIONS');
+
+/**
+ * Defines the properties created by the WebComponent decorator.
+ */
+interface WebComponentInstance extends WebComponentHooks<any> {
+    /** Backed field for the `state` property of the component. */
+    $__state__$?: any;
+    /**
+     * Since onSetState hook is called for each property change
+     * setting this property to `true` allow to stop watching properties mutation
+     * until the value is set to `false`.
+     */
+    $__suspendChanges__$?: boolean;
+    /**
+     * A value indicating whether the ngOnInit hook
+     * of the decorated component is already called.
+     */
+    $__ngOnInitCalled__$?: boolean;
 }
 
 /**
  * Decorator that marks a class as a web component and provides configuration metadata that determines how the component should be processed, instantiated, and used at runtime.
  * @param definition metadata informations about the component.
  */
-export function WebComponent(definition: WebComponentDefinition): ClassDecorator {
-    return function(target: any) {
+export function WebComponent(
+    definition: WebComponentDefinition
+): ClassDecorator {
+    return function (target: any) {
         const prototype = target.prototype;
-        prototype.$__detectChange__$ = function() {
-            if (this.$__suspend_change_detector__$) {
-                return;
-            }
-            this.$__suspend_change_detector__$ = true;
-            const hooks = this as WebComponentHooks<any>;
-            if (hooks.onSetState) {
-                hooks.onSetState();
-            }
-            const detector = this.injector.get(ChangeDetectorRef) as ChangeDetectorRef;
-            detector.detectChanges();
-            this.$__suspend_change_detector__$ = false;
-        };
         Object.defineProperty(prototype, 'state', {
             get: function () {
                 return stateGetter(this, definition);
             },
-            set: function(newState: any) {
+            set: function (newState: any) {
                 stateSetter(this, definition, newState);
-            }
-        });
-        return target;
-    }
-}
-
-export function stateGetter(instance: any, definition: WebComponentDefinition) {
-    // create a proxy to handles mutations of the state object.
-    if (!instance.$__state__$) {
-        const handler: ProxyHandler<any> = {
-            get(target: any, key: string) {
-                if (typeof target[key] === 'object' && target[key] !== null) {
-                    return new Proxy(target[key], handler);
-                }
-                return target[key];
             },
-            set(target, key, value) {
-                target[key] = value;
-                instance.$__detectChange__$();
-                return true;
+        });
+        const ngOnInit = prototype.ngOnInit;
+        prototype.ngOnInit = async function (this: WebComponentInstance) {
+            if (ngOnInit) {
+                await ngOnInit.apply(this);
             }
-        }
-        instance.$__state__$ = new Proxy({
-            cid: '',
-            debug: false,
-            selector: definition.selector
-        }, handler);
-    }
-
-    // the following line ensure that onSetState hook will not be called
-    // for each mutation of the state until $__suspend_change_detector__$ is set to false.
-    const batch = instance.$__suspend_change_detector__$ ?? false;
-    instance.$__suspend_change_detector__$ = true;
-
-    // define missing required properties
-    const state = instance.$__state__$;
-    const properties = definition.schema.properties;
-    Object.keys(properties).forEach(propertyName => {
-        const property = properties[propertyName];
-        if (state[propertyName] == null && property.default != null) {
-            state[propertyName] = deepCopy(property.default);
-        }
-    });
-
-    instance.$__suspend_change_detector__$ = batch;
-
-    const hooks = instance as WebComponentHooks<any>;
-    if (hooks.onGetState) {
-        hooks.onGetState(state);
-    }
-
-    return state;
-}
-
-export function stateSetter(instance: any, definition: WebComponentDefinition, newState: any) {
-    if (!newState) {
-        throw new Error('[web-components]: A webcomponent state cannot be null');
-    }
-
-    if (typeof(newState) === 'string') {
-        newState = JSON.parse(newState);
-    }
-
-    // the following line ensure that onSetState hook will not be called
-    // for each mutation of the state until $__suspend_change_detector__$ is set to false.
-    const batch = instance.$__suspend_change_detector__$ ?? false;
-    instance.$__suspend_change_detector__$ = true;
-
-    // copy only allowed properties from newState to state.
-    const state = instance.state;
-    // tslint:disable-next-line: no-non-null-assertion
-    Object.keys(definition.schema.properties!).forEach(propertyName => {
-        if (propertyName in newState) {
-            state[propertyName] = newState[propertyName];
-        }
-    });
-
-    instance.$__suspend_change_detector__$ = batch;
-    instance.$__detectChange__$();
+            this.$__ngOnInitCalled__$ = true;
+            this.state = this.state;
+        };
+        return target;
+    };
 }
 
 /**
@@ -187,24 +139,26 @@ export function stateSetter(instance: any, definition: WebComponentDefinition, n
  * @param definition Definition object to modify.
  *@returns The modified definition object.
  */
-export function defineWebComponent(definition: WebComponentDefinition): WebComponentDefinition {
+export function defineWebComponent(
+    definition: WebComponentDefinition
+): WebComponentDefinition {
     definition.schema.properties = {
         ...definition.schema.properties,
         cid: {
             default: '',
             type: 'string',
-            description: 'Identifiant unique du composant.'
+            description: 'Identifiant unique du composant.',
         },
         debug: {
             default: false,
             type: 'boolean',
-            description: 'Afficher les propriétés du composant?'
+            description: 'Afficher les propriétés du composant?',
         },
         selector: {
             default: definition.selector,
             readOnly: true,
             type: 'string',
-            description: 'Nom de la balise HTML associée au composant.'
+            description: 'Nom de la balise HTML associée au composant.',
         },
     };
     definition.schema.additionalProperties = false;
@@ -216,4 +170,105 @@ export function defineWebComponent(definition: WebComponentDefinition): WebCompo
     return definition;
 }
 
-export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<WebComponentDefinition[]>('WEB_COMPONENT_DEFINITIONS');
+function createState(
+    component: WebComponentInstance,
+    definition: WebComponentDefinition
+) {
+    if (component.$__state__$)
+        return component.$__state__$;
+
+    // create a proxy to handles mutations of the state object.
+    const handler: ProxyHandler<any> = {
+        get(target: any, key: string) {
+            if (typeof target[key] === 'object' && target[key] !== null) {
+                return new Proxy(target[key], handler);
+            }
+            return target[key];
+        },
+        set(target, key, value) {
+            target[key] = value;
+            detectChanges(component);
+            return true;
+        },
+    };
+
+    return component.$__state__$ = new Proxy(
+        {
+            cid: '',
+            debug: false,
+            selector: definition.selector,
+        },
+        handler
+    );
+}
+
+function stateGetter(
+    component: WebComponentInstance,
+    definition: WebComponentDefinition
+) {
+    const suspended = suspendChanges(component);
+    const state = createState(component, definition);
+    const properties = definition.schema.properties;
+    Object.keys(properties).forEach((propertyName) => {
+        const property = properties[propertyName];
+        if (state[propertyName] == null && property.default != null) {
+            state[propertyName] = deepCopy(property.default);
+        }
+    });
+    if (component.onGetState) {
+        component.onGetState(state);
+    }
+    component.$__suspendChanges__$ = suspended;
+    return state;
+}
+
+function stateSetter(
+    component: WebComponentInstance,
+    definition: WebComponentDefinition,
+    newState: any
+) {
+    if (!newState) {
+        throw new Error(
+            '[web-components]: A webcomponent state cannot be null'
+        );
+    }
+
+    if (typeof newState === 'string') {
+        newState = JSON.parse(newState);
+    }
+
+    const suspended = suspendChanges(component);
+    const state = component.state;
+    const properties = definition.schema.properties;
+    Object.keys(properties).forEach((propertyName) => {
+        if (propertyName in newState) {
+            state[propertyName] = newState[propertyName];
+        }
+    });
+    component.$__suspendChanges__$ = suspended;
+    detectChanges(component);
+}
+
+function detectChanges(component: WebComponentInstance) {
+    if (component.$__suspendChanges__$ || !component.$__ngOnInitCalled__$) {
+        return;
+    }
+    component.$__suspendChanges__$ = true;
+
+    if (component.onSetState) {
+        component.onSetState();
+    }
+
+    const detector = component.injector.get(
+        ChangeDetectorRef
+    ) as ChangeDetectorRef;
+    detector.detectChanges();
+
+    component.$__suspendChanges__$ = false;
+}
+
+function suspendChanges(component: WebComponentInstance) {
+    const suspended = component.$__suspendChanges__$ ?? false;
+    component.$__suspendChanges__$ = true;
+    return suspended;
+}
