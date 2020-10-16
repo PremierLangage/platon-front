@@ -1,3 +1,1 @@
-# GraphViewer
-
-<wc-graph-viewer></wc-graph-viewer>
+<https://cyberzoide.developpez.com/graphviz/>
