@@ -25,7 +25,7 @@ export class ShowcaseComponent implements OnInit {
 
     async ngOnInit() {
         this.assets.loadAllAsync([
-            ['style', '/assets/vendors/jsoneditor/jsoneditor.min.css']
+            ['style', 'assets/vendors/jsoneditor/jsoneditor.min.css']
         ]).toPromise().catch();
 
         const host = this.el.nativeElement.firstElementChild;

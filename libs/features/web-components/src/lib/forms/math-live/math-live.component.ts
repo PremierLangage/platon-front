@@ -26,7 +26,7 @@ export class MathLiveComponent implements OnInit, OnDestroy, WebComponentHooks<M
     async ngOnInit() {
         const assets = this.injector.get(AssetLoaderService);
         await assets.loadAllAsync([
-            ['script', '/assets/vendors/mathlive/mathlive.min.js'],
+            ['script', 'assets/vendors/mathlive/mathlive.min.js'],
         ]).toPromise();
         const math = this.mathfield.nativeElement;
         math.oninput = () => {
