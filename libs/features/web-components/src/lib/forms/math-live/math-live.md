@@ -1,5 +1,5 @@
 
-Ce composant est basée sur la library [mathlive](http://cortexjs.io/docs/mathlive/#(%22options%22%3Amodule)).
+Ce composant est basé sur la librarie [mathlive](http://cortexjs.io/docs/mathlive/#(%22options%22%3Amodule)).
 La propriété config correspond aux options acceptées par la librairie.
 
 ### Les propriétés `prefix` et `suffix`
