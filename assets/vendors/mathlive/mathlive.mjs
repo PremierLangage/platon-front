@@ -2969,40 +2969,6 @@ function svgBodyHeight(svgBodyName) {
     return SVG_ACCENTS[svgBodyName][2];
 }
 
-function joinLatex(segments) {
-    let sep = '';
-    let result = '';
-    for (const segment of segments) {
-        if (/[a-zA-Z*]/.test(segment[0])) {
-            // If the segment begins with a char that *could* be in a command
-            // name... insert a separator (if one was needed for the previous segment)
-            result += sep;
-        }
-        // If the segment ends in a command...
-        if (/\\[a-zA-Z]+\*?$/.test(segment)) {
-            // ... potentially add a space before the next segment
-            sep = ' ';
-        }
-        else {
-            sep = '';
-        }
-        result += segment;
-    }
-    return result;
-}
-function tokensToString(tokens) {
-    const result = joinLatex(tokens.map((token) => {
-        var _a;
-        return ((_a = {
-            '<space>': ' ',
-            '<$$>': '$$',
-            '<$>': '$',
-            '<{>': '{',
-            '<}>': '}',
-        }[token]) !== null && _a !== void 0 ? _a : token);
-    }));
-    return result;
-}
 /*
  * Return an array of runs (array of atoms with the same value
  *   for the specified property)
@@ -4179,7 +4145,12 @@ function charToLatex(parseMode, s) {
         return REVERSE_MATH_SYMBOLS[s] || s;
     }
     if (parseMode === 'text') {
-        return (Object.keys(TEXT_SYMBOLS).find((x) => TEXT_SYMBOLS[x] === s) || s);
+        let textSymbol = Object.keys(TEXT_SYMBOLS).find((x) => TEXT_SYMBOLS[x] === s);
+        if (!textSymbol) {
+            const hex = s.codePointAt(0).toString(16);
+            textSymbol = '^'.repeat(hex.length) + hex;
+        }
+        return textSymbol;
     }
     return s;
 }
@@ -4431,12 +4402,12 @@ function unicodeStringToLatex(parseMode, s) {
     }
     return result;
 }
-function getValue(mode, symbol) {
+/**
+ * Gets the value of a symbol in math mode
+ */
+function getValue(symbol) {
     var _a, _b;
-    if (mode === 'math') {
-        return (_b = (_a = MATH_SYMBOLS[symbol]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : symbol;
-    }
-    return TEXT_SYMBOLS[symbol] ? TEXT_SYMBOLS[symbol] : symbol;
+    return (_b = (_a = MATH_SYMBOLS[symbol]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : symbol;
 }
 function emit(symbol, parent, atom, emitFn) {
     var _a, _b, _c;
@@ -4451,8 +4422,9 @@ function emit(symbol, parent, atom, emitFn) {
     if (atom.body && ((_c = (_b = FUNCTIONS[symbol]) === null || _b === void 0 ? void 0 : _b.params) === null || _c === void 0 ? void 0 : _c.length) === 1) {
         return symbol + '{' + emitFn(atom, atom.body) + '}';
     }
-    // No custom emit function provided, return the symbol (could be a character)
-    return symbol;
+    // No custom emit function provided, return an escaped version of the symbol
+    const hex = symbol.codePointAt(0).toString(16);
+    return '^'.repeat(hex.length) + hex;
 }
 function getEnvironmentDefinition(name) {
     var _a;
@@ -4532,6 +4504,9 @@ function getInfo(symbol, parseMode, macros) {
         }
         else if (TEXT_SYMBOLS[symbol]) {
             info = { value: TEXT_SYMBOLS[symbol] };
+        }
+        else if (parseMode === 'text') {
+            info = { value: symbol };
         }
     }
     // Special case `f`, `g` and `h` are recognized as functions.
@@ -4854,6 +4829,7 @@ defineFunction('c', '{:string}', {}, (_name, args) => {
 // here: https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose
 // The second, optional, specifies the style to use for the notations.
 defineFunction('enclose', '{notation:string}[style:string]{body:auto}', null, (_name, args) => {
+    var _a;
     const result = {
         type: 'enclose',
         strokeColor: 'currentColor',
@@ -4914,7 +4890,7 @@ defineFunction('enclose', '{notation:string}[style:string]{body:auto}', null, (_
             result.strokeColor;
     // Normalize the list of notations.
     result.notation = {};
-    args[0]
+    ((_a = args[0]) !== null && _a !== void 0 ? _a : '')
         .split(/[, ]/)
         .filter((v) => v.length > 0)
         .forEach((x) => {
@@ -5387,6 +5363,11 @@ defineFunction([
     'xrightequilibrium',
     'xleftequilibrium',
 ], '[:auto]{:auto}', null, (name, args) => {
+    // The overscript is optional, i.e. `\xtofrom` is valid
+    let overscript = args[1];
+    if ((overscript === null || overscript === void 0 ? void 0 : overscript.length) === 0) {
+        overscript = null;
+    }
     return {
         type: 'overunder',
         // Set the spacing type
@@ -5394,9 +5375,8 @@ defineFunction([
         // Set the "svgBody" to the name of a SVG object (which is the same
         // as the command name)
         svgBody: name.slice(1),
-        overscript: args[1],
+        overscript: overscript,
         underscript: args[0],
-        skipBoundary: true,
     };
 }, (name, _parent, atom, emit) => name +
     (typeof atom.underscript !== 'undefined'
@@ -6666,7 +6646,39 @@ defineFunction(['stackrel', 'stackbin'], '{annotation:auto}{symbol:auto}', null,
         mathtype: name === '\\stackrel' ? 'mrel' : 'mbin',
     };
 }, (name, _parent, atom, emit) => `${name}{${emit(atom, atom.overscript)}}{${emit(atom, atom.body)}}`);
-defineFunction('rlap', '{:auto}', null, function (name, args) {
+/*
+display: inline-block;
+width: 0;
+line-height: 1;
+*/
+/*
+display: inline-block;
+*/
+defineFunction(['phantom', 'vphantom', 'hphantom'], '{:auto*}', {}, (name, _args) => {
+    return {
+        type: 'phantom',
+        captureSelection: true,
+        phantomType: name.slice(1),
+        isPhantom: true,
+    };
+}, (name, _parent, atom, emit) => name + '{' + emit(atom, atom.body) + '}');
+defineFunction('smash', '[:string]{:auto}', null, function (_name, args) {
+    let phantomType = 'smash';
+    if (args[0] === 'b') {
+        phantomType = 'bsmash';
+    }
+    else if (args[0] === 't') {
+        phantomType = 'tsmash';
+        // } else if (args[0]) {
+    }
+    return {
+        type: 'phantom',
+        phantomType,
+        skipBoundary: true,
+        body: args[1],
+    };
+});
+defineFunction('rlap', '{:auto}', null, function (_name, args) {
     return {
         type: 'overlap',
         align: 'right',
@@ -6674,7 +6686,7 @@ defineFunction('rlap', '{:auto}', null, function (name, args) {
         body: args[0],
     };
 });
-defineFunction('llap', '{:auto}', null, function (name, args) {
+defineFunction('llap', '{:auto}', null, function (_name, args) {
     return {
         type: 'overlap',
         align: 'left',
@@ -6682,7 +6694,7 @@ defineFunction('llap', '{:auto}', null, function (name, args) {
         body: args[0],
     };
 });
-defineFunction('mathrlap', '{:auto}', null, function (name, args) {
+defineFunction('mathrlap', '{:auto}', null, function (_name, args) {
     return {
         type: 'overlap',
         mode: 'math',
@@ -7264,7 +7276,7 @@ defineSymbol('"', '\u201D'); // Double Prime
  * scriptscriptstyle.
  */
 function makeSmallDelim(type, delim, style, center, context, classes = '') {
-    const text = makeSymbol('Main-Regular', getValue('math', delim));
+    const text = makeSymbol('Main-Regular', getValue(delim));
     const span = makeStyleWrap(type, text, context.mathstyle, style, classes);
     if (center) {
         span.setTop((1 - context.mathstyle.sizeMultiplier / style.sizeMultiplier) *
@@ -7281,7 +7293,7 @@ function makeSmallDelim(type, delim, style, center, context, classes = '') {
  * Size3, or Size4 fonts. It is always rendered in textstyle.
  */
 function makeLargeDelim(type, delim, size, center, context, classes = '') {
-    const result = makeStyleWrap(type, makeSymbol('Size' + size + '-Regular', getValue('math', delim), 'delimsizing size' + size), context.mathstyle, MATHSTYLES.textstyle, classes);
+    const result = makeStyleWrap(type, makeSymbol('Size' + size + '-Regular', getValue(delim), 'delimsizing size' + size), context.mathstyle, MATHSTYLES.textstyle, classes);
     if (center) {
         result.setTop((1 - context.mathstyle.sizeMultiplier) *
             context.mathstyle.metrics.axisHeight);
@@ -7305,7 +7317,7 @@ function makeInner(symbol, font) {
     else if (font === 'Size4-Regular') {
         sizeClass = ' delim-size4';
     }
-    return makeSymbol(font, getValue('math', symbol), 'delimsizinginner' + sizeClass);
+    return makeSymbol(font, getValue(symbol), 'delimsizinginner' + sizeClass);
 }
 /**
  * Make a stacked delimiter out of a given delimiter, with the total height at
@@ -7318,7 +7330,7 @@ function makeStackedDelim(type, delim, heightTotal, center, context, classes = '
     let middle;
     let repeat;
     let bottom;
-    top = repeat = bottom = getValue('math', delim);
+    top = repeat = bottom = getValue(delim);
     middle = null;
     // Also keep track of what font the delimiters are in
     let font = 'Size1-Regular';
@@ -7466,16 +7478,16 @@ function makeStackedDelim(type, delim, heightTotal, center, context, classes = '
         repeat = top = ' ';
     }
     // Get the metrics of the four sections
-    const topMetrics = getCharacterMetrics(getValue('math', top), font);
+    const topMetrics = getCharacterMetrics(getValue(top), font);
     const topHeightTotal = topMetrics.height + topMetrics.depth;
-    const repeatMetrics = getCharacterMetrics(getValue('math', repeat), font);
+    const repeatMetrics = getCharacterMetrics(getValue(repeat), font);
     const repeatHeightTotal = repeatMetrics.height + repeatMetrics.depth;
-    const bottomMetrics = getCharacterMetrics(getValue('math', bottom), font);
+    const bottomMetrics = getCharacterMetrics(getValue(bottom), font);
     const bottomHeightTotal = bottomMetrics.height + bottomMetrics.depth;
     let middleHeightTotal = 0;
     let middleFactor = 1;
     if (middle !== null) {
-        const middleMetrics = getCharacterMetrics(getValue('math', middle), font);
+        const middleMetrics = getCharacterMetrics(getValue(middle), font);
         middleHeightTotal = middleMetrics.height + middleMetrics.depth;
         middleFactor = 2; // repeat symmetrically above and below middle
     }
@@ -7719,7 +7731,7 @@ function makeCustomSizedDelim(type, delim, height, center, context, classes = ''
         sequence = stackAlwaysDelimiterSequence;
     }
     // Look through the sequence
-    const delimType = traverseSequence(getValue('math', delim), height, sequence, context);
+    const delimType = traverseSequence(getValue(delim), height, sequence, context);
     // Depending on the sequence element we decided on,
     // call the appropriate function.
     if (delimType.type === 'small') {
@@ -7758,10 +7770,456 @@ function makeLeftRightDelim(type, delim, height, depth, context, classes = '') {
  */
 function makeNullFence(type, context, classes) {
     return makeSpan('', 'sizing' + // @todo not useful, redundant with 'nulldelimiter'
-        // 'reset-' + context.size, 'size5',                 // @todo: that seems like a lot of resizing... do we need both?
+        // 'reset-' + context.size, 'size5',
+        // @todo: that seems like a lot of resizing... do we need both?
         context.mathstyle.adjustTo(MATHSTYLES.textstyle) +
         ' nulldelimiter ' + // The null delimiter has a width, specified by class 'nulldelimiter'
         (classes || ''), type);
+}
+
+function stringToCodepoints(str) {
+    const result = [];
+    for (let i = 0; i < str.length; i++) {
+        let code = str.charCodeAt(i);
+        if (code === 0x0d && str.charCodeAt(i + 1) === 0x0a) {
+            code = 0x0a;
+            i++;
+        }
+        if (code === 0x0d || code === 0x0c)
+            code = 0x0a;
+        if (code === 0x00)
+            code = 0xfffd;
+        // Decode a surrogate pair into an astral codepoint.
+        if (code >= 0xd800 && code <= 0xdbff) {
+            const nextCode = str.charCodeAt(i + 1);
+            if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
+                const lead = code - 0xd800;
+                const trail = nextCode - 0xdc00;
+                code = Math.pow(2, 16) + lead * Math.pow(2, 10) + trail;
+                // N = ((H - 0xD800) * 0x400) + (L - 0xDC00) + 0x10000;
+                i++;
+            }
+        }
+        result.push(code);
+    }
+    return result;
+}
+const ZWJ = 0x200d; // Zero-width joiner
+// const ZWSP = 0x200b; // Zero-width space
+/* The following codepoints should combine with the previous ones */
+const EMOJI_COMBINATOR = [
+    [ZWJ, 1],
+    [0xfe0e, 2],
+    [0x1f3fb, 5],
+    [0x1f9b0, 4],
+    [0xe0020, 96],
+];
+let emojiCombinator;
+// Regional indicator: a pair of codepoints indicating some flags
+const REGIONAL_INDICATOR = [0x1f1e6, 0x1f1ff];
+function isEmojiCombinator(code) {
+    var _a;
+    if (typeof emojiCombinator === 'undefined') {
+        emojiCombinator = {};
+        EMOJI_COMBINATOR.forEach((x) => {
+            for (let i = x[0]; i <= x[0] + x[1] - 1; i++) {
+                emojiCombinator[i] = true;
+            }
+        });
+    }
+    return (_a = emojiCombinator[code]) !== null && _a !== void 0 ? _a : false;
+}
+function isRegionalIndicator(code) {
+    return code >= REGIONAL_INDICATOR[0] && code <= REGIONAL_INDICATOR[1];
+}
+/**
+ * Return a string or an array of graphemes.
+ * This includes:
+ * - emoji with skin and hair modifiers
+ * - emoji combination (for example "female pilot")
+ * - text emoji with an emoji presentation style modifier
+ *      - U+1F512 U+FE0E 🔒︎
+ *      - U+1F512 U+FE0F 🔒️
+ * - flags represented as two regional indicator codepoints
+ * - flags represented as a flag emoji + zwj + an emoji tag
+ * - other combinations (for example, rainbow flag)
+ */
+function splitGraphemes(str) {
+    // If it's all ASCII, short-circuit the grapheme splitting...
+    if (/^[\x20-\xFF]*$/.test(str))
+        return str;
+    const result = [];
+    const codePoints = stringToCodepoints(str);
+    let index = 0;
+    while (index < codePoints.length) {
+        const code = codePoints[index++];
+        const next = codePoints[index];
+        // Combine sequences
+        if (next === ZWJ) {
+            // Zero-width joiner sequences are:
+            // ZWJ_SEQUENCE := (CHAR + ZWJ)+
+            const baseIndex = index - 1;
+            index += 2;
+            while (codePoints[index] === ZWJ) {
+                index += 2;
+            }
+            result.push(String.fromCodePoint(...codePoints.slice(baseIndex, index - baseIndex + 1)));
+        }
+        else if (isEmojiCombinator(next)) {
+            // Combine emoji sequences
+            // See http://unicode.org/reports/tr51/#def_emoji_tag_sequence
+            const baseIndex = index - 1; // The previous character is the 'base'
+            while (isEmojiCombinator(codePoints[index])) {
+                index += codePoints[index] === ZWJ ? 2 : 1;
+            }
+            result.push(String.fromCodePoint(...codePoints.slice(baseIndex, index - baseIndex)));
+        }
+        else if (isRegionalIndicator(code)) {
+            // Some (but not all) flags are represented by a sequence of two
+            // "regional indicators" codepoints.
+            index += 1;
+            result.push(String.fromCodePoint(...codePoints.slice(index - 2, 2)));
+        }
+        else {
+            result.push(String.fromCodePoint(code));
+        }
+    }
+    return result;
+}
+
+/**
+ * ## Reference
+ * TeX source code:
+ * {@link  http://tug.org/texlive/devsrc/Build/source/texk/web2c/tex.web | Tex.web}
+ *
+ */
+/**
+ * Given a LaTeX expression represented as a character string,
+ * the Lexer class will scan and return Tokens for the lexical
+ * units in the string.
+ *
+ * @param s A string of LaTeX
+ */
+class Tokenizer {
+    constructor(s) {
+        this.obeyspaces = false;
+        this.s = splitGraphemes(s);
+        this.pos = 0;
+    }
+    /**
+     * @return True if we reached the end of the stream
+     */
+    end() {
+        return this.pos >= this.s.length;
+    }
+    /**
+     * Return the next char and advance
+     */
+    get() {
+        return this.pos < this.s.length ? this.s[this.pos++] : '';
+    }
+    /**
+     * Return the next char, but do not advance
+     */
+    peek() {
+        return this.s[this.pos];
+    }
+    /**
+     * Return the next substring matching regEx and advance.
+     */
+    match(regEx) {
+        // this.s can either be a string, if it's made up only of ASCII chars
+        // or an array of graphemes, if it's more complicated.
+        let execResult;
+        if (typeof this.s === 'string') {
+            execResult = regEx.exec(this.s.slice(this.pos));
+        }
+        else {
+            execResult = regEx.exec(this.s.slice(this.pos).join(''));
+        }
+        if (execResult === null || execResult === void 0 ? void 0 : execResult[0]) {
+            this.pos += execResult[0].length;
+            return execResult[0];
+        }
+        return null;
+    }
+    /**
+     * Return the next token, or null.
+     */
+    next() {
+        // If we've reached the end, exit
+        if (this.end())
+            return null;
+        // Handle white space
+        // In text mode, spaces are significant,
+        // however they are coalesced unless \obeyspaces
+        if (!this.obeyspaces && this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]+/)) {
+            // Note that browsers are inconsistent in their definitions of the
+            // `\s` metacharacter, so we use an explicit pattern instead.
+            // - IE:          `[ \f\n\r\t\v]`
+            // - Chrome:      `[ \f\n\r\t\v\u00A0]`
+            // - Firefox:     `[ \f\n\r\t\v\u00A0\u2028\u2029]`
+            // - \f \u000C: form feed (FORM FEED)
+            // - \n \u000A: linefeed (LINE FEED)
+            // - \r \u000D: carriage return
+            // - \t \u0009: tab (CHARACTER TABULATION)
+            // - \v \u000B: vertical tab (LINE TABULATION)
+            // - \u00A0: NON-BREAKING SPACE
+            // - \u2028: LINE SEPARATOR
+            // - \u2029: PARAGRAPH SEPARATOR
+            return '<space>';
+        }
+        else if (this.obeyspaces &&
+            this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]/)) {
+            // Don't coalesce when this.obeyspaces is true (different regex from above)
+            return '<space>';
+        }
+        const next = this.get();
+        // Is it a command?
+        if (next === '\\') {
+            if (!this.end()) {
+                // A command is either a string of letters and asterisks...
+                let command = this.match(/^[a-zA-Z*]+/);
+                if (command) {
+                    // Spaces after a 'control word' are ignored
+                    // (but not after a 'control symbol' (single char)
+                    this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]*/);
+                }
+                else {
+                    // ... or a single non-letter character
+                    command = this.get();
+                    if (command === ' ') {
+                        // The `\ ` command is equivalent to a single space
+                        return '<space>';
+                    }
+                }
+                return '\\' + command;
+            }
+        }
+        else if (next === '{') {
+            // This is a group start
+            return '<{>';
+        }
+        else if (next === '}') {
+            // This is a group end
+            return '<}>';
+        }
+        else if (next === '^') {
+            if (this.peek() === '^') {
+                // It might be a ^^ command (inline hex character)
+                this.get();
+                // There can be zero to six carets with the same number of hex digits
+                const hex = this.match(/^(\^(\^(\^(\^[0-9a-f])?[0-9a-f])?[0-9a-f])?[0-9a-f])?[0-9a-f][0-9a-f]/);
+                if (hex) {
+                    return String.fromCodePoint(parseInt(hex.slice(hex.lastIndexOf('^') + 1), 16));
+                }
+            }
+            return next;
+        }
+        else if (next === '#') {
+            // This could be either a param token, or a literal # (used for
+            // colorspecs, for example). A param token is a '#' followed by
+            // - a digit 0-9 followed by a non-alpha, non-digit
+            // - or '?'.
+            // Otherwise, it's a literal '#'.
+            if (!this.end()) {
+                let isParam = false;
+                if (/[0-9?]/.test(this.peek())) {
+                    // Could be a param
+                    isParam = true;
+                    // Need to look ahead to the following char
+                    if (this.pos + 1 < this.s.length) {
+                        const after = this.s[this.pos + 1];
+                        isParam = /[^0-9A-Za-z]/.test(after);
+                    }
+                }
+                if (isParam) {
+                    return '#' + this.get();
+                }
+                return '#';
+            }
+        }
+        else if (next === '$') {
+            // Mode switch
+            if (this.peek() === '$') {
+                // $$
+                this.get();
+                return '<$$>';
+            }
+            // $
+            return '<$>';
+        }
+        return next;
+    }
+}
+// Some primitive commands need to be handled in the expansion phase
+// (the 'gullet')
+function expand(lex, args) {
+    var _a, _b, _c, _d;
+    let result = [];
+    let token = lex.next();
+    if (token) {
+        if (token === '\\relax') ;
+        else if (token === '\\noexpand') {
+            // Do not expand the next token
+            token = lex.next();
+            if (token) {
+                result.push(token);
+            }
+        }
+        else if (token === '\\obeyspaces') {
+            lex.obeyspaces = true;
+        }
+        else if (token === '\\space' || token === '~') {
+            // The `\space` command is equivalent to a single space
+            // The ~ is an 'active character' (a single character macro)
+            // that maps to <space>
+            result.push('<space>');
+        }
+        else if (token === '\\bgroup') {
+            // Begin group, synonym for opening brace
+            result.push('<{>');
+        }
+        else if (token === '\\egroup') {
+            // End group, synonym for closing brace
+            result.push('<}>');
+        }
+        else if (token === '\\string') {
+            // Turn the next token into a string
+            token = lex.next();
+            if (token) {
+                if (token[0] === '\\') {
+                    Array.from(token).forEach((x) => result.push(x === '\\' ? '\\backslash' : x));
+                }
+                else if (token === '<{>') {
+                    result.push('\\{');
+                }
+                else if (token === '<space>') {
+                    result.push('~');
+                }
+                else if (token === '<}>') {
+                    result.push('\\}');
+                }
+            }
+        }
+        else if (token === '\\csname') {
+            // Turn the next tokens, until `\endcsname`, into a command
+            while (lex.peek() === '<space>') {
+                lex.next();
+            }
+            let command = '';
+            let done = false;
+            let tokens = [];
+            do {
+                if (tokens.length === 0) {
+                    // We're out of tokens to look at, get some more
+                    if (/^#[0-9?]$/.test(lex.peek())) {
+                        // Expand parameters (but not commands)
+                        const param = lex.get().slice(1);
+                        tokens = tokenize((_b = (_a = args === null || args === void 0 ? void 0 : args[param]) !== null && _a !== void 0 ? _a : args === null || args === void 0 ? void 0 : args['?']) !== null && _b !== void 0 ? _b : '\\placeholder{}', args);
+                        token = tokens[0];
+                    }
+                    else {
+                        token = lex.next();
+                        tokens = token ? [token] : [];
+                    }
+                }
+                done = tokens.length === 0;
+                if (!done && token === '\\endcsname') {
+                    done = true;
+                    tokens.shift();
+                }
+                if (!done) {
+                    done =
+                        token === '<$>' ||
+                            token === '<$$>' ||
+                            token === '<{>' ||
+                            token === '<}>' ||
+                            (token.length > 1 && token[0] === '\\');
+                }
+                if (!done) {
+                    command += tokens.shift();
+                }
+            } while (!done);
+            if (command) {
+                result.push('\\' + command);
+            }
+            result = result.concat(tokens);
+        }
+        else if (token === '\\endcsname') ;
+        else if (token.length > 1 && token[0] === '#') {
+            // It's a parameter to expand
+            const param = token.slice(1);
+            result = result.concat(tokenize((_d = (_c = args === null || args === void 0 ? void 0 : args[param]) !== null && _c !== void 0 ? _c : args === null || args === void 0 ? void 0 : args['?']) !== null && _d !== void 0 ? _d : '\\placeholder{}', args));
+        }
+        else {
+            result.push(token);
+        }
+    }
+    return result;
+}
+/**
+ * Create Tokens from a stream of LaTeX
+ *
+ * @param s - A string of LaTeX. It can include comments (with the `%`
+ * marker) and multiple lines.
+ */
+function tokenize(s, args) {
+    // Merge multiple lines into one, and remove comments
+    const lines = s.toString().split(/\r?\n/);
+    let stream = '';
+    let sep = '';
+    for (const line of lines) {
+        stream += sep;
+        sep = ' ';
+        // Remove everything after a % (comment marker)
+        // (but \% should be preserved...)
+        const m = line.match(/((?:\\%)|[^%])*/);
+        if (m !== null)
+            stream += m[0];
+    }
+    const tokenizer = new Tokenizer(stream);
+    let result = [];
+    do {
+        result = result.concat(expand(tokenizer, args));
+    } while (!tokenizer.end());
+    return result;
+}
+function joinLatex(segments) {
+    let sep = '';
+    let result = '';
+    for (const segment of segments) {
+        if (segment) {
+            if (/[a-zA-Z*]/.test(segment[0])) {
+                // If the segment begins with a char that *could* be in a command
+                // name... insert a separator (if one was needed for the previous segment)
+                result += sep;
+            }
+            // If the segment ends in a command...
+            if (/\\[a-zA-Z]+\*?$/.test(segment)) {
+                // ... potentially add a space before the next segment
+                sep = ' ';
+            }
+            else {
+                sep = '';
+            }
+            result += segment;
+        }
+    }
+    return result;
+}
+function tokensToString(tokens) {
+    const result = joinLatex(tokens.map((token) => {
+        var _a;
+        return ((_a = {
+            '<space>': ' ',
+            '<$$>': '$$',
+            '<$>': '$',
+            '<{>': '{',
+            '<}>': '}',
+        }[token]) !== null && _a !== void 0 ? _a : token);
+    }));
+    return result;
 }
 
 // See https://tex.stackexchange.com/questions/58098/what-are-all-the-font-styles-i-can-use-in-math-mode
@@ -8255,7 +8713,7 @@ function decompose(inputContext, atoms) {
             }
         }
     }
-    else if (atoms) {
+    else if (atoms instanceof Atom) {
         // This is a single atom, decompose it
         result = atoms.decompose(context);
         if (result && displaySelection && atoms.isSelected) {
@@ -8361,6 +8819,9 @@ class Atom {
         this.mode = mode;
         this.type = type;
         this.body = body;
+        if (style.isPhantom) {
+            this.setPhantom(true);
+        }
         // Append all the properties in extras to this
         // This can override the mode, type and body
         this.applyStyle(style);
@@ -8438,6 +8899,16 @@ class Atom {
         const base = this.getInitialBaseElement();
         return /minner|mbin|mrel|mpunct|mopen|mclose|textord/.test(base.type);
     }
+    setPhantom(isPhantom) {
+        // this.isPhantom = isPhantom;
+        this.forEach((x) => {
+            x.isPhantom = isPhantom;
+        });
+    }
+    /**
+     * Iterate over all the child atoms of this atom, this included,
+     * and invoke the cb callback.
+     */
     forEach(cb) {
         cb(this);
         if (isArray(this.body)) {
@@ -8493,42 +8964,6 @@ class Atom {
                 }
             }
         }
-    }
-    /**
-     * Iterate over all the child atoms of this atom, this included,
-     * and return an array of all the atoms for which the predicate callback
-     * is true.
-     */
-    filter(cb) {
-        let result = [];
-        if (cb(this))
-            result.push(this);
-        for (const relation of [
-            'body',
-            'superscript',
-            'subscript',
-            'overscript',
-            'underscript',
-            'numer',
-            'denom',
-            'index',
-        ]) {
-            if (isArray(this[relation])) {
-                for (const atom of this[relation]) {
-                    if (atom)
-                        result = result.concat(atom.filter(cb));
-                }
-            }
-        }
-        if (isArray(this.array)) {
-            for (const row of this.array) {
-                for (const cell of row) {
-                    if (cell)
-                        result = result.concat(cell.filter(cb));
-                }
-            }
-        }
-        return result;
     }
     decomposeGroup(context) {
         // The scope of the context is this group, so clone it
@@ -9015,562 +9450,54 @@ function isAtomArray(arg) {
     return isArray(arg);
 }
 
-function stringToCodepoints(str) {
-    const result = [];
-    for (let i = 0; i < str.length; i++) {
-        let code = str.charCodeAt(i);
-        if (code === 0x0d && str.charCodeAt(i + 1) === 0x0a) {
-            code = 0x0a;
-            i++;
-        }
-        if (code === 0x0d || code === 0x0c)
-            code = 0x0a;
-        if (code === 0x00)
-            code = 0xfffd;
-        // Decode a surrogate pair into an astral codepoint.
-        if (code >= 0xd800 && code <= 0xdbff) {
-            const nextCode = str.charCodeAt(i + 1);
-            if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
-                const lead = code - 0xd800;
-                const trail = nextCode - 0xdc00;
-                code = Math.pow(2, 16) + lead * Math.pow(2, 10) + trail;
-                // N = ((H - 0xD800) * 0x400) + (L - 0xDC00) + 0x10000;
-                i++;
-            }
-        }
-        result.push(code);
+registerAtomType('accent', (context, atom) => {
+    // Accents are handled in the TeXbook pg. 443, rule 12.
+    const mathstyle = context.mathstyle;
+    // Build the base atom
+    let base = decompose(context.cramp(), atom.body);
+    if (atom.superscript || atom.subscript) {
+        // If there is a supsub attached to the accent
+        // apply it to the base.
+        // Note this does not give the same result as TeX when there
+        // are stacked accents, e.g. \vec{\breve{\hat{\acute{...}}}}^2
+        base = [atom.attachSupsub(context, makeSpan(base, '', 'mord'), 'mord')];
     }
-    return result;
-}
-const ZWJ = 0x200d; // Zero-width joiner
-// const ZWSP = 0x200b; // Zero-width space
-/* The following codepoints should combine with the previous ones */
-const EMOJI_COMBINATOR = [
-    [ZWJ, 1],
-    [0xfe0e, 2],
-    [0x1f3fb, 5],
-    [0x1f9b0, 4],
-    [0xe0020, 96],
-];
-let emojiCombinator;
-// Regional indicator: a pair of codepoints indicating some flags
-const REGIONAL_INDICATOR = [0x1f1e6, 0x1f1ff];
-function isEmojiCombinator(code) {
-    var _a;
-    if (typeof emojiCombinator === 'undefined') {
-        emojiCombinator = {};
-        EMOJI_COMBINATOR.forEach((x) => {
-            for (let i = x[0]; i <= x[0] + x[1] - 1; i++) {
-                emojiCombinator[i] = true;
-            }
-        });
+    // Calculate the skew of the accent. This is based on the line "If the
+    // nucleus is not a single character, let s = 0; otherwise set s to the
+    // kern amount for the nucleus followed by the \skewchar of its font."
+    // Note that our skew metrics are just the kern between each character
+    // and the skewchar.
+    let skew$1 = 0;
+    if (isArray(atom.body) &&
+        atom.body.length === 1 &&
+        atom.body[0].isCharacterBox()) {
+        skew$1 = skew(base);
     }
-    return (_a = emojiCombinator[code]) !== null && _a !== void 0 ? _a : false;
-}
-function isRegionalIndicator(code) {
-    return code >= REGIONAL_INDICATOR[0] && code <= REGIONAL_INDICATOR[1];
-}
-/**
- * Return a string or an array of graphemes.
- * This includes:
- * - emoji with skin and hair modifiers
- * - emoji combination (for example "female pilot")
- * - text emoji with an emoji presentation style modifier
- *      - U+1F512 U+FE0E 🔒︎
- *      - U+1F512 U+FE0F 🔒️
- * - flags represented as two regional indicator codepoints
- * - flags represented as a flag emoji + zwj + an emoji tag
- * - other combinations (for example, rainbow flag)
- */
-function splitGraphemes(str) {
-    // If it's all ASCII, short-circuit the grapheme splitting...
-    if (/^[\x20-\xFF]*$/.test(str))
-        return str;
-    const result = [];
-    const codePoints = stringToCodepoints(str);
-    let index = 0;
-    while (index < codePoints.length) {
-        const code = codePoints[index++];
-        const next = codePoints[index];
-        // Combine sequences
-        if (next === ZWJ) {
-            // Zero-width joiner sequences are:
-            // ZWJ_SEQUENCE := (CHAR + ZWJ)+
-            const baseIndex = index - 1;
-            index += 2;
-            while (codePoints[index] === ZWJ) {
-                index += 2;
-            }
-            result.push(String.fromCodePoint(...codePoints.slice(baseIndex, index - baseIndex + 1)));
-        }
-        else if (isEmojiCombinator(next)) {
-            // Combine emoji sequences
-            // See http://unicode.org/reports/tr51/#def_emoji_tag_sequence
-            const baseIndex = index - 1; // The previous character is the 'base'
-            while (isEmojiCombinator(codePoints[index])) {
-                index += codePoints[index] === ZWJ ? 2 : 1;
-            }
-            result.push(String.fromCodePoint(...codePoints.slice(baseIndex, index - baseIndex)));
-        }
-        else if (isRegionalIndicator(code)) {
-            // Some (but not all) flags are represented by a sequence of two
-            // "regional indicators" codepoints.
-            index += 1;
-            result.push(String.fromCodePoint(...codePoints.slice(index - 2, 2)));
-        }
-        else {
-            result.push(String.fromCodePoint(code));
-        }
-    }
-    return result;
-}
-
-/**
- * ## Reference
- * TeX source code:
- * {@link  http://tug.org/texlive/devsrc/Build/source/texk/web2c/tex.web | Tex.web}
- *
- */
-/**
- * Given a LaTeX expression represented as a character string,
- * the Lexer class will scan and return Tokens for the lexical
- * units in the string.
- *
- * @param s A string of LaTeX
- */
-class Tokenizer {
-    constructor(s) {
-        this.obeyspaces = false;
-        this.s = splitGraphemes(s);
-        this.pos = 0;
-    }
-    /**
-     * @return True if we reached the end of the stream
-     */
-    end() {
-        return this.pos >= this.s.length;
-    }
-    /**
-     * Return the next char and advance
-     */
-    get() {
-        return this.pos < this.s.length ? this.s[this.pos++] : '';
-    }
-    /**
-     * Return the next char, but do not advance
-     */
-    peek() {
-        return this.s[this.pos];
-    }
-    /**
-     * Return the next substring matching regEx and advance.
-     */
-    match(regEx) {
-        // this.s can either be a string, if it's made up only of ASCII chars
-        // or an array of graphemes, if it's more complicated.
-        let execResult;
-        if (typeof this.s === 'string') {
-            execResult = regEx.exec(this.s.slice(this.pos));
-        }
-        else {
-            execResult = regEx.exec(this.s.slice(this.pos).join(''));
-        }
-        if (execResult === null || execResult === void 0 ? void 0 : execResult[0]) {
-            this.pos += execResult[0].length;
-            return execResult[0];
-        }
-        return null;
-    }
-    /**
-     * Return the next token, or null.
-     */
-    next() {
-        // If we've reached the end, exit
-        if (this.end())
-            return null;
-        // Handle white space
-        // In text mode, spaces are significant,
-        // however they are coalesced unless \obeyspaces
-        if (!this.obeyspaces && this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]+/)) {
-            // Note that browsers are inconsistent in their definitions of the
-            // `\s` metacharacter, so we use an explicit pattern instead.
-            // - IE:          `[ \f\n\r\t\v]`
-            // - Chrome:      `[ \f\n\r\t\v\u00A0]`
-            // - Firefox:     `[ \f\n\r\t\v\u00A0\u2028\u2029]`
-            // - \f \u000C: form feed (FORM FEED)
-            // - \n \u000A: linefeed (LINE FEED)
-            // - \r \u000D: carriage return
-            // - \t \u0009: tab (CHARACTER TABULATION)
-            // - \v \u000B: vertical tab (LINE TABULATION)
-            // - \u00A0: NON-BREAKING SPACE
-            // - \u2028: LINE SEPARATOR
-            // - \u2029: PARAGRAPH SEPARATOR
-            return '<space>';
-        }
-        else if (this.obeyspaces &&
-            this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]/)) {
-            // Don't coalesce when this.obeyspaces is true (different regex from above)
-            return '<space>';
-        }
-        const next = this.get();
-        // Is it a command?
-        if (next === '\\') {
-            if (!this.end()) {
-                // A command is either a string of letters and asterisks...
-                let command = this.match(/^[a-zA-Z*]+/);
-                if (command) {
-                    // Spaces after a 'control word' are ignored
-                    // (but not after a 'control symbol' (single char)
-                    this.match(/^[ \f\n\r\t\v\xA0\u2028\u2029]*/);
-                }
-                else {
-                    // ... or a single non-letter character
-                    command = this.get();
-                    if (command === ' ') {
-                        // The `\ ` command is equivalent to a single space
-                        return '<space>';
-                    }
-                }
-                return '\\' + command;
-            }
-        }
-        else if (next === '{') {
-            // This is a group start
-            return '<{>';
-        }
-        else if (next === '}') {
-            // This is a group end
-            return '<}>';
-        }
-        else if (next === '^') {
-            if (this.peek() === '^') {
-                // It might be a ^^ command (inline hex character)
-                this.get();
-                let hex = this.match(/^\^\^[0-9a-f][0-9a-f][0-9a-f][0-9a-f]/);
-                if (hex) {
-                    // It's a ^^^^ hex char
-                    return String.fromCodePoint(parseInt(hex.slice(2), 16));
-                }
-                hex = this.match(/^[0-9a-f][0-9a-f]/);
-                if (hex) {
-                    return String.fromCodePoint(parseInt(hex, 16));
-                }
-            }
-            return next;
-        }
-        else if (next === '#') {
-            // This could be either a param token, or a literal # (used for
-            // colorspecs, for example). A param token is a '#' followed by
-            // - a digit 0-9 followed by a non-alpha, non-digit
-            // - or '?'.
-            // Otherwise, it's a literal '#'.
-            if (!this.end()) {
-                let isParam = false;
-                if (/[0-9?]/.test(this.peek())) {
-                    // Could be a param
-                    isParam = true;
-                    // Need to look ahead to the following char
-                    if (this.pos + 1 < this.s.length) {
-                        const after = this.s[this.pos + 1];
-                        isParam = /[^0-9A-Za-z]/.test(after);
-                    }
-                }
-                if (isParam) {
-                    return '#' + this.get();
-                }
-                return '#';
-            }
-        }
-        else if (next === '$') {
-            // Mode switch
-            if (this.peek() === '$') {
-                // $$
-                this.get();
-                return '<$$>';
-            }
-            // $
-            return '<$>';
-        }
-        return next;
-    }
-}
-// Some primitive commands need to be handled in the expansion phase
-// (the 'gullet')
-function expand(lex, args) {
-    var _a, _b, _c, _d;
-    let result = [];
-    let token = lex.next();
-    if (token) {
-        if (token === '\\relax') ;
-        else if (token === '\\noexpand') {
-            // Do not expand the next token
-            token = lex.next();
-            if (token) {
-                result.push(token);
-            }
-        }
-        else if (token === '\\obeyspaces') {
-            lex.obeyspaces = true;
-        }
-        else if (token === '\\space' || token === '~') {
-            // The `\space` command is equivalent to a single space
-            // The ~ is an 'active character' (a single character macro)
-            // that maps to <space>
-            result.push('<space>');
-        }
-        else if (token === '\\bgroup') {
-            // Begin group, synonym for opening brace
-            result.push('<{>');
-        }
-        else if (token === '\\egroup') {
-            // End group, synonym for closing brace
-            result.push('<}>');
-        }
-        else if (token === '\\string') {
-            // Turn the next token into a string
-            token = lex.next();
-            if (token) {
-                if (token[0] === '\\') {
-                    Array.from(token).forEach((x) => result.push(x === '\\' ? '\\backslash' : x));
-                }
-                else if (token === '<{>') {
-                    result.push('\\{');
-                }
-                else if (token === '<space>') {
-                    result.push('~');
-                }
-                else if (token === '<}>') {
-                    result.push('\\}');
-                }
-            }
-        }
-        else if (token === '\\csname') {
-            // Turn the next tokens, until `\endcsname`, into a command
-            while (lex.peek() === '<space>') {
-                lex.next();
-            }
-            let command = '';
-            let done = false;
-            let tokens = [];
-            do {
-                if (tokens.length === 0) {
-                    // We're out of tokens to look at, get some more
-                    if (/^#[0-9?]$/.test(lex.peek())) {
-                        // Expand parameters (but not commands)
-                        const param = lex.get().slice(1);
-                        tokens = tokenize((_b = (_a = args === null || args === void 0 ? void 0 : args[param]) !== null && _a !== void 0 ? _a : args === null || args === void 0 ? void 0 : args['?']) !== null && _b !== void 0 ? _b : '\\placeholder{}', args);
-                        token = tokens[0];
-                    }
-                    else {
-                        token = lex.next();
-                        tokens = token ? [token] : [];
-                    }
-                }
-                done = tokens.length === 0;
-                if (!done && token === '\\endcsname') {
-                    done = true;
-                    tokens.shift();
-                }
-                if (!done) {
-                    done =
-                        token === '<$>' ||
-                            token === '<$$>' ||
-                            token === '<{>' ||
-                            token === '<}>' ||
-                            (token.length > 1 && token[0] === '\\');
-                }
-                if (!done) {
-                    command += tokens.shift();
-                }
-            } while (!done);
-            if (command) {
-                result.push('\\' + command);
-            }
-            result = result.concat(tokens);
-        }
-        else if (token === '\\endcsname') ;
-        else if (token.length > 1 && token[0] === '#') {
-            // It's a parameter to expand
-            const param = token.slice(1);
-            result = result.concat(tokenize((_d = (_c = args === null || args === void 0 ? void 0 : args[param]) !== null && _c !== void 0 ? _c : args === null || args === void 0 ? void 0 : args['?']) !== null && _d !== void 0 ? _d : '\\placeholder{}', args));
-        }
-        else {
-            result.push(token);
-        }
-    }
-    return result;
-}
-/**
- * Create Tokens from a stream of LaTeX
- *
- * @param s - A string of LaTeX. It can include comments (with the `%`
- * marker) and multiple lines.
- */
-function tokenize(s, args) {
-    // Merge multiple lines into one, and remove comments
-    const lines = s.toString().split(/\r?\n/);
-    let stream = '';
-    let sep = '';
-    for (const line of lines) {
-        stream += sep;
-        sep = ' ';
-        // Remove everything after a % (comment marker)
-        // (but \% should be preserved...)
-        const m = line.match(/((?:\\%)|[^%])*/);
-        if (m !== null)
-            stream += m[0];
-    }
-    const tokenizer = new Tokenizer(stream);
-    let result = [];
-    do {
-        result = result.concat(expand(tokenizer, args));
-    } while (!tokenizer.end());
-    return result;
-}
-
-/**
- * Gengrac -- Generalized fraction
- *
- * Decompose fractions, binomials, and in general anything made
- * of two expressions on top of each other, optionally separated by a bar,
- * and optionally surrounded by fences (parentheses, brackets, etc...)
- *
- * Depending on the type of fraction the mathstyle is either
- * display math or inline math (which is indicated by 'textstyle'). This value can
- * also be set to 'auto', which indicates it should use the current mathstyle
- */
-registerAtomType('genfrac', (context, atom) => {
-    const mathstyle = atom.mathstyle === 'auto'
-        ? context.mathstyle
-        : MATHSTYLES[atom.mathstyle];
-    const newContext = context.clone({ mathstyle: mathstyle });
-    let numer = [];
-    if (atom.numerPrefix) {
-        numer.push(makeSpan(atom.numerPrefix, 'mord'));
-    }
-    const numeratorStyle = atom.continuousFraction
-        ? mathstyle
-        : mathstyle.fracNum();
-    numer = numer.concat(decompose(newContext.clone({ mathstyle: numeratorStyle }), atom.numer));
-    const numerReset = makeHlist(numer, context.mathstyle.adjustTo(numeratorStyle));
-    let denom = [];
-    if (atom.denomPrefix) {
-        denom.push(makeSpan(atom.denomPrefix, 'mord'));
-    }
-    const denominatorStyle = atom.continuousFraction
-        ? mathstyle
-        : mathstyle.fracDen();
-    denom = denom.concat(decompose(newContext.clone({ mathstyle: denominatorStyle }), atom.denom));
-    const denomReset = makeHlist(denom, context.mathstyle.adjustTo(denominatorStyle));
-    const ruleWidth = !atom.hasBarLine
-        ? 0
-        : METRICS.defaultRuleThickness / mathstyle.sizeMultiplier;
-    // Rule 15b from TeXBook Appendix G, p.444
-    //
-    // 15b. If C > T, set u ← σ8 and v ← σ11. Otherwise set u ← σ9 or σ10,according
-    // as θ ̸= 0 or θ = 0, and set v ← σ12. (The fraction will be typeset with
-    // its numerator shifted up by an amount u with respect to the current
-    // baseline, and with the denominator shifted down by v, unless the boxes
-    // are unusually large.)
-    let numShift;
-    let clearance = 0;
-    let denomShift;
-    if (mathstyle.size === MATHSTYLES.displaystyle.size) {
-        numShift = mathstyle.metrics.num1; // set u ← σ8
-        if (ruleWidth > 0) {
-            clearance = 3 * ruleWidth; //  φ ← 3θ
-        }
-        else {
-            clearance = 7 * METRICS.defaultRuleThickness; // φ ← 7 ξ8
-        }
-        denomShift = mathstyle.metrics.denom1; // v ← σ11
+    // calculate the amount of space between the body and the accent
+    let clearance = Math.min(height(base), mathstyle.metrics.xHeight);
+    let accentBody;
+    if (atom.svgAccent) {
+        accentBody = makeSVGSpan(atom.svgAccent);
+        clearance = -clearance + METRICS.bigOpSpacing1;
     }
     else {
-        if (ruleWidth > 0) {
-            numShift = mathstyle.metrics.num2; // u ← σ9
-            clearance = ruleWidth; //  φ ← θ
-        }
-        else {
-            numShift = mathstyle.metrics.num3; // u ← σ10
-            clearance = 3 * METRICS.defaultRuleThickness; // φ ← 3 ξ8
-        }
-        denomShift = mathstyle.metrics.denom2; // v ← σ12
+        // Build the accent
+        const accent = makeSymbol('Main-Regular', atom.accent, 'math');
+        // Remove the italic correction of the accent, because it only serves to
+        // shift the accent over to a place we don't want.
+        accent.italic = 0;
+        // The \vec character that the fonts use is a combining character, and
+        // thus shows up much too far to the left. To account for this, we add a
+        // specific class which shifts the accent over to where we want it.
+        const vecClass = atom.accent === '\u20d7' ? ' accent-vec' : '';
+        accentBody = makeSpan(makeSpan(accent), 'accent-body' + vecClass);
     }
-    const numerDepth = numerReset ? depth(numerReset) : 0;
-    const denomHeight = denomReset ? height(denomReset) : 0;
-    let frac;
-    if (ruleWidth === 0) {
-        // Rule 15c from Appendix G
-        // No bar line between numerator and denominator
-        const candidateClearance = numShift - numerDepth - (denomHeight - denomShift);
-        if (candidateClearance < clearance) {
-            numShift += 0.5 * (clearance - candidateClearance);
-            denomShift += 0.5 * (clearance - candidateClearance);
-        }
-        frac = makeVlist(newContext, [numerReset, -numShift, denomReset, denomShift], 'individualShift');
-    }
-    else {
-        // Rule 15d from Appendix G
-        // There is a bar line between the numerator and the denominator
-        const axisHeight = mathstyle.metrics.axisHeight;
-        const numerLine = axisHeight + 0.5 * ruleWidth;
-        const denomLine = axisHeight - 0.5 * ruleWidth;
-        if (numShift - numerDepth - numerLine < clearance) {
-            numShift += clearance - (numShift - numerDepth - numerLine);
-        }
-        if (denomLine - (denomHeight - denomShift) < clearance) {
-            denomShift += clearance - (denomLine - (denomHeight - denomShift));
-        }
-        const mid = makeSpan(null, ' frac-line');
-        mid.applyStyle(atom.getStyle());
-        // Manually set the height of the line because its height is
-        // created in CSS
-        mid.height = ruleWidth / 2;
-        mid.depth = ruleWidth / 2;
-        const elements = [];
-        if (numerReset) {
-            elements.push(numerReset);
-            elements.push(-numShift);
-        }
-        elements.push(mid);
-        elements.push(ruleWidth / 2 - axisHeight);
-        if (denomReset) {
-            elements.push(denomReset);
-            elements.push(denomShift);
-        }
-        frac = makeVlist(newContext, elements, 'individualShift');
-    }
-    // Add a 'mfrac' class to provide proper context for
-    // other css selectors (such as 'frac-line')
-    frac.classes += ' mfrac';
-    // Since we manually change the style sometimes (with \dfrac or \tfrac),
-    // account for the possible size change here.
-    frac.height *= mathstyle.sizeMultiplier / context.mathstyle.sizeMultiplier;
-    frac.depth *= mathstyle.sizeMultiplier / context.mathstyle.sizeMultiplier;
-    // if (!atom.leftDelim && !atom.rightDelim) {
-    //     return makeOrd(frac,
-    //         context.parentMathstyle.adjustTo(mathstyle) +
-    //         ((context.parentSize !== context.size) ?
-    //             (' sizing reset-' + context.parentSize + ' ' + context.size) : ''));
-    // }
-    // Rule 15e of Appendix G
-    const delimSize = mathstyle.size === MATHSTYLES.displaystyle.size
-        ? mathstyle.metrics.delim1
-        : mathstyle.metrics.delim2;
-    // Optional delimiters
-    const leftDelim = atom.bind(context, makeCustomSizedDelim('mopen', atom.leftDelim, delimSize, true, context.clone({ mathstyle: mathstyle })));
-    const rightDelim = atom.bind(context, makeCustomSizedDelim('mclose', atom.rightDelim, delimSize, true, context.clone({ mathstyle: mathstyle })));
-    leftDelim.applyStyle(atom.getStyle());
-    rightDelim.applyStyle(atom.getStyle());
-    return [
-        atom.bind(context, 
-        // makeStruts(
-        makeSpan([leftDelim, frac, rightDelim], context.parentSize !== context.size
-            ? 'sizing reset-' + context.parentSize + ' ' + context.size
-            : '', 'mord')
-        // )
-        ),
-    ];
+    accentBody = makeVlist(context, [base, -clearance, accentBody]);
+    // Shift the accent over by the skew. Note we shift by twice the skew
+    // because we are centering the accent, so by adding 2*skew to the left,
+    // we shift it to the right by 1*skew.
+    accentBody.children[1].setLeft(2 * skew$1);
+    return [makeSpan([accentBody], 'accent', 'mord')];
 });
 
 registerAtomType('array', (context, atom) => {
@@ -9804,144 +9731,56 @@ function makeColOfRepeatingElements(context, body, offset, elem) {
     return makeVlist(context, col, 'individualShift');
 }
 
-// An `overunder` atom has the following attributes:
-// - body: atoms[]: atoms displayed on the base line
-// - svgBody: string. A SVG graphic displayed on the base line (if present, the body is ignored)
-// - overscript: atoms[]: atoms displayed above the body
-// - svgAbove: string. A named SVG graphic above the element
-// - underscript: atoms[]: atoms displayed below the body
-// - svgBelow: string. A named SVG graphic below the element
-// - skipBoundary: boolean. If true, ignore atom boundary when keyboard navigating
-registerAtomType('overunder', (context, atom) => {
-    const body = atom.svgBody
-        ? makeSVGSpan(atom.svgBody)
-        : decompose(context, atom.body);
-    const annotationStyle = context.clone({
-        mathstyle: MATHSTYLES.scriptstyle,
-    });
-    let above;
-    let below;
-    if (atom.svgAbove) {
-        above = makeSVGSpan(atom.svgAbove);
-    }
-    else if (atom.overscript) {
-        above = makeSpan(decompose(annotationStyle, atom.overscript), context.mathstyle.adjustTo(annotationStyle.mathstyle));
-    }
-    if (atom.svgBelow) {
-        below = makeSVGSpan(atom.svgBelow);
-    }
-    else if (atom.underscript) {
-        below = makeSpan(decompose(annotationStyle, atom.underscript), context.mathstyle.adjustTo(annotationStyle.mathstyle));
-    }
-    if (above && below) {
-        // Pad the above and below if over a "base"
-        below.setLeft(0.3);
-        below.setRight(0.3);
-        above.setLeft(0.3);
-        above.setRight(0.3);
-    }
-    let result = makeOverunderStack(context, body, above, below, isSpanType(atom.type) ? atom.type : 'mord');
-    if (atom.superscript || atom.subscript) {
-        result = atom.attachLimits(context, result, 0, 0);
-    }
-    return [result];
-});
-/**
- * Combine a nucleus with an atom above and an atom below. Used to form
- * stacks for the 'overunder' atom type .
- *
- * @param nucleus The base over and under which the atoms will
- * be placed.
- * @param type The type ('mop', 'mrel', etc...) of the result
- */
-function makeOverunderStack(context, nucleus, above, below, type) {
-    // If nothing above and nothing below, nothing to do.
-    if (!above && !below)
-        return isArray(nucleus) ? makeSpan(nucleus) : nucleus;
-    let aboveShift = 0;
-    let belowShift = 0;
-    if (above) {
-        aboveShift = Math.max(METRICS.bigOpSpacing1, METRICS.bigOpSpacing3 - depth(above));
-    }
-    if (below) {
-        belowShift = Math.max(METRICS.bigOpSpacing2, METRICS.bigOpSpacing4 - height(below));
-    }
-    let result = null;
-    if (below && above) {
-        const bottom = height(below) + depth(below) + depth(nucleus);
-        result = makeVlist(context, [
-            0,
-            below,
-            belowShift,
-            nucleus,
-            aboveShift,
-            above,
-            METRICS.bigOpSpacing2,
-        ], 'bottom', bottom);
-    }
-    else if (below && !above) {
-        const top = height(nucleus);
-        result = makeVlist(context, [0, below, belowShift, nucleus], 'top', top);
-    }
-    else if (above && !below) {
-        result = makeVlist(context, [
-            depth(nucleus),
-            nucleus,
-            Math.max(METRICS.bigOpSpacing2, aboveShift),
-            above,
-        ], 'bottom', depth(nucleus));
-    }
-    return makeSpan(result, 'op-over-under', type);
-}
-
-registerAtomType('accent', (context, atom) => {
-    // Accents are handled in the TeXbook pg. 443, rule 12.
-    const mathstyle = context.mathstyle;
-    // Build the base atom
-    let base = decompose(context.cramp(), atom.body);
-    if (atom.superscript || atom.subscript) {
-        // If there is a supsub attached to the accent
-        // apply it to the base.
-        // Note this does not give the same result as TeX when there
-        // are stacked accents, e.g. \vec{\breve{\hat{\acute{...}}}}^2
-        base = [atom.attachSupsub(context, makeSpan(base, '', 'mord'), 'mord')];
-    }
-    // Calculate the skew of the accent. This is based on the line "If the
-    // nucleus is not a single character, let s = 0; otherwise set s to the
-    // kern amount for the nucleus followed by the \skewchar of its font."
-    // Note that our skew metrics are just the kern between each character
-    // and the skewchar.
-    let skew$1 = 0;
-    if (isArray(atom.body) &&
-        atom.body.length === 1 &&
-        atom.body[0].isCharacterBox()) {
-        skew$1 = skew(base);
-    }
-    // calculate the amount of space between the body and the accent
-    let clearance = Math.min(height(base), mathstyle.metrics.xHeight);
-    let accentBody;
-    if (atom.svgAccent) {
-        accentBody = makeSVGSpan(atom.svgAccent);
-        clearance = -clearance + METRICS.bigOpSpacing1;
+registerAtomType('box', (context, atom) => {
+    // The padding extends outside of the base
+    const padding = typeof atom.padding === 'number' ? atom.padding : METRICS.fboxsep;
+    // Base is the main content "inside" the box
+    const content = makeSpan(decompose(context, atom.body), '', 'mord');
+    content.setStyle('vertical-align', -depth(content), 'em');
+    content.setStyle('height', 0);
+    const base = makeSpan(content, '', 'mord');
+    // This span will represent the box (background and border)
+    // It's positioned to overlap the base
+    // The 'ML__box' class is required to prevent the span from being omitted
+    // during rendering (it looks like an empty, no-op span)
+    const box = makeSpan('', 'ML__box');
+    box.setStyle('position', 'absolute');
+    box.setStyle('height', height(base) + depth(base) + 2 * padding, 'em');
+    if (padding !== 0) {
+        box.setStyle('width', 'calc(100% + ' + 2 * padding + 'em)');
     }
     else {
-        // Build the accent
-        const accent = makeSymbol('Main-Regular', atom.accent, 'math');
-        // Remove the italic correction of the accent, because it only serves to
-        // shift the accent over to a place we don't want.
-        accent.italic = 0;
-        // The \vec character that the fonts use is a combining character, and
-        // thus shows up much too far to the left. To account for this, we add a
-        // specific class which shifts the accent over to where we want it.
-        const vecClass = atom.accent === '\u20d7' ? ' accent-vec' : '';
-        accentBody = makeSpan(makeSpan(accent), 'accent-body' + vecClass);
+        box.setStyle('width', '100%');
     }
-    accentBody = makeVlist(context, [base, -clearance, accentBody]);
-    // Shift the accent over by the skew. Note we shift by twice the skew
-    // because we are centering the accent, so by adding 2*skew to the left,
-    // we shift it to the right by 1*skew.
-    accentBody.children[1].setLeft(2 * skew$1);
-    return [makeSpan([accentBody], 'accent', 'mord')];
+    box.setStyle('top', -padding, 'em');
+    box.setStyle('left', -padding, 'em');
+    box.setStyle('z-index', '-1'); // Ensure the box is *behind* the base
+    box.setStyle('box-sizing', 'border-box');
+    if (atom.backgroundcolor) {
+        box.setStyle('background-color', atom.backgroundcolor);
+    }
+    if (atom.framecolor) {
+        box.setStyle('border', METRICS.fboxrule + 'em solid ' + atom.framecolor);
+    }
+    if (atom.border)
+        box.setStyle('border', atom.border);
+    base.setStyle('display', 'inline-block');
+    base.setStyle('height', height(base) + depth(base), 'em');
+    // The result is a span that encloses the box and the base
+    const result = makeSpan([box, base]);
+    // Set its position as relative so that the box can be absolute positioned
+    // over the base
+    result.setStyle('position', 'relative');
+    result.setStyle('vertical-align', -padding + depth(base), 'em');
+    // The padding adds to the width and height of the pod
+    result.height = height(base) + padding;
+    result.depth = depth(base) + padding;
+    result.setLeft(padding);
+    result.setRight(padding);
+    result.setStyle('height', result.height + result.depth - 2 * padding, 'em');
+    result.setStyle('top', -padding, 'em');
+    result.setStyle('display', 'inline-block');
+    return [result];
 });
 
 registerAtomType('enclose', (context, atom) => {
@@ -10112,146 +9951,149 @@ registerAtomType('enclose', (context, atom) => {
     return [result];
 });
 
-registerAtomType('box', (context, atom) => {
-    // The padding extends outside of the base
-    const padding = typeof atom.padding === 'number' ? atom.padding : METRICS.fboxsep;
-    // Base is the main content "inside" the box
-    const content = makeSpan(decompose(context, atom.body), '', 'mord');
-    content.setStyle('vertical-align', -depth(content), 'em');
-    content.setStyle('height', 0);
-    const base = makeSpan(content, '', 'mord');
-    // This span will represent the box (background and border)
-    // It's positioned to overlap the base
-    // The 'ML__box' class is required to prevent the span from being omitted
-    // during rendering (it looks like an empty, no-op span)
-    const box = makeSpan('', 'ML__box');
-    box.setStyle('position', 'absolute');
-    box.setStyle('height', height(base) + depth(base) + 2 * padding, 'em');
-    if (padding !== 0) {
-        box.setStyle('width', 'calc(100% + ' + 2 * padding + 'em)');
-    }
-    else {
-        box.setStyle('width', '100%');
-    }
-    box.setStyle('top', -padding, 'em');
-    box.setStyle('left', -padding, 'em');
-    box.setStyle('z-index', '-1'); // Ensure the box is *behind* the base
-    box.setStyle('box-sizing', 'border-box');
-    if (atom.backgroundcolor) {
-        box.setStyle('background-color', atom.backgroundcolor);
-    }
-    if (atom.framecolor) {
-        box.setStyle('border', METRICS.fboxrule + 'em solid ' + atom.framecolor);
-    }
-    if (atom.border)
-        box.setStyle('border', atom.border);
-    base.setStyle('display', 'inline-block');
-    base.setStyle('height', height(base) + depth(base), 'em');
-    // The result is a span that encloses the box and the base
-    const result = makeSpan([box, base]);
-    // Set its position as relative so that the box can be absolute positioned
-    // over the base
-    result.setStyle('position', 'relative');
-    result.setStyle('vertical-align', -padding + depth(base), 'em');
-    // The padding adds to the width and height of the pod
-    result.height = height(base) + padding;
-    result.depth = depth(base) + padding;
-    result.setLeft(padding);
-    result.setRight(padding);
-    result.setStyle('height', result.height + result.depth - 2 * padding, 'em');
-    result.setStyle('top', -padding, 'em');
-    result.setStyle('display', 'inline-block');
-    return [result];
-});
-
 /**
- * Operators are handled in the TeXbook pg. 443-444, rule 13(a).
+ * Gengrac -- Generalized fraction
+ *
+ * Decompose fractions, binomials, and in general anything made
+ * of two expressions on top of each other, optionally separated by a bar,
+ * and optionally surrounded by fences (parentheses, brackets, etc...)
+ *
+ * Depending on the type of fraction the mathstyle is either
+ * display math or inline math (which is indicated by 'textstyle'). This value can
+ * also be set to 'auto', which indicates it should use the current mathstyle
  */
-registerAtomType('mop', (context, atom) => {
-    var _a;
-    const mathstyle = context.mathstyle;
-    let base;
-    let baseShift = 0;
-    let slant = 0;
-    if (atom.isSymbol) {
-        // If this is a symbol, create the symbol.
-        // Most symbol operators get larger in displaystyle (rule 13)
-        const large = mathstyle.size === MATHSTYLES.displaystyle.size &&
-            atom.symbol !== '\\smallint';
-        base = makeSymbol(large ? 'Size2-Regular' : 'Size1-Regular', atom.body, 'op-symbol ' + (large ? 'large-op' : 'small-op'), 'mop');
-        // Shift the symbol so its center lies on the axis (rule 13). It
-        // appears that our fonts have the centers of the symbols already
-        // almost on the axis, so these numbers are very small. Note we
-        // don't actually apply this here, but instead it is used either in
-        // the vlist creation or separately when there are no limits.
-        baseShift =
-            (base.height - base.depth) / 2 -
-                mathstyle.metrics.axisHeight * mathstyle.sizeMultiplier;
-        // The slant of the symbol is just its italic correction.
-        slant = base.italic;
-        base.applyStyle({
-            color: atom.isPhantom ? 'transparent' : atom.color,
-            backgroundColor: atom.isPhantom
-                ? 'transparent'
-                : atom.backgroundColor,
-            cssId: atom.cssId,
-            cssClass: atom.cssClass,
-            letterShapeStyle: context.letterShapeStyle,
-        });
+registerAtomType('genfrac', (context, atom) => {
+    const mathstyle = atom.mathstyle === 'auto'
+        ? context.mathstyle
+        : MATHSTYLES[atom.mathstyle];
+    const newContext = context.clone({ mathstyle: mathstyle });
+    let numer = [];
+    if (atom.numerPrefix) {
+        numer.push(makeSpan(atom.numerPrefix, 'mord'));
     }
-    else if (isArray(atom.body)) {
-        // If this is a list, decompose that list.
-        base = makeSpan(decompose(context, atom.body), '', 'mop');
+    const numeratorStyle = atom.continuousFraction
+        ? mathstyle
+        : mathstyle.fracNum();
+    numer = numer.concat(decompose(newContext.clone({ mathstyle: numeratorStyle }), atom.numer));
+    const numerReset = makeHlist(numer, context.mathstyle.adjustTo(numeratorStyle));
+    let denom = [];
+    if (atom.denomPrefix) {
+        denom.push(makeSpan(atom.denomPrefix, 'mord'));
     }
-    else {
-        // Otherwise, this is a text operator. Build the text from the
-        // operator's name.
-        console.assert(atom.type === 'mop');
-        base = atom.makeSpan(context, atom.body);
-    }
-    // Bind the generated span and this atom so the atom can be retrieved
-    // from the span later.
-    atom.bind(context, base);
-    if (atom.isSymbol)
-        base.setTop(baseShift);
-    let result = base;
-    if (atom.superscript || atom.subscript) {
-        const limits = (_a = atom.limits) !== null && _a !== void 0 ? _a : 'auto';
-        if (limits === 'limits' ||
-            (limits === 'auto' &&
-                mathstyle.size === MATHSTYLES.displaystyle.size)) {
-            result = atom.attachLimits(context, base, baseShift, slant);
+    const denominatorStyle = atom.continuousFraction
+        ? mathstyle
+        : mathstyle.fracDen();
+    denom = denom.concat(decompose(newContext.clone({ mathstyle: denominatorStyle }), atom.denom));
+    const denomReset = makeHlist(denom, context.mathstyle.adjustTo(denominatorStyle));
+    const ruleWidth = !atom.hasBarLine
+        ? 0
+        : METRICS.defaultRuleThickness / mathstyle.sizeMultiplier;
+    // Rule 15b from TeXBook Appendix G, p.444
+    //
+    // 15b. If C > T, set u ← σ8 and v ← σ11. Otherwise set u ← σ9 or σ10,according
+    // as θ ̸= 0 or θ = 0, and set v ← σ12. (The fraction will be typeset with
+    // its numerator shifted up by an amount u with respect to the current
+    // baseline, and with the denominator shifted down by v, unless the boxes
+    // are unusually large.)
+    let numShift;
+    let clearance = 0;
+    let denomShift;
+    if (mathstyle.size === MATHSTYLES.displaystyle.size) {
+        numShift = mathstyle.metrics.num1; // set u ← σ8
+        if (ruleWidth > 0) {
+            clearance = 3 * ruleWidth; //  φ ← 3θ
         }
         else {
-            result = atom.attachSupsub(context, base, 'mop');
+            clearance = 7 * METRICS.defaultRuleThickness; // φ ← 7 ξ8
         }
-    }
-    return [result];
-});
-
-/**
- * \overline and \underline
- */
-registerAtomType('line', (context, atom) => {
-    const mathstyle = context.mathstyle;
-    // TeXBook:443. Rule 9 and 10
-    const inner = decompose(context.cramp(), atom.body);
-    const ruleWidth = METRICS.defaultRuleThickness / mathstyle.sizeMultiplier;
-    const line = makeSpan(null, context.mathstyle.adjustTo(MATHSTYLES.textstyle) +
-        ' ' +
-        atom.position +
-        '-line');
-    line.height = ruleWidth;
-    line.maxFontSize = 1.0;
-    let vlist;
-    if (atom.position === 'overline') {
-        vlist = makeVlist(context, [inner, 3 * ruleWidth, line, ruleWidth]);
+        denomShift = mathstyle.metrics.denom1; // v ← σ11
     }
     else {
-        const innerSpan = makeSpan(inner);
-        vlist = makeVlist(context, [ruleWidth, line, 3 * ruleWidth, innerSpan], 'top', height(innerSpan));
+        if (ruleWidth > 0) {
+            numShift = mathstyle.metrics.num2; // u ← σ9
+            clearance = ruleWidth; //  φ ← θ
+        }
+        else {
+            numShift = mathstyle.metrics.num3; // u ← σ10
+            clearance = 3 * METRICS.defaultRuleThickness; // φ ← 3 ξ8
+        }
+        denomShift = mathstyle.metrics.denom2; // v ← σ12
     }
-    return [makeSpan(vlist, atom.position, 'mord')];
+    const numerDepth = numerReset ? depth(numerReset) : 0;
+    const denomHeight = denomReset ? height(denomReset) : 0;
+    let frac;
+    if (ruleWidth === 0) {
+        // Rule 15c from Appendix G
+        // No bar line between numerator and denominator
+        const candidateClearance = numShift - numerDepth - (denomHeight - denomShift);
+        if (candidateClearance < clearance) {
+            numShift += 0.5 * (clearance - candidateClearance);
+            denomShift += 0.5 * (clearance - candidateClearance);
+        }
+        frac = makeVlist(newContext, [numerReset, -numShift, denomReset, denomShift], 'individualShift');
+    }
+    else {
+        // Rule 15d from Appendix G
+        // There is a bar line between the numerator and the denominator
+        const axisHeight = mathstyle.metrics.axisHeight;
+        const numerLine = axisHeight + 0.5 * ruleWidth;
+        const denomLine = axisHeight - 0.5 * ruleWidth;
+        if (numShift - numerDepth - numerLine < clearance) {
+            numShift += clearance - (numShift - numerDepth - numerLine);
+        }
+        if (denomLine - (denomHeight - denomShift) < clearance) {
+            denomShift += clearance - (denomLine - (denomHeight - denomShift));
+        }
+        const mid = makeSpan(null, ' frac-line');
+        mid.applyStyle(atom.getStyle());
+        // Manually set the height of the line because its height is
+        // created in CSS
+        mid.height = ruleWidth / 2;
+        mid.depth = ruleWidth / 2;
+        const elements = [];
+        if (numerReset) {
+            elements.push(numerReset);
+            elements.push(-numShift);
+        }
+        elements.push(mid);
+        elements.push(ruleWidth / 2 - axisHeight);
+        if (denomReset) {
+            elements.push(denomReset);
+            elements.push(denomShift);
+        }
+        frac = makeVlist(newContext, elements, 'individualShift');
+    }
+    // Add a 'mfrac' class to provide proper context for
+    // other css selectors (such as 'frac-line')
+    frac.classes += ' mfrac';
+    // Since we manually change the style sometimes (with \dfrac or \tfrac),
+    // account for the possible size change here.
+    frac.height *= mathstyle.sizeMultiplier / context.mathstyle.sizeMultiplier;
+    frac.depth *= mathstyle.sizeMultiplier / context.mathstyle.sizeMultiplier;
+    // if (!atom.leftDelim && !atom.rightDelim) {
+    //     return makeOrd(frac,
+    //         context.parentMathstyle.adjustTo(mathstyle) +
+    //         ((context.parentSize !== context.size) ?
+    //             (' sizing reset-' + context.parentSize + ' ' + context.size) : ''));
+    // }
+    // Rule 15e of Appendix G
+    const delimSize = mathstyle.size === MATHSTYLES.displaystyle.size
+        ? mathstyle.metrics.delim1
+        : mathstyle.metrics.delim2;
+    // Optional delimiters
+    const leftDelim = atom.bind(context, makeCustomSizedDelim('mopen', atom.leftDelim, delimSize, true, context.clone({ mathstyle: mathstyle })));
+    const rightDelim = atom.bind(context, makeCustomSizedDelim('mclose', atom.rightDelim, delimSize, true, context.clone({ mathstyle: mathstyle })));
+    leftDelim.applyStyle(atom.getStyle());
+    rightDelim.applyStyle(atom.getStyle());
+    return [
+        atom.bind(context, 
+        // makeStruts(
+        makeSpan([leftDelim, frac, rightDelim], context.parentSize !== context.size
+            ? 'sizing reset-' + context.parentSize + ' ' + context.size
+            : '', 'mord')
+        // )
+        ),
+    ];
 });
 
 /**
@@ -10352,14 +10194,218 @@ registerAtomType('leftright', (context, atom) => {
     return result;
 });
 
+/**
+ * \overline and \underline
+ */
+registerAtomType('line', (context, atom) => {
+    const mathstyle = context.mathstyle;
+    // TeXBook:443. Rule 9 and 10
+    const inner = decompose(context.cramp(), atom.body);
+    const ruleWidth = METRICS.defaultRuleThickness / mathstyle.sizeMultiplier;
+    const line = makeSpan(null, context.mathstyle.adjustTo(MATHSTYLES.textstyle) +
+        ' ' +
+        atom.position +
+        '-line');
+    line.height = ruleWidth;
+    line.maxFontSize = 1.0;
+    let vlist;
+    if (atom.position === 'overline') {
+        vlist = makeVlist(context, [inner, 3 * ruleWidth, line, ruleWidth]);
+    }
+    else {
+        const innerSpan = makeSpan(inner);
+        vlist = makeVlist(context, [ruleWidth, line, 3 * ruleWidth, innerSpan], 'top', height(innerSpan));
+    }
+    return [makeSpan(vlist, atom.position, 'mord')];
+});
+
+/**
+ * Operators are handled in the TeXbook pg. 443-444, rule 13(a).
+ */
+registerAtomType('mop', (context, atom) => {
+    var _a;
+    const mathstyle = context.mathstyle;
+    let base;
+    let baseShift = 0;
+    let slant = 0;
+    if (atom.isSymbol) {
+        // If this is a symbol, create the symbol.
+        // Most symbol operators get larger in displaystyle (rule 13)
+        const large = mathstyle.size === MATHSTYLES.displaystyle.size &&
+            atom.symbol !== '\\smallint';
+        base = makeSymbol(large ? 'Size2-Regular' : 'Size1-Regular', atom.body, 'op-symbol ' + (large ? 'large-op' : 'small-op'), 'mop');
+        // Shift the symbol so its center lies on the axis (rule 13). It
+        // appears that our fonts have the centers of the symbols already
+        // almost on the axis, so these numbers are very small. Note we
+        // don't actually apply this here, but instead it is used either in
+        // the vlist creation or separately when there are no limits.
+        baseShift =
+            (base.height - base.depth) / 2 -
+                mathstyle.metrics.axisHeight * mathstyle.sizeMultiplier;
+        // The slant of the symbol is just its italic correction.
+        slant = base.italic;
+        base.applyStyle({
+            color: atom.isPhantom ? 'transparent' : atom.color,
+            backgroundColor: atom.isPhantom
+                ? 'transparent'
+                : atom.backgroundColor,
+            cssId: atom.cssId,
+            cssClass: atom.cssClass,
+            letterShapeStyle: context.letterShapeStyle,
+        });
+    }
+    else if (isArray(atom.body)) {
+        // If this is a list, decompose that list.
+        base = makeSpan(decompose(context, atom.body), '', 'mop');
+    }
+    else {
+        // Otherwise, this is a text operator. Build the text from the
+        // operator's name.
+        console.assert(atom.type === 'mop');
+        base = atom.makeSpan(context, atom.body);
+    }
+    // Bind the generated span and this atom so the atom can be retrieved
+    // from the span later.
+    atom.bind(context, base);
+    if (atom.isSymbol)
+        base.setTop(baseShift);
+    let result = base;
+    if (atom.superscript || atom.subscript) {
+        const limits = (_a = atom.limits) !== null && _a !== void 0 ? _a : 'auto';
+        if (limits === 'limits' ||
+            (limits === 'auto' &&
+                mathstyle.size === MATHSTYLES.displaystyle.size)) {
+            result = atom.attachLimits(context, base, baseShift, slant);
+        }
+        else {
+            result = atom.attachSupsub(context, base, 'mop');
+        }
+    }
+    return [result];
+});
+
+// An `overunder` atom has the following attributes:
+// - body: atoms[]: atoms displayed on the base line
+// - svgBody: string. A SVG graphic displayed on the base line (if present, the body is ignored)
+// - overscript: atoms[]: atoms displayed above the body
+// - svgAbove: string. A named SVG graphic above the element
+// - underscript: atoms[]: atoms displayed below the body
+// - svgBelow: string. A named SVG graphic below the element
+// - skipBoundary: boolean. If true, ignore atom boundary when keyboard navigating
+registerAtomType('overunder', (context, atom) => {
+    const body = atom.svgBody
+        ? makeSVGSpan(atom.svgBody)
+        : decompose(context, atom.body);
+    const annotationStyle = context.clone({
+        mathstyle: MATHSTYLES.scriptstyle,
+    });
+    let above;
+    let below;
+    if (atom.svgAbove) {
+        above = makeSVGSpan(atom.svgAbove);
+    }
+    else if (atom.overscript && atom.overscript.length > 0) {
+        above = makeSpan(decompose(annotationStyle, atom.overscript), context.mathstyle.adjustTo(annotationStyle.mathstyle));
+    }
+    if (atom.svgBelow) {
+        below = makeSVGSpan(atom.svgBelow);
+    }
+    else if (atom.underscript && atom.underscript.length > 0) {
+        below = makeSpan(decompose(annotationStyle, atom.underscript), context.mathstyle.adjustTo(annotationStyle.mathstyle));
+    }
+    if (above && below) {
+        // Pad the above and below if over a "base"
+        below.setLeft(0.3);
+        below.setRight(0.3);
+        above.setLeft(0.3);
+        above.setRight(0.3);
+    }
+    let result = makeOverunderStack(context, body, above, below, isSpanType(atom.type) ? atom.type : 'mrel');
+    if (atom.superscript || atom.subscript) {
+        result = atom.attachLimits(context, result, 0, 0);
+    }
+    return [result];
+});
+/**
+ * Combine a nucleus with an atom above and an atom below. Used to form
+ * stacks for the 'overunder' atom type .
+ *
+ * @param nucleus The base over and under which the atoms will
+ * be placed.
+ * @param type The type ('mop', 'mrel', etc...) of the result
+ */
+function makeOverunderStack(context, nucleus, above, below, type) {
+    // If nothing above and nothing below, nothing to do.
+    if (!above && !below) {
+        return makeSpan(nucleus, 'op-over-under', type);
+        // return isArray(nucleus) ? makeSpan(nucleus) : nucleus;
+    }
+    let aboveShift = 0;
+    let belowShift = 0;
+    if (above) {
+        aboveShift = Math.max(METRICS.bigOpSpacing1, METRICS.bigOpSpacing3 - depth(above));
+    }
+    if (below) {
+        belowShift = Math.max(METRICS.bigOpSpacing2, METRICS.bigOpSpacing4 - height(below));
+    }
+    let result = null;
+    if (below && above) {
+        const bottom = height(below) + depth(below) + depth(nucleus);
+        result = makeVlist(context, [
+            0,
+            below,
+            belowShift,
+            nucleus,
+            aboveShift,
+            above,
+            METRICS.bigOpSpacing2,
+        ], 'bottom', bottom);
+    }
+    else if (below && !above) {
+        const top = height(nucleus);
+        result = makeVlist(context, [0, below, belowShift, nucleus], 'top', top);
+    }
+    else if (above && !below) {
+        result = makeVlist(context, [
+            depth(nucleus),
+            nucleus,
+            Math.max(METRICS.bigOpSpacing2, aboveShift),
+            above,
+        ], 'bottom', depth(nucleus));
+    }
+    return makeSpan(result, 'op-over-under', type);
+}
+
+registerAtomType('phantom', (context, atom) => {
+    if (atom.phantomType === 'vphantom') {
+        const content = makeSpan(decompose(context, atom.body), 'inner');
+        return [makeSpan([content, makeSpan(null, 'fix')], 'rlap', 'mord')];
+    }
+    else if (atom.phantomType === 'hphantom' ||
+        atom.phantomType === 'smash' ||
+        atom.phantomType === 'bsmash' ||
+        atom.phantomType === 'tsmash') {
+        const content = makeSpan(decompose(context, atom.body), '', 'mord');
+        if (atom.phantomType !== 'bsmash') {
+            content.height = 0;
+        }
+        if (atom.phantomType !== 'tsmash') {
+            content.depth = 0;
+        }
+        return [makeSpan(makeVlist(context, [content]), '', 'mord')];
+    }
+    return [makeSpan(decompose(context, atom.body), '', 'mord')];
+});
+
 registerAtomType('surd', (context, atom) => {
+    var _a;
     // See the TeXbook pg. 443, Rule 11.
     // http://www.ctex.org/documents/shredder/src/texbook.pdf
     const mathstyle = context.mathstyle;
     // First, we do the same steps as in overline to build the inner group
     // and line
-    console.assert(isArray(atom.body));
-    const inner = decompose(context.cramp(), atom.body);
+    console.assert(atom.body === null || isArray(atom.body));
+    const inner = (_a = decompose(context.cramp(), atom.body)) !== null && _a !== void 0 ? _a : makeSpan('');
     const ruleWidth = METRICS.defaultRuleThickness / mathstyle.sizeMultiplier;
     let phi = ruleWidth;
     if (mathstyle.id < MATHSTYLES.textstyle.id) {
@@ -10387,7 +10433,7 @@ registerAtomType('surd', (context, atom) => {
     line.applyStyle(atom.getStyle());
     line.height = ruleWidth;
     const body = makeVlist(context, [inner, lineClearance, line, ruleWidth]);
-    if (typeof atom.index === 'undefined') {
+    if (!atom.index) {
         return [atom.bind(context, makeSpan([delim, body], 'sqrt', 'mord'))];
     }
     // Handle the optional root index
@@ -10406,466 +10452,10 @@ registerAtomType('surd', (context, atom) => {
     const rootVlist = makeVlist(context, [root], 'shift', -toShift);
     // Add a class surrounding it so we can add on the appropriate
     // kerning
-    return [
-        atom.bind(context, makeSpan([makeSpan(rootVlist, 'root'), delim, body], 'sqrt', 'mord')),
-    ];
-});
-
-// Each entry indicate the font-name (to be used to calculate font metrics)
-// and the CSS classes (for proper markup styling) for each possible
-// variant combinations.
-const VARIANTS = {
-    // Handle some special characters which are only available in "main" font (not "math")
-    main: ['Main-Regular', 'ML__cmr'],
-    'main-italic': ['Main-Italic', 'ML__cmr ML__it'],
-    'main-bold': ['Main-Bold', 'ML__cmr ML__bold'],
-    'main-bolditalic': ['Main-BoldItalic', 'ML__cmr ML_bold ML__it'],
-    normal: ['Main-Regular', 'ML__cmr'],
-    'normal-bold': ['Main-Bold', 'ML__mathbf'],
-    'normal-italic': ['Math-Italic', 'ML__mathit'],
-    'normal-bolditalic': ['Math-BoldItalic', 'ML__mathbfit'],
-    // Extended math symbols, arrows, etc.. at their standard Unicode codepoints
-    ams: ['AMS-Regular', 'ML__ams'],
-    'ams-bold': ['AMS-Regular', 'ML__ams'],
-    'ams-italic': ['AMS-Regular', 'ML__ams'],
-    'ams-bolditalic': ['AMS-Regular', 'ML__ams'],
-    'sans-serif': ['SansSerif-Regular', 'ML__sans'],
-    'sans-serif-bold': ['SansSerif-Regular', 'ML__sans ML__bold'],
-    'sans-serif-italic': ['SansSerif-Regular', 'ML__sans'],
-    'sans-serif-bolditalic': ['SansSerif-Regular', 'ML__sans'],
-    calligraphic: ['Caligraphic-Regular', 'ML__cal'],
-    'calligraphic-bold': ['Caligraphic-Regular', 'ML__cal ML__bold'],
-    'calligraphic-italic': ['Caligraphic-Regular', 'ML__cal ML__it'],
-    'calligraphic-bolditalic': [
-        'Caligraphic-Regular',
-        'ML__cal ML__bold ML__it',
-    ],
-    script: ['Script-Regular', 'ML__script'],
-    'script-bold': ['Script-Regular', 'ML__script ML__bold'],
-    'script-italic': ['Script-Regular', 'ML__script ML__it'],
-    'script-bolditalic': ['Script-Regular', 'ML__script ML__bold ML__it'],
-    fraktur: ['Fraktur-Regular', 'ML__frak'],
-    'fraktur-bold': ['Fraktur-Regular', 'ML__frak'],
-    'fraktur-italic': ['Fraktur-Regular', 'ML__frak'],
-    'fraktur-bolditalic': ['Fraktur-Regular', 'ML__frak'],
-    monospace: ['Typewriter-Regular', 'ML__tt'],
-    'monospace-bold': ['Typewriter-Regular', 'ML__tt ML__bold'],
-    'monospace-italic': ['Typewriter-Regular', 'ML__tt ML__it'],
-    'monospace-bolditalic': ['Typewriter-Regular', 'ML__tt ML__bold ML__it'],
-    // Blackboard characters are 'A-Z' in the AMS font
-    'double-struck': ['AMS-Regular', 'ML__bb'],
-    'double-struck-bold': ['AMS-Regular', 'ML__bb'],
-    'double-struck-italic': ['AMS-Regular', 'ML__bb'],
-    'double-struck-bolditalic': ['AMS-Regular', 'ML__bb'],
-};
-const VARIANT_REPERTOIRE = {
-    'double-struck': /^[A-Z ]$/,
-    script: /^[A-Z ]$/,
-    calligraphic: /^[0-9A-Z ]$/,
-    fraktur: /^[0-9A-Za-z ]$|^[!"#$%&'()*+,\-./:;=?[]^’‘]$/,
-    monospace: /^[0-9A-Za-z ]$|^[!"&'()*+,\-./:;=?@[\]^_~\u0131\u0237\u0393\u0394\u0398\u039b\u039e\u03A0\u03A3\u03A5\u03A8\u03a9]$/,
-    'sans-serif': /^[0-9A-Za-z ]$|^[!"&'()*+,\-./:;=?@[\]^_~\u0131\u0237\u0393\u0394\u0398\u039b\u039e\u03A0\u03A3\u03A5\u03A8\u03a9]$/,
-};
-const GREEK_LOWERCASE = /^[\u03b1-\u03c9]|\u03d1|\u03d5|\u03d6|\u03f1|\u03f5]$/;
-const GREEK_UPPERCASE = /^[\u0393|\u0394|\u0398|\u039b|\u039E|\u03A0|\u03A3|\u03a5|\u03a6|\u03a8|\u03a9]$/;
-const LETTER_SHAPE_RANGES = [
-    /^[a-z]$/,
-    /^[A-Z]$/,
-    GREEK_LOWERCASE,
-    GREEK_UPPERCASE,
-];
-// The letterShapeStyle property indicates which characters should be
-// automatically italicized (see LETTER_SHAPE_RANGES)
-const LETTER_SHAPE_MODIFIER = {
-    iso: ['it', 'it', 'it', 'it'],
-    tex: ['it', 'it', 'it', 'up'],
-    french: ['it', 'up', 'up', 'up'],
-    upright: ['up', 'up', 'up', 'up'],
-};
-// See http://ctan.math.illinois.edu/macros/latex/base/fntguide.pdf
-function emitLatexMathRun(context, run, expandMacro) {
-    let contextValue = context.variant;
-    if (context.variantStyle && context.variantStyle !== 'up') {
-        contextValue += '-' + context.variantStyle;
-    }
-    return joinLatex(getPropertyRuns(run, 'color').map((x) => {
-        const result = joinLatex(getPropertyRuns(x, 'variant').map((x) => {
-            let value = x[0].variant;
-            if (x[0].variantStyle && x[0].variantStyle !== 'up') {
-                value += '-' + x[0].variantStyle;
-            }
-            // Check if all the atoms in this run have a base
-            // variant identical to the current variant
-            // If so, we can skip wrapping them
-            if (x.every((x) => {
-                const info = getInfo(x.symbol, context.mode, null);
-                if (!info || !(info.variant || info.variantStyle)) {
-                    return false;
-                }
-                let styledValue = x.variant;
-                if (x.variantStyle && x.variantStyle !== 'up') {
-                    styledValue += '-' + x.variantStyle;
-                }
-                return styledValue === value;
-            })) {
-                return joinLatex(x.map((x) => x.toLatex(expandMacro)));
-            }
-            let command = '';
-            if (value && value !== contextValue) {
-                command = {
-                    calligraphic: '\\mathcal{',
-                    fraktur: '\\mathfrak{',
-                    'double-struck': '\\mathbb{',
-                    script: '\\mathscr{',
-                    monospace: '\\mathtt{',
-                    'sans-serif': '\\mathsf{',
-                    normal: '\\mathrm{',
-                    'normal-italic': '\\mathit{',
-                    'normal-bold': '\\mathbf{',
-                    'normal-bolditalic': '\\mathbfit{',
-                    ams: '',
-                    'ams-italic': '\\mathit{',
-                    'ams-bold': '\\mathbf{',
-                    'ams-bolditalic': '\\mathbfit{',
-                    main: '',
-                    'main-italic': '\\mathit{',
-                    'main-bold': '\\mathbf{',
-                    'main-bolditalic': '\\mathbfit{',
-                }[value];
-                console.assert(typeof command !== 'undefined');
-            }
-            return (command +
-                joinLatex(x.map((x) => x.toLatex(expandMacro))) +
-                (command ? '}' : ''));
-        }));
-        if (x[0].color && (!context || context.color !== x[0].color)) {
-            return ('\\textcolor{' +
-                colorToString(x[0].color) +
-                '}{' +
-                result +
-                '}');
-        }
-        return result;
-    }));
-}
-function applyStyle$1(atom, style) {
-    // letterShapeStyle will usually be set automatically, except when the
-    // locale cannot be determined, in which case its value will be 'auto'
-    // which we default to 'tex'
-    const letterShapeStyle = style.letterShapeStyle === 'auto' || !style.letterShapeStyle
-        ? 'tex'
-        : style.letterShapeStyle;
-    let variant = style.variant || 'normal';
-    let variantStyle = style.variantStyle || '';
-    // 1. Remap to "main" font some characters that don't exist
-    // in the "math" font
-    // There are two fonts that include the roman italic characters, "main-it" and "math"
-    // They are similar, but the "math" font has some different kernings ('f')
-    // and some slightly different character shape. It doesn't include a few
-    // characters, so for those characters, "main" has to be used instead
-    // \imath, \jmath and \pound don't exist in "math" font,
-    // so use "main" italic instead.
-    if (variant === 'normal' &&
-        !variantStyle &&
-        /\u00a3|\u0131|\u0237/.test(atom.body)) {
-        variant = 'main';
-        variantStyle = 'italic';
-    }
-    // 2. If no explicit variant style, auto-italicize some symbols,
-    // depending on the letterShapeStyle
-    if (variant === 'normal' && !variantStyle && atom.body.length === 1) {
-        LETTER_SHAPE_RANGES.forEach((x, i) => {
-            if (x.test(atom.body) &&
-                LETTER_SHAPE_MODIFIER[letterShapeStyle][i] === 'it') {
-                variantStyle = 'italic';
-            }
-        });
-    }
-    // 3. Map the variant + variantStyle to a font
-    if (variantStyle === 'up') {
-        variantStyle = '';
-    }
-    const styledVariant = variantStyle ? variant + '-' + variantStyle : variant;
-    console.assert(VARIANTS[styledVariant]);
-    const [fontName, classes] = VARIANTS[styledVariant];
-    // 4. If outside the font repertoire, switch to system font
-    // (return NULL to use default metrics)
-    if (VARIANT_REPERTOIRE[variant] &&
-        !VARIANT_REPERTOIRE[variant].test(atom.body)) {
-        // Map to unicode character
-        atom.body = mathVariantToUnicode(atom.body, variant, variantStyle);
-        atom.variant = '';
-        atom.variantStyle = '';
-        // Return NULL to use default metrics
-        return null;
-    }
-    // Lowercase greek letters have an incomplete repertoire (no bold)
-    // so, for \mathbf to behave correctly, add a 'lcGreek' class.
-    if (GREEK_LOWERCASE.test(atom.body)) {
-        atom.classes += ' lcGreek';
-    }
-    // 5. Assign classes based on the font
-    if (classes) {
-        atom.classes += ' ' + classes;
-    }
-    return fontName;
-}
-register('math', {
-    emitLatexRun: emitLatexMathRun,
-    applyStyle: applyStyle$1,
-});
-
-function emitStringTextRun(_context, run, _expandMacro) {
-    let needSpace = false;
-    return joinLatex(run.map((x) => {
-        let result = '';
-        let space = '';
-        if (x.latex) {
-            result = x.latex;
-        }
-        else if (typeof x.body === 'string') {
-            result = unicodeStringToLatex('text', x.body);
-        }
-        else if (x.symbol) {
-            result = x.symbol.replace(/\\/g, '\\backslash ');
-        }
-        if (needSpace && (!result || /^[a-zA-Z0-9*]/.test(result))) {
-            space = '{}';
-        }
-        needSpace = /\\[a-zA-Z0-9]+\*?$/.test(result);
-        return space + result;
-    }));
-}
-function emitFontShapeTextRun(context, run, expandMacro) {
-    return joinLatex(getPropertyRuns(run, 'fontShape').map((x) => {
-        const result = emitStringTextRun(context, x);
-        if (x[0].fontShape === 'it') {
-            return '\\textit{' + result + '}';
-        }
-        if (x[0].fontShape === 'sl') {
-            return '\\textsl{' + result + '}';
-        }
-        if (x[0].fontShape === 'sc') {
-            return '\\textsc{' + result + '}';
-        }
-        if (x[0].fontShape === 'n') {
-            return '\\textup{' + result + '}';
-        }
-        if (x[0].fontShape) {
-            return '\\fontshape{' + x[0].fontShape + '}' + result;
-        }
-        return result;
-    }));
-}
-function emitFontSeriesTextRun(context, run, expandMacro) {
-    return joinLatex(getPropertyRuns(run, 'fontSeries').map((x) => {
-        const result = emitFontShapeTextRun(context, x);
-        if (x[0].fontSeries === 'b') {
-            return '\\textbf{' + result + '}';
-        }
-        if (x[0].fontSeries === 'l') {
-            return '\\textlf{' + result + '}';
-        }
-        if (x[0].fontSeries === 'm') {
-            return '\\textmd{' + result + '}';
-        }
-        if (x[0].fontSeries) {
-            return '\\fontseries{' + x[0].fontSeries + '}' + result;
-        }
-        return result;
-    }));
-}
-function emitSizeTextRun(context, run, expandMacro) {
-    return joinLatex(getPropertyRuns(run, 'fontSize').map((x) => {
-        const result = emitFontSeriesTextRun(context, x);
-        const command = {
-            size1: 'tiny',
-            size2: 'scriptsize',
-            size3: 'footnotesize',
-            size4: 'small',
-            size5: 'normalsize',
-            size6: 'large',
-            size7: 'Large',
-            size8: 'LARGE',
-            size9: 'huge',
-            size10: 'Huge',
-        }[x[0].fontSize] || '';
-        if (command) {
-            return '\\' + command + ' ' + result;
-        }
-        return result;
-    }));
-}
-function emitFontFamilyTextRun(context, run, expandMacro) {
-    return joinLatex(getPropertyRuns(run, 'fontFamily').map((x) => {
-        const result = emitSizeTextRun(context, x);
-        const command = {
-            roman: 'textrm',
-            monospace: 'texttt',
-            'sans-serif': 'textsf',
-        }[x[0].fontFamily] || '';
-        if (command) {
-            return '\\' + command + '{' + result + '}';
-        }
-        if (x[0].fontFamily) {
-            return '\\fontfamily{' + x[0].fontFamily + '}' + result;
-        }
-        return result;
-    }));
-}
-function emitStyledTextRun(context, run, expandMacro) {
-    return emitFontFamilyTextRun(context, run);
-}
-function emitColorRun(context, run, expandMacro) {
-    return joinLatex(getPropertyRuns(run, 'color').map((x) => {
-        const result = emitStyledTextRun(context, x);
-        if (x[0].color &&
-            x[0].color !== 'none' &&
-            (!context || context.color !== x[0].color)) {
-            // If there is a color specified, and it is different
-            // from our context color, output a command
-            return ('\\textcolor{' +
-                colorToString(x[0].color) +
-                '}{' +
-                result +
-                '}');
-        }
-        return result;
-    }));
-}
-function emitLatexTextRun(context, run, expandMacro) {
-    const result = emitColorRun(context, run);
-    const allAtomsHaveShapeOrSeriesOrFontFamily = run.every((x) => x.fontSeries || x.fontShape || x.fontFamily);
-    if (!allAtomsHaveShapeOrSeriesOrFontFamily ||
-        run[0].mode !== context.mode) {
-        // Wrap in text, only if there isn't a shape or series on
-        // all the atoms, because if so, it will be wrapped in a
-        // \\textbf, \\textit, etc... and the \\text would be redundant
-        return `\\text{${result}}`;
-    }
-    return result;
-}
-const TEXT_FONT_CLASS = {
-    roman: '',
-    'sans-serif': 'ML__sans',
-    monospace: 'ML__tt',
-};
-/**
- * Return the font-family name
- */
-function applyStyle$2(span, style) {
-    const fontFamily = style.fontFamily;
-    if (TEXT_FONT_CLASS[fontFamily]) {
-        span.classes += ' ' + TEXT_FONT_CLASS[fontFamily];
-    }
-    else if (fontFamily) {
-        // Not a well-known family. Use a style.
-        span.setStyle('font-family', fontFamily);
-    }
-    if (style.fontShape) {
-        span.classes +=
-            ' ' +
-                ({
-                    it: 'ML__it',
-                    sl: 'ML__shape_sl',
-                    sc: 'ML__shape_sc',
-                    ol: 'ML__shape_ol',
-                }[style.fontShape] || '');
-    }
-    if (style.fontSeries) {
-        const m = style.fontSeries.match(/(.?[lbm])?(.?[cx])?/);
-        if (m) {
-            span.classes +=
-                ' ' +
-                    ({
-                        ul: 'ML__series_ul',
-                        el: 'ML__series_el',
-                        l: 'ML__series_l',
-                        sl: 'ML__series_sl',
-                        m: '',
-                        sb: 'ML__series_sb',
-                        b: 'ML__bold',
-                        eb: 'ML__series_eb',
-                        ub: 'ML__series_ub',
-                    }[m[1] || ''] || '');
-            span.classes +=
-                ' ' +
-                    ({
-                        uc: 'ML__series_uc',
-                        ec: 'ML__series_ec',
-                        c: 'ML__series_c',
-                        sc: 'ML__series_sc',
-                        n: '',
-                        sx: 'ML__series_sx',
-                        x: 'ML__series_x',
-                        ex: 'ML__series_ex',
-                        ux: 'ML__series_ux',
-                    }[m[2] || ''] || '');
-        }
-    }
-    // Always use the metrics of 'Main-Regular' in text mode
-    return 'Main-Regular';
-}
-// Given an array of tokens, return an array of atoms
-// options.args
-// options.macros
-// options.smartFence
-// options.style
-// options.parser
-function parse(tokens, error, options) {
-    let result = [];
-    let atom;
-    while (tokens.length > 0) {
-        const token = tokens.shift();
-        if (token === '<space>') {
-            atom = new Atom('text', '', ' ', options.style);
-            atom.symbol = ' ';
-            result.push(atom);
-        }
-        else if (token[0] === '\\') {
-            // Invoke the 'main' parser to handle the command
-            tokens.unshift(token);
-            let atoms;
-            [atoms, tokens] = options.parse('text', tokens, options);
-            result = [...result, ...atoms];
-        }
-        else if (token.length === 1) {
-            const info = getInfo(token, 'text', options.macros);
-            if (!info) {
-                error({ code: 'unexpected-token' });
-            }
-            else if (!info.mode || info.mode.includes('text')) {
-                atom = new Atom('text', info ? info.type : '', // @todo: revisit. Use 'text' type?
-                info ? info.value : token, options.style);
-                atom.symbol = token;
-                atom.latex = charToLatex('text', token);
-                result.push(atom);
-            }
-            else {
-                error({ code: 'unexpected-token' });
-            }
-        }
-        else if (token === '<$>' || token === '<$$>') {
-            // Mode-shift
-            const subtokens = tokens.slice(0, tokens.findIndex((x) => x === token));
-            tokens = tokens.slice(subtokens.length + 1);
-            const [atoms] = options.parse('math', subtokens, options);
-            result = [...result, ...atoms];
-        }
-        else if (token === '<{>' || token === '<}>') ;
-        else {
-            error({
-                code: 'unexpected-token',
-                arg: token,
-            });
-        }
-    }
-    return [result, tokens];
-}
-register('text', {
-    emitLatexRun: emitLatexTextRun,
-    applyStyle: applyStyle$2,
-    parse: (tokens, error, options) => parse(tokens, error, options)[0],
+    const result = makeSpan([makeSpan(rootVlist, 'root'), delim, body], 'sqrt', 'mord');
+    result.height = delim.height;
+    result.depth = delim.depth;
+    return [atom.bind(context, result)];
 });
 
 // Performance to check first char of string: https://jsben.ch/QLjdZ
@@ -11107,7 +10697,7 @@ class Parser {
             }
             else {
                 const token = this.peek();
-                if (this.peek() === ']') {
+                if (token === ']') {
                     done = true;
                 }
                 else if (isLiteral(token)) {
@@ -11126,6 +10716,48 @@ class Parser {
                 }
             }
             done = done || this.end();
+        }
+        return result;
+    }
+    /**
+     * Return a sequence of characters as a string.
+     * Terminates on a balanced closing bracket
+     * This is used by the `\ce` command
+     */
+    scanBalancedString() {
+        let result = '';
+        let done = this.end();
+        let level = 1;
+        while (!done) {
+            if (this.match('<space>')) {
+                result += ' ';
+            }
+            else {
+                const token = this.get();
+                if (token === '<{>') {
+                    result += '{';
+                    level += 1;
+                }
+                else if (token === '<}>') {
+                    level -= 1;
+                    if (level > 0) {
+                        result += '}';
+                    }
+                    else {
+                        this.index -= 1;
+                    }
+                }
+                else if (token === '<$>') {
+                    result += '$';
+                }
+                else if (token === '<$$>') {
+                    result += '$$';
+                }
+                else {
+                    result += token;
+                }
+            }
+            done = level === 0 || this.end();
         }
         return result;
     }
@@ -11667,7 +11299,7 @@ class Parser {
         // there isn't a valid delimiter after `\right`, we'll
         // consider the `\right` missing and set the `rightDelim` to undefined
         const rightDelim = this.scanDelim();
-        const result = new Atom(this.parseMode, 'leftright');
+        const result = new Atom(this.parseMode, 'leftright', '', this.style);
         result.leftDelim = leftDelim;
         result.rightDelim = rightDelim !== null && rightDelim !== void 0 ? rightDelim : undefined;
         result.inner = close === 'right';
@@ -11767,7 +11399,7 @@ class Parser {
             }
             else {
                 const arg = this.parseArgument(param.type);
-                if (arg) {
+                if (typeof arg !== 'undefined') {
                     args.push(arg);
                 }
                 else {
@@ -11817,6 +11449,10 @@ class Parser {
         const saveAtoms = this.swapAtoms([]);
         if (parseMode === 'string') {
             result = this.scanString();
+            this.skipUntilToken('<}>');
+        }
+        else if (parseMode === 'balanced-string') {
+            result = this.scanBalancedString();
             this.skipUntilToken('<}>');
         }
         else if (parseMode === 'number') {
@@ -11878,7 +11514,7 @@ class Parser {
         }
         this.parseMode = savedParseMode;
         const atoms = this.swapAtoms(saveAtoms);
-        return result ? result : atoms;
+        return result !== null && result !== void 0 ? result : atoms;
     }
     parseOptionalArgument(parseMode) {
         var _a;
@@ -11948,7 +11584,7 @@ class Parser {
         }
         this.parseMode = savedParseMode;
         const atoms = this.swapAtoms(saveAtoms);
-        return result ? result : atoms;
+        return result !== null && result !== void 0 ? result : atoms;
     }
     parseSimpleToken() {
         const token = this.get();
@@ -12212,7 +11848,8 @@ class Parser {
         const atom = new Atom(this.parseMode, 'group', parseString(def, this.parseMode, args, this.macros, false, this.onError));
         atom.captureSelection = true;
         atom.symbol = macro;
-        atom.latex = macro + tokensToString(this.tokens.slice(initialIndex));
+        atom.latex =
+            macro + tokensToString(this.tokens.slice(initialIndex, this.index));
         return atom;
     }
     /**
@@ -12466,6 +12103,45 @@ function invalidateVerbatimLatex(model) {
         atom = model.ancestor(depth);
     }
 }
+/**
+ * Ensure that the range is valid and canonical, i.e.
+ * start <= end
+ * collapsed = start === end
+ * start >= 0, end >=0
+ * If optins.accesibleAtomsOnly, the range is limited to the values
+ * that can produce an atom, specifically, the last value is excluded (it's
+ * a valid position to insert, but it can't be read from)
+ */
+function normalizeRange(iter, range, options = { accessibleAtomsOnly: false }) {
+    const result = { ...range };
+    const lastPosition = options.accessibleAtomsOnly
+        ? iter.lastPosition - 1
+        : iter.lastPosition;
+    if (result.end === -1) {
+        result.end = lastPosition;
+    }
+    else if (isNaN(result.end)) {
+        result.end = result.start;
+    }
+    else {
+        result.end = Math.min(result.end, lastPosition);
+    }
+    if (result.start < result.end) {
+        result.direction = 'forward';
+    }
+    else {
+        [result.start, result.end] = [result.end, result.start];
+        result.direction = 'backward';
+    }
+    result.collapsed = result.start === result.end;
+    if (result.collapsed) {
+        result.direction = 'none';
+    }
+    if (iter.positions[result.start]) {
+        result.depth = iter.positions[result.start].depth - 1;
+    }
+    return result;
+}
 
 function pathToString(path, extent) {
     let result = '';
@@ -12593,7 +12269,7 @@ function arrayColRow(array, index) {
  * Return the array cell corresponding to colrow or null (for example in
  * a sparse array)
  */
-function arrayCell(array, colrow) {
+function arrayCell(array, colrow, addMisingFirstAtom = true) {
     var _a;
     if (typeof colrow !== 'object')
         colrow = arrayColRow(array, colrow);
@@ -12602,7 +12278,9 @@ function arrayCell(array, colrow) {
         result = (_a = array[colrow.row][colrow.col]) !== null && _a !== void 0 ? _a : null;
     }
     // If the 'first' math atom is missing, insert it
-    if (result && (result.length === 0 || result[0].type !== 'first')) {
+    if (addMisingFirstAtom &&
+        result &&
+        (result.length === 0 || result[0].type !== 'first')) {
         result.unshift(new Atom('math', 'first'));
     }
     return result;
@@ -12653,198 +12331,3625 @@ function arrayAdjustRow(array, colRow, dir) {
     return result;
 }
 
-class ModelPrivate {
-    constructor(options, listeners, hooks, target) {
-        this.options = {
-            mode: 'math',
-            removeExtraneousParentheses: false,
-            ...options,
-        };
-        this.root = makeRoot(this.options.mode);
-        this.path = [{ relation: 'body', offset: 0 }];
-        this.extent = 0;
-        this.setListeners(listeners);
-        this.setHooks(hooks);
-        this.mathfield = target;
-        this.suppressChangeNotifications = false;
+// Each entry indicate the font-name (to be used to calculate font metrics)
+// and the CSS classes (for proper markup styling) for each possible
+// variant combinations.
+const VARIANTS = {
+    // Handle some special characters which are only available in "main" font (not "math")
+    main: ['Main-Regular', 'ML__cmr'],
+    'main-italic': ['Main-Italic', 'ML__cmr ML__it'],
+    'main-bold': ['Main-Bold', 'ML__cmr ML__bold'],
+    'main-bolditalic': ['Main-BoldItalic', 'ML__cmr ML_bold ML__it'],
+    normal: ['Main-Regular', 'ML__cmr'],
+    'normal-bold': ['Main-Bold', 'ML__mathbf'],
+    'normal-italic': ['Math-Italic', 'ML__mathit'],
+    'normal-bolditalic': ['Math-BoldItalic', 'ML__mathbfit'],
+    // Extended math symbols, arrows, etc.. at their standard Unicode codepoints
+    ams: ['AMS-Regular', 'ML__ams'],
+    'ams-bold': ['AMS-Regular', 'ML__ams'],
+    'ams-italic': ['AMS-Regular', 'ML__ams'],
+    'ams-bolditalic': ['AMS-Regular', 'ML__ams'],
+    'sans-serif': ['SansSerif-Regular', 'ML__sans'],
+    'sans-serif-bold': ['SansSerif-Regular', 'ML__sans ML__bold'],
+    'sans-serif-italic': ['SansSerif-Regular', 'ML__sans'],
+    'sans-serif-bolditalic': ['SansSerif-Regular', 'ML__sans'],
+    calligraphic: ['Caligraphic-Regular', 'ML__cal'],
+    'calligraphic-bold': ['Caligraphic-Regular', 'ML__cal ML__bold'],
+    'calligraphic-italic': ['Caligraphic-Regular', 'ML__cal ML__it'],
+    'calligraphic-bolditalic': [
+        'Caligraphic-Regular',
+        'ML__cal ML__bold ML__it',
+    ],
+    script: ['Script-Regular', 'ML__script'],
+    'script-bold': ['Script-Regular', 'ML__script ML__bold'],
+    'script-italic': ['Script-Regular', 'ML__script ML__it'],
+    'script-bolditalic': ['Script-Regular', 'ML__script ML__bold ML__it'],
+    fraktur: ['Fraktur-Regular', 'ML__frak'],
+    'fraktur-bold': ['Fraktur-Regular', 'ML__frak'],
+    'fraktur-italic': ['Fraktur-Regular', 'ML__frak'],
+    'fraktur-bolditalic': ['Fraktur-Regular', 'ML__frak'],
+    monospace: ['Typewriter-Regular', 'ML__tt'],
+    'monospace-bold': ['Typewriter-Regular', 'ML__tt ML__bold'],
+    'monospace-italic': ['Typewriter-Regular', 'ML__tt ML__it'],
+    'monospace-bolditalic': ['Typewriter-Regular', 'ML__tt ML__bold ML__it'],
+    // Blackboard characters are 'A-Z' in the AMS font
+    'double-struck': ['AMS-Regular', 'ML__bb'],
+    'double-struck-bold': ['AMS-Regular', 'ML__bb'],
+    'double-struck-italic': ['AMS-Regular', 'ML__bb'],
+    'double-struck-bolditalic': ['AMS-Regular', 'ML__bb'],
+};
+const VARIANT_REPERTOIRE = {
+    'double-struck': /^[A-Z ]$/,
+    script: /^[A-Z ]$/,
+    calligraphic: /^[0-9A-Z ]$/,
+    fraktur: /^[0-9A-Za-z ]$|^[!"#$%&'()*+,\-./:;=?[]^’‘]$/,
+    monospace: /^[0-9A-Za-z ]$|^[!"&'()*+,\-./:;=?@[\]^_~\u0131\u0237\u0393\u0394\u0398\u039b\u039e\u03A0\u03A3\u03A5\u03A8\u03a9]$/,
+    'sans-serif': /^[0-9A-Za-z ]$|^[!"&'()*+,\-./:;=?@[\]^_~\u0131\u0237\u0393\u0394\u0398\u039b\u039e\u03A0\u03A3\u03A5\u03A8\u03a9]$/,
+};
+const GREEK_LOWERCASE = /^[\u03b1-\u03c9]|\u03d1|\u03d5|\u03d6|\u03f1|\u03f5]$/;
+const GREEK_UPPERCASE = /^[\u0393|\u0394|\u0398|\u039b|\u039E|\u03A0|\u03A3|\u03a5|\u03a6|\u03a8|\u03a9]$/;
+const LETTER_SHAPE_RANGES = [
+    /^[a-z]$/,
+    /^[A-Z]$/,
+    GREEK_LOWERCASE,
+    GREEK_UPPERCASE,
+];
+// The letterShapeStyle property indicates which characters should be
+// automatically italicized (see LETTER_SHAPE_RANGES)
+const LETTER_SHAPE_MODIFIER = {
+    iso: ['it', 'it', 'it', 'it'],
+    tex: ['it', 'it', 'it', 'up'],
+    french: ['it', 'up', 'up', 'up'],
+    upright: ['up', 'up', 'up', 'up'],
+};
+// See http://ctan.math.illinois.edu/macros/latex/base/fntguide.pdf
+function emitLatexMathRun(context, run, expandMacro) {
+    let contextValue = context.variant;
+    if (context.variantStyle && context.variantStyle !== 'up') {
+        contextValue += '-' + context.variantStyle;
     }
-    clone() {
-        const result = new ModelPrivate(this.options, this.listeners, this.hooks, this.mathfield);
-        result.root = this.root;
-        result.path = clone(this.path);
-        return result;
-    }
-    setListeners(listeners) {
-        this.listeners = listeners;
-    }
-    setHooks(hooks) {
-        this.hooks = {
-            announce: (hooks === null || hooks === void 0 ? void 0 : hooks.announce) ? hooks.announce
-                : (_target, _command, _modelBefore, _atoms) => {
-                    return;
-                },
-            moveOut: (hooks === null || hooks === void 0 ? void 0 : hooks.moveOut) ? hooks.moveOut
-                : () => {
-                    return true;
-                },
-            tabOut: (hooks === null || hooks === void 0 ? void 0 : hooks.tabOut) ? hooks.tabOut
-                : () => {
-                    return true;
-                },
-        };
-    }
-    announce(command, // @revisit: be more explicit
-    modelBefore, atoms = []) {
-        this.hooks.announce(this.mathfield, command, modelBefore, atoms);
-    }
-    /**
-     * Return a string representation of the selection.
-     * @todo This is a bad name for this function, since it doesn't return
-     * a representation of the content, which one might expect...
-     */
-    toString() {
-        return pathToString(this.path, this.extent);
-    }
-    /**
-     * @return array of children of the parent
-     */
-    siblings() {
-        var _a;
-        if (this.path.length === 0)
-            return [];
-        let siblings;
-        if (this.parent().array) {
-            siblings = arrayCell(this.parent().array, this.relation());
-        }
-        else {
-            siblings = (_a = this.parent()[this.relation()]) !== null && _a !== void 0 ? _a : [];
-            if (typeof siblings === 'string')
-                siblings = [];
-        }
-        // If the 'first' atom is missing, insert it
-        if (siblings.length === 0 || siblings[0].type !== 'first') {
-            siblings.unshift(new Atom(this.parent().mode, 'first'));
-        }
-        return siblings;
-    }
-    anchorOffset() {
-        return this.path.length > 0
-            ? this.path[this.path.length - 1].offset
-            : 0;
-    }
-    focusOffset() {
-        return this.path.length > 0
-            ? this.path[this.path.length - 1].offset + this.extent
-            : 0;
-    }
-    /**
-     * Offset of the first atom included in the selection
-     * i.e. `=1` => selection starts with and includes first atom
-     * With expression _x=_ and atoms :
-     * - 0: _<first>_
-     * - 1: _x_
-     * - 2: _=_
-     *
-     * - if caret is before _x_:  `start` = 0, `end` = 0
-     * - if caret is after _x_:   `start` = 1, `end` = 1
-     * - if _x_ is selected:      `start` = 1, `end` = 2
-     * - if _x=_ is selected:   `start` = 1, `end` = 3
-     */
-    startOffset() {
-        return Math.min(this.focusOffset(), this.anchorOffset());
-    }
-    /**
-     * Offset of the first atom not included in the selection
-     * i.e. max value of `siblings.length`
-     * `endOffset - startOffset = extent`
-     */
-    endOffset() {
-        return Math.max(this.focusOffset(), this.anchorOffset());
-    }
-    /**
-     * Sibling, relative to `anchor`
-     * `sibling(0)` = start of selection
-     * `sibling(-1)` = sibling immediately left of start offset
-     */
-    sibling(offset) {
-        return this.siblings()[this.startOffset() + offset];
-    }
-    // @revisit: move ancestor, and anything related to the selection to model-selection
-    /**
-     * @param ancestor distance from self to ancestor.
-     * - `ancestor` = 0: self
-     * - `ancestor` = 1: parent
-     * - `ancestor` = 2: grand-parent
-     * - etc...
-     */
-    ancestor(ancestor) {
-        // If the requested ancestor goes beyond what's available,
-        // return null
-        if (ancestor > this.path.length)
-            return null;
-        // Start with the root
-        let result = this.root;
-        // Iterate over the path segments, selecting the appropriate
-        for (let i = 0; i < this.path.length - ancestor; i++) {
-            const segment = this.path[i];
-            if (result.array) {
-                result = arrayCell(result.array, segment.relation)[segment.offset];
+    return joinLatex(getPropertyRuns(run, 'color').map((x) => {
+        const result = joinLatex(getPropertyRuns(x, 'variant').map((x) => {
+            let value = x[0].variant;
+            if (x[0].variantStyle && x[0].variantStyle !== 'up') {
+                value += '-' + x[0].variantStyle;
             }
-            else if (!result[segment.relation]) {
-                // There is no such relation... (the path got out of sync with the tree)
-                return null;
+            // Check if all the atoms in this run have a base
+            // variant identical to the current variant
+            // If so, we can skip wrapping them
+            if (x.every((x) => {
+                const info = getInfo(x.symbol, context.mode, null);
+                if (!info || !(info.variant || info.variantStyle)) {
+                    return false;
+                }
+                let styledValue = x.variant;
+                if (x.variantStyle && x.variantStyle !== 'up') {
+                    styledValue += '-' + x.variantStyle;
+                }
+                return styledValue === value;
+            })) {
+                return joinLatex(x.map((x) => x.toLatex(expandMacro)));
+            }
+            let command = '';
+            if (value && value !== contextValue) {
+                command = {
+                    calligraphic: '\\mathcal{',
+                    fraktur: '\\mathfrak{',
+                    'double-struck': '\\mathbb{',
+                    script: '\\mathscr{',
+                    monospace: '\\mathtt{',
+                    'sans-serif': '\\mathsf{',
+                    normal: '\\mathrm{',
+                    'normal-italic': '\\mathit{',
+                    'normal-bold': '\\mathbf{',
+                    'normal-bolditalic': '\\mathbfit{',
+                    ams: '',
+                    'ams-italic': '\\mathit{',
+                    'ams-bold': '\\mathbf{',
+                    'ams-bolditalic': '\\mathbfit{',
+                    main: '',
+                    'main-italic': '\\mathit{',
+                    'main-bold': '\\mathbf{',
+                    'main-bolditalic': '\\mathbfit{',
+                }[value];
+                console.assert(typeof command !== 'undefined');
+            }
+            return (command +
+                joinLatex(x.map((x) => x.toLatex(expandMacro))) +
+                (command ? '}' : ''));
+        }));
+        if (x[0].color && (!context || context.color !== x[0].color)) {
+            return ('\\textcolor{' +
+                colorToString(x[0].color) +
+                '}{' +
+                result +
+                '}');
+        }
+        return result;
+    }));
+}
+function applyStyle$1(atom, style) {
+    // letterShapeStyle will usually be set automatically, except when the
+    // locale cannot be determined, in which case its value will be 'auto'
+    // which we default to 'tex'
+    const letterShapeStyle = style.letterShapeStyle === 'auto' || !style.letterShapeStyle
+        ? 'tex'
+        : style.letterShapeStyle;
+    let variant = style.variant || 'normal';
+    let variantStyle = style.variantStyle || '';
+    // 1. Remap to "main" font some characters that don't exist
+    // in the "math" font
+    // There are two fonts that include the roman italic characters, "main-it" and "math"
+    // They are similar, but the "math" font has some different kernings ('f')
+    // and some slightly different character shape. It doesn't include a few
+    // characters, so for those characters, "main" has to be used instead
+    // \imath, \jmath and \pound don't exist in "math" font,
+    // so use "main" italic instead.
+    if (variant === 'normal' &&
+        !variantStyle &&
+        /\u00a3|\u0131|\u0237/.test(atom.body)) {
+        variant = 'main';
+        variantStyle = 'italic';
+    }
+    // 2. If no explicit variant style, auto-italicize some symbols,
+    // depending on the letterShapeStyle
+    if (variant === 'normal' && !variantStyle && atom.body.length === 1) {
+        LETTER_SHAPE_RANGES.forEach((x, i) => {
+            if (x.test(atom.body) &&
+                LETTER_SHAPE_MODIFIER[letterShapeStyle][i] === 'it') {
+                variantStyle = 'italic';
+            }
+        });
+    }
+    // 3. Map the variant + variantStyle to a font
+    if (variantStyle === 'up') {
+        variantStyle = '';
+    }
+    const styledVariant = variantStyle ? variant + '-' + variantStyle : variant;
+    console.assert(VARIANTS[styledVariant]);
+    const [fontName, classes] = VARIANTS[styledVariant];
+    // 4. If outside the font repertoire, switch to system font
+    // (return NULL to use default metrics)
+    if (VARIANT_REPERTOIRE[variant] &&
+        !VARIANT_REPERTOIRE[variant].test(atom.body)) {
+        // Map to unicode character
+        atom.body = mathVariantToUnicode(atom.body, variant, variantStyle);
+        atom.variant = '';
+        atom.variantStyle = '';
+        // Return NULL to use default metrics
+        return null;
+    }
+    // Lowercase greek letters have an incomplete repertoire (no bold)
+    // so, for \mathbf to behave correctly, add a 'lcGreek' class.
+    if (GREEK_LOWERCASE.test(atom.body)) {
+        atom.classes += ' lcGreek';
+    }
+    // 5. Assign classes based on the font
+    if (classes) {
+        atom.classes += ' ' + classes;
+    }
+    return fontName;
+}
+register('math', {
+    emitLatexRun: emitLatexMathRun,
+    applyStyle: applyStyle$1,
+});
+
+function emitStringTextRun(_context, run, _expandMacro) {
+    let needSpace = false;
+    return joinLatex(run.map((x) => {
+        let result = '';
+        let space = '';
+        if (x.latex) {
+            result = x.latex;
+        }
+        else if (typeof x.body === 'string') {
+            result = unicodeStringToLatex('text', x.body);
+        }
+        else if (x.symbol) {
+            result = x.symbol.replace(/\\/g, '\\backslash ');
+        }
+        if (needSpace && (!result || /^[a-zA-Z0-9*]/.test(result))) {
+            space = '{}';
+        }
+        needSpace = /\\[a-zA-Z0-9]+\*?$/.test(result);
+        return space + result;
+    }));
+}
+function emitFontShapeTextRun(context, run, expandMacro) {
+    return joinLatex(getPropertyRuns(run, 'fontShape').map((x) => {
+        const result = emitStringTextRun(context, x);
+        if (x[0].fontShape === 'it') {
+            return '\\textit{' + result + '}';
+        }
+        if (x[0].fontShape === 'sl') {
+            return '\\textsl{' + result + '}';
+        }
+        if (x[0].fontShape === 'sc') {
+            return '\\textsc{' + result + '}';
+        }
+        if (x[0].fontShape === 'n') {
+            return '\\textup{' + result + '}';
+        }
+        if (x[0].fontShape) {
+            return '\\fontshape{' + x[0].fontShape + '}' + result;
+        }
+        return result;
+    }));
+}
+function emitFontSeriesTextRun(context, run, expandMacro) {
+    return joinLatex(getPropertyRuns(run, 'fontSeries').map((x) => {
+        const result = emitFontShapeTextRun(context, x);
+        if (x[0].fontSeries === 'b') {
+            return '\\textbf{' + result + '}';
+        }
+        if (x[0].fontSeries === 'l') {
+            return '\\textlf{' + result + '}';
+        }
+        if (x[0].fontSeries === 'm') {
+            return '\\textmd{' + result + '}';
+        }
+        if (x[0].fontSeries) {
+            return '\\fontseries{' + x[0].fontSeries + '}' + result;
+        }
+        return result;
+    }));
+}
+function emitSizeTextRun(context, run, expandMacro) {
+    return joinLatex(getPropertyRuns(run, 'fontSize').map((x) => {
+        const result = emitFontSeriesTextRun(context, x);
+        const command = {
+            size1: 'tiny',
+            size2: 'scriptsize',
+            size3: 'footnotesize',
+            size4: 'small',
+            size5: 'normalsize',
+            size6: 'large',
+            size7: 'Large',
+            size8: 'LARGE',
+            size9: 'huge',
+            size10: 'Huge',
+        }[x[0].fontSize] || '';
+        if (command) {
+            return '\\' + command + ' ' + result;
+        }
+        return result;
+    }));
+}
+function emitFontFamilyTextRun(context, run, expandMacro) {
+    return joinLatex(getPropertyRuns(run, 'fontFamily').map((x) => {
+        const result = emitSizeTextRun(context, x);
+        const command = {
+            roman: 'textrm',
+            monospace: 'texttt',
+            'sans-serif': 'textsf',
+        }[x[0].fontFamily] || '';
+        if (command) {
+            return '\\' + command + '{' + result + '}';
+        }
+        if (x[0].fontFamily) {
+            return '\\fontfamily{' + x[0].fontFamily + '}' + result;
+        }
+        return result;
+    }));
+}
+function emitStyledTextRun(context, run, expandMacro) {
+    return emitFontFamilyTextRun(context, run);
+}
+function emitColorRun(context, run, expandMacro) {
+    return joinLatex(getPropertyRuns(run, 'color').map((x) => {
+        const result = emitStyledTextRun(context, x);
+        if (x[0].color &&
+            x[0].color !== 'none' &&
+            (!context || context.color !== x[0].color)) {
+            // If there is a color specified, and it is different
+            // from our context color, output a command
+            return ('\\textcolor{' +
+                colorToString(x[0].color) +
+                '}{' +
+                result +
+                '}');
+        }
+        return result;
+    }));
+}
+function emitLatexTextRun(context, run, expandMacro) {
+    const result = emitColorRun(context, run);
+    const allAtomsHaveShapeOrSeriesOrFontFamily = run.every((x) => x.fontSeries || x.fontShape || x.fontFamily);
+    if (!allAtomsHaveShapeOrSeriesOrFontFamily ||
+        run[0].mode !== context.mode) {
+        // Wrap in text, only if there isn't a shape or series on
+        // all the atoms, because if so, it will be wrapped in a
+        // \\textbf, \\textit, etc... and the \\text would be redundant
+        return `\\text{${result}}`;
+    }
+    return result;
+}
+const TEXT_FONT_CLASS = {
+    roman: '',
+    'sans-serif': 'ML__sans',
+    monospace: 'ML__tt',
+};
+/**
+ * Return the font-family name
+ */
+function applyStyle$2(span, style) {
+    const fontFamily = style.fontFamily;
+    if (TEXT_FONT_CLASS[fontFamily]) {
+        span.classes += ' ' + TEXT_FONT_CLASS[fontFamily];
+    }
+    else if (fontFamily) {
+        // Not a well-known family. Use a style.
+        span.setStyle('font-family', fontFamily);
+    }
+    if (style.fontShape) {
+        span.classes +=
+            ' ' +
+                ({
+                    it: 'ML__it',
+                    sl: 'ML__shape_sl',
+                    sc: 'ML__shape_sc',
+                    ol: 'ML__shape_ol',
+                }[style.fontShape] || '');
+    }
+    if (style.fontSeries) {
+        const m = style.fontSeries.match(/(.?[lbm])?(.?[cx])?/);
+        if (m) {
+            span.classes +=
+                ' ' +
+                    ({
+                        ul: 'ML__series_ul',
+                        el: 'ML__series_el',
+                        l: 'ML__series_l',
+                        sl: 'ML__series_sl',
+                        m: '',
+                        sb: 'ML__series_sb',
+                        b: 'ML__bold',
+                        eb: 'ML__series_eb',
+                        ub: 'ML__series_ub',
+                    }[m[1] || ''] || '');
+            span.classes +=
+                ' ' +
+                    ({
+                        uc: 'ML__series_uc',
+                        ec: 'ML__series_ec',
+                        c: 'ML__series_c',
+                        sc: 'ML__series_sc',
+                        n: '',
+                        sx: 'ML__series_sx',
+                        x: 'ML__series_x',
+                        ex: 'ML__series_ex',
+                        ux: 'ML__series_ux',
+                    }[m[2] || ''] || '');
+        }
+    }
+    // Always use the metrics of 'Main-Regular' in text mode
+    return 'Main-Regular';
+}
+// Given an array of tokens, return an array of atoms
+// options.args
+// options.macros
+// options.smartFence
+// options.style
+// options.parser
+function parse(tokens, error, options) {
+    let result = [];
+    let atom;
+    while (tokens.length > 0) {
+        const token = tokens.shift();
+        if (token === '<space>') {
+            atom = new Atom('text', '', ' ', options.style);
+            atom.symbol = ' ';
+            result.push(atom);
+        }
+        else if (token[0] === '\\') {
+            // Invoke the 'main' parser to handle the command
+            tokens.unshift(token);
+            let atoms;
+            [atoms, tokens] = options.parse('text', tokens, options);
+            result = [...result, ...atoms];
+        }
+        else if (token === '<$>' || token === '<$$>') {
+            // Mode-shift
+            const subtokens = tokens.slice(0, tokens.findIndex((x) => x === token));
+            tokens = tokens.slice(subtokens.length + 1);
+            const [atoms] = options.parse('math', subtokens, options);
+            result = [...result, ...atoms];
+        }
+        else if (token === '<{>' || token === '<}>') ;
+        else {
+            const info = getInfo(token, 'text', options.macros);
+            if (!info) {
+                error({ code: 'unexpected-token' });
+            }
+            else if (!info.mode || info.mode.includes('text')) {
+                atom = new Atom('text', info ? info.type : '', // @todo: revisit. Use 'text' type?
+                info ? info.value : token, options.style);
+                atom.symbol = token;
+                atom.latex = charToLatex('text', token);
+                result.push(atom);
             }
             else {
-                // Make sure the 'first' atom has been inserted, otherwise
-                // the segment.offset might be invalid
-                if (result[segment.relation].length === 0 ||
-                    result[segment.relation][0].type !== 'first') {
-                    result[segment.relation].unshift(new Atom(result[segment.relation][0].mode, 'first'));
-                }
-                const offset = Math.min(segment.offset, result[segment.relation].length - 1);
-                result = result[segment.relation][offset];
+                error({ code: 'unexpected-token' });
             }
         }
-        return result;
     }
-    parent() {
-        return this.ancestor(1);
+    return [result, tokens];
+}
+register('text', {
+    emitLatexRun: emitLatexTextRun,
+    applyStyle: applyStyle$2,
+    parse: (tokens, error, options) => parse(tokens, error, options)[0],
+});
+
+/* eslint-disable */
+defineFunction(['ce', 'pu'], '{chemformula:balanced-string}', null, (name, args) => {
+    const tex = texify.go(mhchemParser.go(args[0], name === '\\pu' ? 'pu' : 'ce'));
+    // console.log(tex);
+    return {
+        type: 'group',
+        mode: 'chem',
+        body: parseString(tex),
+        latexOpen: '\\' + name + '{',
+        latexClose: '}',
+    };
+}
+// (name, _parent, atom, emit) => {
+//     // let args = '';
+//     // if (typeof atom.index !== 'undefined') {
+//     //     args += `[${emit(atom, atom.index)}]`;
+//     // }
+//     // args += `{${emit(atom, atom.body as Atom[])}}`;
+//     return '';
+// }
+);
+/*************************************************************
+ *
+ *  MathJax/extensions/TeX/mhchem.js
+ *
+ *  Implements the \ce command for handling chemical formulas
+ *  from the mhchem LaTeX package.
+ *
+ *  ---------------------------------------------------------------------
+ *
+ *  Copyright (c) 2011-2015 The MathJax Consortium
+ *  Copyright (c) 2015-2018 Martin Hensel
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+//
+// Core parser for mhchem syntax  (recursive)
+//
+/** @type {MhchemParser} */
+var mhchemParser = {
+    //
+    // Parses mchem \ce syntax
+    //
+    // Call like
+    //   go("H2O");
+    //
+    go: function (input, stateMachine) {
+        if (!input) {
+            return [];
+        }
+        if (stateMachine === undefined) {
+            stateMachine = 'ce';
+        }
+        var state = '0';
+        //
+        // String buffers for parsing:
+        //
+        // buffer.a == amount
+        // buffer.o == element
+        // buffer.b == left-side superscript
+        // buffer.p == left-side subscript
+        // buffer.q == right-side subscript
+        // buffer.d == right-side superscript
+        //
+        // buffer.r == arrow
+        // buffer.rdt == arrow, script above, type
+        // buffer.rd == arrow, script above, content
+        // buffer.rqt == arrow, script below, type
+        // buffer.rq == arrow, script below, content
+        //
+        // buffer.text_
+        // buffer.rm
+        // etc.
+        //
+        // buffer.parenthesisLevel == int, starting at 0
+        // buffer.sb == bool, space before
+        // buffer.beginsWithBond == bool
+        //
+        // These letters are also used as state names.
+        //
+        // Other states:
+        // 0 == begin of main part (arrow/operator unlikely)
+        // 1 == next entity
+        // 2 == next entity (arrow/operator unlikely)
+        // 3 == next atom
+        // c == macro
+        //
+        /** @type {Buffer} */
+        var buffer = {};
+        buffer['parenthesisLevel'] = 0;
+        input = input.replace(/\n/g, ' ');
+        input = input.replace(/[\u2212\u2013\u2014\u2010]/g, '-');
+        input = input.replace(/[\u2026]/g, '...');
+        //
+        // Looks through mhchemParser.transitions, to execute a matching action
+        // (recursive)
+        //
+        var lastInput;
+        var watchdog = 10;
+        /** @type {ParserOutput[]} */
+        var output = [];
+        while (true) {
+            if (lastInput !== input) {
+                watchdog = 10;
+                lastInput = input;
+            }
+            else {
+                watchdog--;
+            }
+            //
+            // Find actions in transition table
+            //
+            var machine = mhchemParser.stateMachines[stateMachine];
+            var t = machine.transitions[state] || machine.transitions['*'];
+            iterateTransitions: for (var i = 0; i < t.length; i++) {
+                var matches = mhchemParser.patterns.match_(t[i].pattern, input);
+                if (matches) {
+                    //
+                    // Execute actions
+                    //
+                    var task = t[i].task;
+                    for (var iA = 0; iA < task.action_.length; iA++) {
+                        var o;
+                        //
+                        // Find and execute action
+                        //
+                        if (machine.actions[task.action_[iA].type_]) {
+                            o = machine.actions[task.action_[iA].type_](buffer, matches.match_, task.action_[iA].option);
+                        }
+                        else if (mhchemParser.actions[task.action_[iA].type_]) {
+                            o = mhchemParser.actions[task.action_[iA].type_](buffer, matches.match_, task.action_[iA].option);
+                        }
+                        else {
+                            throw [
+                                'MhchemBugA',
+                                'mhchem bug A. Please report. (' +
+                                    task.action_[iA].type_ +
+                                    ')',
+                            ]; // Trying to use non-existing action
+                        }
+                        //
+                        // Add output
+                        //
+                        mhchemParser.concatArray(output, o);
+                    }
+                    //
+                    // Set next state,
+                    // Shorten input,
+                    // Continue with next character
+                    //   (= apply only one transition per position)
+                    //
+                    state = task.nextState || state;
+                    if (input.length > 0) {
+                        if (!task.revisit) {
+                            input = matches.remainder;
+                        }
+                        if (!task.toContinue) {
+                            break iterateTransitions;
+                        }
+                    }
+                    else {
+                        return output;
+                    }
+                }
+            }
+            //
+            // Prevent infinite loop
+            //
+            if (watchdog <= 0) {
+                throw ['MhchemBugU', 'mhchem bug U. Please report.']; // Unexpected character
+            }
+        }
+    },
+    concatArray: function (a, b) {
+        if (b) {
+            if (Array.isArray(b)) {
+                for (var iB = 0; iB < b.length; iB++) {
+                    a.push(b[iB]);
+                }
+            }
+            else {
+                a.push(b);
+            }
+        }
+    },
+    patterns: {
+        //
+        // Matching patterns
+        // either regexps or function that return null or {match_:"a", remainder:"bc"}
+        //
+        patterns: {
+            // property names must not look like integers ("2") for correct property traversal order, later on
+            empty: /^$/,
+            else: /^./,
+            else2: /^./,
+            space: /^\s/,
+            'space A': /^\s(?=[A-Z\\$])/,
+            space$: /^\s$/,
+            'a-z': /^[a-z]/,
+            x: /^x/,
+            x$: /^x$/,
+            i$: /^i$/,
+            letters: /^(?:[a-zA-Z\u03B1-\u03C9\u0391-\u03A9?@]|(?:\\(?:alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)(?:\s+|\{\}|(?![a-zA-Z]))))+/,
+            '\\greek': /^\\(?:alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)(?:\s+|\{\}|(?![a-zA-Z]))/,
+            'one lowercase latin letter $': /^(?:([a-z])(?:$|[^a-zA-Z]))$/,
+            '$one lowercase latin letter$ $': /^\$(?:([a-z])(?:$|[^a-zA-Z]))\$$/,
+            'one lowercase greek letter $': /^(?:\$?[\u03B1-\u03C9]\$?|\$?\\(?:alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\s*\$?)(?:\s+|\{\}|(?![a-zA-Z]))$/,
+            digits: /^[0-9]+/,
+            '-9.,9': /^[+\-]?(?:[0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))/,
+            '-9.,9 no missing 0': /^[+\-]?[0-9]+(?:[.,][0-9]+)?/,
+            '(-)(9.,9)(e)(99)': function (input) {
+                var m = input.match(/^(\+\-|\+\/\-|\+|\-|\\pm\s?)?([0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))?(\((?:[0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))\))?(?:([eE]|\s*(\*|x|\\times|\u00D7)\s*10\^)([+\-]?[0-9]+|\{[+\-]?[0-9]+\}))?/);
+                if (m && m[0]) {
+                    return {
+                        match_: m.splice(1),
+                        remainder: input.substr(m[0].length),
+                    };
+                }
+                return null;
+            },
+            '(-)(9)^(-9)': function (input) {
+                var m = input.match(/^(\+\-|\+\/\-|\+|\-|\\pm\s?)?([0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+)?)\^([+\-]?[0-9]+|\{[+\-]?[0-9]+\})/);
+                if (m && m[0]) {
+                    return {
+                        match_: m.splice(1),
+                        remainder: input.substr(m[0].length),
+                    };
+                }
+                return null;
+            },
+            'state of aggregation $': function (input) {
+                // ... or crystal system
+                var a = mhchemParser.patterns.findObserveGroups(input, '', /^\([a-z]{1,3}(?=[\),])/, ')', ''); // (aq), (aq,$\infty$), (aq, sat)
+                if (a && a.remainder.match(/^($|[\s,;\)\]\}])/)) {
+                    return a;
+                } //  AND end of 'phrase'
+                var m = input.match(/^(?:\((?:\\ca\s?)?\$[amothc]\$\))/); // OR crystal system ($o$) (\ca$c$)
+                if (m) {
+                    return {
+                        match_: m[0],
+                        remainder: input.substr(m[0].length),
+                    };
+                }
+                return null;
+            },
+            '_{(state of aggregation)}$': /^_\{(\([a-z]{1,3}\))\}/,
+            '{[(': /^(?:\\\{|\[|\()/,
+            ')]}': /^(?:\)|\]|\\\})/,
+            ', ': /^[,;]\s*/,
+            ',': /^[,;]/,
+            '.': /^[.]/,
+            '. ': /^([.\u22C5\u00B7\u2022])\s*/,
+            '...': /^\.\.\.(?=$|[^.])/,
+            '* ': /^([*])\s*/,
+            '^{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '^{', '', '', '}');
+            },
+            '^($...$)': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '^', '$', '$', '');
+            },
+            '^a': /^\^([0-9]+|[^\\_])/,
+            '^\\x{}{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '^', /^\\[a-zA-Z]+\{/, '}', '', '', '{', '}', '', true);
+            },
+            '^\\x{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '^', /^\\[a-zA-Z]+\{/, '}', '');
+            },
+            '^\\x': /^\^(\\[a-zA-Z]+)\s*/,
+            '^(-1)': /^\^(-?\d+)/,
+            "'": /^'/,
+            '_{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '_{', '', '', '}');
+            },
+            '_($...$)': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '_', '$', '$', '');
+            },
+            _9: /^_([+\-]?[0-9]+|[^\\])/,
+            '_\\x{}{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '_', /^\\[a-zA-Z]+\{/, '}', '', '', '{', '}', '', true);
+            },
+            '_\\x{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '_', /^\\[a-zA-Z]+\{/, '}', '');
+            },
+            '_\\x': /^_(\\[a-zA-Z]+)\s*/,
+            '^_': /^(?:\^(?=_)|\_(?=\^)|[\^_]$)/,
+            '{}': /^\{\}/,
+            '{...}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '', '{', '}', '');
+            },
+            '{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '{', '', '', '}');
+            },
+            '$...$': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '', '$', '$', '');
+            },
+            '${(...)}$': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '${', '', '', '}$');
+            },
+            '$(...)$': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '$', '', '', '$');
+            },
+            '=<>': /^[=<>]/,
+            '#': /^[#\u2261]/,
+            '+': /^\+/,
+            '-$': /^-(?=[\s_},;\]/]|$|\([a-z]+\))/,
+            '-9': /^-(?=[0-9])/,
+            '- orbital overlap': /^-(?=(?:[spd]|sp)(?:$|[\s,;\)\]\}]))/,
+            '-': /^-/,
+            'pm-operator': /^(?:\\pm|\$\\pm\$|\+-|\+\/-)/,
+            operator: /^(?:\+|(?:[\-=<>]|<<|>>|\\approx|\$\\approx\$)(?=\s|$|-?[0-9]))/,
+            arrowUpDown: /^(?:v|\(v\)|\^|\(\^\))(?=$|[\s,;\)\]\}])/,
+            '\\bond{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\bond{', '', '', '}');
+            },
+            '->': /^(?:<->|<-->|->|<-|<=>>|<<=>|<=>|[\u2192\u27F6\u21CC])/,
+            CMT: /^[CMT](?=\[)/,
+            '[(...)]': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '[', '', '', ']');
+            },
+            '1st-level escape': /^(&|\\\\|\\hline)\s*/,
+            '\\,': /^(?:\\[,\ ;:])/,
+            '\\x{}{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '', /^\\[a-zA-Z]+\{/, '}', '', '', '{', '}', '', true);
+            },
+            '\\x{}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '', /^\\[a-zA-Z]+\{/, '}', '');
+            },
+            '\\ca': /^\\ca(?:\s+|(?![a-zA-Z]))/,
+            '\\x': /^(?:\\[a-zA-Z]+\s*|\\[_&{}%])/,
+            orbital: /^(?:[0-9]{1,2}[spdfgh]|[0-9]{0,2}sp)(?=$|[^a-zA-Z])/,
+            others: /^[\/~|]/,
+            '\\frac{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\frac{', '', '', '}', '{', '', '', '}');
+            },
+            '\\overset{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\overset{', '', '', '}', '{', '', '', '}');
+            },
+            '\\underset{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\underset{', '', '', '}', '{', '', '', '}');
+            },
+            '\\underbrace{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\underbrace{', '', '', '}_', '{', '', '', '}');
+            },
+            '\\color{(...)}0': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\color{', '', '', '}');
+            },
+            '\\color{(...)}{(...)}1': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\color{', '', '', '}', '{', '', '', '}');
+            },
+            '\\color(...){(...)}2': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\color', '\\', '', /^(?=\{)/, '{', '', '', '}');
+            },
+            '\\ce{(...)}': function (input) {
+                return mhchemParser.patterns.findObserveGroups(input, '\\ce{', '', '', '}');
+            },
+            oxidation$: /^(?:[+-][IVX]+|\\pm\s*0|\$\\pm\$\s*0)$/,
+            'd-oxidation$': /^(?:[+-]?\s?[IVX]+|\\pm\s*0|\$\\pm\$\s*0)$/,
+            'roman numeral': /^[IVX]+/,
+            '1/2$': /^[+\-]?(?:[0-9]+|\$[a-z]\$|[a-z])\/[0-9]+(?:\$[a-z]\$|[a-z])?$/,
+            amount: function (input) {
+                var match;
+                // e.g. 2, 0.5, 1/2, -2, n/2, +;  $a$ could be added later in parsing
+                match = input.match(/^(?:(?:(?:\([+\-]?[0-9]+\/[0-9]+\)|[+\-]?(?:[0-9]+|\$[a-z]\$|[a-z])\/[0-9]+|[+\-]?[0-9]+[.,][0-9]+|[+\-]?\.[0-9]+|[+\-]?[0-9]+)(?:[a-z](?=\s*[A-Z]))?)|[+\-]?[a-z](?=\s*[A-Z])|\+(?!\s))/);
+                if (match) {
+                    return {
+                        match_: match[0],
+                        remainder: input.substr(match[0].length),
+                    };
+                }
+                var a = mhchemParser.patterns.findObserveGroups(input, '', '$', '$', '');
+                if (a) {
+                    // e.g. $2n-1$, $-$
+                    match = a.match_.match(/^\$(?:\(?[+\-]?(?:[0-9]*[a-z]?[+\-])?[0-9]*[a-z](?:[+\-][0-9]*[a-z]?)?\)?|\+|-)\$$/);
+                    if (match) {
+                        return {
+                            match_: match[0],
+                            remainder: input.substr(match[0].length),
+                        };
+                    }
+                }
+                return null;
+            },
+            amount2: function (input) {
+                return this['amount'](input);
+            },
+            '(KV letters),': /^(?:[A-Z][a-z]{0,2}|i)(?=,)/,
+            formula$: function (input) {
+                if (input.match(/^\([a-z]+\)$/)) {
+                    return null;
+                } // state of aggregation = no formula
+                var match = input.match(/^(?:[a-z]|(?:[0-9\ \+\-\,\.\(\)]+[a-z])+[0-9\ \+\-\,\.\(\)]*|(?:[a-z][0-9\ \+\-\,\.\(\)]+)+[a-z]?)$/);
+                if (match) {
+                    return {
+                        match_: match[0],
+                        remainder: input.substr(match[0].length),
+                    };
+                }
+                return null;
+            },
+            uprightEntities: /^(?:pH|pOH|pC|pK|iPr|iBu)(?=$|[^a-zA-Z])/,
+            '/': /^\s*(\/)\s*/,
+            '//': /^\s*(\/\/)\s*/,
+            '*': /^\s*[*.]\s*/,
+        },
+        findObserveGroups: function (input, begExcl, begIncl, endIncl, endExcl, beg2Excl, beg2Incl, end2Incl, end2Excl, combine) {
+            /** @type {{(input: string, pattern: string | RegExp): string | string[] | null;}} */
+            var _match = function (input, pattern) {
+                if (typeof pattern === 'string') {
+                    if (input.indexOf(pattern) !== 0) {
+                        return null;
+                    }
+                    return pattern;
+                }
+                else {
+                    var match = input.match(pattern);
+                    if (!match) {
+                        return null;
+                    }
+                    return match[0];
+                }
+            };
+            /** @type {{(input: string, i: number, endChars: string | RegExp): {endMatchBegin: number, endMatchEnd: number} | null;}} */
+            var _findObserveGroups = function (input, i, endChars) {
+                var braces = 0;
+                while (i < input.length) {
+                    var a = input.charAt(i);
+                    var match = _match(input.substr(i), endChars);
+                    if (match !== null && braces === 0) {
+                        return {
+                            endMatchBegin: i,
+                            endMatchEnd: i + match.length,
+                        };
+                    }
+                    else if (a === '{') {
+                        braces++;
+                    }
+                    else if (a === '}') {
+                        if (braces === 0) {
+                            throw [
+                                'ExtraCloseMissingOpen',
+                                'Extra close brace or missing open brace',
+                            ];
+                        }
+                        else {
+                            braces--;
+                        }
+                    }
+                    i++;
+                }
+                if (braces > 0) {
+                    return null;
+                }
+                return null;
+            };
+            var match = _match(input, begExcl);
+            if (match === null) {
+                return null;
+            }
+            input = input.substr(match.length);
+            match = _match(input, begIncl);
+            if (match === null) {
+                return null;
+            }
+            var e = _findObserveGroups(input, match.length, endIncl || endExcl);
+            if (e === null) {
+                return null;
+            }
+            var match1 = input.substring(0, endIncl ? e.endMatchEnd : e.endMatchBegin);
+            if (!(beg2Excl || beg2Incl)) {
+                return {
+                    match_: match1,
+                    remainder: input.substr(e.endMatchEnd),
+                };
+            }
+            else {
+                var group2 = this.findObserveGroups(input.substr(e.endMatchEnd), beg2Excl, beg2Incl, end2Incl, end2Excl);
+                if (group2 === null) {
+                    return null;
+                }
+                /** @type {string[]} */
+                var matchRet = [match1, group2.match_];
+                return {
+                    match_: combine ? matchRet.join('') : matchRet,
+                    remainder: group2.remainder,
+                };
+            }
+        },
+        //
+        // Matching function
+        // e.g. match("a", input) will look for the regexp called "a" and see if it matches
+        // returns null or {match_:"a", remainder:"bc"}
+        //
+        match_: function (m, input) {
+            var pattern = mhchemParser.patterns.patterns[m];
+            if (pattern === undefined) {
+                throw [
+                    'MhchemBugP',
+                    'mhchem bug P. Please report. (' + m + ')',
+                ]; // Trying to use non-existing pattern
+            }
+            else if (typeof pattern === 'function') {
+                return mhchemParser.patterns.patterns[m](input); // cannot use cached var pattern here, because some pattern functions need this===mhchemParser
+            }
+            else {
+                // RegExp
+                var match = input.match(pattern);
+                if (match) {
+                    var mm;
+                    if (match[2]) {
+                        mm = [match[1], match[2]];
+                    }
+                    else if (match[1]) {
+                        mm = match[1];
+                    }
+                    else {
+                        mm = match[0];
+                    }
+                    return {
+                        match_: mm,
+                        remainder: input.substr(match[0].length),
+                    };
+                }
+                return null;
+            }
+        },
+    },
+    //
+    // Generic state machine actions
+    //
+    actions: {
+        'a=': function (buffer, m) {
+            buffer.a = (buffer.a || '') + m;
+        },
+        'b=': function (buffer, m) {
+            buffer.b = (buffer.b || '') + m;
+        },
+        'p=': function (buffer, m) {
+            buffer.p = (buffer.p || '') + m;
+        },
+        'o=': function (buffer, m) {
+            buffer.o = (buffer.o || '') + m;
+        },
+        'q=': function (buffer, m) {
+            buffer.q = (buffer.q || '') + m;
+        },
+        'd=': function (buffer, m) {
+            buffer.d = (buffer.d || '') + m;
+        },
+        'rm=': function (buffer, m) {
+            buffer.rm = (buffer.rm || '') + m;
+        },
+        'text=': function (buffer, m) {
+            buffer.text_ = (buffer.text_ || '') + m;
+        },
+        insert: function (buffer, m, a) {
+            return { type_: a };
+        },
+        'insert+p1': function (buffer, m, a) {
+            return { type_: a, p1: m };
+        },
+        'insert+p1+p2': function (buffer, m, a) {
+            return { type_: a, p1: m[0], p2: m[1] };
+        },
+        copy: function (buffer, m) {
+            return m;
+        },
+        rm: function (buffer, m) {
+            return { type_: 'rm', p1: m || '' };
+        },
+        text: function (buffer, m) {
+            return mhchemParser.go(m, 'text');
+        },
+        '{text}': function (buffer, m) {
+            var ret = ['{'];
+            mhchemParser.concatArray(ret, mhchemParser.go(m, 'text'));
+            ret.push('}');
+            return ret;
+        },
+        'tex-math': function (buffer, m) {
+            return mhchemParser.go(m, 'tex-math');
+        },
+        'tex-math tight': function (buffer, m) {
+            return mhchemParser.go(m, 'tex-math tight');
+        },
+        bond: function (buffer, m, k) {
+            return { type_: 'bond', kind_: k || m };
+        },
+        'color0-output': function (buffer, m) {
+            return { type_: 'color0', color: m[0] };
+        },
+        ce: function (buffer, m) {
+            return mhchemParser.go(m);
+        },
+        '1/2': function (buffer, m) {
+            /** @type {ParserOutput[]} */
+            var ret = [];
+            if (m.match(/^[+\-]/)) {
+                ret.push(m.substr(0, 1));
+                m = m.substr(1);
+            }
+            var n = m.match(/^([0-9]+|\$[a-z]\$|[a-z])\/([0-9]+)(\$[a-z]\$|[a-z])?$/);
+            n[1] = n[1].replace(/\$/g, '');
+            ret.push({ type_: 'frac', p1: n[1], p2: n[2] });
+            if (n[3]) {
+                n[3] = n[3].replace(/\$/g, '');
+                ret.push({ type_: 'tex-math', p1: n[3] });
+            }
+            return ret;
+        },
+        '9,9': function (buffer, m) {
+            return mhchemParser.go(m, '9,9');
+        },
+    },
+    //
+    // createTransitions
+    // convert  { 'letter': { 'state': { action_: 'output' } } }  to  { 'state' => [ { pattern: 'letter', task: { action_: [{type_: 'output'}] } } ] }
+    // with expansion of 'a|b' to 'a' and 'b' (at 2 places)
+    //
+    createTransitions: function (o) {
+        var pattern, state;
+        /** @type {string[]} */
+        var stateArray;
+        var i;
+        //
+        // 1. Collect all states
+        //
+        /** @type {Transitions} */
+        var transitions = {};
+        for (pattern in o) {
+            for (state in o[pattern]) {
+                stateArray = state.split('|');
+                o[pattern][state].stateArray = stateArray;
+                for (i = 0; i < stateArray.length; i++) {
+                    transitions[stateArray[i]] = [];
+                }
+            }
+        }
+        //
+        // 2. Fill states
+        //
+        for (pattern in o) {
+            for (state in o[pattern]) {
+                stateArray = o[pattern][state].stateArray || [];
+                for (i = 0; i < stateArray.length; i++) {
+                    //
+                    // 2a. Normalize actions into array:  'text=' ==> [{type_:'text='}]
+                    // (Note to myself: Resolving the function here would be problematic. It would need .bind (for *this*) and currying (for *option*).)
+                    //
+                    /** @type {any} */
+                    var p = o[pattern][state];
+                    if (p.action_) {
+                        p.action_ = [].concat(p.action_);
+                        for (var k = 0; k < p.action_.length; k++) {
+                            if (typeof p.action_[k] === 'string') {
+                                p.action_[k] = { type_: p.action_[k] };
+                            }
+                        }
+                    }
+                    else {
+                        p.action_ = [];
+                    }
+                    //
+                    // 2.b Multi-insert
+                    //
+                    var patternArray = pattern.split('|');
+                    for (var j = 0; j < patternArray.length; j++) {
+                        if (stateArray[i] === '*') {
+                            // insert into all
+                            for (var t in transitions) {
+                                transitions[t].push({
+                                    pattern: patternArray[j],
+                                    task: p,
+                                });
+                            }
+                        }
+                        else {
+                            transitions[stateArray[i]].push({
+                                pattern: patternArray[j],
+                                task: p,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return transitions;
+    },
+    stateMachines: {},
+};
+//
+// Definition of state machines
+//
+mhchemParser.stateMachines = {
+    //
+    // \ce state machines
+    //
+    //#region ce
+    ce: {
+        // main parser
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            else: {
+                '0|1|2': {
+                    action_: 'beginsWithBond=false',
+                    revisit: true,
+                    toContinue: true,
+                },
+            },
+            oxidation$: {
+                '0': { action_: 'oxidation-output' },
+            },
+            CMT: {
+                r: { action_: 'rdt=', nextState: 'rt' },
+                rd: { action_: 'rqt=', nextState: 'rdt' },
+            },
+            arrowUpDown: {
+                '0|1|2|as': {
+                    action_: ['sb=false', 'output', 'operator'],
+                    nextState: '1',
+                },
+            },
+            uprightEntities: {
+                '0|1|2': { action_: ['o=', 'output'], nextState: '1' },
+            },
+            orbital: {
+                '0|1|2|3': { action_: 'o=', nextState: 'o' },
+            },
+            '->': {
+                '0|1|2|3': { action_: 'r=', nextState: 'r' },
+                'a|as': { action_: ['output', 'r='], nextState: 'r' },
+                '*': { action_: ['output', 'r='], nextState: 'r' },
+            },
+            '+': {
+                o: { action_: 'd= kv', nextState: 'd' },
+                'd|D': { action_: 'd=', nextState: 'd' },
+                q: { action_: 'd=', nextState: 'qd' },
+                'qd|qD': { action_: 'd=', nextState: 'qd' },
+                dq: { action_: ['output', 'd='], nextState: 'd' },
+                '3': {
+                    action_: ['sb=false', 'output', 'operator'],
+                    nextState: '0',
+                },
+            },
+            amount: {
+                '0|2': { action_: 'a=', nextState: 'a' },
+            },
+            'pm-operator': {
+                '0|1|2|a|as': {
+                    action_: [
+                        'sb=false',
+                        'output',
+                        { type_: 'operator', option: '\\pm' },
+                    ],
+                    nextState: '0',
+                },
+            },
+            operator: {
+                '0|1|2|a|as': {
+                    action_: ['sb=false', 'output', 'operator'],
+                    nextState: '0',
+                },
+            },
+            '-$': {
+                'o|q': {
+                    action_: ['charge or bond', 'output'],
+                    nextState: 'qd',
+                },
+                d: { action_: 'd=', nextState: 'd' },
+                D: {
+                    action_: ['output', { type_: 'bond', option: '-' }],
+                    nextState: '3',
+                },
+                q: { action_: 'd=', nextState: 'qd' },
+                qd: { action_: 'd=', nextState: 'qd' },
+                'qD|dq': {
+                    action_: ['output', { type_: 'bond', option: '-' }],
+                    nextState: '3',
+                },
+            },
+            '-9': {
+                '3|o': {
+                    action_: ['output', { type_: 'insert', option: 'hyphen' }],
+                    nextState: '3',
+                },
+            },
+            '- orbital overlap': {
+                o: {
+                    action_: ['output', { type_: 'insert', option: 'hyphen' }],
+                    nextState: '2',
+                },
+                d: {
+                    action_: ['output', { type_: 'insert', option: 'hyphen' }],
+                    nextState: '2',
+                },
+            },
+            '-': {
+                '0|1|2': {
+                    action_: [
+                        { type_: 'output', option: 1 },
+                        'beginsWithBond=true',
+                        { type_: 'bond', option: '-' },
+                    ],
+                    nextState: '3',
+                },
+                '3': { action_: { type_: 'bond', option: '-' } },
+                a: {
+                    action_: ['output', { type_: 'insert', option: 'hyphen' }],
+                    nextState: '2',
+                },
+                as: {
+                    action_: [
+                        { type_: 'output', option: 2 },
+                        { type_: 'bond', option: '-' },
+                    ],
+                    nextState: '3',
+                },
+                b: { action_: 'b=' },
+                o: {
+                    action_: { type_: '- after o/d', option: false },
+                    nextState: '2',
+                },
+                q: {
+                    action_: { type_: '- after o/d', option: false },
+                    nextState: '2',
+                },
+                'd|qd|dq': {
+                    action_: { type_: '- after o/d', option: true },
+                    nextState: '2',
+                },
+                'D|qD|p': {
+                    action_: ['output', { type_: 'bond', option: '-' }],
+                    nextState: '3',
+                },
+            },
+            amount2: {
+                '1|3': { action_: 'a=', nextState: 'a' },
+            },
+            letters: {
+                '0|1|2|3|a|as|b|p|bp|o': { action_: 'o=', nextState: 'o' },
+                'q|dq': { action_: ['output', 'o='], nextState: 'o' },
+                'd|D|qd|qD': { action_: 'o after d', nextState: 'o' },
+            },
+            digits: {
+                o: { action_: 'q=', nextState: 'q' },
+                'd|D': { action_: 'q=', nextState: 'dq' },
+                q: { action_: ['output', 'o='], nextState: 'o' },
+                a: { action_: 'o=', nextState: 'o' },
+            },
+            'space A': {
+                'b|p|bp': {},
+            },
+            space: {
+                a: { nextState: 'as' },
+                '0': { action_: 'sb=false' },
+                '1|2': { action_: 'sb=true' },
+                'r|rt|rd|rdt|rdq': { action_: 'output', nextState: '0' },
+                '*': { action_: ['output', 'sb=true'], nextState: '1' },
+            },
+            '1st-level escape': {
+                '1|2': {
+                    action_: [
+                        'output',
+                        { type_: 'insert+p1', option: '1st-level escape' },
+                    ],
+                },
+                '*': {
+                    action_: [
+                        'output',
+                        { type_: 'insert+p1', option: '1st-level escape' },
+                    ],
+                    nextState: '0',
+                },
+            },
+            '[(...)]': {
+                'r|rt': { action_: 'rd=', nextState: 'rd' },
+                'rd|rdt': { action_: 'rq=', nextState: 'rdq' },
+            },
+            '...': {
+                'o|d|D|dq|qd|qD': {
+                    action_: ['output', { type_: 'bond', option: '...' }],
+                    nextState: '3',
+                },
+                '*': {
+                    action_: [
+                        { type_: 'output', option: 1 },
+                        { type_: 'insert', option: 'ellipsis' },
+                    ],
+                    nextState: '1',
+                },
+            },
+            '. |* ': {
+                '*': {
+                    action_: [
+                        'output',
+                        { type_: 'insert', option: 'addition compound' },
+                    ],
+                    nextState: '1',
+                },
+            },
+            'state of aggregation $': {
+                '*': {
+                    action_: ['output', 'state of aggregation'],
+                    nextState: '1',
+                },
+            },
+            '{[(': {
+                'a|as|o': {
+                    action_: ['o=', 'output', 'parenthesisLevel++'],
+                    nextState: '2',
+                },
+                '0|1|2|3': {
+                    action_: ['o=', 'output', 'parenthesisLevel++'],
+                    nextState: '2',
+                },
+                '*': {
+                    action_: ['output', 'o=', 'output', 'parenthesisLevel++'],
+                    nextState: '2',
+                },
+            },
+            ')]}': {
+                '0|1|2|3|b|p|bp|o': {
+                    action_: ['o=', 'parenthesisLevel--'],
+                    nextState: 'o',
+                },
+                'a|as|d|D|q|qd|qD|dq': {
+                    action_: ['output', 'o=', 'parenthesisLevel--'],
+                    nextState: 'o',
+                },
+            },
+            ', ': {
+                '*': { action_: ['output', 'comma'], nextState: '0' },
+            },
+            '^_': {
+                // ^ and _ without a sensible argument
+                '*': {},
+            },
+            '^{(...)}|^($...$)': {
+                '0|1|2|as': { action_: 'b=', nextState: 'b' },
+                p: { action_: 'b=', nextState: 'bp' },
+                '3|o': { action_: 'd= kv', nextState: 'D' },
+                q: { action_: 'd=', nextState: 'qD' },
+                'd|D|qd|qD|dq': { action_: ['output', 'd='], nextState: 'D' },
+            },
+            "^a|^\\x{}{}|^\\x{}|^\\x|'": {
+                '0|1|2|as': { action_: 'b=', nextState: 'b' },
+                p: { action_: 'b=', nextState: 'bp' },
+                '3|o': { action_: 'd= kv', nextState: 'd' },
+                q: { action_: 'd=', nextState: 'qd' },
+                'd|qd|D|qD': { action_: 'd=' },
+                dq: { action_: ['output', 'd='], nextState: 'd' },
+            },
+            '_{(state of aggregation)}$': {
+                'd|D|q|qd|qD|dq': { action_: ['output', 'q='], nextState: 'q' },
+            },
+            '_{(...)}|_($...$)|_9|_\\x{}{}|_\\x{}|_\\x': {
+                '0|1|2|as': { action_: 'p=', nextState: 'p' },
+                b: { action_: 'p=', nextState: 'bp' },
+                '3|o': { action_: 'q=', nextState: 'q' },
+                'd|D': { action_: 'q=', nextState: 'dq' },
+                'q|qd|qD|dq': { action_: ['output', 'q='], nextState: 'q' },
+            },
+            '=<>': {
+                '0|1|2|3|a|as|o|q|d|D|qd|qD|dq': {
+                    action_: [{ type_: 'output', option: 2 }, 'bond'],
+                    nextState: '3',
+                },
+            },
+            '#': {
+                '0|1|2|3|a|as|o': {
+                    action_: [
+                        { type_: 'output', option: 2 },
+                        { type_: 'bond', option: '#' },
+                    ],
+                    nextState: '3',
+                },
+            },
+            '{}': {
+                '*': {
+                    action_: { type_: 'output', option: 1 },
+                    nextState: '1',
+                },
+            },
+            '{...}': {
+                '0|1|2|3|a|as|b|p|bp': { action_: 'o=', nextState: 'o' },
+                'o|d|D|q|qd|qD|dq': {
+                    action_: ['output', 'o='],
+                    nextState: 'o',
+                },
+            },
+            '$...$': {
+                a: { action_: 'a=' },
+                '0|1|2|3|as|b|p|bp|o': { action_: 'o=', nextState: 'o' },
+                'as|o': { action_: 'o=' },
+                'q|d|D|qd|qD|dq': { action_: ['output', 'o='], nextState: 'o' },
+            },
+            '\\bond{(...)}': {
+                '*': {
+                    action_: [{ type_: 'output', option: 2 }, 'bond'],
+                    nextState: '3',
+                },
+            },
+            '\\frac{(...)}': {
+                '*': {
+                    action_: [{ type_: 'output', option: 1 }, 'frac-output'],
+                    nextState: '3',
+                },
+            },
+            '\\overset{(...)}': {
+                '*': {
+                    action_: [{ type_: 'output', option: 2 }, 'overset-output'],
+                    nextState: '3',
+                },
+            },
+            '\\underset{(...)}': {
+                '*': {
+                    action_: [
+                        { type_: 'output', option: 2 },
+                        'underset-output',
+                    ],
+                    nextState: '3',
+                },
+            },
+            '\\underbrace{(...)}': {
+                '*': {
+                    action_: [
+                        { type_: 'output', option: 2 },
+                        'underbrace-output',
+                    ],
+                    nextState: '3',
+                },
+            },
+            '\\color{(...)}{(...)}1|\\color(...){(...)}2': {
+                '*': {
+                    action_: [{ type_: 'output', option: 2 }, 'color-output'],
+                    nextState: '3',
+                },
+            },
+            '\\color{(...)}0': {
+                '*': {
+                    action_: [{ type_: 'output', option: 2 }, 'color0-output'],
+                },
+            },
+            '\\ce{(...)}': {
+                '*': {
+                    action_: [{ type_: 'output', option: 2 }, 'ce'],
+                    nextState: '3',
+                },
+            },
+            '\\,': {
+                '*': {
+                    action_: [{ type_: 'output', option: 1 }, 'copy'],
+                    nextState: '1',
+                },
+            },
+            '\\x{}{}|\\x{}|\\x': {
+                '0|1|2|3|a|as|b|p|bp|o|c0': {
+                    action_: ['o=', 'output'],
+                    nextState: '3',
+                },
+                '*': { action_: ['output', 'o=', 'output'], nextState: '3' },
+            },
+            others: {
+                '*': {
+                    action_: [{ type_: 'output', option: 1 }, 'copy'],
+                    nextState: '3',
+                },
+            },
+            else2: {
+                a: { action_: 'a to o', nextState: 'o', revisit: true },
+                as: {
+                    action_: ['output', 'sb=true'],
+                    nextState: '1',
+                    revisit: true,
+                },
+                'r|rt|rd|rdt|rdq': {
+                    action_: ['output'],
+                    nextState: '0',
+                    revisit: true,
+                },
+                '*': { action_: ['output', 'copy'], nextState: '3' },
+            },
+        }),
+        actions: {
+            'o after d': function (buffer, m) {
+                var ret;
+                if ((buffer.d || '').match(/^[0-9]+$/)) {
+                    var tmp = buffer.d;
+                    buffer.d = undefined;
+                    ret = this['output'](buffer);
+                    buffer.b = tmp;
+                }
+                else {
+                    ret = this['output'](buffer);
+                }
+                mhchemParser.actions['o='](buffer, m);
+                return ret;
+            },
+            'd= kv': function (buffer, m) {
+                buffer.d = m;
+                buffer.dType = 'kv';
+            },
+            'charge or bond': function (buffer, m) {
+                if (buffer['beginsWithBond']) {
+                    /** @type {ParserOutput[]} */
+                    var ret = [];
+                    mhchemParser.concatArray(ret, this['output'](buffer));
+                    mhchemParser.concatArray(ret, mhchemParser.actions['bond'](buffer, m, '-'));
+                    return ret;
+                }
+                else {
+                    buffer.d = m;
+                }
+            },
+            '- after o/d': function (buffer, m, isAfterD) {
+                var c1 = mhchemParser.patterns.match_('orbital', buffer.o || '');
+                var c2 = mhchemParser.patterns.match_('one lowercase greek letter $', buffer.o || '');
+                var c3 = mhchemParser.patterns.match_('one lowercase latin letter $', buffer.o || '');
+                var c4 = mhchemParser.patterns.match_('$one lowercase latin letter$ $', buffer.o || '');
+                var hyphenFollows = m === '-' &&
+                    ((c1 && c1.remainder === '') || c2 || c3 || c4);
+                if (hyphenFollows &&
+                    !buffer.a &&
+                    !buffer.b &&
+                    !buffer.p &&
+                    !buffer.d &&
+                    !buffer.q &&
+                    !c1 &&
+                    c3) {
+                    buffer.o = '$' + buffer.o + '$';
+                }
+                /** @type {ParserOutput[]} */
+                var ret = [];
+                if (hyphenFollows) {
+                    mhchemParser.concatArray(ret, this['output'](buffer));
+                    ret.push({ type_: 'hyphen' });
+                }
+                else {
+                    c1 = mhchemParser.patterns.match_('digits', buffer.d || '');
+                    if (isAfterD && c1 && c1.remainder === '') {
+                        mhchemParser.concatArray(ret, mhchemParser.actions['d='](buffer, m));
+                        mhchemParser.concatArray(ret, this['output'](buffer));
+                    }
+                    else {
+                        mhchemParser.concatArray(ret, this['output'](buffer));
+                        mhchemParser.concatArray(ret, mhchemParser.actions['bond'](buffer, m, '-'));
+                    }
+                }
+                return ret;
+            },
+            'a to o': function (buffer) {
+                buffer.o = buffer.a;
+                buffer.a = undefined;
+            },
+            'sb=true': function (buffer) {
+                buffer.sb = true;
+            },
+            'sb=false': function (buffer) {
+                buffer.sb = false;
+            },
+            'beginsWithBond=true': function (buffer) {
+                buffer['beginsWithBond'] = true;
+            },
+            'beginsWithBond=false': function (buffer) {
+                buffer['beginsWithBond'] = false;
+            },
+            'parenthesisLevel++': function (buffer) {
+                buffer['parenthesisLevel']++;
+            },
+            'parenthesisLevel--': function (buffer) {
+                buffer['parenthesisLevel']--;
+            },
+            'state of aggregation': function (buffer, m) {
+                return {
+                    type_: 'state of aggregation',
+                    p1: mhchemParser.go(m, 'o'),
+                };
+            },
+            comma: function (buffer, m) {
+                var a = m.replace(/\s*$/, '');
+                var withSpace = a !== m;
+                if (withSpace && buffer['parenthesisLevel'] === 0) {
+                    return { type_: 'comma enumeration L', p1: a };
+                }
+                else {
+                    return { type_: 'comma enumeration M', p1: a };
+                }
+            },
+            output: function (buffer, m, entityFollows) {
+                // entityFollows:
+                //   undefined = if we have nothing else to output, also ignore the just read space (buffer.sb)
+                //   1 = an entity follows, never omit the space if there was one just read before (can only apply to state 1)
+                //   2 = 1 + the entity can have an amount, so output a\, instead of converting it to o (can only apply to states a|as)
+                /** @type {ParserOutput | ParserOutput[]} */
+                var ret;
+                if (!buffer.r) {
+                    ret = [];
+                    if (!buffer.a &&
+                        !buffer.b &&
+                        !buffer.p &&
+                        !buffer.o &&
+                        !buffer.q &&
+                        !buffer.d &&
+                        !entityFollows) ;
+                    else {
+                        if (buffer.sb) {
+                            ret.push({ type_: 'entitySkip' });
+                        }
+                        if (!buffer.o &&
+                            !buffer.q &&
+                            !buffer.d &&
+                            !buffer.b &&
+                            !buffer.p &&
+                            entityFollows !== 2) {
+                            buffer.o = buffer.a;
+                            buffer.a = undefined;
+                        }
+                        else if (!buffer.o &&
+                            !buffer.q &&
+                            !buffer.d &&
+                            (buffer.b || buffer.p)) {
+                            buffer.o = buffer.a;
+                            buffer.d = buffer.b;
+                            buffer.q = buffer.p;
+                            buffer.a = buffer.b = buffer.p = undefined;
+                        }
+                        else {
+                            if (buffer.o &&
+                                buffer.dType === 'kv' &&
+                                mhchemParser.patterns.match_('d-oxidation$', buffer.d || '')) {
+                                buffer.dType = 'oxidation';
+                            }
+                            else if (buffer.o &&
+                                buffer.dType === 'kv' &&
+                                !buffer.q) {
+                                buffer.dType = undefined;
+                            }
+                        }
+                        ret.push({
+                            type_: 'chemfive',
+                            a: mhchemParser.go(buffer.a, 'a'),
+                            b: mhchemParser.go(buffer.b, 'bd'),
+                            p: mhchemParser.go(buffer.p, 'pq'),
+                            o: mhchemParser.go(buffer.o, 'o'),
+                            q: mhchemParser.go(buffer.q, 'pq'),
+                            d: mhchemParser.go(buffer.d, buffer.dType === 'oxidation'
+                                ? 'oxidation'
+                                : 'bd'),
+                            dType: buffer.dType,
+                        });
+                    }
+                }
+                else {
+                    // r
+                    /** @type {ParserOutput[]} */
+                    var rd;
+                    if (buffer.rdt === 'M') {
+                        rd = mhchemParser.go(buffer.rd, 'tex-math');
+                    }
+                    else if (buffer.rdt === 'T') {
+                        rd = [{ type_: 'text', p1: buffer.rd || '' }];
+                    }
+                    else {
+                        rd = mhchemParser.go(buffer.rd);
+                    }
+                    /** @type {ParserOutput[]} */
+                    var rq;
+                    if (buffer.rqt === 'M') {
+                        rq = mhchemParser.go(buffer.rq, 'tex-math');
+                    }
+                    else if (buffer.rqt === 'T') {
+                        rq = [{ type_: 'text', p1: buffer.rq || '' }];
+                    }
+                    else {
+                        rq = mhchemParser.go(buffer.rq);
+                    }
+                    ret = {
+                        type_: 'arrow',
+                        r: buffer.r,
+                        rd: rd,
+                        rq: rq,
+                    };
+                }
+                for (var p in buffer) {
+                    if (p !== 'parenthesisLevel' && p !== 'beginsWithBond') {
+                        delete buffer[p];
+                    }
+                }
+                return ret;
+            },
+            'oxidation-output': function (buffer, m) {
+                var ret = ['{'];
+                mhchemParser.concatArray(ret, mhchemParser.go(m, 'oxidation'));
+                ret.push('}');
+                return ret;
+            },
+            'frac-output': function (buffer, m) {
+                return {
+                    type_: 'frac-ce',
+                    p1: mhchemParser.go(m[0]),
+                    p2: mhchemParser.go(m[1]),
+                };
+            },
+            'overset-output': function (buffer, m) {
+                return {
+                    type_: 'overset',
+                    p1: mhchemParser.go(m[0]),
+                    p2: mhchemParser.go(m[1]),
+                };
+            },
+            'underset-output': function (buffer, m) {
+                return {
+                    type_: 'underset',
+                    p1: mhchemParser.go(m[0]),
+                    p2: mhchemParser.go(m[1]),
+                };
+            },
+            'underbrace-output': function (buffer, m) {
+                return {
+                    type_: 'underbrace',
+                    p1: mhchemParser.go(m[0]),
+                    p2: mhchemParser.go(m[1]),
+                };
+            },
+            'color-output': function (buffer, m) {
+                return {
+                    type_: 'color',
+                    color1: m[0],
+                    color2: mhchemParser.go(m[1]),
+                };
+            },
+            'r=': function (buffer, m) {
+                buffer.r = m;
+            },
+            'rdt=': function (buffer, m) {
+                buffer.rdt = m;
+            },
+            'rd=': function (buffer, m) {
+                buffer.rd = m;
+            },
+            'rqt=': function (buffer, m) {
+                buffer.rqt = m;
+            },
+            'rq=': function (buffer, m) {
+                buffer.rq = m;
+            },
+            operator: function (buffer, m, p1) {
+                return { type_: 'operator', kind_: p1 || m };
+            },
+        },
+    },
+    a: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            '1/2$': {
+                '0': { action_: '1/2' },
+            },
+            else: {
+                '0': { nextState: '1', revisit: true },
+            },
+            '$(...)$': {
+                '*': { action_: 'tex-math tight', nextState: '1' },
+            },
+            ',': {
+                '*': { action_: { type_: 'insert', option: 'commaDecimal' } },
+            },
+            else2: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {},
+    },
+    o: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            '1/2$': {
+                '0': { action_: '1/2' },
+            },
+            else: {
+                '0': { nextState: '1', revisit: true },
+            },
+            letters: {
+                '*': { action_: 'rm' },
+            },
+            '\\ca': {
+                '*': { action_: { type_: 'insert', option: 'circa' } },
+            },
+            '\\x{}{}|\\x{}|\\x': {
+                '*': { action_: 'copy' },
+            },
+            '${(...)}$|$(...)$': {
+                '*': { action_: 'tex-math' },
+            },
+            '{(...)}': {
+                '*': { action_: '{text}' },
+            },
+            else2: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {},
+    },
+    text: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            '{...}': {
+                '*': { action_: 'text=' },
+            },
+            '${(...)}$|$(...)$': {
+                '*': { action_: 'tex-math' },
+            },
+            '\\greek': {
+                '*': { action_: ['output', 'rm'] },
+            },
+            '\\,|\\x{}{}|\\x{}|\\x': {
+                '*': { action_: ['output', 'copy'] },
+            },
+            else: {
+                '*': { action_: 'text=' },
+            },
+        }),
+        actions: {
+            output: function (buffer) {
+                if (buffer.text_) {
+                    /** @type {ParserOutput} */
+                    var ret = { type_: 'text', p1: buffer.text_ };
+                    for (var p in buffer) {
+                        delete buffer[p];
+                    }
+                    return ret;
+                }
+            },
+        },
+    },
+    pq: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            'state of aggregation $': {
+                '*': { action_: 'state of aggregation' },
+            },
+            i$: {
+                '0': { nextState: '!f', revisit: true },
+            },
+            '(KV letters),': {
+                '0': { action_: 'rm', nextState: '0' },
+            },
+            formula$: {
+                '0': { nextState: 'f', revisit: true },
+            },
+            '1/2$': {
+                '0': { action_: '1/2' },
+            },
+            else: {
+                '0': { nextState: '!f', revisit: true },
+            },
+            '${(...)}$|$(...)$': {
+                '*': { action_: 'tex-math' },
+            },
+            '{(...)}': {
+                '*': { action_: 'text' },
+            },
+            'a-z': {
+                f: { action_: 'tex-math' },
+            },
+            letters: {
+                '*': { action_: 'rm' },
+            },
+            '-9.,9': {
+                '*': { action_: '9,9' },
+            },
+            ',': {
+                '*': {
+                    action_: {
+                        type_: 'insert+p1',
+                        option: 'comma enumeration S',
+                    },
+                },
+            },
+            '\\color{(...)}{(...)}1|\\color(...){(...)}2': {
+                '*': { action_: 'color-output' },
+            },
+            '\\color{(...)}0': {
+                '*': { action_: 'color0-output' },
+            },
+            '\\ce{(...)}': {
+                '*': { action_: 'ce' },
+            },
+            '\\,|\\x{}{}|\\x{}|\\x': {
+                '*': { action_: 'copy' },
+            },
+            else2: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {
+            'state of aggregation': function (buffer, m) {
+                return {
+                    type_: 'state of aggregation subscript',
+                    p1: mhchemParser.go(m, 'o'),
+                };
+            },
+            'color-output': function (buffer, m) {
+                return {
+                    type_: 'color',
+                    color1: m[0],
+                    color2: mhchemParser.go(m[1], 'pq'),
+                };
+            },
+        },
+    },
+    bd: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            x$: {
+                '0': { nextState: '!f', revisit: true },
+            },
+            formula$: {
+                '0': { nextState: 'f', revisit: true },
+            },
+            else: {
+                '0': { nextState: '!f', revisit: true },
+            },
+            '-9.,9 no missing 0': {
+                '*': { action_: '9,9' },
+            },
+            '.': {
+                '*': { action_: { type_: 'insert', option: 'electron dot' } },
+            },
+            'a-z': {
+                f: { action_: 'tex-math' },
+            },
+            x: {
+                '*': { action_: { type_: 'insert', option: 'KV x' } },
+            },
+            letters: {
+                '*': { action_: 'rm' },
+            },
+            "'": {
+                '*': { action_: { type_: 'insert', option: 'prime' } },
+            },
+            '${(...)}$|$(...)$': {
+                '*': { action_: 'tex-math' },
+            },
+            '{(...)}': {
+                '*': { action_: 'text' },
+            },
+            '\\color{(...)}{(...)}1|\\color(...){(...)}2': {
+                '*': { action_: 'color-output' },
+            },
+            '\\color{(...)}0': {
+                '*': { action_: 'color0-output' },
+            },
+            '\\ce{(...)}': {
+                '*': { action_: 'ce' },
+            },
+            '\\,|\\x{}{}|\\x{}|\\x': {
+                '*': { action_: 'copy' },
+            },
+            else2: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {
+            'color-output': function (buffer, m) {
+                return {
+                    type_: 'color',
+                    color1: m[0],
+                    color2: mhchemParser.go(m[1], 'bd'),
+                };
+            },
+        },
+    },
+    oxidation: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            'roman numeral': {
+                '*': { action_: 'roman-numeral' },
+            },
+            '${(...)}$|$(...)$': {
+                '*': { action_: 'tex-math' },
+            },
+            else: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {
+            'roman-numeral': function (buffer, m) {
+                return { type_: 'roman numeral', p1: m || '' };
+            },
+        },
+    },
+    'tex-math': {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            '\\ce{(...)}': {
+                '*': { action_: ['output', 'ce'] },
+            },
+            '{...}|\\,|\\x{}{}|\\x{}|\\x': {
+                '*': { action_: 'o=' },
+            },
+            else: {
+                '*': { action_: 'o=' },
+            },
+        }),
+        actions: {
+            output: function (buffer) {
+                if (buffer.o) {
+                    /** @type {ParserOutput} */
+                    var ret = { type_: 'tex-math', p1: buffer.o };
+                    for (var p in buffer) {
+                        delete buffer[p];
+                    }
+                    return ret;
+                }
+            },
+        },
+    },
+    'tex-math tight': {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            '\\ce{(...)}': {
+                '*': { action_: ['output', 'ce'] },
+            },
+            '{...}|\\,|\\x{}{}|\\x{}|\\x': {
+                '*': { action_: 'o=' },
+            },
+            '-|+': {
+                '*': { action_: 'tight operator' },
+            },
+            else: {
+                '*': { action_: 'o=' },
+            },
+        }),
+        actions: {
+            'tight operator': function (buffer, m) {
+                buffer.o = (buffer.o || '') + '{' + m + '}';
+            },
+            output: function (buffer) {
+                if (buffer.o) {
+                    /** @type {ParserOutput} */
+                    var ret = { type_: 'tex-math', p1: buffer.o };
+                    for (var p in buffer) {
+                        delete buffer[p];
+                    }
+                    return ret;
+                }
+            },
+        },
+    },
+    '9,9': {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': {},
+            },
+            ',': {
+                '*': { action_: 'comma' },
+            },
+            else: {
+                '*': { action_: 'copy' },
+            },
+        }),
+        actions: {
+            comma: function () {
+                return { type_: 'commaDecimal' };
+            },
+        },
+    },
+    //#endregion
+    //
+    // \pu state machines
+    //
+    //#region pu
+    pu: {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            space$: {
+                '*': { action_: ['output', 'space'] },
+            },
+            '{[(|)]}': {
+                '0|a': { action_: 'copy' },
+            },
+            '(-)(9)^(-9)': {
+                '0': { action_: 'number^', nextState: 'a' },
+            },
+            '(-)(9.,9)(e)(99)': {
+                '0': { action_: 'enumber', nextState: 'a' },
+            },
+            space: {
+                '0|a': {},
+            },
+            'pm-operator': {
+                '0|a': {
+                    action_: { type_: 'operator', option: '\\pm' },
+                    nextState: '0',
+                },
+            },
+            operator: {
+                '0|a': { action_: 'copy', nextState: '0' },
+            },
+            '//': {
+                d: { action_: 'o=', nextState: '/' },
+            },
+            '/': {
+                d: { action_: 'o=', nextState: '/' },
+            },
+            '{...}|else': {
+                '0|d': { action_: 'd=', nextState: 'd' },
+                a: { action_: ['space', 'd='], nextState: 'd' },
+                '/|q': { action_: 'q=', nextState: 'q' },
+            },
+        }),
+        actions: {
+            enumber: function (buffer, m) {
+                /** @type {ParserOutput[]} */
+                var ret = [];
+                if (m[0] === '+-' || m[0] === '+/-') {
+                    ret.push('\\pm ');
+                }
+                else if (m[0]) {
+                    ret.push(m[0]);
+                }
+                if (m[1]) {
+                    mhchemParser.concatArray(ret, mhchemParser.go(m[1], 'pu-9,9'));
+                    if (m[2]) {
+                        if (m[2].match(/[,.]/)) {
+                            mhchemParser.concatArray(ret, mhchemParser.go(m[2], 'pu-9,9'));
+                        }
+                        else {
+                            ret.push(m[2]);
+                        }
+                    }
+                    m[3] = m[4] || m[3];
+                    if (m[3]) {
+                        m[3] = m[3].trim();
+                        if (m[3] === 'e' || m[3].substr(0, 1) === '*') {
+                            ret.push({ type_: 'cdot' });
+                        }
+                        else {
+                            ret.push({ type_: 'times' });
+                        }
+                    }
+                }
+                if (m[3]) {
+                    ret.push('10^{' + m[5] + '}');
+                }
+                return ret;
+            },
+            'number^': function (buffer, m) {
+                /** @type {ParserOutput[]} */
+                var ret = [];
+                if (m[0] === '+-' || m[0] === '+/-') {
+                    ret.push('\\pm ');
+                }
+                else if (m[0]) {
+                    ret.push(m[0]);
+                }
+                mhchemParser.concatArray(ret, mhchemParser.go(m[1], 'pu-9,9'));
+                ret.push('^{' + m[2] + '}');
+                return ret;
+            },
+            operator: function (buffer, m, p1) {
+                return { type_: 'operator', kind_: p1 || m };
+            },
+            space: function () {
+                return { type_: 'pu-space-1' };
+            },
+            output: function (buffer) {
+                /** @type {ParserOutput | ParserOutput[]} */
+                var ret;
+                var md = mhchemParser.patterns.match_('{(...)}', buffer.d || '');
+                if (md && md.remainder === '') {
+                    buffer.d = md.match_;
+                }
+                var mq = mhchemParser.patterns.match_('{(...)}', buffer.q || '');
+                if (mq && mq.remainder === '') {
+                    buffer.q = mq.match_;
+                }
+                if (buffer.d) {
+                    buffer.d = buffer.d.replace(/\u00B0C|\^oC|\^{o}C/g, '{}^{\\circ}C');
+                    buffer.d = buffer.d.replace(/\u00B0F|\^oF|\^{o}F/g, '{}^{\\circ}F');
+                }
+                if (buffer.q) {
+                    // fraction
+                    buffer.q = buffer.q.replace(/\u00B0C|\^oC|\^{o}C/g, '{}^{\\circ}C');
+                    buffer.q = buffer.q.replace(/\u00B0F|\^oF|\^{o}F/g, '{}^{\\circ}F');
+                    var b5 = {
+                        d: mhchemParser.go(buffer.d, 'pu'),
+                        q: mhchemParser.go(buffer.q, 'pu'),
+                    };
+                    if (buffer.o === '//') {
+                        ret = { type_: 'pu-frac', p1: b5.d, p2: b5.q };
+                    }
+                    else {
+                        ret = b5.d;
+                        if (b5.d.length > 1 || b5.q.length > 1) {
+                            ret.push({ type_: ' / ' });
+                        }
+                        else {
+                            ret.push({ type_: '/' });
+                        }
+                        mhchemParser.concatArray(ret, b5.q);
+                    }
+                }
+                else {
+                    // no fraction
+                    ret = mhchemParser.go(buffer.d, 'pu-2');
+                }
+                for (var p in buffer) {
+                    delete buffer[p];
+                }
+                return ret;
+            },
+        },
+    },
+    'pu-2': {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '*': { action_: 'output' },
+            },
+            '*': {
+                '*': { action_: ['output', 'cdot'], nextState: '0' },
+            },
+            '\\x': {
+                '*': { action_: 'rm=' },
+            },
+            space: {
+                '*': { action_: ['output', 'space'], nextState: '0' },
+            },
+            '^{(...)}|^(-1)': {
+                '1': { action_: '^(-1)' },
+            },
+            '-9.,9': {
+                '0': { action_: 'rm=', nextState: '0' },
+                '1': { action_: '^(-1)', nextState: '0' },
+            },
+            '{...}|else': {
+                '*': { action_: 'rm=', nextState: '1' },
+            },
+        }),
+        actions: {
+            cdot: function () {
+                return { type_: 'tight cdot' };
+            },
+            '^(-1)': function (buffer, m) {
+                buffer.rm += '^{' + m + '}';
+            },
+            space: function () {
+                return { type_: 'pu-space-2' };
+            },
+            output: function (buffer) {
+                /** @type {ParserOutput | ParserOutput[]} */
+                var ret = [];
+                if (buffer.rm) {
+                    var mrm = mhchemParser.patterns.match_('{(...)}', buffer.rm || '');
+                    if (mrm && mrm.remainder === '') {
+                        ret = mhchemParser.go(mrm.match_, 'pu');
+                    }
+                    else {
+                        ret = { type_: 'rm', p1: buffer.rm };
+                    }
+                }
+                for (var p in buffer) {
+                    delete buffer[p];
+                }
+                return ret;
+            },
+        },
+    },
+    'pu-9,9': {
+        transitions: mhchemParser.createTransitions({
+            empty: {
+                '0': { action_: 'output-0' },
+                o: { action_: 'output-o' },
+            },
+            ',': {
+                '0': { action_: ['output-0', 'comma'], nextState: 'o' },
+            },
+            '.': {
+                '0': { action_: ['output-0', 'copy'], nextState: 'o' },
+            },
+            else: {
+                '*': { action_: 'text=' },
+            },
+        }),
+        actions: {
+            comma: function () {
+                return { type_: 'commaDecimal' };
+            },
+            'output-0': function (buffer) {
+                /** @type {ParserOutput[]} */
+                var ret = [];
+                buffer.text_ = buffer.text_ || '';
+                if (buffer.text_.length > 4) {
+                    var a = buffer.text_.length % 3;
+                    if (a === 0) {
+                        a = 3;
+                    }
+                    for (var i = buffer.text_.length - 3; i > 0; i -= 3) {
+                        ret.push(buffer.text_.substr(i, 3));
+                        ret.push({ type_: '1000 separator' });
+                    }
+                    ret.push(buffer.text_.substr(0, a));
+                    ret.reverse();
+                }
+                else {
+                    ret.push(buffer.text_);
+                }
+                for (var p in buffer) {
+                    delete buffer[p];
+                }
+                return ret;
+            },
+            'output-o': function (buffer) {
+                /** @type {ParserOutput[]} */
+                var ret = [];
+                buffer.text_ = buffer.text_ || '';
+                if (buffer.text_.length > 4) {
+                    var a = buffer.text_.length - 3;
+                    for (var i = 0; i < a; i += 3) {
+                        ret.push(buffer.text_.substr(i, 3));
+                        ret.push({ type_: '1000 separator' });
+                    }
+                    ret.push(buffer.text_.substr(i));
+                }
+                else {
+                    ret.push(buffer.text_);
+                }
+                for (var p in buffer) {
+                    delete buffer[p];
+                }
+                return ret;
+            },
+        },
+    },
+};
+//
+// texify: Take MhchemParser output and convert it to TeX
+//
+/** @type {Texify} */
+var texify = {
+    go: function (input, isInner) {
+        // (recursive, max 4 levels)
+        if (!input) {
+            return '';
+        }
+        var res = '';
+        var cee = false;
+        for (var i = 0; i < input.length; i++) {
+            var inputi = input[i];
+            if (typeof inputi === 'string') {
+                res += inputi;
+            }
+            else {
+                res += texify._go2(inputi);
+                if (inputi.type_ === '1st-level escape') {
+                    cee = true;
+                }
+            }
+        }
+        if (!isInner && !cee && res) {
+            res = '{' + res + '}';
+        }
+        return res;
+    },
+    _goInner: function (input) {
+        if (!input) {
+            return input;
+        }
+        return texify.go(input, true);
+    },
+    _go2: function (buf) {
+        /** @type {undefined | string} */
+        var res;
+        switch (buf.type_) {
+            case 'chemfive':
+                res = '';
+                var b5 = {
+                    a: texify._goInner(buf.a),
+                    b: texify._goInner(buf.b),
+                    p: texify._goInner(buf.p),
+                    o: texify._goInner(buf.o),
+                    q: texify._goInner(buf.q),
+                    d: texify._goInner(buf.d),
+                };
+                //
+                // a
+                //
+                if (b5.a) {
+                    if (b5.a.match(/^[+\-]/)) {
+                        b5.a = '{' + b5.a + '}';
+                    }
+                    res += b5.a + '\\,';
+                }
+                //
+                // b and p
+                //
+                if (b5.b || b5.p) {
+                    res += '{\\vphantom{X}}';
+                    res +=
+                        '^{\\hphantom{' +
+                            (b5.b || '') +
+                            '}}_{\\hphantom{' +
+                            (b5.p || '') +
+                            '}}';
+                    res += '{\\vphantom{X}}';
+                    res +=
+                        '^{\\smash[t]{\\vphantom{2}}\\mathllap{' +
+                            (b5.b || '') +
+                            '}}';
+                    res +=
+                        '_{\\vphantom{2}\\mathllap{\\smash[t]{' +
+                            (b5.p || '') +
+                            '}}}';
+                }
+                //
+                // o
+                //
+                if (b5.o) {
+                    if (b5.o.match(/^[+\-]/)) {
+                        b5.o = '{' + b5.o + '}';
+                    }
+                    res += b5.o;
+                }
+                //
+                // q and d
+                //
+                if (buf.dType === 'kv') {
+                    if (b5.d || b5.q) {
+                        res += '{\\vphantom{X}}';
+                    }
+                    if (b5.d) {
+                        res += '^{' + b5.d + '}';
+                    }
+                    if (b5.q) {
+                        res += '_{\\smash[t]{' + b5.q + '}}';
+                    }
+                }
+                else if (buf.dType === 'oxidation') {
+                    if (b5.d) {
+                        res += '{\\vphantom{X}}';
+                        res += '^{' + b5.d + '}';
+                    }
+                    if (b5.q) {
+                        res += '{\\vphantom{X}}';
+                        res += '_{\\smash[t]{' + b5.q + '}}';
+                    }
+                }
+                else {
+                    if (b5.q) {
+                        res += '{\\vphantom{X}}';
+                        res += '_{\\smash[t]{' + b5.q + '}}';
+                    }
+                    if (b5.d) {
+                        res += '{\\vphantom{X}}';
+                        res += '^{' + b5.d + '}';
+                    }
+                }
+                break;
+            case 'rm':
+                res = '\\mathrm{' + buf.p1 + '}';
+                break;
+            case 'text':
+                if (buf.p1.match(/[\^_]/)) {
+                    buf.p1 = buf.p1.replace(' ', '~').replace('-', '\\text{-}');
+                    res = '\\mathrm{' + buf.p1 + '}';
+                }
+                else {
+                    res = '\\text{' + buf.p1 + '}';
+                }
+                break;
+            case 'roman numeral':
+                res = '\\mathrm{' + buf.p1 + '}';
+                break;
+            case 'state of aggregation':
+                res = '\\mskip2mu ' + texify._goInner(buf.p1);
+                break;
+            case 'state of aggregation subscript':
+                res = '\\mskip1mu ' + texify._goInner(buf.p1);
+                break;
+            case 'bond':
+                res = texify._getBond(buf.kind_);
+                if (!res) {
+                    throw [
+                        'MhchemErrorBond',
+                        'mhchem Error. Unknown bond type (' + buf.kind_ + ')',
+                    ];
+                }
+                break;
+            case 'frac':
+                var c = '\\frac{' + buf.p1 + '}{' + buf.p2 + '}';
+                res =
+                    '\\mathchoice{\\textstyle' +
+                        c +
+                        '}{' +
+                        c +
+                        '}{' +
+                        c +
+                        '}{' +
+                        c +
+                        '}';
+                break;
+            case 'pu-frac':
+                var d = '\\frac{' +
+                    texify._goInner(buf.p1) +
+                    '}{' +
+                    texify._goInner(buf.p2) +
+                    '}';
+                res =
+                    '\\mathchoice{\\textstyle' +
+                        d +
+                        '}{' +
+                        d +
+                        '}{' +
+                        d +
+                        '}{' +
+                        d +
+                        '}';
+                break;
+            case 'tex-math':
+                res = buf.p1 + ' ';
+                break;
+            case 'frac-ce':
+                res =
+                    '\\frac{' +
+                        texify._goInner(buf.p1) +
+                        '}{' +
+                        texify._goInner(buf.p2) +
+                        '}';
+                break;
+            case 'overset':
+                res =
+                    '\\overset{' +
+                        texify._goInner(buf.p1) +
+                        '}{' +
+                        texify._goInner(buf.p2) +
+                        '}';
+                break;
+            case 'underset':
+                res =
+                    '\\underset{' +
+                        texify._goInner(buf.p1) +
+                        '}{' +
+                        texify._goInner(buf.p2) +
+                        '}';
+                break;
+            case 'underbrace':
+                res =
+                    '\\underbrace{' +
+                        texify._goInner(buf.p1) +
+                        '}_{' +
+                        texify._goInner(buf.p2) +
+                        '}';
+                break;
+            case 'color':
+                res =
+                    '{\\color{' +
+                        buf.color1 +
+                        '}{' +
+                        texify._goInner(buf.color2) +
+                        '}}';
+                break;
+            case 'color0':
+                res = '\\color{' + buf.color + '}';
+                break;
+            case 'arrow':
+                var b6 = {
+                    rd: texify._goInner(buf.rd),
+                    rq: texify._goInner(buf.rq),
+                };
+                var arrow = '\\x' + texify._getArrow(buf.r);
+                if (b6.rq) {
+                    arrow += '[{' + b6.rq + '}]';
+                }
+                if (b6.rd) {
+                    arrow += '{' + b6.rd + '}';
+                }
+                else {
+                    arrow += '{}';
+                }
+                res = arrow;
+                break;
+            case 'operator':
+                res = texify._getOperator(buf.kind_);
+                break;
+            case '1st-level escape':
+                res = buf.p1 + ' '; // &, \\\\, \\hlin
+                break;
+            case 'space':
+                res = ' ';
+                break;
+            case 'entitySkip':
+                res = '~';
+                break;
+            case 'pu-space-1':
+                res = '~';
+                break;
+            case 'pu-space-2':
+                res = '\\mkern3mu ';
+                break;
+            case '1000 separator':
+                res = '\\mkern2mu ';
+                break;
+            case 'commaDecimal':
+                res = '{,}';
+                break;
+            case 'comma enumeration L':
+                res = '{' + buf.p1 + '}\\mkern6mu ';
+                break;
+            case 'comma enumeration M':
+                res = '{' + buf.p1 + '}\\mkern3mu ';
+                break;
+            case 'comma enumeration S':
+                res = '{' + buf.p1 + '}\\mkern1mu ';
+                break;
+            case 'hyphen':
+                res = '\\text{-}';
+                break;
+            case 'addition compound':
+                res = '\\,{\\cdot}\\,';
+                break;
+            case 'electron dot':
+                res = '\\mkern1mu \\bullet\\mkern1mu ';
+                break;
+            case 'KV x':
+                res = '{\\times}';
+                break;
+            case 'prime':
+                res = '\\prime ';
+                break;
+            case 'cdot':
+                res = '\\cdot ';
+                break;
+            case 'tight cdot':
+                res = '\\mkern1mu{\\cdot}\\mkern1mu ';
+                break;
+            case 'times':
+                res = '\\times ';
+                break;
+            case 'circa':
+                res = '{\\sim}';
+                break;
+            case '^':
+                res = 'uparrow';
+                break;
+            case 'v':
+                res = 'downarrow';
+                break;
+            case 'ellipsis':
+                res = '\\ldots ';
+                break;
+            case '/':
+                res = '/';
+                break;
+            case ' / ':
+                res = '\\,/\\,';
+                break;
+            default:
+                throw ['MhchemBugT', 'mhchem bug T. Please report.']; // Missing texify rule or unknown MhchemParser output
+        }
+        return res;
+    },
+    _getArrow: function (a) {
+        switch (a) {
+            case '->':
+                return 'rightarrow';
+            case '\u2192':
+                return 'rightarrow';
+            case '\u27F6':
+                return 'rightarrow';
+            case '<-':
+                return 'leftarrow';
+            case '<->':
+                return 'leftrightarrow';
+            case '<-->':
+                return 'rightleftarrows';
+            case '<=>':
+                return 'rightleftharpoons';
+            case '\u21CC':
+                return 'rightleftharpoons';
+            case '<=>>':
+                return 'rightequilibrium';
+            case '<<=>':
+                return 'leftequilibrium';
+            default:
+                throw ['MhchemBugT', 'mhchem bug T. Please report.'];
+        }
+    },
+    _getBond: function (a) {
+        switch (a) {
+            case '-':
+                return '{-}';
+            case '1':
+                return '{-}';
+            case '=':
+                return '{=}';
+            case '2':
+                return '{=}';
+            case '#':
+                return '{\\equiv}';
+            case '3':
+                return '{\\equiv}';
+            case '~':
+                return '{\\tripledash}';
+            case '~-':
+                return '{\\mathrlap{\\raisebox{-.1em}{$-$}}\\raisebox{.1em}{$\\tripledash$}}';
+            case '~=':
+                return '{\\mathrlap{\\raisebox{-.2em}{$-$}}\\mathrlap{\\raisebox{.2em}{$\\tripledash$}}-}';
+            case '~--':
+                return '{\\mathrlap{\\raisebox{-.2em}{$-$}}\\mathrlap{\\raisebox{.2em}{$\\tripledash$}}-}';
+            case '-~-':
+                return '{\\mathrlap{\\raisebox{-.2em}{$-$}}\\mathrlap{\\raisebox{.2em}{$-$}}\\tripledash}';
+            case '...':
+                return '{{\\cdot}{\\cdot}{\\cdot}}';
+            case '....':
+                return '{{\\cdot}{\\cdot}{\\cdot}{\\cdot}}';
+            case '->':
+                return '{\\rightarrow}';
+            case '<-':
+                return '{\\leftarrow}';
+            case '<':
+                return '{<}';
+            case '>':
+                return '{>}';
+            default:
+                throw ['MhchemBugT', 'mhchem bug T. Please report.'];
+        }
+    },
+    _getOperator: function (a) {
+        switch (a) {
+            case '+':
+                return ' {}+{} ';
+            case '-':
+                return ' {}-{} ';
+            case '=':
+                return ' {}={} ';
+            case '<':
+                return ' {}<{} ';
+            case '>':
+                return ' {}>{} ';
+            case '<<':
+                return ' {}\\ll{} ';
+            case '>>':
+                return ' {}\\gg{} ';
+            case '\\pm':
+                return ' {}\\pm{} ';
+            case '\\approx':
+                return ' {}\\approx{} ';
+            case '$\\approx$':
+                return ' {}\\approx{} ';
+            case 'v':
+                return ' \\downarrow{} ';
+            case '(v)':
+                return ' \\downarrow{} ';
+            case '^':
+                return ' \\uparrow{} ';
+            case '(^)':
+                return ' \\uparrow{} ';
+            default:
+                throw ['MhchemBugT', 'mhchem bug T. Please report.'];
+        }
+    },
+};
+
+/**
+ * These shortcut strings are replaced with the corresponding LaTeX expression
+ * without requiring an escape sequence or command.
+ */
+const INLINE_SHORTCUTS = {
+    // Primes
+    "''": { mode: 'math', value: '^{\\doubleprime}' },
+    // Greek letters
+    alpha: '\\alpha',
+    delta: '\\delta',
+    Delta: '\\Delta',
+    pi: { mode: 'math', value: '\\pi' },
+    'pi ': { mode: 'text', value: '\\pi ' },
+    Pi: { mode: 'math', value: '\\Pi' },
+    theta: '\\theta',
+    Theta: '\\Theta',
+    // Letter-like
+    ii: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\imaginaryI',
+    },
+    jj: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\imaginaryJ',
+    },
+    ee: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\exponentialE',
+    },
+    nabla: { mode: 'math', value: '\\nabla' },
+    grad: { mode: 'math', value: '\\nabla' },
+    del: { mode: 'math', value: '\\partial' },
+    '\u221e': '\\infty',
+    // '&infin;': '\\infty',
+    // '&#8734;': '\\infty',
+    oo: {
+        mode: 'math',
+        after: 'nothing+digit+frac+surd+binop+relop+punct+array+openfence+closefence+space',
+        value: '\\infty',
+    },
+    // Big operators
+    '∑': { mode: 'math', value: '\\sum' },
+    sum: { mode: 'math', value: '\\sum_{#?}^{#?}' },
+    prod: { mode: 'math', value: '\\prod_{#?}^{#?}' },
+    sqrt: { mode: 'math', value: '\\sqrt{#?}' },
+    // '∫':                    '\\int',             // There's a alt-B command for this
+    '∆': { mode: 'math', value: '\\differentialD' },
+    '∂': { mode: 'math', value: '\\differentialD' },
+    // Functions
+    arcsin: { mode: 'math', value: '\\arcsin' },
+    arccos: { mode: 'math', value: '\\arccos' },
+    arctan: { mode: 'math', value: '\\arctan' },
+    sin: { mode: 'math', value: '\\sin' },
+    sinh: { mode: 'math', value: '\\sinh' },
+    cos: { mode: 'math', value: '\\cos' },
+    cosh: { mode: 'math', value: '\\cosh' },
+    tan: { mode: 'math', value: '\\tan' },
+    tanh: { mode: 'math', value: '\\tanh' },
+    sec: { mode: 'math', value: '\\sec' },
+    csc: { mode: 'math', value: '\\csc' },
+    cot: { mode: 'math', value: '\\cot' },
+    log: { mode: 'math', value: '\\log' },
+    ln: { mode: 'math', value: '\\ln' },
+    exp: { mode: 'math', value: '\\exp' },
+    lim: { mode: 'math', value: '\\lim_{#?}' },
+    // Differentials
+    // According to ISO31/XI (ISO 80000-2), differentials should be upright
+    dx: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\differentialD x',
+    },
+    dy: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\differentialD y',
+    },
+    dt: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\differentialD t',
+    },
+    // Logic
+    AA: { mode: 'math', value: '\\forall' },
+    EE: { mode: 'math', value: '\\exists' },
+    '!EE': { mode: 'math', value: '\\nexists' },
+    '&&': { mode: 'math', value: '\\land' },
+    // The shortcut for the greek letter "xi" is interfering with "x in"
+    xin: {
+        mode: 'math',
+        after: 'nothing+text+relop+punct+openfence+space',
+        value: 'x \\in',
+    },
+    in: {
+        mode: 'math',
+        after: 'nothing+letter+closefence',
+        value: '\\in',
+    },
+    '!in': { mode: 'math', value: '\\notin' },
+    // Sets
+    NN: '\\N',
+    ZZ: '\\Z',
+    QQ: '\\Q',
+    RR: '\\R',
+    CC: '\\C',
+    PP: '\\P',
+    // Operators
+    xx: { mode: 'math', value: '\\times' },
+    '+-': { mode: 'math', value: '\\pm' },
+    // Relational operators
+    '!=': { mode: 'math', value: '\\ne' },
+    '>=': { mode: 'math', value: '\\ge' },
+    '<=': { mode: 'math', value: '\\le' },
+    '<<': { mode: 'math', value: '\\ll' },
+    '>>': { mode: 'math', value: '\\gg' },
+    '~~': { mode: 'math', value: '\\approx' },
+    // More operators
+    '≈': { mode: 'math', value: '\\approx' },
+    '?=': { mode: 'math', value: '\\questeq' },
+    '÷': { mode: 'math', value: '\\div' },
+    '¬': { mode: 'math', value: '\\neg' },
+    ':=': { mode: 'math', value: '\\coloneq' },
+    '::': { mode: 'math', value: '\\Colon' },
+    // Fences
+    '(:': { mode: 'math', value: '\\langle' },
+    ':)': { mode: 'math', value: '\\rangle' },
+    // More Greek letters
+    beta: '\\beta',
+    chi: '\\chi',
+    epsilon: '\\epsilon',
+    varepsilon: '\\varepsilon',
+    eta: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\eta',
+    },
+    'eta ': {
+        mode: 'text',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\eta ',
+    },
+    gamma: '\\gamma',
+    Gamma: '\\Gamma',
+    iota: '\\iota',
+    kappa: '\\kappa',
+    lambda: '\\lambda',
+    Lambda: '\\Lambda',
+    mu: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\mu',
+    },
+    'mu ': {
+        mode: 'text',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\mu ',
+    },
+    nu: {
+        mode: 'math',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\nu',
+    },
+    'nu ': {
+        mode: 'text',
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\nu ',
+    },
+    µ: '\\mu',
+    phi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\phi',
+    },
+    Phi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\Phi',
+    },
+    varphi: '\\varphi',
+    psi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\psi',
+    },
+    Psi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\Psi',
+    },
+    rho: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\rho',
+    },
+    sigma: '\\sigma',
+    Sigma: '\\Sigma',
+    tau: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\tau',
+    },
+    vartheta: '\\vartheta',
+    upsilon: '\\upsilon',
+    xi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\xi',
+    },
+    Xi: {
+        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
+        value: '\\Xi',
+    },
+    zeta: '\\zeta',
+    omega: '\\omega',
+    Omega: '\\Omega',
+    Ω: '\\omega',
+    // More Logic
+    forall: { mode: 'math', value: '\\forall' },
+    exists: {
+        mode: 'math',
+        value: '\\exists',
+    },
+    '!exists': {
+        mode: 'math',
+        value: '\\nexists',
+    },
+    ':.': {
+        mode: 'math',
+        value: '\\therefore',
+    },
+    // MORE FUNCTIONS
+    // 'arg': '\\arg',
+    liminf: '\\operatorname*{lim~inf}_{#?}',
+    limsup: '\\operatorname*{lim~sup}_{#?}',
+    argmin: '\\operatorname*{arg~min}_{#?}',
+    argmax: '\\operatorname*{arg~max}_{#?}',
+    det: '\\det',
+    mod: {
+        mode: 'math',
+        value: '\\mod',
+    },
+    max: {
+        mode: 'math',
+        value: '\\max',
+    },
+    min: {
+        mode: 'math',
+        value: '\\min',
+    },
+    erf: '\\operatorname{erf}',
+    erfc: '\\operatorname{erfc}',
+    bessel: {
+        mode: 'math',
+        value: '\\operatorname{bessel}',
+    },
+    mean: {
+        mode: 'math',
+        value: '\\operatorname{mean}',
+    },
+    median: {
+        mode: 'math',
+        value: '\\operatorname{median}',
+    },
+    fft: {
+        mode: 'math',
+        value: '\\operatorname{fft}',
+    },
+    lcm: {
+        mode: 'math',
+        value: '\\operatorname{lcm}',
+    },
+    gcd: {
+        mode: 'math',
+        value: '\\operatorname{gcd}',
+    },
+    randomReal: '\\operatorname{randomReal}',
+    randomInteger: '\\operatorname{randomInteger}',
+    Re: {
+        mode: 'math',
+        value: '\\operatorname{Re}',
+    },
+    Im: {
+        mode: 'math',
+        value: '\\operatorname{Im}',
+    },
+    // UNITS
+    mm: {
+        mode: 'math',
+        after: 'nothing+digit',
+        value: '\\operatorname{mm}',
+    },
+    cm: {
+        mode: 'math',
+        after: 'nothing+digit',
+        value: '\\operatorname{cm}',
+    },
+    km: {
+        mode: 'math',
+        after: 'nothing+digit',
+        value: '\\operatorname{km}',
+    },
+    kg: {
+        mode: 'math',
+        after: 'nothing+digit',
+        value: '\\operatorname{kg}',
+    },
+    // '||':                   '\\lor',
+    '...': '\\ldots',
+    '+...': '+\\cdots',
+    '-...': '-\\cdots',
+    '->...': '\\to\\cdots',
+    '->': '\\to',
+    '|->': '\\mapsto',
+    '-->': '\\longrightarrow',
+    //    '<-':                   '\\leftarrow',
+    '<--': '\\longleftarrow',
+    '=>': '\\Rightarrow',
+    '==>': '\\Longrightarrow',
+    // '<=': '\\Leftarrow',     // CONFLICTS WITH LESS THAN OR EQUAL
+    '<=>': '\\Leftrightarrow',
+    '<->': '\\leftrightarrow',
+    '(.)': '\\odot',
+    '(+)': '\\oplus',
+    '(/)': '\\oslash',
+    '(*)': '\\otimes',
+    '(-)': '\\ominus',
+    // '(-)':                  '\\circleddash',
+    '||': '\\Vert',
+    '{': '\\{',
+    '}': '\\}',
+    '*': '\\cdot',
+};
+
+/**
+ * Return an array of potential shortcuts
+ */
+function getInlineShortcutsStartingWith(s, config) {
+    const result = [];
+    const skipDefaultShortcuts = config.overrideDefaultInlineShortcuts;
+    for (let i = 0; i <= s.length - 1; i++) {
+        const s2 = s.substring(i);
+        if (!skipDefaultShortcuts) {
+            Object.keys(INLINE_SHORTCUTS).forEach((key) => {
+                if (key.startsWith(s2) && !result.includes(key)) {
+                    result.push(key);
+                }
+            });
+        }
+        const customInlineShortcuts = (config === null || config === void 0 ? void 0 : config.inlineShortcuts) ? config.inlineShortcuts
+            : null;
+        if (customInlineShortcuts) {
+            Object.keys(customInlineShortcuts).forEach((key) => {
+                if (key.startsWith(s2)) {
+                    result.push(key);
+                }
+            });
+        }
     }
-    relation() {
-        return this.path.length > 0
-            ? this.path[this.path.length - 1].relation
-            : '';
+    return result;
+}
+/**
+ *
+ * @param siblings atoms preceding this potential shortcut
+ */
+function validateShortcut(siblings, shortcut) {
+    if (!shortcut)
+        return '';
+    // If it's a simple shortcut (no conditional), it's always valid
+    if (typeof shortcut === 'string')
+        return shortcut;
+    // If we have no context, we assume all the shortcuts are valid
+    if (!siblings)
+        return shortcut.value;
+    let nothing = false;
+    let letter = false;
+    let digit = false;
+    let isFunction = false;
+    let frac = false;
+    let surd = false;
+    let binop = false;
+    let relop = false;
+    let punct = false;
+    let array = false;
+    let openfence = false;
+    let closefence = false;
+    let text = false;
+    let space = false;
+    let sibling = siblings[siblings.length - 1];
+    let index = siblings.length - 1;
+    while (sibling && /msubsup|placeholder/.test(sibling.type)) {
+        index -= 1;
+        sibling = siblings[index];
     }
-    /**
-     * If necessary, insert a `first` atom in the sibling list.
-     * If there's already a `first` atom, do nothing.
-     * The `first` atom is used as a 'placeholder' to hold the blinking caret when
-     * the caret is positioned at the very beginning of the mathlist.
-     */
-    insertFirstAtom() {
-        this.siblings();
+    nothing = !sibling || sibling.type === 'first'; // start of a group
+    if (sibling) {
+        if (typeof shortcut.mode !== 'undefined' &&
+            sibling.mode !== shortcut.mode) {
+            return '';
+        }
+        text = sibling.mode === 'text';
+        letter =
+            !text &&
+                sibling.type === 'mord' &&
+                LETTER.test(sibling.body);
+        digit =
+            !text &&
+                sibling.type === 'mord' &&
+                /[0-9]+$/.test(sibling.body);
+        isFunction = !text && sibling.isFunction;
+        frac = sibling.type === 'genfrac';
+        surd = sibling.type === 'surd';
+        binop = sibling.type === 'mbin';
+        relop = sibling.type === 'mrel';
+        punct = sibling.type === 'mpunct' || sibling.type === 'minner';
+        array = Boolean(sibling.array);
+        openfence = sibling.type === 'mopen';
+        closefence = sibling.type === 'mclose' || sibling.type === 'leftright';
+        space = sibling.type === 'space';
     }
+    if (typeof shortcut.after !== 'undefined') {
+        // If this is a conditional shortcut, consider the conditions now
+        if ((/nothing/.test(shortcut.after) && nothing) ||
+            (/letter/.test(shortcut.after) && letter) ||
+            (/digit/.test(shortcut.after) && digit) ||
+            (/function/.test(shortcut.after) && isFunction) ||
+            (/frac/.test(shortcut.after) && frac) ||
+            (/surd/.test(shortcut.after) && surd) ||
+            (/binop/.test(shortcut.after) && binop) ||
+            (/relop/.test(shortcut.after) && relop) ||
+            (/punct/.test(shortcut.after) && punct) ||
+            (/array/.test(shortcut.after) && array) ||
+            (/openfence/.test(shortcut.after) && openfence) ||
+            (/closefence/.test(shortcut.after) && closefence) ||
+            (/text/.test(shortcut.after) && text) ||
+            (/space/.test(shortcut.after) && space)) {
+            return shortcut.value;
+        }
+        return '';
+    }
+    return shortcut.value;
+}
+/**
+ *
+ * @param context - atoms preceding the candidate, potentially used
+ * to reduce which shortcuts are applicable. If 'null', no restrictions are
+ * applied.
+ * @param s - candidate inline shortcuts (e.g. `'pi'`)
+ * @return A replacement string matching the shortcut (e.g. `'\pi'`)
+ */
+function getInlineShortcut(context, s, shortcuts) {
+    var _a;
+    return validateShortcut(context, (_a = shortcuts === null || shortcuts === void 0 ? void 0 : shortcuts[s]) !== null && _a !== void 0 ? _a : INLINE_SHORTCUTS[s]);
 }
 
-function selectionWillChange(model) {
-    var _a;
-    if (typeof ((_a = model.listeners) === null || _a === void 0 ? void 0 : _a.onSelectionWillChange) === 'function' &&
-        !model.suppressChangeNotifications) {
-        model.listeners.onSelectionWillChange(model);
+/**
+ * Attempts to parse and interpret a string in an unknown format, possibly
+ * ASCIIMath and return a canonical LaTeX string.
+ *
+ * The format recognized are one of these variations:
+ * - ASCIIMath: Only supports a subset
+ * (1/2x)
+ * 1/2sin x                     -> \frac {1}{2}\sin x
+ * 1/2sinx                      -> \frac {1}{2}\sin x
+ * (1/2sin x (x^(2+1))          // Unbalanced parentheses
+ * (1/2sin(x^(2+1))             -> \left(\frac {1}{2}\sin \left(x^{2+1}\right)\right)
+ * alpha + (pi)/(4)             -> \alpha +\frac {\pi }{4}
+ * x=(-b +- sqrt(b^2 – 4ac))/(2a)
+ * alpha/beta
+ * sqrt2 + sqrtx + sqrt(1+a) + sqrt(1/2)
+ * f(x) = x^2 "when" x >= 0
+ * AA n in QQ
+ * AA x in RR "," |x| > 0
+ * AA x in RR "," abs(x) > 0
+ *
+ * - UnicodeMath (generated by Microsoft Word): also only supports a subset
+ *      - See https://www.unicode.org/notes/tn28/UTN28-PlainTextMath-v3.1.pdf
+ * √(3&x+1)
+ * {a+b/c}
+ * [a+b/c]
+ * _a^b x
+ * lim_(n->\infty) n
+ * \iint_(a=0)^\infty  a
+ *
+ * - "JavaScript Latex": a variant that is LaTeX, but with escaped backslashes
+ *  \\frac{1}{2} \\sin x
+ */
+function parseMathString(s, options) {
+    if (!s)
+        return ['latex', ''];
+    // Nothing to do if a single character
+    if (s.length <= 1)
+        return ['latex', s];
+    if (!options || options.format !== 'ASCIIMath') {
+        // This is not explicitly ASCIIMath. Try to infer if this is LaTex...
+        // If the strings is surrounded by `$..$` or `$$..$$`, assumes it is LaTeX
+        const trimedString = s.trim();
+        if ((trimedString.startsWith('$$') && trimedString.endsWith('$$')) ||
+            (trimedString.startsWith('\\[') && trimedString.endsWith('\\]')) ||
+            (trimedString.startsWith('\\(') && trimedString.endsWith('\\)'))) {
+            return [
+                'latex',
+                trimedString.substring(2, trimedString.length - 2),
+            ];
+        }
+        if (trimedString.startsWith('$') && trimedString.endsWith('$')) {
+            return [
+                'latex',
+                trimedString.substring(1, trimedString.length - 1),
+            ];
+        }
+        // Replace double-backslash (coming from JavaScript) to a single one
+        s = s.replace(/\\\\([^\s\n])/g, '\\$1');
+        if (/\\/.test(s)) {
+            // If the string includes a '\' it's probably a LaTeX string
+            // (that's not completely true, it could be a UnicodeMath string, since
+            // UnicodeMath supports some LaTeX commands. However, we need to pick
+            // one in order to correctly interpret {} (which are argument delimiters
+            // in LaTeX, and are fences in UnicodeMath)
+            return ['latex', s];
+        }
     }
+    s = s.replace(/\u2061/gu, ''); // Remove function application
+    s = s.replace(/\u3016/gu, '{'); // WHITE LENTICULAR BRACKET (grouping)
+    s = s.replace(/\u3017/gu, '}'); // WHITE LENTICULAR BRACKET (grouping)
+    s = s.replace(/([^\\])sinx/g, '$1\\sin x'); // common typo
+    s = s.replace(/([^\\])cosx/g, '$1\\cos x '); // common typo
+    s = s.replace(/\u2013/g, '-'); // EN-DASH, sometimes used as a minus sign
+    return [
+        (options === null || options === void 0 ? void 0 : options.format) || 'ASCIIMath',
+        parseMathExpression(s, options !== null && options !== void 0 ? options : {}),
+    ];
 }
+function parseMathExpression(s, options) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    if (!s)
+        return '';
+    let done = false;
+    let m;
+    if (!done && (s[0] === '^' || s[0] === '_')) {
+        // Superscript and subscript
+        m = parseMathArgument(s.substr(1), {
+            inlineShortcuts: (_a = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _a !== void 0 ? _a : {},
+            noWrap: true,
+        });
+        s = s[0] + '{' + m.match + '}';
+        s += parseMathExpression(m.rest, options);
+        done = true;
+    }
+    if (!done) {
+        m = s.match(/^(sqrt|\u221a)(.*)/);
+        if (m) {
+            // Square root
+            m = parseMathArgument(m[2], {
+                inlineShortcuts: (_b = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _b !== void 0 ? _b : {},
+                noWrap: true,
+            });
+            const sqrtArgument = m.match || '\\placeholder{}';
+            s = '\\sqrt{' + sqrtArgument + '}';
+            s += parseMathExpression(m.rest, options);
+            done = true;
+        }
+    }
+    if (!done) {
+        m = s.match(/^(\\cbrt|\u221b)(.*)/);
+        if (m) {
+            // Cube root
+            m = parseMathArgument(m[2], {
+                inlineShortcuts: (_c = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _c !== void 0 ? _c : {},
+                noWrap: true,
+            });
+            const sqrtArgument = m.match || '\\placeholder{}';
+            s = '\\sqrt[3]{' + sqrtArgument + '}';
+            s += parseMathExpression(m.rest, options);
+            done = true;
+        }
+    }
+    if (!done) {
+        m = s.match(/^abs(.*)/);
+        if (m) {
+            // Absolute value
+            m = parseMathArgument(m[1], {
+                inlineShortcuts: (_d = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _d !== void 0 ? _d : {},
+                noWrap: true,
+            });
+            s = '\\left|' + m.match + '\\right|';
+            s += parseMathExpression(m.rest, options);
+            done = true;
+        }
+    }
+    if (!done) {
+        m = s.match(/^["”“](.*?)["”“](.*)/);
+        if (m) {
+            // Quoted text
+            s = '\\text{' + m[1] + '}';
+            s += parseMathExpression(m[2], options);
+            done = true;
+        }
+    }
+    if (!done) {
+        m = s.match(/^([^a-zA-Z({[_^\\\s"]+)(.*)/);
+        // A string of symbols...
+        // Could be a binary or relational operator, etc...
+        if (m) {
+            s = paddedShortcut(m[1], options);
+            s += parseMathExpression(m[2], options);
+            done = true;
+        }
+    }
+    if (!done && /^(f|g|h)[^a-zA-Z]/.test(s)) {
+        // This could be a function...
+        m = parseMathArgument(s.substring(1), {
+            inlineShortcuts: (_e = options.inlineShortcuts) !== null && _e !== void 0 ? _e : {},
+            noWrap: true,
+        });
+        if (s[1] === '(') {
+            s = s[0] + '\\mleft(' + m.match + '\\mright)';
+        }
+        else {
+            s = s[0] + m.match;
+        }
+        s += parseMathExpression(m.rest, options);
+        done = true;
+    }
+    if (!done) {
+        m = s.match(/^([a-zA-Z]+)(.*)/);
+        if (m) {
+            // Some alphabetical string...
+            // Could be a function name (sin) or symbol name (alpha)
+            s = paddedShortcut(m[1], options);
+            s += parseMathExpression(m[2], options);
+            done = true;
+        }
+    }
+    if (!done) {
+        m = parseMathArgument(s, {
+            inlineShortcuts: (_f = options.inlineShortcuts) !== null && _f !== void 0 ? _f : {},
+            noWrap: true,
+        });
+        if (m.match && m.rest[0] === '/') {
+            // Fraction
+            const m2 = parseMathArgument(m.rest.substr(1), {
+                inlineShortcuts: (_g = options.inlineShortcuts) !== null && _g !== void 0 ? _g : {},
+                noWrap: true,
+            });
+            if (m2.match) {
+                s =
+                    '\\frac{' +
+                        m.match +
+                        '}{' +
+                        m2.match +
+                        '}' +
+                        parseMathExpression(m2.rest, options);
+            }
+            done = true;
+        }
+        else if (m.match) {
+            if (s[0] === '(') {
+                s =
+                    '\\left(' +
+                        m.match +
+                        '\\right)' +
+                        parseMathExpression(m.rest, options);
+            }
+            else {
+                s = m.match + parseMathExpression(m.rest, options);
+            }
+            done = true;
+        }
+    }
+    if (!done) {
+        m = s.match(/^(\s+)(.*)$/);
+        // Whitespace
+        if (m) {
+            s = ' ' + parseMathExpression(m[2], options);
+            done = true;
+        }
+    }
+    return s;
+}
+/**
+ * Parse a math argument, as defined by ASCIIMath and UnicodeMath:
+ * - Either an expression fenced in (), {} or []
+ * - a number (- sign, digits, decimal point, digits)
+ * - a single [a-zA-Z] letter (an identifier)
+ * - a multi-letter shortcut (e.g., pi)
+ * - a LaTeX command (\pi) (for UnicodeMath)
+ * @return
+ * - match: the parsed (and converted) portion of the string that is an argument
+ * - rest: the raw, unconverted, rest of the string
+ */
+function parseMathArgument(s, options) {
+    let match = '';
+    s = s.trim();
+    let rest = s;
+    let lFence = s.charAt(0);
+    let rFence = { '(': ')', '{': '}', '[': ']' }[lFence];
+    if (rFence) {
+        // It's a fence
+        let level = 1;
+        let i = 1;
+        while (i < s.length && level > 0) {
+            if (s[i] === lFence)
+                level++;
+            if (s[i] === rFence)
+                level--;
+            i++;
+        }
+        if (level === 0) {
+            // We've found the matching closing fence
+            if (options.noWrap && lFence === '(') {
+                match = parseMathExpression(s.substring(1, i - 1), options);
+            }
+            else {
+                if (lFence === '{' && rFence === '}') {
+                    lFence = '\\{';
+                    rFence = '\\}';
+                }
+                match =
+                    '\\left' +
+                        lFence +
+                        parseMathExpression(s.substring(1, i - 1), options) +
+                        '\\right' +
+                        rFence;
+            }
+            rest = s.substring(i);
+        }
+        else {
+            // Unbalanced fence...
+            match = s.substring(1, i);
+            rest = '';
+        }
+    }
+    else {
+        let m = s.match(/^([a-zA-Z]+)/);
+        if (m) {
+            // It's a string of letter, maybe a shortcut
+            let shortcut = getInlineShortcut(null, s, options.inlineShortcuts);
+            if (shortcut) {
+                shortcut = shortcut.replace('_{#?}', '');
+                shortcut = shortcut.replace('^{#?}', '');
+                return { match: shortcut, rest: s.substring(shortcut.length) };
+            }
+        }
+        m = s.match(/^([a-zA-Z])/);
+        if (m) {
+            // It's a single letter
+            return { match: m[1], rest: s.substring(1) };
+        }
+        m = s.match(/^(-)?\d+(\.\d*)?/);
+        if (m) {
+            // It's a number
+            return { match: m[0], rest: s.substring(m[0].length) };
+        }
+        if (!/^\\(left|right)/.test(s)) {
+            // It's a LaTeX command (but not a \left\right)
+            m = s.match(/^(\\[a-zA-Z]+)/);
+            if (m) {
+                rest = s.substring(m[1].length);
+                match = m[1];
+            }
+        }
+    }
+    return { match: match, rest: rest };
+}
+function paddedShortcut(s, options) {
+    let result = getInlineShortcut(null, s, options);
+    if (result) {
+        result = result.replace('_{#?}', '');
+        result = result.replace('^{#?}', '');
+        result += ' ';
+    }
+    else {
+        result = s;
+    }
+    return result;
+}
+
 function selectionDidChange(model) {
     var _a;
     if (typeof ((_a = model.listeners) === null || _a === void 0 ? void 0 : _a.onSelectionDidChange) === 'function' &&
         !model.suppressChangeNotifications) {
         model.listeners.onSelectionDidChange(model);
-    }
-}
-function contentWillChange(model) {
-    var _a;
-    if (typeof ((_a = model.listeners) === null || _a === void 0 ? void 0 : _a.onContentWillChange) === 'function' &&
-        !model.suppressChangeNotifications) {
-        model.listeners.onContentWillChange(model);
     }
 }
 function contentDidChange(model) {
@@ -12899,6 +16004,152 @@ interface Emitter<T> {
 */
 
 /**
+ * The atom where the selection starts.
+ *
+ * When the selection is extended the anchor remains fixed. The anchor
+ * could be either before or after the focus.
+ */
+function getAnchor(model) {
+    if (model.parent().array) {
+        return arrayCell(model.parent().array, model.relation())[model.anchorOffset()];
+    }
+    const siblings = model.siblings();
+    return siblings[Math.min(siblings.length - 1, model.anchorOffset())];
+}
+/**
+ *
+ * @param  extent the length of the selection
+ * @return true if the path has actually changed
+ */
+function setPath(model, inSelection, extent = 0) {
+    let selection;
+    // Convert to a path array if necessary
+    if (typeof inSelection === 'string') {
+        selection = pathFromString(inSelection);
+        selection.extent = extent;
+    }
+    else if (isArray(inSelection)) {
+        // need to temporarily change the path of this to use 'sibling()'
+        const newPath = clone(inSelection);
+        const oldPath = model.path;
+        model.path = newPath;
+        if (extent === 0 && getAnchor(model).type === 'placeholder') {
+            // select the placeholder
+            newPath[newPath.length - 1].offset = model.anchorOffset() - 1;
+            extent = 1;
+        }
+        selection = {
+            path: newPath,
+            extent: extent !== null && extent !== void 0 ? extent : 0,
+        };
+        model.path = oldPath;
+    }
+    else {
+        selection = inSelection;
+    }
+    const pathChanged = pathDistance(model.path, selection.path) !== 0;
+    const extentChanged = selection.extent !== model.extent;
+    if (pathChanged || extentChanged) {
+        if (pathChanged) {
+            adjustPlaceholder(model);
+        }
+        model.path = clone(selection.path);
+        if (model.siblings().length < model.anchorOffset()) {
+            // The new path is out of bounds.
+            // Reset the path to something valid
+            console.warn('Invalid selection: ' +
+                model.toString() +
+                ' in "' +
+                model.root.toLatex(false) +
+                '"');
+            model.path = [{ relation: 'body', offset: 0 }];
+            model.extent = 0;
+        }
+        else {
+            model.extent = selection.extent;
+        }
+        selectionDidChange(model);
+    }
+    return pathChanged || extentChanged;
+}
+/**
+ * When changing the selection, if the former selection is an empty list,
+ * insert a placeholder if necessary. For example, if in an empty numerator.
+ */
+function adjustPlaceholder(model) {
+    // Should we insert a placeholder?
+    // Check if we're an empty list that is the child of a fraction
+    const siblings = model.siblings();
+    if (siblings && siblings.length <= 1) {
+        let placeholder;
+        const relation = model.relation();
+        if (relation === 'numer') {
+            placeholder = 'numerator';
+        }
+        else if (relation === 'denom') {
+            placeholder = 'denominator';
+        }
+        else if (model.parent().type === 'surd' && relation === 'body') {
+            // Surd (roots)
+            placeholder = 'radicand';
+        }
+        else if (model.parent().type === 'overunder' && relation === 'body') {
+            placeholder = 'base';
+        }
+        else if (relation === 'underscript' || relation === 'overscript') {
+            placeholder = 'annotation';
+        }
+        if (placeholder) {
+            // ◌ ⬚
+            // const placeholderAtom = [
+            //     new Atom('math', 'placeholder', '⬚', getAnchorStyle(model)),
+            // ];
+            // Array.prototype.splice.apply(
+            //     siblings,
+            //     [1, 0].concat(placeholderAtom)
+            // );
+            // @revisit
+            siblings.splice(1, 0, new Atom('math', 'placeholder', '⬚', getAnchorStyle(model)));
+        }
+    }
+}
+// @revisit any
+function getAnchorStyle(model) {
+    const anchor = model.extent === 0 ? getAnchor(model) : model.sibling(1);
+    let result;
+    if (anchor && anchor.type !== 'first') {
+        if (anchor.type === 'command') {
+            return {};
+        }
+        result = {
+            color: anchor.color,
+            backgroundColor: anchor.backgroundColor,
+            fontFamily: anchor.fontFamily,
+            fontShape: anchor.fontShape,
+            fontSeries: anchor.fontSeries,
+            fontSize: anchor.fontSize,
+        };
+    }
+    let i = 1;
+    let ancestor = model.ancestor(i);
+    while (!result && ancestor) {
+        if (ancestor) {
+            result = {
+                color: ancestor.color,
+                backgroundColor: ancestor.backgroundColor,
+                fontFamily: ancestor.fontFamily,
+                fontShape: ancestor.fontShape,
+                fontSeries: ancestor.fontSeries,
+                fontSize: ancestor.fontSize,
+            };
+        }
+        i += 1;
+        ancestor = model.ancestor(i);
+    }
+    return result;
+}
+
+/**
  * Return true if the atom could be a part of a number
  * i.e. "-12354.568"
  */
@@ -12933,14 +16184,14 @@ function getCommandOffsets(model) {
     }
     return null;
 }
-function positionInsertionPointAfterCommitedCommand(model) {
+function setPositionAfterCommitedCommand(model) {
     const siblings = model.siblings();
     const command = getCommandOffsets(model);
     let i = command.start;
     while (i < command.end && !siblings[i].isSuggestion) {
         i++;
     }
-    setSelection(model, i - 1);
+    setSelectionOffset(model, i - 1);
 }
 function getAnchorMode(model) {
     const anchor = selectionIsCollapsed(model)
@@ -12958,43 +16209,6 @@ function getAnchorMode(model) {
     while (!result && ancestor) {
         if (ancestor)
             result = ancestor.mode;
-        i += 1;
-        ancestor = model.ancestor(i);
-    }
-    return result;
-}
-// @revisit any
-function getAnchorStyle(model) {
-    const anchor = selectionIsCollapsed(model)
-        ? getAnchor(model)
-        : model.sibling(1);
-    let result;
-    if (anchor && anchor.type !== 'first') {
-        if (anchor.type === 'command') {
-            return {};
-        }
-        result = {
-            color: anchor.color,
-            backgroundColor: anchor.backgroundColor,
-            fontFamily: anchor.fontFamily,
-            fontShape: anchor.fontShape,
-            fontSeries: anchor.fontSeries,
-            fontSize: anchor.fontSize,
-        };
-    }
-    let i = 1;
-    let ancestor = model.ancestor(i);
-    while (!result && ancestor) {
-        if (ancestor) {
-            result = {
-                color: ancestor.color,
-                backgroundColor: ancestor.backgroundColor,
-                fontFamily: ancestor.fontFamily,
-                fontShape: ancestor.fontShape,
-                fontSeries: ancestor.fontSeries,
-                fontSize: ancestor.fontSize,
-            };
-        }
         i += 1;
         ancestor = model.ancestor(i);
     }
@@ -13019,8 +16233,8 @@ function leap(model, dir = 1, callHooks = true) {
     // Candidate placeholders are atom of type 'placeholder'
     // or empty children list (except for the root: if the root is empty,
     // it is not a valid placeholder)
-    const placeholders = filter(model, (path, atom) => atom.type === 'placeholder' ||
-        (path.length > 1 && model.siblings().length === 1), dir);
+    const placeholders = filter(model, (atom, iter) => atom.type === 'placeholder' ||
+        (iter.path.length > 1 && iter.siblings().length === 1), dir);
     // If no placeholders were found, call handler or move to the next focusable
     // element in the document
     if (placeholders.length === 0) {
@@ -13030,34 +16244,20 @@ function leap(model, dir = 1, callHooks = true) {
             if (((_a = model.hooks) === null || _a === void 0 ? void 0 : _a.tabOut) &&
                 model.hooks.tabOut(model, dir > 0 ? 'forward' : 'backward') &&
                 document.activeElement) {
-                const focussableElements = `a[href]:not([disabled]),
-                    button:not([disabled]),
-                    textarea:not([disabled]),
-                    input[type=text]:not([disabled]),
-                    select:not([disabled]),
-                    [contentEditable="true"],
-                    [tabindex]:not([disabled]):not([tabindex="-1"])`;
-                // Get all the potentially focusable elements
-                // and exclude (1) those that are invisible (width and height = 0)
-                // (2) not the active element
-                // (3) the ancestor of the active element
-                const focussable = Array.prototype.filter.call(document.querySelectorAll(focussableElements), (element) => ((element.offsetWidth > 0 ||
-                    element.offsetHeight > 0) &&
-                    !element.contains(document.activeElement)) ||
-                    element === document.activeElement);
-                let index = focussable.indexOf(document.activeElement) + dir;
+                const tabbable = getTabbableElements();
+                let index = tabbable.indexOf(document.activeElement) +
+                    dir;
                 if (index < 0)
-                    index = focussable.length - 1;
-                if (index >= focussable.length)
+                    index = tabbable.length - 1;
+                if (index >= tabbable.length)
                     index = 0;
-                focussable[index].focus();
+                tabbable[index].focus();
             }
         }
         model.suppressChangeNotifications = savedSuppressChangeNotifications;
         return false;
     }
     // Set the selection to the next placeholder
-    selectionWillChange(model);
     setPath(model, placeholders[0]);
     if (getAnchor(model).type === 'placeholder')
         setSelectionExtent(model, -1);
@@ -13065,6 +16265,138 @@ function leap(model, dir = 1, callHooks = true) {
     selectionDidChange(model);
     model.suppressChangeNotifications = savedSuppressChangeNotifications;
     return true;
+}
+/**
+ * Return an array of tabbable elements, approximately in the order a browser
+ * would (the browsers are inconsistent), which is first by accounting
+ * for non-null tabIndex, then null tabIndex, then document order of focusable
+ * elements.
+ */
+function getTabbableElements() {
+    // const focussableElements = `a[href]:not([disabled]),
+    // button:not([disabled]),
+    // textarea:not([disabled]),
+    // input[type=text]:not([disabled]),
+    // select:not([disabled]),
+    // [contentEditable="true"],
+    // [tabindex]:not([disabled]):not([tabindex="-1"])`;
+    // // Get all the potentially focusable elements
+    // // and exclude (1) those that are invisible (width and height = 0)
+    // // (2) not the active element
+    // // (3) the ancestor of the active element
+    // return Array.prototype.filter.call(
+    //     document.querySelectorAll(focussableElements),
+    //     (element) =>
+    //         ((element.offsetWidth > 0 || element.offsetHeight > 0) &&
+    //             !element.contains(document.activeElement)) ||
+    //         element === document.activeElement
+    // );
+    function tabbable(el) {
+        const regularTabbables = [];
+        const orderedTabbables = [];
+        const candidates = Array.from(el.querySelectorAll(`input, select, textarea, a[href], button, 
+        [tabindex], audio[controls], video[controls],
+        [contenteditable]:not([contenteditable="false"]), details>summary`)).filter(isNodeMatchingSelectorTabbable);
+        candidates.forEach((candidate, i) => {
+            const candidateTabindex = getTabindex(candidate);
+            if (candidateTabindex === 0) {
+                regularTabbables.push(candidate);
+            }
+            else {
+                orderedTabbables.push({
+                    documentOrder: i,
+                    tabIndex: candidateTabindex,
+                    node: candidate,
+                });
+            }
+        });
+        return orderedTabbables
+            .sort((a, b) => a.tabIndex === b.tabIndex
+            ? a.documentOrder - b.documentOrder
+            : a.tabIndex - b.tabIndex)
+            .map((a) => a.node)
+            .concat(regularTabbables);
+    }
+    function isNodeMatchingSelectorTabbable(el) {
+        if (!isNodeMatchingSelectorFocusable(el) ||
+            isNonTabbableRadio(el) ||
+            getTabindex(el) < 0) {
+            return false;
+        }
+        return true;
+    }
+    function isNodeMatchingSelectorFocusable(node) {
+        if (node.disabled ||
+            (node.tagName === 'INPUT' && node.type === 'hidden') ||
+            isHidden(node)) {
+            return false;
+        }
+        return true;
+    }
+    function getTabindex(node) {
+        const tabindexAttr = parseInt(node.getAttribute('tabindex'), 10);
+        if (!isNaN(tabindexAttr)) {
+            return tabindexAttr;
+        }
+        // Browsers do not return `tabIndex` correctly for contentEditable nodes;
+        // so if they don't have a tabindex attribute specifically set, assume it's 0.
+        if (node.contentEditable === 'true') {
+            return 0;
+        }
+        // in Chrome, <audio controls/> and <video controls/> elements get a default
+        //  `tabIndex` of -1 when the 'tabindex' attribute isn't specified in the DOM,
+        //  yet they are still part of the regular tab order; in FF, they get a default
+        //  `tabIndex` of 0; since Chrome still puts those elements in the regular tab
+        //  order, consider their tab index to be 0
+        if ((node.nodeName === 'AUDIO' || node.nodeName === 'VIDEO') &&
+            node.getAttribute('tabindex') === null) {
+            return 0;
+        }
+        return node.tabIndex;
+    }
+    function isNonTabbableRadio(node) {
+        return (node.tagName === 'INPUT' &&
+            node.type === 'radio' &&
+            !isTabbableRadio(node));
+    }
+    function getCheckedRadio(nodes, form) {
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].checked && nodes[i].form === form) {
+                return nodes[i];
+            }
+        }
+        return null;
+    }
+    function isTabbableRadio(node) {
+        if (!node.name) {
+            return true;
+        }
+        const radioScope = node.form || node.ownerDocument;
+        const radioSet = radioScope.querySelectorAll('input[type="radio"][name="' + node.name + '"]');
+        const checked = getCheckedRadio(radioSet, node.form);
+        return !checked || checked === node;
+    }
+    function isHidden(el) {
+        if (el === document.activeElement ||
+            el.contains(document.activeElement)) {
+            return false;
+        }
+        if (getComputedStyle(el).visibility === 'hidden')
+            return true;
+        // Note that browsers generally don't consider the bounding rect
+        // as a criteria to determine if an item is focusable, but we want
+        // to exclude the invisible textareas used to capture keyoard input.
+        const bounds = el.getBoundingClientRect();
+        if (bounds.width === 0 || bounds.height === 0)
+            return true;
+        while (el) {
+            if (getComputedStyle(el).display === 'none')
+                return true;
+            el = el.parentElement;
+        }
+        return false;
+    }
+    return tabbable(document.body);
 }
 /**
  * @param offset
@@ -13079,7 +16411,7 @@ function leap(model, dir = 1, callHooks = true) {
  * @param relation e.g. `'body'`, `'superscript'`, etc...
  * @return False if the relation is invalid (no such children)
  */
-function setSelection(model, offset = 0, extent = 0, relation = '') {
+function setSelectionOffset(model, offset = 0, extent = 0, relation = '') {
     // If no relation ("children", "superscript", etc...) is specified
     // keep the current relation
     const oldRelation = model.path[model.path.length - 1].relation;
@@ -13109,14 +16441,11 @@ function setSelection(model, offset = 0, extent = 0, relation = '') {
     if (extent === 'end') {
         extent = siblingsCount - offset - 1;
     }
-    else if (extent === 'start') {
-        extent = -offset;
-    }
     setSelectionExtent(model, extent);
     const extentChanged = model.extent !== oldExtent;
     setSelectionExtent(model, oldExtent);
     // Calculate the new offset, and make sure it is in range
-    // (setSelection can be called with an offset that greater than
+    // (`setSelectionOffset()` can be called with an offset that greater than
     // the number of children, for example when doing an up from a
     // numerator to a smaller denominator, e.g. "1/(x+1)".
     if (offset < 0) {
@@ -13129,7 +16458,6 @@ function setSelection(model, offset = 0, extent = 0, relation = '') {
         if (relationChanged) {
             adjustPlaceholder(model);
         }
-        selectionWillChange(model);
         model.path[model.path.length - 1].relation = relation;
         model.path[model.path.length - 1].offset = offset;
         setSelectionExtent(model, extent);
@@ -13138,7 +16466,9 @@ function setSelection(model, offset = 0, extent = 0, relation = '') {
     return true;
 }
 /**
- * Move the anchor to the next permissible atom
+ * Move the anchor to the next permissible atom.
+ * Used by `move()`.
+ * Does not send selection change notifications.
  */
 function next(model, options) {
     var _a;
@@ -13163,7 +16493,7 @@ function next(model, options) {
         }
         // We found a new relation/set of siblings...
         if (relation) {
-            setSelection(model, 0, 0, relation);
+            setSelectionOffset(model, 0, 0, relation);
             return;
         }
         // No more siblings, check if we have a sibling cell in an array
@@ -13173,8 +16503,8 @@ function next(model, options) {
             while (cellIndex < maxCellCount) {
                 const cell = arrayCell(model.parent().array, cellIndex);
                 // Some cells could be null (sparse array), so skip them
-                if (cell && setSelection(model, 0, 0, 'cell' + cellIndex)) {
-                    selectionDidChange(model);
+                if (cell &&
+                    setSelectionOffset(model, 0, 0, 'cell' + cellIndex)) {
                     return;
                 }
                 cellIndex += 1;
@@ -13199,11 +16529,10 @@ function next(model, options) {
                 next(model, options);
             }
         }
-        selectionDidChange(model);
         return;
     }
     // Still some siblings to go through. Move on to the next one.
-    setSelection(model, model.anchorOffset() + 1);
+    setSelectionOffset(model, model.anchorOffset() + 1);
     const anchor = getAnchor(model);
     // Dive into its components, if the new anchor is a compound atom,
     // and allows capture of the selection by its sub-elements
@@ -13223,7 +16552,7 @@ function next(model, options) {
             }
             console.assert(relation);
             model.path.push({ relation: relation, offset: 0 });
-            setSelection(model, 0, 0, relation);
+            setSelectionOffset(model, 0, 0, relation);
             return;
         }
         relation = 'body';
@@ -13256,13 +16585,13 @@ function previous(model, options) {
         model.anchorOffset() === 1 &&
         model.parent() &&
         model.parent().skipBoundary) {
-        setSelection(model, 0);
+        setSelectionOffset(model, 0);
     }
     if (model.anchorOffset() < 1) {
         // We've reached the first of these siblings.
         // Is there another set of siblings to consider?
         let relation = PREVIOUS_RELATION[model.relation()];
-        while (relation && !setSelection(model, -1, 0, relation)) {
+        while (relation && !setSelectionOffset(model, -1, 0, relation)) {
             relation = PREVIOUS_RELATION[relation];
         }
         // Ignore the body of the subsup scaffolding and of
@@ -13276,14 +16605,13 @@ function previous(model, options) {
         if (relation)
             return;
         adjustPlaceholder(model);
-        selectionWillChange(model);
         // No more siblings, check if we have a sibling cell in an array
         if (model.relation().startsWith('cell')) {
             let cellIndex = parseInt(model.relation().match(/cell([0-9]*)$/)[1]) - 1;
             while (cellIndex >= 0) {
                 const cell = arrayCell(model.parent().array, cellIndex);
-                if (cell && setSelection(model, -1, 0, 'cell' + cellIndex)) {
-                    selectionDidChange(model);
+                if (cell &&
+                    setSelectionOffset(model, -1, 0, 'cell' + cellIndex)) {
                     return;
                 }
                 cellIndex -= 1;
@@ -13301,9 +16629,8 @@ function previous(model, options) {
         }
         else {
             model.path.pop();
-            setSelection(model, model.anchorOffset() - 1);
+            setSelectionOffset(model, model.anchorOffset() - 1);
         }
-        selectionDidChange(model);
         return;
     }
     // If the new anchor is a compound atom, dive into its components
@@ -13329,7 +16656,7 @@ function previous(model, options) {
                 relation: relation,
                 offset: arrayCell(anchor.array, cellIndex).length - 1,
             });
-            setSelection(model, -1, 0, relation);
+            setSelectionOffset(model, -1, 0, relation);
             return;
         }
         relation = 'superscript';
@@ -13339,7 +16666,7 @@ function previous(model, options) {
                     relation: relation,
                     offset: anchor[relation].length - 1,
                 });
-                setSelection(model, -1, 0, relation);
+                setSelectionOffset(model, -1, 0, relation);
                 return;
             }
             relation = PREVIOUS_RELATION[relation];
@@ -13347,23 +16674,32 @@ function previous(model, options) {
     }
     // There wasn't a component to navigate to, so...
     // Still some siblings to go through: move on to the previous one.
-    setSelection(model, model.anchorOffset() - 1);
+    setSelectionOffset(model, model.anchorOffset() - 1);
     if (!options.iterateAll &&
         model.sibling(0) &&
         model.sibling(0).skipBoundary) {
         previous(model, options);
     }
 }
-function move(model, dist, options) {
-    var _a;
+function move(model, direction, options) {
     options = options !== null && options !== void 0 ? options : { extend: false };
-    const extend = (_a = options.extend) !== null && _a !== void 0 ? _a : false;
     removeSuggestion(model);
-    if (extend) {
-        extend(model, dist, options);
+    const oldPath = model.clone();
+    if (direction === 'upward') {
+        up(model, options);
+    }
+    else if (direction === 'downward') {
+        down(model, options);
     }
     else {
-        const oldPath = model.clone();
+        let dist = direction === 'forward'
+            ? 1
+            : direction === 'backward'
+                ? -1
+                : direction;
+        if (options.extend) {
+            return extend(model, dist);
+        }
         // const previousParent = model.parent();
         // const previousRelation = model.relation();
         // const previousSiblings = model.siblings();
@@ -13390,26 +16726,25 @@ function move(model, dist, options) {
         //         previousParent[previousRelation] = null;
         //     }
         // }
-        model.announce('move', oldPath);
     }
+    selectionDidChange(model);
+    model.announce('move', oldPath);
     return true;
 }
 function up(model, options) {
-    var _a;
+    var _a, _b;
     options = options !== null && options !== void 0 ? options : { extend: false };
     const extend = (_a = options.extend) !== null && _a !== void 0 ? _a : false;
     collapseSelectionBackward(model);
     const relation = model.relation();
     if (relation === 'denom') {
         if (extend) {
-            selectionWillChange(model);
             model.path.pop();
             model.path[model.path.length - 1].offset -= 1;
             setSelectionExtent(model, 1);
-            selectionDidChange(model);
         }
         else {
-            setSelection(model, model.anchorOffset(), 0, 'numer');
+            setSelectionOffset(model, model.anchorOffset(), 0, 'numer');
         }
         model.announce('moveUp');
     }
@@ -13420,34 +16755,36 @@ function up(model, options) {
         if (colRow && arrayCell(model.parent().array, colRow)) {
             model.path[model.path.length - 1].relation =
                 'cell' + arrayIndex(model.parent().array, colRow);
-            setSelection(model, model.anchorOffset());
+            setSelectionOffset(model, model.anchorOffset());
             model.announce('moveUp');
         }
         else {
-            move(model, -1, options);
+            move(model, 'backward', options);
         }
     }
     else {
         model.announce('line');
+        if (!model.suppressChangeNotifications &&
+            !((_b = model.hooks) === null || _b === void 0 ? void 0 : _b.moveOut(model, 'upward'))) {
+            return false;
+        }
     }
     return true;
 }
 function down(model, options) {
-    var _a;
+    var _a, _b;
     options = options !== null && options !== void 0 ? options : { extend: false };
     const extend = (_a = options.extend) !== null && _a !== void 0 ? _a : false;
     collapseSelectionForward(model);
     const relation = model.relation();
     if (relation === 'numer') {
         if (extend) {
-            selectionWillChange(model);
             model.path.pop();
             model.path[model.path.length - 1].offset -= 1;
             setSelectionExtent(model, 1);
-            selectionDidChange(model);
         }
         else {
-            setSelection(model, model.anchorOffset(), 0, 'denom');
+            setSelectionOffset(model, model.anchorOffset(), 0, 'denom');
         }
         model.announce('moveDown');
     }
@@ -13459,15 +16796,19 @@ function down(model, options) {
         if (colRow && arrayCell(model.parent().array, colRow)) {
             model.path[model.path.length - 1].relation =
                 'cell' + arrayIndex(model.parent().array, colRow);
-            setSelection(model, model.anchorOffset());
+            setSelectionOffset(model, model.anchorOffset());
             model.announce('moveDown');
         }
         else {
-            move(model, +1, options);
+            move(model, 'forward', options);
         }
     }
     else {
         model.announce('line');
+        if (!model.suppressChangeNotifications &&
+            !((_b = model.hooks) === null || _b === void 0 ? void 0 : _b.moveOut(model, 'downward'))) {
+            return false;
+        }
     }
     return true;
 }
@@ -13487,7 +16828,6 @@ function extend(model, dist) {
         // We're trying to extend beyond the first element.
         // Go up to the parent.
         if (model.path.length > 1) {
-            selectionWillChange(model);
             model.path.pop();
             // model.path[model.path.length - 1].offset -= 1;
             setSelectionExtent(model, -1);
@@ -13504,7 +16844,6 @@ function extend(model, dist) {
         // We're trying to extend beyond the last element.
         // Go up to the parent
         if (model.path.length > 1) {
-            selectionWillChange(model);
             model.path.pop();
             model.path[model.path.length - 1].offset -= 1;
             setSelectionExtent(model, 1);
@@ -13518,7 +16857,7 @@ function extend(model, dist) {
         }
         extent -= 1;
     }
-    setSelection(model, offset, extent);
+    setSelectionOffset(model, offset, extent);
     model.announce('move', oldPath);
     return true;
 }
@@ -13550,11 +16889,11 @@ function skip(model, dir, options) {
         // We're in a text zone, skip word by word
         offset = wordBoundaryOffset(model, offset, dir);
         if (offset < 0 && !extend) {
-            setSelection(model, 0);
+            setSelectionOffset(model, 0);
             return;
         }
         if (offset > siblings.length) {
-            setSelection(model, siblings.length - 1);
+            setSelectionOffset(model, siblings.length - 1);
             move(model, dir, options);
             return;
         }
@@ -13594,10 +16933,10 @@ function skip(model, dir, options) {
     }
     if (extend) {
         const anchor = model.anchorOffset();
-        setSelection(model, anchor, offset - anchor);
+        setSelectionOffset(model, anchor, offset - anchor);
     }
     else {
-        setSelection(model, offset);
+        setSelectionOffset(model, offset);
     }
     model.announce('move', oldPath);
 }
@@ -13688,10 +17027,10 @@ function selectGroup(model) {
         end -= 1;
         if (start >= end) {
             // No word found. Select a single character
-            setSelection(model, model.endOffset() - 1, 1);
+            setSelectionOffset(model, model.endOffset() - 1, 1);
             return true;
         }
-        setSelection(model, start, end - start);
+        setSelectionOffset(model, start, end - start);
     }
     else {
         // In a math zone, select all the sibling nodes
@@ -13706,17 +17045,17 @@ function selectGroup(model) {
             while (isNumber(siblings[end]))
                 end += 1;
             end -= 1;
-            setSelection(model, start, end - start);
+            setSelectionOffset(model, start, end - start);
         }
         else {
-            setSelection(model, 0, 'end');
+            setSelectionOffset(model, 0, 'end');
         }
     }
     return true;
 }
 function selectAll(model) {
     model.path = [{ relation: 'body', offset: 0 }];
-    return setSelection(model, 0, 'end');
+    return setSelectionOffset(model, 0, 'end');
 }
 /**
  * @return {boolean} True if the selection is an insertion point.
@@ -13726,18 +17065,17 @@ function selectionIsCollapsed(model) {
 }
 function setSelectionExtent(model, extent) {
     model.extent = extent;
-    return true;
 }
 function collapseSelectionForward(model) {
     if (model.extent === 0)
         return false;
-    setSelection(model, model.endOffset());
+    setSelectionOffset(model, model.endOffset());
     return true;
 }
 function collapseSelectionBackward(model) {
     if (model.extent === 0)
         return false;
-    setSelection(model, model.startOffset());
+    setSelectionOffset(model, model.startOffset());
     return true;
 }
 function moveAfterParent(model) {
@@ -13752,20 +17090,8 @@ function moveAfterParent(model) {
     return false;
 }
 /**
- * The atom where the selection starts.
- *
- * When the selection is extended the anchor remains fixed. The anchor
- * could be either before or after the focus.
- */
-function getAnchor(model) {
-    if (model.parent().array) {
-        return arrayCell(model.parent().array, model.relation())[model.anchorOffset()];
-    }
-    const siblings = model.siblings();
-    return siblings[Math.min(siblings.length - 1, model.anchorOffset())];
-}
-/**
- * Extend the selection between `from` and `to` nodes
+ * Extend the selection between `from` and `to` nodes.
+ * Called during dragging.
  *
  * @param {object} options
  * - options.extendToWordBoundary
@@ -13831,62 +17157,6 @@ function setRange(model, from, to, options = {
         commonAncestor[ancestorDepth].offset -= 1;
     }
     return setPath(model, commonAncestor, extent);
-}
-/**
- *
- * @param  extent the length of the selection
- * @return true if the path has actually changed
- */
-function setPath(model, inSelection, extent = 0) {
-    let selection;
-    // Convert to a path array if necessary
-    if (typeof inSelection === 'string') {
-        selection = pathFromString(inSelection);
-    }
-    else if (isArray(inSelection)) {
-        // need to temporarily change the path of this to use 'sibling()'
-        const newPath = clone(inSelection);
-        const oldPath = model.path;
-        model.path = newPath;
-        if (extent === 0 && getAnchor(model).type === 'placeholder') {
-            // select the placeholder
-            newPath[newPath.length - 1].offset = model.anchorOffset() - 1;
-            extent = 1;
-        }
-        selection = {
-            path: newPath,
-            extent: extent || 0,
-        };
-        model.path = oldPath;
-    }
-    else {
-        selection = inSelection;
-    }
-    const pathChanged = pathDistance(model.path, selection.path) !== 0;
-    const extentChanged = selection.extent !== model.extent;
-    if (pathChanged || extentChanged) {
-        if (pathChanged) {
-            adjustPlaceholder(model);
-        }
-        selectionWillChange(model);
-        model.path = clone(selection.path);
-        if (model.siblings().length < model.anchorOffset()) {
-            // The new path is out of bounds.
-            // Reset the path to something valid
-            console.warn('Invalid selection: ' +
-                model.toString() +
-                ' in "' +
-                model.root.toLatex(false) +
-                '"');
-            model.path = [{ relation: 'body', offset: 0 }];
-            model.extent = 0;
-        }
-        else {
-            setSelectionExtent(model, selection.extent);
-        }
-        selectionDidChange(model);
-    }
-    return pathChanged || extentChanged;
 }
 /**
  * Locate the offset before the insertion point that would indicate
@@ -13959,47 +17229,6 @@ function getContentFromSiblings(model, start, end) {
         i++;
     }
     return result;
-}
-/**
- * When changing the selection, if the former selection is an empty list,
- * insert a placeholder if necessary. For example, if in an empty numerator.
- */
-function adjustPlaceholder(model) {
-    // Should we insert a placeholder?
-    // Check if we're an empty list that is the child of a fraction
-    const siblings = model.siblings();
-    if (siblings && siblings.length <= 1) {
-        let placeholder;
-        const relation = model.relation();
-        if (relation === 'numer') {
-            placeholder = 'numerator';
-        }
-        else if (relation === 'denom') {
-            placeholder = 'denominator';
-        }
-        else if (model.parent().type === 'surd' && relation === 'body') {
-            // Surd (roots)
-            placeholder = 'radicand';
-        }
-        else if (model.parent().type === 'overunder' && relation === 'body') {
-            placeholder = 'base';
-        }
-        else if (relation === 'underscript' || relation === 'overscript') {
-            placeholder = 'annotation';
-        }
-        if (placeholder) {
-            // ◌ ⬚
-            // const placeholderAtom = [
-            //     new Atom('math', 'placeholder', '⬚', getAnchorStyle(model)),
-            // ];
-            // Array.prototype.splice.apply(
-            //     siblings,
-            //     [1, 0].concat(placeholderAtom)
-            // );
-            // @revisit
-            siblings.splice(1, 0, new Atom('math', 'placeholder', '⬚', getAnchorStyle(model)));
-        }
-    }
 }
 function wordBoundary(model, path, dir) {
     dir = dir < 0 ? -1 : +1;
@@ -14137,11 +17366,11 @@ function filter(model, cb, dir = +1) {
     }
     else {
         collapseSelectionBackward(iter);
-        move(iter, 1);
+        move(iter, 'forward');
     }
     const initialAnchor = getAnchor(iter);
     do {
-        if (cb.bind(iter)(iter.path, getAnchor(iter))) {
+        if (cb(getAnchor(iter), iter)) {
             result.push(iter.toString());
         }
         if (dir >= 0) {
@@ -15152,8 +18381,8 @@ const DEFAULT_KEYBINDINGS = [
         ifMode: 'text',
         command: 'moveToPreviousPlaceholder',
     },
-    { key: '[Escape]', ifMode: 'math', command: ['switch-mode', 'command'] },
-    { key: '\\', ifMode: 'math', command: ['switch-mode', 'command'] },
+    { key: '[Escape]', ifMode: 'math', command: ['switchMode', 'command'] },
+    { key: '\\', ifMode: 'math', command: ['switchMode', 'command'] },
     {
         key: 'alt+[Equal]',
         ifMode: 'math',
@@ -15250,7 +18479,7 @@ const DEFAULT_KEYBINDINGS = [
     {
         key: 'shift+[Quote]',
         ifMode: 'text',
-        command: ['switch-mode', 'math', '”', ''],
+        command: ['switchMode', 'math', '”', ''],
     },
     // WOLFRAM MATHEMATICA BINDINGS
     {
@@ -15271,12 +18500,18 @@ const DEFAULT_KEYBINDINGS = [
         ifMode: 'math',
         command: ['insert', '$$\\left\\lbrace #0 \\right\\rbrace$$'],
     },
-    { key: '[Return]', ifMode: 'math', command: 'addRowAfter' },
-    { key: '[Enter]', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'ctrl+[Return]', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'ctrl+[Enter]', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'cmd+[Return]', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'cmd+[Enter]', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'ctrl+;', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'cmd+;', ifMode: 'math', command: 'addRowAfter' },
+    { key: 'ctrl+shift+;', ifMode: 'math', command: 'addRowBefore' },
+    { key: 'cmd+shift+;', ifMode: 'math', command: 'addRowBefore' },
     { key: 'ctrl+[Comma]', ifMode: 'math', command: 'addColumnAfter' },
-    { key: '[Return]', ifMode: 'text', command: 'addRowAfter' },
-    { key: '[Enter]', ifMode: 'text', command: 'addRowAfter' },
-    { key: 'ctrl+[Comma]', ifMode: 'text', command: 'addColumnAfter' },
+    { key: 'cmd+[Comma]', ifMode: 'math', command: 'addColumnAfter' },
+    { key: 'ctrl+shift+[Comma]', ifMode: 'math', command: 'addColumnAfter' },
+    { key: 'cmd+shift+[Comma]', ifMode: 'math', command: 'addColumnAfter' },
     // Excel keybindings:
     // shift+space: select entire row, ctrl+space: select an entire column
     // ctrl+shift++ or ctrl+numpad+
@@ -15726,7 +18961,7 @@ function releaseSharedElement(el) {
 }
 /**
  * Checks if the argument is a valid Mathfield.
- * After a Mathfield has been destroyed (for example by calling revertToOriginalContent()
+ * After a Mathfield has been destroyed (for example by calling `dispose()`
  * the Mathfield is no longer valid. However, there may be some pending
  * operations invoked via requestAnimationFrame() for example, that would
  * need to ensure the mathfield is still valid by the time they're executed.
@@ -15833,31 +19068,31 @@ function attachButtonHandlers(mathfield, el, command) {
     if (typeof command === 'object' && (command.default || command.pressed)) {
         // Attach the default (no modifiers pressed) command to the element
         if (command.default) {
-            el.setAttribute('data-' + mathfield.config.namespace + 'command', JSON.stringify(command.default));
+            el.setAttribute('data-' + mathfield.options.namespace + 'command', JSON.stringify(command.default));
         }
         if (command.alt) {
-            el.setAttribute('data-' + mathfield.config.namespace + 'command-alt', JSON.stringify(command.alt));
+            el.setAttribute('data-' + mathfield.options.namespace + 'command-alt', JSON.stringify(command.alt));
         }
         if (command.altshift) {
-            el.setAttribute('data-' + mathfield.config.namespace + 'command-altshift', JSON.stringify(command.altshift));
+            el.setAttribute('data-' + mathfield.options.namespace + 'command-altshift', JSON.stringify(command.altshift));
         }
         if (command.shift) {
-            el.setAttribute('data-' + mathfield.config.namespace + 'command-shift', JSON.stringify(command.shift));
+            el.setAttribute('data-' + mathfield.options.namespace + 'command-shift', JSON.stringify(command.shift));
         }
         // .pressed: command to perform when the button is pressed (i.e.
         // on mouse down/touch). Otherwise the command is performed when
         // the button is released
         if (command.pressed) {
-            el.setAttribute('data-' + mathfield.config.namespace + 'command-pressed', JSON.stringify(command.pressed));
+            el.setAttribute('data-' + mathfield.options.namespace + 'command-pressed', JSON.stringify(command.pressed));
         }
         if (command.pressAndHoldStart) {
             el.setAttribute('data-' +
-                mathfield.config.namespace +
+                mathfield.options.namespace +
                 'command-pressAndHoldStart', JSON.stringify(command.pressAndHoldStart));
         }
         if (command.pressAndHoldEnd) {
             el.setAttribute('data-' +
-                mathfield.config.namespace +
+                mathfield.options.namespace +
                 'command-pressAndHoldEnd', JSON.stringify(command.pressAndHoldEnd));
         }
     }
@@ -15865,7 +19100,7 @@ function attachButtonHandlers(mathfield, el, command) {
         // We need to turn the command into a string to attach it to the dataset
         // associated with the button (the command could be an array made of a
         // selector and one or more parameters)
-        el.setAttribute('data-' + mathfield.config.namespace + 'command', JSON.stringify(command));
+        el.setAttribute('data-' + mathfield.options.namespace + 'command', JSON.stringify(command));
     }
     let pressHoldStart;
     let pressHoldElement;
@@ -15876,7 +19111,10 @@ function attachButtonHandlers(mathfield, el, command) {
         if (ev.type !== 'mousedown' || ev.buttons === 1) {
             // The primary button was pressed or the screen was tapped.
             ev.stopPropagation();
-            ev.preventDefault();
+            // Can't preventDefault() in a passive listener
+            if (ev.type !== 'touchstart') {
+                ev.preventDefault();
+            }
             el.classList.add('pressed');
             pressHoldStart = Date.now();
             // Record the ID of the primary touch point for tracking on touchmove
@@ -15885,14 +19123,14 @@ function attachButtonHandlers(mathfield, el, command) {
             }
             // Parse the JSON to get the command (and its optional arguments)
             // and perform it immediately
-            const command = el.getAttribute('data-' + mathfield.config.namespace + 'command-pressed');
+            const command = el.getAttribute('data-' + mathfield.options.namespace + 'command-pressed');
             if (command) {
-                mathfield.$perform(JSON.parse(command));
+                mathfield.executeCommand(JSON.parse(command));
             }
             // If there is a `press and hold start` command, perform it
             // after a delay, if we're still pressed by then.
             const pressAndHoldStartCommand = el.getAttribute('data-' +
-                mathfield.config.namespace +
+                mathfield.options.namespace +
                 'command-pressAndHoldStart');
             if (pressAndHoldStartCommand) {
                 pressHoldElement = el;
@@ -15901,7 +19139,7 @@ function attachButtonHandlers(mathfield, el, command) {
                 }
                 pressAndHoldTimer = window.setTimeout(function () {
                     if (el.classList.contains('pressed')) {
-                        mathfield.$perform(JSON.parse(pressAndHoldStartCommand));
+                        mathfield.executeCommand(JSON.parse(pressAndHoldStartCommand));
                     }
                 }, 300);
             }
@@ -15913,7 +19151,7 @@ function attachButtonHandlers(mathfield, el, command) {
         //     'command-pressAndHoldEnd');
         // const now = Date.now();
         // if (command && now > pressHoldStart + 300) {
-        //     mathfield.$perform(JSON.parse(command));
+        //     mathfield.executeCommand(JSON.parse(command));
         // }
     });
     on(el, 'touchmove:passive', (ev) => {
@@ -15921,7 +19159,7 @@ function attachButtonHandlers(mathfield, el, command) {
         // to the target that was originally tapped on. For consistency,
         // we want to mimic the behavior of the mouse interaction by
         // tracking the touch events and dispatching them to potential targets
-        ev.preventDefault();
+        // ev.preventDefault(); // can't preventDefault inside a passive event handler
         for (let i = 0; i < ev.changedTouches.length; i++) {
             if (ev.changedTouches[i].identifier === touchID) {
                 // Found a touch matching our primary/tracked touch
@@ -15969,7 +19207,9 @@ function attachButtonHandlers(mathfield, el, command) {
         window.setTimeout(function () {
             el.classList.remove('active');
         }, 150);
-        let command = el.getAttribute('data-' + mathfield.config.namespace + 'command-pressAndHoldEnd');
+        let command = el.getAttribute('data-' +
+            mathfield.options.namespace +
+            'command-pressAndHoldEnd');
         const now = Date.now();
         // If the button has not been pressed for very long or if we were
         // not the button that started the press and hold, don't consider
@@ -15978,21 +19218,21 @@ function attachButtonHandlers(mathfield, el, command) {
             command = undefined;
         }
         if (!command && ev.altKey && ev.shiftKey) {
-            command = el.getAttribute('data-' + mathfield.config.namespace + 'command-altshift');
+            command = el.getAttribute('data-' + mathfield.options.namespace + 'command-altshift');
         }
         if (!command && ev.altKey) {
-            command = el.getAttribute('data-' + mathfield.config.namespace + 'command-alt');
+            command = el.getAttribute('data-' + mathfield.options.namespace + 'command-alt');
         }
         if (!command && ev.shiftKey) {
-            command = el.getAttribute('data-' + mathfield.config.namespace + 'command-shift');
+            command = el.getAttribute('data-' + mathfield.options.namespace + 'command-shift');
         }
         if (!command) {
-            command = el.getAttribute('data-' + mathfield.config.namespace + 'command');
+            command = el.getAttribute('data-' + mathfield.options.namespace + 'command');
         }
         if (command) {
             // Parse the JSON to get the command (and its optional arguments)
             // and perform it
-            mathfield.$perform(JSON.parse(command));
+            mathfield.executeCommand(JSON.parse(command));
         }
         ev.stopPropagation();
         ev.preventDefault();
@@ -16238,10 +19478,10 @@ function getNote(symbol) {
     return result;
 }
 function latexToMarkup(latex, mf) {
-    const parse = parseString(latex, 'math', null, mf.config.macros);
+    const parse = parseString(latex, 'math', null, mf.options.macros);
     const spans = decompose({
         mathstyle: MATHSTYLES.displaystyle,
-        macros: mf.config.macros,
+        macros: mf.options.macros,
     }, parse);
     const wrapper = makeStruts(makeSpan(spans, 'ML__base'), 'ML__mathlive');
     return wrapper.toMarkup();
@@ -16315,7 +19555,7 @@ function updatePopoverPosition(mf, options) {
     }
 }
 function showPopover(mf, markup) {
-    mf.popover.innerHTML = mf.config.createHTML(markup);
+    mf.popover.innerHTML = mf.options.createHTML(markup);
     const position = getCaretPosition(mf.field);
     if (position)
         setPopoverPosition(mf, position);
@@ -16409,11 +19649,9 @@ function commitCommandStringBeforeInsertionPoint(model) {
 function spliceCommandStringAroundInsertionPoint(model, mathlist) {
     const command = getCommandOffsets(model);
     if (command) {
-        // Dispatch notifications
-        contentWillChange(model);
         if (!mathlist) {
             model.siblings().splice(command.start, command.end - command.start);
-            setSelection(model, command.start - 1, 0);
+            setSelectionOffset(model, command.start - 1, 0);
         }
         else {
             // Array.prototype.splice.apply(
@@ -16424,9 +19662,12 @@ function spliceCommandStringAroundInsertionPoint(model, mathlist) {
             model
                 .siblings()
                 .splice(command.start, command.end - command.start, ...mathlist);
-            let newPlaceholders = [];
+            const newPlaceholders = [];
             for (const atom of mathlist) {
-                newPlaceholders = newPlaceholders.concat(atom.filter((atom) => atom.type === 'placeholder'));
+                atom.forEach((x) => {
+                    if (x.type === 'placeholder')
+                        newPlaceholders.push(x);
+                });
             }
             setSelectionExtent(model, 0);
             // Set the anchor offset to a reasonable value that can be used by
@@ -16434,7 +19675,7 @@ function spliceCommandStringAroundInsertionPoint(model, mathlist) {
             // if the length of the mathlist is shorter than the name of the command
             model.path[model.path.length - 1].offset = command.start - 1;
             if (newPlaceholders.length === 0 || !leap(model, +1, false)) {
-                setSelection(model, command.start + mathlist.length - 1);
+                setSelectionOffset(model, command.start + mathlist.length - 1);
             }
         }
         // Dispatch notifications
@@ -16471,7 +19712,6 @@ function removeCommandStringFromAtom(atom) {
     }
 }
 function removeCommandString(model) {
-    contentWillChange(model);
     const contentWasChanging = model.suppressChangeNotifications;
     model.suppressChangeNotifications = true;
     removeCommandStringFromAtom(model.root.body);
@@ -16973,7 +20213,7 @@ function toString$1(atoms) {
  *
  */
 function atomToMathML(atom, options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     // For named SVG atoms, map to a Unicode char
     const SVG_CODE_POINTS = {
         widehat: '^',
@@ -17237,24 +20477,24 @@ function atomToMathML(atom, options) {
                     (atom.svgBelow || underscript)) {
                     body = atom.body;
                 }
-                else if (overscript) {
+                else if (overscript && overscript.length > 0) {
                     body = atom.body;
                     if ((_b = (_a = atom.body) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.underscript) {
                         underscript = atom.body[0].underscript;
                         body = atom.body[0].body;
                     }
-                    else if (((_c = atom === null || atom === void 0 ? void 0 : atom.body[0]) === null || _c === void 0 ? void 0 : _c.type) === 'first' && ((_d = atom === null || atom === void 0 ? void 0 : atom.body[1]) === null || _d === void 0 ? void 0 : _d.underscript)) {
+                    else if (((_d = (_c = atom.body) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.type) === 'first' && ((_f = (_e = atom.body) === null || _e === void 0 ? void 0 : _e[1]) === null || _f === void 0 ? void 0 : _f.underscript)) {
                         underscript = atom.body[1].underscript;
                         body = atom.body[1].body;
                     }
                 }
-                else if (underscript) {
+                else if (underscript && underscript.length > 0) {
                     body = atom.body;
-                    if ((_f = (_e = atom === null || atom === void 0 ? void 0 : atom.body) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.overscript) {
+                    if ((_h = (_g = atom.body) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.overscript) {
                         overscript = atom.body[0].overscript;
                         body = atom.body[0].body;
                     }
-                    else if (((_g = atom === null || atom === void 0 ? void 0 : atom.body[0]) === null || _g === void 0 ? void 0 : _g.type) === 'first' && ((_h = atom === null || atom === void 0 ? void 0 : atom.body[1]) === null || _h === void 0 ? void 0 : _h.overscript)) {
+                    else if (((_k = (_j = atom.body) === null || _j === void 0 ? void 0 : _j[0]) === null || _k === void 0 ? void 0 : _k.type) === 'first' && ((_m = (_l = atom.body) === null || _l === void 0 ? void 0 : _l[1]) === null || _m === void 0 ? void 0 : _m.overscript)) {
                         overscript = atom.body[1].overscript;
                         body = atom.body[1].body;
                     }
@@ -17428,6 +20668,10 @@ function atomToMathML(atom, options) {
             case 'space':
                 result += '&nbsp;';
                 break;
+            case 'msupsub':
+                break;
+            case 'phantom':
+                break;
             default:
                 console.log('In conversion to MathML, unknown type : ' + atom.type);
         }
@@ -17493,17 +20737,17 @@ function render(mathfield, renderOptions) {
         a.isSelected = false;
         a.containsCaret = false;
     });
-    const hasFocus = mathfield.$hasFocus();
+    const hasFocus = mathfield.hasFocus();
     if (selectionIsCollapsed(mathfield.model)) {
         getAnchor(mathfield.model).caret =
-            hasFocus && !mathfield.config.readOnly ? mathfield.mode : '';
+            hasFocus && !mathfield.options.readOnly ? mathfield.mode : '';
     }
     else {
         forEachSelected(mathfield.model, (a) => {
             a.isSelected = true;
         });
     }
-    if (hasFocus && !mathfield.config.readOnly) {
+    if (hasFocus && !mathfield.options.readOnly) {
         let ancestor = mathfield.model.ancestor(1);
         let i = 1;
         let done = false;
@@ -17521,7 +20765,7 @@ function render(mathfield, renderOptions) {
     //
     const spans = decompose({
         mathstyle: MATHSTYLES.displaystyle,
-        letterShapeStyle: mathfield.config.letterShapeStyle,
+        letterShapeStyle: mathfield.options.letterShapeStyle,
         atomIdsSettings: {
             // Using the hash as a seed for the ID
             // keeps the IDs the same until the content of the field changes.
@@ -17531,8 +20775,8 @@ function render(mathfield, renderOptions) {
             // consecutive digits to represent a number.
             groupNumbers: renderOptions.forHighlighting,
         },
-        smartFence: mathfield.config.smartFence,
-        macros: mathfield.config.macros,
+        smartFence: mathfield.options.smartFence,
+        macros: mathfield.options.macros,
     }, mathfield.model.root);
     //
     // 5. Construct struts around the spans
@@ -17550,10 +20794,10 @@ function render(mathfield, renderOptions) {
     //
     // 6. Generate markup and accessible node
     //
-    mathfield.field.innerHTML = mathfield.config.createHTML(wrapper.toMarkup(0, mathfield.config.horizontalSpacingScale));
-    mathfield.field.classList.toggle('ML__focused', hasFocus && !mathfield.config.readOnly);
-    mathfield.accessibleNode.innerHTML = mathfield.config.createHTML('<math xmlns="http://www.w3.org/1998/Math/MathML">' +
-        atomsToMathML(mathfield.model.root, mathfield.config) +
+    mathfield.field.innerHTML = mathfield.options.createHTML(wrapper.toMarkup(0, mathfield.options.horizontalSpacingScale));
+    mathfield.field.classList.toggle('ML__focused', hasFocus && !mathfield.options.readOnly);
+    mathfield.accessibleNode.innerHTML = mathfield.options.createHTML('<math xmlns="http://www.w3.org/1998/Math/MathML">' +
+        atomsToMathML(mathfield.model.root, mathfield.options) +
         '</math>');
     //mathfield.ariaLiveText.textContent = "";
     //
@@ -17606,7 +20850,9 @@ function perform(mathfield, command) {
     selector = selector.replace(/-\w/g, (m) => m[1].toUpperCase());
     if (((_a = COMMANDS[selector]) === null || _a === void 0 ? void 0 : _a.target) === 'model') {
         if (/^(delete|transpose|add)/.test(selector)) {
-            mathfield.resetKeystrokeBuffer();
+            if (selector !== 'deletePreviousChar') {
+                mathfield.resetKeystrokeBuffer();
+            }
         }
         if (/^(delete|transpose|add)/.test(selector) &&
             mathfield.mode !== 'command') {
@@ -17662,8 +20908,8 @@ function perform(mathfield, command) {
  */
 function performWithFeedback(mathfield, selector) {
     // @revisit: have a registry of commands -> sound
-    mathfield.$focus();
-    if (mathfield.config.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
+    mathfield.focus();
+    if (mathfield.options.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
         navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
     }
     // Convert kebab case to camel case.
@@ -17705,7 +20951,7 @@ function performWithFeedback(mathfield, selector) {
         mathfield.keypressSound.load();
         mathfield.keypressSound.play().catch((err) => console.warn(err));
     }
-    return mathfield.$perform(selector);
+    return mathfield.executeCommand(selector);
 }
 register$2({
     performWithFeedback: (mathfield, command) => performWithFeedback(mathfield, command),
@@ -17853,28 +21099,24 @@ function convertParentToArray(model) {
     // Or if at root, this could be a 'align*' environment
 }
 function addRowAfter(model) {
-    contentWillChange(model);
     convertParentToArray(model);
     addCell(model, 'after row');
     contentDidChange(model);
     return true;
 }
 function addRowBefore(model) {
-    contentWillChange(model);
     convertParentToArray(model);
     addCell(model, 'before row');
     contentDidChange(model);
     return true;
 }
 function addColumnAfter(model) {
-    contentWillChange(model);
     convertParentToArray(model);
     addCell(model, 'after column');
     contentDidChange(model);
     return true;
 }
 function addColumnBefore(model) {
-    contentWillChange(model);
     convertParentToArray(model);
     addCell(model, 'before column');
     contentDidChange(model);
@@ -17894,9 +21136,6 @@ register$2({
  * If dir = 0, delete only if the selection is not collapsed
  */
 function delete_(model, dir = 0) {
-    // Dispatch notifications
-    contentWillChange(model);
-    selectionWillChange(model);
     const contentWasChanging = model.suppressChangeNotifications;
     model.suppressChangeNotifications = true;
     dir = dir < 0 ? -1 : dir > 0 ? +1 : dir;
@@ -17910,7 +21149,7 @@ function delete_(model, dir = 0) {
                 const atoms = arrayJoinRows(array);
                 model.path.pop();
                 model.siblings().splice(model.anchorOffset(), 1, ...atoms);
-                setSelection(model, model.anchorOffset() - 1, atoms.length);
+                setSelectionOffset(model, model.anchorOffset() - 1, atoms.length);
             }
             else {
                 const colRow = arrayColRow(array, model.relation());
@@ -17927,7 +21166,7 @@ function delete_(model, dir = 0) {
                     // cells left in the row)
                     const atoms = arrayJoinColumns(array[colRow.row]);
                     array[dest.row][dest.col] = array[dest.row][dest.col].concat(atoms);
-                    setSelection(model, destLength - 1, atoms.length);
+                    setSelectionOffset(model, destLength - 1, atoms.length);
                     // (2.2) Remove row
                     arrayRemoveRow(array, colRow.row);
                 }
@@ -17940,7 +21179,7 @@ function delete_(model, dir = 0) {
                         model.path[model.path.length - 1].relation =
                             'cell' + arrayIndex(array, colRow);
                         const destCell = array[colRow.row][colRow.col];
-                        setSelection(model, destCell.length - 1, 0);
+                        setSelectionOffset(model, destCell.length - 1, 0);
                     }
                     // (3.2) merge cell with cell in previous column
                 }
@@ -17960,7 +21199,7 @@ function delete_(model, dir = 0) {
         model.announce('deleted', null, siblings.slice(first, last));
         siblings.splice(first, last - first);
         // Adjust the anchor
-        setSelection(model, first - 1);
+        setSelectionOffset(model, first - 1);
     }
     else {
         const anchorOffset = model.anchorOffset();
@@ -17972,16 +21211,16 @@ function delete_(model, dir = 0) {
                 const sibling = model.sibling(0);
                 if (sibling.type === 'leftright') {
                     sibling.rightDelim = '?';
-                    move(model, -1);
+                    move(model, 'backward');
                 }
                 else if (!sibling.captureSelection &&
                     /^(group|array|genfrac|surd|leftright|overlap|overunder|box|mathstyle|sizing)$/.test(sibling.type)) {
-                    move(model, -1);
+                    move(model, 'backward');
                 }
                 else {
                     model.announce('deleted', null, siblings.slice(anchorOffset, anchorOffset + 1));
                     siblings.splice(anchorOffset, 1);
-                    setSelection(model, anchorOffset - 1);
+                    setSelectionOffset(model, anchorOffset - 1);
                 }
             }
             else {
@@ -18000,7 +21239,7 @@ function delete_(model, dir = 0) {
                     // );
                     // @revisit
                     model.siblings().splice(model.anchorOffset(), 0, ...supsub);
-                    setSelection(model, model.anchorOffset() - 1);
+                    setSelectionOffset(model, model.anchorOffset() - 1);
                     model.announce('deleted: ' + relation);
                 }
                 else if (relation === 'denom') {
@@ -18026,7 +21265,7 @@ function delete_(model, dir = 0) {
                     // );
                     // @revisit
                     model.siblings().splice(model.anchorOffset(), 0, ...numer);
-                    setSelection(model, model.anchorOffset() + numer.length - 1);
+                    setSelectionOffset(model, model.anchorOffset() + numer.length - 1);
                     model.announce('deleted: denominator');
                 }
                 else if (relation === 'body') {
@@ -18036,20 +21275,15 @@ function delete_(model, dir = 0) {
                     if (model.path.length > 1) {
                         body.shift(); // Remove the 'first' atom
                         model.path.pop();
-                        // Array.prototype.splice.apply(
-                        //     model.siblings(),
-                        //     [model.anchorOffset(), 1].concat(body)
-                        // );
-                        // @revisit
                         model
                             .siblings()
                             .splice(model.anchorOffset(), 1, ...body);
-                        setSelection(model, model.anchorOffset() - 1);
+                        setSelectionOffset(model, model.anchorOffset() - 1);
                         model.announce('deleted: root');
                     }
                 }
                 else {
-                    move(model, -1);
+                    move(model, 'backward');
                     deleteChar(model, -1);
                 }
             }
@@ -18057,7 +21291,7 @@ function delete_(model, dir = 0) {
         else if (dir > 0) {
             if (anchorOffset !== siblings.length - 1) {
                 if (/^(group|array|genfrac|surd|leftright|overlap|overunder|box|mathstyle|sizing)$/.test(model.sibling(1).type)) {
-                    move(model, +1);
+                    move(model, 'forward');
                 }
                 else {
                     model.announce('deleted', null, siblings.slice(anchorOffset + 1, anchorOffset + 2));
@@ -18088,11 +21322,11 @@ function delete_(model, dir = 0) {
                     // @revisit
                     model.siblings().splice(model.anchorOffset(), 1, ...denom);
                     model.siblings().splice(model.anchorOffset(), 0, ...numer);
-                    setSelection(model, model.anchorOffset() + numer.length - 1);
+                    setSelectionOffset(model, model.anchorOffset() + numer.length - 1);
                     model.announce('deleted: numerator');
                 }
                 else {
-                    move(model, 1);
+                    move(model, 'forward');
                     deleteChar(model, -1);
                 }
             }
@@ -18114,7 +21348,7 @@ function deleteAtoms(model, count) {
     }
     else {
         model.siblings().splice(model.anchorOffset() + count + 1, -count);
-        setSelection(model, model.anchorOffset() + count);
+        setSelectionOffset(model, model.anchorOffset() + count);
     }
 }
 /**
@@ -18137,932 +21371,6 @@ function deleteChar(model, count = 0) {
         }
     }
     return true;
-}
-
-/**
- * These shortcut strings are replaced with the corresponding LaTeX expression
- * without requiring an escape sequence or command.
- */
-const INLINE_SHORTCUTS = {
-    // Primes
-    "''": { mode: 'math', value: '^{\\doubleprime}' },
-    // Greek letters
-    alpha: '\\alpha',
-    delta: '\\delta',
-    Delta: '\\Delta',
-    pi: { mode: 'math', value: '\\pi' },
-    'pi ': { mode: 'text', value: '\\pi ' },
-    Pi: { mode: 'math', value: '\\Pi' },
-    theta: '\\theta',
-    Theta: '\\Theta',
-    // Letter-like
-    ii: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\imaginaryI',
-    },
-    jj: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\imaginaryJ',
-    },
-    ee: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\exponentialE',
-    },
-    nabla: { mode: 'math', value: '\\nabla' },
-    grad: { mode: 'math', value: '\\nabla' },
-    del: { mode: 'math', value: '\\partial' },
-    '\u221e': '\\infty',
-    // '&infin;': '\\infty',
-    // '&#8734;': '\\infty',
-    oo: {
-        mode: 'math',
-        after: 'nothing+digit+frac+surd+binop+relop+punct+array+openfence+closefence+space',
-        value: '\\infty',
-    },
-    // Big operators
-    '∑': { mode: 'math', value: '\\sum' },
-    sum: { mode: 'math', value: '\\sum_{#?}^{#?}' },
-    prod: { mode: 'math', value: '\\prod_{#?}^{#?}' },
-    sqrt: { mode: 'math', value: '\\sqrt' },
-    // '∫':                    '\\int',             // There's a alt-B command for this
-    '∆': { mode: 'math', value: '\\differentialD' },
-    '∂': { mode: 'math', value: '\\differentialD' },
-    // Functions
-    arcsin: { mode: 'math', value: '\\arcsin' },
-    arccos: { mode: 'math', value: '\\arccos' },
-    arctan: { mode: 'math', value: '\\arctan' },
-    sin: { mode: 'math', value: '\\sin' },
-    sinh: { mode: 'math', value: '\\sinh' },
-    cos: { mode: 'math', value: '\\cos' },
-    cosh: { mode: 'math', value: '\\cosh' },
-    tan: { mode: 'math', value: '\\tan' },
-    tanh: { mode: 'math', value: '\\tanh' },
-    sec: { mode: 'math', value: '\\sec' },
-    csc: { mode: 'math', value: '\\csc' },
-    cot: { mode: 'math', value: '\\cot' },
-    log: { mode: 'math', value: '\\log' },
-    ln: { mode: 'math', value: '\\ln' },
-    exp: { mode: 'math', value: '\\exp' },
-    lim: { mode: 'math', value: '\\lim_{#?}' },
-    // Differentials
-    // According to ISO31/XI (ISO 80000-2), differentials should be upright
-    dx: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\differentialD x',
-    },
-    dy: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\differentialD y',
-    },
-    dt: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\differentialD t',
-    },
-    // Logic
-    AA: { mode: 'math', value: '\\forall' },
-    EE: { mode: 'math', value: '\\exists' },
-    '!EE': { mode: 'math', value: '\\nexists' },
-    '&&': { mode: 'math', value: '\\land' },
-    // The shortcut for the greek letter "xi" is interfering with "x in"
-    xin: {
-        mode: 'math',
-        after: 'nothing+text+relop+punct+openfence+space',
-        value: 'x \\in',
-    },
-    in: {
-        mode: 'math',
-        after: 'nothing+letter+closefence',
-        value: '\\in',
-    },
-    '!in': { mode: 'math', value: '\\notin' },
-    // Sets
-    NN: '\\N',
-    ZZ: '\\Z',
-    QQ: '\\Q',
-    RR: '\\R',
-    CC: '\\C',
-    PP: '\\P',
-    // Operators
-    xx: { mode: 'math', value: '\\times' },
-    '+-': { mode: 'math', value: '\\pm' },
-    // Relational operators
-    '!=': { mode: 'math', value: '\\ne' },
-    '>=': { mode: 'math', value: '\\ge' },
-    '<=': { mode: 'math', value: '\\le' },
-    '<<': { mode: 'math', value: '\\ll' },
-    '>>': { mode: 'math', value: '\\gg' },
-    '~~': { mode: 'math', value: '\\approx' },
-    // More operators
-    '≈': { mode: 'math', value: '\\approx' },
-    '?=': { mode: 'math', value: '\\questeq' },
-    '÷': { mode: 'math', value: '\\div' },
-    '¬': { mode: 'math', value: '\\neg' },
-    ':=': { mode: 'math', value: '\\coloneq' },
-    '::': { mode: 'math', value: '\\Colon' },
-    // Fences
-    '(:': { mode: 'math', value: '\\langle' },
-    ':)': { mode: 'math', value: '\\rangle' },
-    // More Greek letters
-    beta: '\\beta',
-    chi: '\\chi',
-    epsilon: '\\epsilon',
-    varepsilon: '\\varepsilon',
-    eta: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\eta',
-    },
-    'eta ': {
-        mode: 'text',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\eta ',
-    },
-    gamma: '\\gamma',
-    Gamma: '\\Gamma',
-    iota: '\\iota',
-    kappa: '\\kappa',
-    lambda: '\\lambda',
-    Lambda: '\\Lambda',
-    mu: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\mu',
-    },
-    'mu ': {
-        mode: 'text',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\mu ',
-    },
-    nu: {
-        mode: 'math',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\nu',
-    },
-    'nu ': {
-        mode: 'text',
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\nu ',
-    },
-    µ: '\\mu',
-    phi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\phi',
-    },
-    Phi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\Phi',
-    },
-    varphi: '\\varphi',
-    psi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\psi',
-    },
-    Psi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\Psi',
-    },
-    rho: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\rho',
-    },
-    sigma: '\\sigma',
-    Sigma: '\\Sigma',
-    tau: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\tau',
-    },
-    vartheta: '\\vartheta',
-    upsilon: '\\upsilon',
-    xi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\xi',
-    },
-    Xi: {
-        after: 'nothing+digit+function+frac+surd+binop+relop+punct+array+openfence+closefence+space+text',
-        value: '\\Xi',
-    },
-    zeta: '\\zeta',
-    omega: '\\omega',
-    Omega: '\\Omega',
-    Ω: '\\omega',
-    // More Logic
-    forall: { mode: 'math', value: '\\forall' },
-    exists: {
-        mode: 'math',
-        value: '\\exists',
-    },
-    '!exists': {
-        mode: 'math',
-        value: '\\nexists',
-    },
-    ':.': {
-        mode: 'math',
-        value: '\\therefore',
-    },
-    // MORE FUNCTIONS
-    // 'arg': '\\arg',
-    liminf: '\\operatorname*{lim~inf}_{#?}',
-    limsup: '\\operatorname*{lim~sup}_{#?}',
-    argmin: '\\operatorname*{arg~min}_{#?}',
-    argmax: '\\operatorname*{arg~max}_{#?}',
-    det: '\\det',
-    mod: {
-        mode: 'math',
-        value: '\\mod',
-    },
-    max: {
-        mode: 'math',
-        value: '\\max',
-    },
-    min: {
-        mode: 'math',
-        value: '\\min',
-    },
-    erf: '\\operatorname{erf}',
-    erfc: '\\operatorname{erfc}',
-    bessel: {
-        mode: 'math',
-        value: '\\operatorname{bessel}',
-    },
-    mean: {
-        mode: 'math',
-        value: '\\operatorname{mean}',
-    },
-    median: {
-        mode: 'math',
-        value: '\\operatorname{median}',
-    },
-    fft: {
-        mode: 'math',
-        value: '\\operatorname{fft}',
-    },
-    lcm: {
-        mode: 'math',
-        value: '\\operatorname{lcm}',
-    },
-    gcd: {
-        mode: 'math',
-        value: '\\operatorname{gcd}',
-    },
-    randomReal: '\\operatorname{randomReal}',
-    randomInteger: '\\operatorname{randomInteger}',
-    Re: {
-        mode: 'math',
-        value: '\\operatorname{Re}',
-    },
-    Im: {
-        mode: 'math',
-        value: '\\operatorname{Im}',
-    },
-    // UNITS
-    mm: {
-        mode: 'math',
-        after: 'nothing+digit',
-        value: '\\operatorname{mm}',
-    },
-    cm: {
-        mode: 'math',
-        after: 'nothing+digit',
-        value: '\\operatorname{cm}',
-    },
-    km: {
-        mode: 'math',
-        after: 'nothing+digit',
-        value: '\\operatorname{km}',
-    },
-    kg: {
-        mode: 'math',
-        after: 'nothing+digit',
-        value: '\\operatorname{kg}',
-    },
-    // '||':                   '\\lor',
-    '...': '\\ldots',
-    '+...': '+\\cdots',
-    '-...': '-\\cdots',
-    '->...': '\\to\\cdots',
-    '->': '\\to',
-    '|->': '\\mapsto',
-    '-->': '\\longrightarrow',
-    //    '<-':                   '\\leftarrow',
-    '<--': '\\longleftarrow',
-    '=>': '\\Rightarrow',
-    '==>': '\\Longrightarrow',
-    // '<=': '\\Leftarrow',     // CONFLICTS WITH LESS THAN OR EQUAL
-    '<=>': '\\Leftrightarrow',
-    '<->': '\\leftrightarrow',
-    '(.)': '\\odot',
-    '(+)': '\\oplus',
-    '(/)': '\\oslash',
-    '(*)': '\\otimes',
-    '(-)': '\\ominus',
-    // '(-)':                  '\\circleddash',
-    '||': '\\Vert',
-    '{': '\\{',
-    '}': '\\}',
-    '*': '\\cdot',
-};
-
-/**
- * Return an array of potential shortcuts
- */
-function getInlineShortcutsStartingWith(s, config) {
-    const result = [];
-    const skipDefaultShortcuts = config.overrideDefaultInlineShortcuts;
-    for (let i = 0; i <= s.length - 1; i++) {
-        const s2 = s.substring(i);
-        if (!skipDefaultShortcuts) {
-            Object.keys(INLINE_SHORTCUTS).forEach((key) => {
-                if (key.startsWith(s2) && !result.includes(key)) {
-                    result.push(key);
-                }
-            });
-        }
-        const customInlineShortcuts = (config === null || config === void 0 ? void 0 : config.inlineShortcuts) ? config.inlineShortcuts
-            : null;
-        if (customInlineShortcuts) {
-            Object.keys(customInlineShortcuts).forEach((key) => {
-                if (key.startsWith(s2)) {
-                    result.push(key);
-                }
-            });
-        }
-    }
-    return result;
-}
-/**
- *
- * @param siblings atoms preceding this potential shortcut
- */
-function validateShortcut(siblings, shortcut) {
-    if (!shortcut)
-        return '';
-    // If it's a simple shortcut (no conditional), it's always valid
-    if (typeof shortcut === 'string')
-        return shortcut;
-    // If we have no context, we assume all the shortcuts are valid
-    if (!siblings)
-        return shortcut.value;
-    let nothing = false;
-    let letter = false;
-    let digit = false;
-    let isFunction = false;
-    let frac = false;
-    let surd = false;
-    let binop = false;
-    let relop = false;
-    let punct = false;
-    let array = false;
-    let openfence = false;
-    let closefence = false;
-    let text = false;
-    let space = false;
-    let sibling = siblings[siblings.length - 1];
-    let index = siblings.length - 1;
-    while (sibling && /msubsup|placeholder/.test(sibling.type)) {
-        index -= 1;
-        sibling = siblings[index];
-    }
-    nothing = !sibling || sibling.type === 'first'; // start of a group
-    if (sibling) {
-        if (typeof shortcut.mode !== 'undefined' &&
-            sibling.mode !== shortcut.mode) {
-            return '';
-        }
-        text = sibling.mode === 'text';
-        letter =
-            !text &&
-                sibling.type === 'mord' &&
-                LETTER.test(sibling.body);
-        digit =
-            !text &&
-                sibling.type === 'mord' &&
-                /[0-9]+$/.test(sibling.body);
-        isFunction = !text && sibling.isFunction;
-        frac = sibling.type === 'genfrac';
-        surd = sibling.type === 'surd';
-        binop = sibling.type === 'mbin';
-        relop = sibling.type === 'mrel';
-        punct = sibling.type === 'mpunct' || sibling.type === 'minner';
-        array = Boolean(sibling.array);
-        openfence = sibling.type === 'mopen';
-        closefence = sibling.type === 'mclose' || sibling.type === 'leftright';
-        space = sibling.type === 'space';
-    }
-    if (typeof shortcut.after !== 'undefined') {
-        // If this is a conditional shortcut, consider the conditions now
-        if ((/nothing/.test(shortcut.after) && nothing) ||
-            (/letter/.test(shortcut.after) && letter) ||
-            (/digit/.test(shortcut.after) && digit) ||
-            (/function/.test(shortcut.after) && isFunction) ||
-            (/frac/.test(shortcut.after) && frac) ||
-            (/surd/.test(shortcut.after) && surd) ||
-            (/binop/.test(shortcut.after) && binop) ||
-            (/relop/.test(shortcut.after) && relop) ||
-            (/punct/.test(shortcut.after) && punct) ||
-            (/array/.test(shortcut.after) && array) ||
-            (/openfence/.test(shortcut.after) && openfence) ||
-            (/closefence/.test(shortcut.after) && closefence) ||
-            (/text/.test(shortcut.after) && text) ||
-            (/space/.test(shortcut.after) && space)) {
-            return shortcut.value;
-        }
-        return '';
-    }
-    return shortcut.value;
-}
-/**
- *
- * @param context - atoms preceding the candidate, potentially used
- * to reduce which shortcuts are applicable. If 'null', no restrictions are
- * applied.
- * @param s - candidate inline shortcuts (e.g. `'pi'`)
- * @return A replacement string matching the shortcut (e.g. `'\pi'`)
- */
-function getInlineShortcut(context, s, shortcuts) {
-    var _a;
-    return validateShortcut(context, (_a = shortcuts === null || shortcuts === void 0 ? void 0 : shortcuts[s]) !== null && _a !== void 0 ? _a : INLINE_SHORTCUTS[s]);
-}
-
-/**
- * Attempts to parse and interpret a string in an unknown format, possibly
- * ASCIIMath and return a canonical LaTeX string.
- *
- * The format recognized are one of these variations:
- * - ASCIIMath: Only supports a subset
- * (1/2x)
- * 1/2sin x                     -> \frac {1}{2}\sin x
- * 1/2sinx                      -> \frac {1}{2}\sin x
- * (1/2sin x (x^(2+1))          // Unbalanced parentheses
- * (1/2sin(x^(2+1))             -> \left(\frac {1}{2}\sin \left(x^{2+1}\right)\right)
- * alpha + (pi)/(4)             -> \alpha +\frac {\pi }{4}
- * x=(-b +- sqrt(b^2 – 4ac))/(2a)
- * alpha/beta
- * sqrt2 + sqrtx + sqrt(1+a) + sqrt(1/2)
- * f(x) = x^2 "when" x >= 0
- * AA n in QQ
- * AA x in RR "," |x| > 0
- * AA x in RR "," abs(x) > 0
- *
- * - UnicodeMath (generated by Microsoft Word): also only supports a subset
- *      - See https://www.unicode.org/notes/tn28/UTN28-PlainTextMath-v3.1.pdf
- * √(3&x+1)
- * {a+b/c}
- * [a+b/c]
- * _a^b x
- * lim_(n->\infty) n
- * \iint_(a=0)^\infty  a
- *
- * - "JavaScript Latex": a variant that is LaTeX, but with escaped backslashes
- *  \\frac{1}{2} \\sin x
- */
-function parseMathString(s, options) {
-    if (!s)
-        return ['latex', ''];
-    // Nothing to do if a single character
-    if (s.length <= 1)
-        return ['latex', s];
-    if (!options || options.format !== 'ASCIIMath') {
-        // This is not explicitly ASCIIMath. Try to infer if this is LaTex...
-        // If the strings is surrounded by `$..$` or `$$..$$`, assumes it is LaTeX
-        const trimedString = s.trim();
-        if ((trimedString.startsWith('$$') && trimedString.endsWith('$$')) ||
-            (trimedString.startsWith('\\[') && trimedString.endsWith('\\]')) ||
-            (trimedString.startsWith('\\(') && trimedString.endsWith('\\)'))) {
-            return [
-                'latex',
-                trimedString.substring(2, trimedString.length - 2),
-            ];
-        }
-        if (trimedString.startsWith('$') && trimedString.endsWith('$')) {
-            return [
-                'latex',
-                trimedString.substring(1, trimedString.length - 1),
-            ];
-        }
-        // Replace double-backslash (coming from JavaScript) to a single one
-        s = s.replace(/\\\\([^\s\n])/g, '\\$1');
-        if (/\\/.test(s)) {
-            // If the string includes a '\' it's probably a LaTeX string
-            // (that's not completely true, it could be a UnicodeMath string, since
-            // UnicodeMath supports some LaTeX commands. However, we need to pick
-            // one in order to correctly interpret {} (which are argument delimiters
-            // in LaTeX, and are fences in UnicodeMath)
-            return ['latex', s];
-        }
-    }
-    s = s.replace(/\u2061/gu, ''); // Remove function application
-    s = s.replace(/\u3016/gu, '{'); // WHITE LENTICULAR BRACKET (grouping)
-    s = s.replace(/\u3017/gu, '}'); // WHITE LENTICULAR BRACKET (grouping)
-    s = s.replace(/([^\\])sinx/g, '$1\\sin x'); // common typo
-    s = s.replace(/([^\\])cosx/g, '$1\\cos x '); // common typo
-    s = s.replace(/\u2013/g, '-'); // EN-DASH, sometimes used as a minus sign
-    return [
-        (options === null || options === void 0 ? void 0 : options.format) || 'ASCIIMath',
-        parseMathExpression(s, options !== null && options !== void 0 ? options : {}),
-    ];
-}
-function parseMathExpression(s, options) {
-    var _a, _b, _c, _d, _e, _f, _g;
-    if (!s)
-        return '';
-    let done = false;
-    let m;
-    if (!done && (s[0] === '^' || s[0] === '_')) {
-        // Superscript and subscript
-        m = parseMathArgument(s.substr(1), {
-            inlineShortcuts: (_a = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _a !== void 0 ? _a : {},
-            noWrap: true,
-        });
-        s = s[0] + '{' + m.match + '}';
-        s += parseMathExpression(m.rest, options);
-        done = true;
-    }
-    if (!done) {
-        m = s.match(/^(sqrt|\u221a)(.*)/);
-        if (m) {
-            // Square root
-            m = parseMathArgument(m[2], {
-                inlineShortcuts: (_b = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _b !== void 0 ? _b : {},
-                noWrap: true,
-            });
-            s = '\\sqrt{' + m.match + '}';
-            s += parseMathExpression(m.rest, options);
-            done = true;
-        }
-    }
-    if (!done) {
-        m = s.match(/^(\\cbrt|\u221b)(.*)/);
-        if (m) {
-            // Cube root
-            m = parseMathArgument(m[2], {
-                inlineShortcuts: (_c = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _c !== void 0 ? _c : {},
-                noWrap: true,
-            });
-            s = '\\sqrt[3]{' + m.match + '}';
-            s += parseMathExpression(m.rest, options);
-            done = true;
-        }
-    }
-    if (!done) {
-        m = s.match(/^abs(.*)/);
-        if (m) {
-            // Absolute value
-            m = parseMathArgument(m[1], {
-                inlineShortcuts: (_d = options === null || options === void 0 ? void 0 : options.inlineShortcuts) !== null && _d !== void 0 ? _d : {},
-                noWrap: true,
-            });
-            s = '\\left|' + m.match + '\\right|';
-            s += parseMathExpression(m.rest, options);
-            done = true;
-        }
-    }
-    if (!done) {
-        m = s.match(/^["”“](.*?)["”“](.*)/);
-        if (m) {
-            // Quoted text
-            s = '\\text{' + m[1] + '}';
-            s += parseMathExpression(m[2], options);
-            done = true;
-        }
-    }
-    if (!done) {
-        m = s.match(/^([^a-zA-Z({[_^\\\s"]+)(.*)/);
-        // A string of symbols...
-        // Could be a binary or relational operator, etc...
-        if (m) {
-            s = paddedShortcut(m[1], options);
-            s += parseMathExpression(m[2], options);
-            done = true;
-        }
-    }
-    if (!done && /^(f|g|h)[^a-zA-Z]/.test(s)) {
-        // This could be a function...
-        m = parseMathArgument(s.substring(1), {
-            inlineShortcuts: (_e = options.inlineShortcuts) !== null && _e !== void 0 ? _e : {},
-            noWrap: true,
-        });
-        if (s[1] === '(') {
-            s = s[0] + '\\mleft(' + m.match + '\\mright)';
-        }
-        else {
-            s = s[0] + m.match;
-        }
-        s += parseMathExpression(m.rest, options);
-        done = true;
-    }
-    if (!done) {
-        m = s.match(/^([a-zA-Z]+)(.*)/);
-        if (m) {
-            // Some alphabetical string...
-            // Could be a function name (sin) or symbol name (alpha)
-            s = paddedShortcut(m[1], options);
-            s += parseMathExpression(m[2], options);
-            done = true;
-        }
-    }
-    if (!done) {
-        m = parseMathArgument(s, {
-            inlineShortcuts: (_f = options.inlineShortcuts) !== null && _f !== void 0 ? _f : {},
-            noWrap: true,
-        });
-        if (m.match && m.rest[0] === '/') {
-            // Fraction
-            const m2 = parseMathArgument(m.rest.substr(1), {
-                inlineShortcuts: (_g = options.inlineShortcuts) !== null && _g !== void 0 ? _g : {},
-                noWrap: true,
-            });
-            if (m2.match) {
-                s =
-                    '\\frac{' +
-                        m.match +
-                        '}{' +
-                        m2.match +
-                        '}' +
-                        parseMathExpression(m2.rest, options);
-            }
-            done = true;
-        }
-        else if (m.match) {
-            if (s[0] === '(') {
-                s =
-                    '\\left(' +
-                        m.match +
-                        '\\right)' +
-                        parseMathExpression(m.rest, options);
-            }
-            else {
-                s = m.match + parseMathExpression(m.rest, options);
-            }
-            done = true;
-        }
-    }
-    if (!done) {
-        m = s.match(/^(\s+)(.*)$/);
-        // Whitespace
-        if (m) {
-            s = ' ' + parseMathExpression(m[2], options);
-            done = true;
-        }
-    }
-    return s;
-}
-/**
- * Parse a math argument, as defined by ASCIIMath and UnicodeMath:
- * - Either an expression fenced in (), {} or []
- * - a number (- sign, digits, decimal point, digits)
- * - a single [a-zA-Z] letter (an identifier)
- * - a multi-letter shortcut (e.g., pi)
- * - a LaTeX command (\pi) (for UnicodeMath)
- * @return
- * - match: the parsed (and converted) portion of the string that is an argument
- * - rest: the raw, unconverted, rest of the string
- */
-function parseMathArgument(s, options) {
-    let match = '';
-    s = s.trim();
-    let rest = s;
-    let lFence = s.charAt(0);
-    let rFence = { '(': ')', '{': '}', '[': ']' }[lFence];
-    if (rFence) {
-        // It's a fence
-        let level = 1;
-        let i = 1;
-        while (i < s.length && level > 0) {
-            if (s[i] === lFence)
-                level++;
-            if (s[i] === rFence)
-                level--;
-            i++;
-        }
-        if (level === 0) {
-            // We've found the matching closing fence
-            if (options.noWrap && lFence === '(') {
-                match = parseMathExpression(s.substring(1, i - 1), options);
-            }
-            else {
-                if (lFence === '{' && rFence === '}') {
-                    lFence = '\\{';
-                    rFence = '\\}';
-                }
-                match =
-                    '\\left' +
-                        lFence +
-                        parseMathExpression(s.substring(1, i - 1), options) +
-                        '\\right' +
-                        rFence;
-            }
-            rest = s.substring(i);
-        }
-        else {
-            // Unbalanced fence...
-            match = s.substring(1, i);
-            rest = '';
-        }
-    }
-    else {
-        let m = s.match(/^([a-zA-Z]+)/);
-        if (m) {
-            // It's a string of letter, maybe a shortcut
-            let shortcut = getInlineShortcut(null, s, options.inlineShortcuts);
-            if (shortcut) {
-                shortcut = shortcut.replace('_{#?}', '');
-                shortcut = shortcut.replace('^{#?}', '');
-                return { match: shortcut, rest: s.substring(shortcut.length) };
-            }
-        }
-        m = s.match(/^([a-zA-Z])/);
-        if (m) {
-            // It's a single letter
-            return { match: m[1], rest: s.substring(1) };
-        }
-        m = s.match(/^(-)?\d+(\.\d*)?/);
-        if (m) {
-            // It's a number
-            return { match: m[0], rest: s.substring(m[0].length) };
-        }
-        if (!/^\\(left|right)/.test(s)) {
-            // It's a LaTeX command (but not a \left\right)
-            m = s.match(/^(\\[a-zA-Z]+)/);
-            if (m) {
-                rest = s.substring(m[1].length);
-                match = m[1];
-            }
-        }
-    }
-    return { match: match, rest: rest };
-}
-function paddedShortcut(s, options) {
-    let result = getInlineShortcut(null, s, options);
-    if (result) {
-        result = result.replace('_{#?}', '');
-        result = result.replace('^{#?}', '');
-        result += ' ';
-    }
-    else {
-        result = s;
-    }
-    return result;
-}
-
-// const MATCHING_FENCE = {
-//     '\\lbrace': ['\\rbrace'],
-//     '(': [')', ']', '\\rbrack'],
-//     // For (open/closed) intervals
-//     '\\rbrack': [')', ']', '\\rbrack', '[', '\\lbrack'],
-//     '\\lbrack': [')', ']', '\\rbrack', '[', '\\lbrack'],
-// };
-/**
- * Insert a smart fence '(', '{', '[', etc...
- * If not handled (because `fence` wasn't a fence), return false.
- */
-function insertSmartFence(model, fence, style) {
-    const parent = model.parent();
-    let delims = parent.type === 'leftright' ? parent.leftDelim + parent.rightDelim : '';
-    if (delims === '\\lbrace\\rbrace')
-        delims = '{}';
-    if (delims === '\\{\\}')
-        delims = '{}';
-    //
-    // 1. Are we inserting a middle fence?
-    // ...as in {...|...}
-    //
-    if (delims === '{}' && /\||\\vert|\\Vert|\\mvert|\\mid/.test(fence)) {
-        insert(model, '\\,\\middle' + fence + '\\, ', {
-            mode: 'math',
-            format: 'latex',
-            style: style,
-        });
-        return true;
-    }
-    // Normalize some fences.
-    // Note that '{' and '}' are not valid braces.
-    // They should be '\{' or '\lbrace' and '\}' or '\rbrace'
-    if (fence === '{' || fence === '\\{')
-        fence = '\\lbrace';
-    if (fence === '}' || fence === '\\}')
-        fence = '\\rbrace';
-    if (fence === '[')
-        fence = '\\lbrack';
-    if (fence === ']')
-        fence = '\\rbrack';
-    //
-    // 2. Is it an open fence?
-    //
-    const rDelim = RIGHT_DELIM[fence];
-    if (rDelim && !(parent.type === 'leftright' && parent.leftDelim === '|')) {
-        // We have a valid open fence as input
-        let s = '';
-        const collapsed = selectionIsCollapsed(model) ||
-            getAnchor(model).type === 'placeholder';
-        if (model.sibling(0).isFunction) {
-            // We're before a function (e.g. `\sin`, or 'f'):  this is an
-            // argument list.
-            // Use `\mleft...\mright'.
-            s = '\\mleft' + fence + '\\mright';
-        }
-        else {
-            s = '\\left' + fence + '\\right';
-        }
-        s += collapsed ? '?' : rDelim;
-        let content = [];
-        if (collapsed) {
-            // content = model.siblings().slice(model.anchorOffset() + 1);
-            content = model
-                .siblings()
-                .splice(model.anchorOffset() + 1, model.siblings().length);
-        }
-        insert(model, s, { mode: 'math', format: 'latex', style: style });
-        if (collapsed) {
-            // Move everything that was after the anchor into the leftright
-            model.sibling(0).body = content;
-            move(model, -1);
-        }
-        return true;
-    }
-    //
-    // 3. Is it a close fence?
-    //
-    let lDelim;
-    Object.keys(RIGHT_DELIM).forEach((delim) => {
-        if (fence === RIGHT_DELIM[delim])
-            lDelim = delim;
-    });
-    if (lDelim) {
-        // We found the matching open fence, so it was a valid close fence.
-        // Note that `lDelim` may not match `fence`. That's OK.
-        // If we're the last atom inside a 'leftright',
-        // update the parent
-        if (parent &&
-            parent.type === 'leftright' &&
-            model.endOffset() === model.siblings().length - 1) {
-            contentWillChange(model);
-            parent.rightDelim = fence;
-            move(model, +1);
-            contentDidChange(model);
-            return true;
-        }
-        // If we have a `leftright` sibling to our left
-        // with an indeterminate right fence,
-        // move what's between us and the `leftright` inside the `leftright`
-        const siblings = model.siblings();
-        let i;
-        for (i = model.endOffset(); i >= 0; i--) {
-            if (siblings[i].type === 'leftright' &&
-                siblings[i].rightDelim === '?') {
-                break;
-            }
-        }
-        if (i >= 0) {
-            contentWillChange(model);
-            siblings[i].rightDelim = fence;
-            siblings[i].body = siblings[i].body.concat(siblings.slice(i + 1, model.endOffset() + 1));
-            siblings.splice(i + 1, model.endOffset() - i);
-            setSelection(model, i);
-            contentDidChange(model);
-            return true;
-        }
-        // If we're inside a `leftright`, but not the last atom,
-        // and the `leftright` right delim is indeterminate
-        // adjust the body (put everything after the insertion point outside)
-        if (parent &&
-            parent.type === 'leftright' &&
-            parent.rightDelim === '?') {
-            contentWillChange(model);
-            parent.rightDelim = fence;
-            const tail = siblings.slice(model.endOffset() + 1);
-            siblings.splice(model.endOffset() + 1);
-            model.path.pop();
-            // Array.prototype.splice.apply(
-            //     model.siblings(),
-            //     [model.endOffset() + 1, 0].concat(tail)
-            // );
-            // @revisit: veryfiy this does the right thing
-            model.siblings().splice(model.endOffset() + 1, 0, ...tail);
-            contentDidChange(model);
-            return true;
-        }
-        // Is our grand-parent a 'leftright'?
-        // If `\left(\frac{1}{x|}\right?` with the caret at `|`
-        // go up to the 'leftright' and apply it there instead
-        const grandparent = model.ancestor(2);
-        if (grandparent &&
-            grandparent.type === 'leftright' &&
-            grandparent.rightDelim === '?' &&
-            model.endOffset() === siblings.length - 1) {
-            move(model, 1);
-            return insertSmartFence(model, fence, style);
-        }
-        // Meh... We couldn't find a matching open fence. Just insert the
-        // closing fence as a regular character
-        return false;
-        // insert(model, fence, { mode: 'math', format: 'latex', style: style });
-        // return true;
-    }
-    return false;
 }
 
 function applyStyleToUnstyledAtoms(atom, style) {
@@ -19140,12 +21448,48 @@ function applyStyle$3(model, style) {
         // If the selection already has this size, reset it to default size
         style.fontSize = 'size5';
     }
-    contentWillChange(model);
     forEachSelected(model, (x) => x.applyStyle(style), { recursive: true });
     contentDidChange(model);
     return true;
 }
 
+/**
+ * Normalize the model by adding 'first' atoms where necessary.
+ * This function modifies the model in place.
+ */
+function normalizeModel(model) {
+    model.root.forEach((x) => {
+        if (Array.isArray(x.body) &&
+            (x.body.length === 0 || x.body[0].type !== 'first')) {
+            x.body.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.superscript &&
+            (x.superscript.length === 0 || x.superscript[0].type !== 'first')) {
+            x.superscript.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.subscript &&
+            (x.subscript.length === 0 || x.subscript[0].type !== 'first')) {
+            x.subscript.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.overscript &&
+            (x.overscript.length === 0 || x.overscript[0].type !== 'first')) {
+            x.overscript.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.underscript &&
+            (x.underscript.length === 0 || x.underscript[0].type !== 'first')) {
+            x.underscript.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.numer && (x.numer.length === 0 || x.numer[0].type !== 'first')) {
+            x.numer.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.denom && (x.denom.length === 0 || x.denom[0].type !== 'first')) {
+            x.denom.unshift(new Atom(x.mode, 'first'));
+        }
+        if (x.index && (x.index.length === 0 || x.index[0].type !== 'first')) {
+            x.index.unshift(new Atom(x.mode, 'first'));
+        }
+    });
+}
 function insert(model, s, options) {
     var _a, _b, _c, _d;
     // Try to insert a smart fence.
@@ -19157,22 +21501,21 @@ function insert(model, s, options) {
             parent.rightDelim === '?' &&
             model.endOffset() === model.siblings().length - 1 &&
             /^[)}\]|]$/.test(s)) {
-            contentWillChange(model);
             parent.rightDelim = s;
-            move(model, +1);
+            move(model, 'forward');
+            normalizeModel(model);
             contentDidChange(model);
             return;
         }
     }
     else if (insertSmartFence(model, s, options.style)) {
+        normalizeModel(model);
         return;
     }
     const suppressChangeNotifications = model.suppressChangeNotifications;
     if (options.suppressChangeNotifications) {
         model.suppressChangeNotifications = true;
     }
-    // Dispatch notifications
-    contentWillChange(model);
     const contentWasChanging = model.suppressChangeNotifications;
     model.suppressChangeNotifications = true;
     if (!options.insertionMode)
@@ -19332,20 +21675,23 @@ function insert(model, s, options) {
         model.siblings().splice(model.anchorOffset() + 1, 0, ...mathlist);
     }
     // If needed, make sure there's a first atom in the siblings list
-    model.insertFirstAtom();
+    normalizeModel(model);
     // Prepare to dispatch notifications
     // (for selection changes, then content change)
     model.suppressChangeNotifications = contentWasChanging;
     // Update the anchor's location
     if (options.selectionMode === 'placeholder') {
         // Move to the next placeholder
-        let newPlaceholders = [];
+        const newPlaceholders = [];
         for (const atom of mathlist) {
-            newPlaceholders = newPlaceholders.concat(atom.filter((atom) => atom.type === 'placeholder'));
+            atom.forEach((x) => {
+                if (x.type === 'placeholder')
+                    newPlaceholders.push(x);
+            });
         }
         if (newPlaceholders.length === 0 || !leap(model, +1, false)) {
             // No placeholder found, move to right after what we just inserted
-            setSelection(model, model.anchorOffset() + mathlist.length);
+            setSelectionOffset(model, model.anchorOffset() + mathlist.length);
             // model.path[model.path.length - 1].offset += mathlist.length;
         }
         else {
@@ -19354,10 +21700,10 @@ function insert(model, s, options) {
     }
     else if (options.selectionMode === 'before') ;
     else if (options.selectionMode === 'after') {
-        setSelection(model, model.anchorOffset() + mathlist.length);
+        setSelectionOffset(model, model.anchorOffset() + mathlist.length);
     }
     else if (options.selectionMode === 'item') {
-        setSelection(model, model.anchorOffset(), mathlist.length);
+        setSelectionOffset(model, model.anchorOffset(), mathlist.length);
     }
     contentDidChange(model);
     model.suppressChangeNotifications = suppressChangeNotifications;
@@ -19443,6 +21789,545 @@ function simplifyParen(model, atoms) {
         });
     }
 }
+// const MATCHING_FENCE = {
+//     '\\lbrace': ['\\rbrace'],
+//     '(': [')', ']', '\\rbrack'],
+//     // For (open/closed) intervals
+//     '\\rbrack': [')', ']', '\\rbrack', '[', '\\lbrack'],
+//     '\\lbrack': [')', ']', '\\rbrack', '[', '\\lbrack'],
+// };
+/**
+ * Insert a smart fence '(', '{', '[', etc...
+ * If not handled (because `fence` wasn't a fence), return false.
+ */
+function insertSmartFence(model, fence, style) {
+    const parent = model.parent();
+    let delims = parent.type === 'leftright' ? parent.leftDelim + parent.rightDelim : '';
+    if (delims === '\\lbrace\\rbrace')
+        delims = '{}';
+    if (delims === '\\{\\}')
+        delims = '{}';
+    //
+    // 1. Are we inserting a middle fence?
+    // ...as in {...|...}
+    //
+    if (delims === '{}' && /\||\\vert|\\Vert|\\mvert|\\mid/.test(fence)) {
+        insert(model, '\\,\\middle' + fence + '\\, ', {
+            mode: 'math',
+            format: 'latex',
+            style: style,
+        });
+        return true;
+    }
+    // Normalize some fences.
+    // Note that '{' and '}' are not valid braces.
+    // They should be '\{' or '\lbrace' and '\}' or '\rbrace'
+    if (fence === '{' || fence === '\\{')
+        fence = '\\lbrace';
+    if (fence === '}' || fence === '\\}')
+        fence = '\\rbrace';
+    if (fence === '[')
+        fence = '\\lbrack';
+    if (fence === ']')
+        fence = '\\rbrack';
+    //
+    // 2. Is it an open fence?
+    //
+    const rDelim = RIGHT_DELIM[fence];
+    if (rDelim && !(parent.type === 'leftright' && parent.leftDelim === '|')) {
+        // We have a valid open fence as input
+        let s = '';
+        const collapsed = selectionIsCollapsed(model) ||
+            getAnchor(model).type === 'placeholder';
+        if (model.sibling(0).isFunction) {
+            // We're before a function (e.g. `\sin`, or 'f'):  this is an
+            // argument list.
+            // Use `\mleft...\mright'.
+            s = '\\mleft' + fence + '\\mright';
+        }
+        else {
+            s = '\\left' + fence + '\\right';
+        }
+        s += collapsed ? '?' : rDelim;
+        let content = [];
+        if (collapsed) {
+            content = model
+                .siblings()
+                .splice(model.anchorOffset() + 1, model.siblings().length);
+        }
+        insert(model, s, { mode: 'math', format: 'latex', style: style });
+        if (collapsed) {
+            // Move everything that was after the anchor into the leftright
+            model.sibling(0).body = content;
+            move(model, 'backward');
+        }
+        return true;
+    }
+    //
+    // 3. Is it a close fence?
+    //
+    let lDelim;
+    Object.keys(RIGHT_DELIM).forEach((delim) => {
+        if (fence === RIGHT_DELIM[delim])
+            lDelim = delim;
+    });
+    if (lDelim) {
+        // We found the matching open fence, so it was a valid close fence.
+        // Note that `lDelim` may not match `fence`. That's OK.
+        // If we're the last atom inside a 'leftright',
+        // update the parent
+        if (parent &&
+            parent.type === 'leftright' &&
+            model.endOffset() === model.siblings().length - 1) {
+            parent.rightDelim = fence;
+            move(model, 'forward');
+            contentDidChange(model);
+            return true;
+        }
+        // If we have a `leftright` sibling to our left
+        // with an indeterminate right fence,
+        // move what's between us and the `leftright` inside the `leftright`
+        const siblings = model.siblings();
+        let i;
+        for (i = model.endOffset(); i >= 0; i--) {
+            if (siblings[i].type === 'leftright' &&
+                siblings[i].rightDelim === '?') {
+                break;
+            }
+        }
+        if (i >= 0) {
+            siblings[i].rightDelim = fence;
+            siblings[i].body = siblings[i].body.concat(siblings.slice(i + 1, model.endOffset() + 1));
+            siblings.splice(i + 1, model.endOffset() - i);
+            setSelectionOffset(model, i);
+            contentDidChange(model);
+            return true;
+        }
+        // If we're inside a `leftright`, but not the last atom,
+        // and the `leftright` right delim is indeterminate
+        // adjust the body (put everything after the insertion point outside)
+        if (parent &&
+            parent.type === 'leftright' &&
+            parent.rightDelim === '?') {
+            parent.rightDelim = fence;
+            const tail = siblings.slice(model.endOffset() + 1);
+            siblings.splice(model.endOffset() + 1);
+            model.path.pop();
+            // Array.prototype.splice.apply(
+            //     model.siblings(),
+            //     [model.endOffset() + 1, 0].concat(tail)
+            // );
+            // @revisit: veryfiy this does the right thing
+            model.siblings().splice(model.endOffset() + 1, 0, ...tail);
+            contentDidChange(model);
+            return true;
+        }
+        // Is our grand-parent a 'leftright'?
+        // If `\left(\frac{1}{x|}\right?` with the caret at `|`
+        // go up to the 'leftright' and apply it there instead
+        const grandparent = model.ancestor(2);
+        if (grandparent &&
+            grandparent.type === 'leftright' &&
+            grandparent.rightDelim === '?' &&
+            model.endOffset() === siblings.length - 1) {
+            move(model, 'forward');
+            return insertSmartFence(model, fence, style);
+        }
+        // Meh... We couldn't find a matching open fence. Just insert the
+        // closing fence as a regular character
+        return false;
+    }
+    return false;
+}
+
+class PositionIterator {
+    constructor(root) {
+        this.positions = [];
+        this.root = root;
+        const model = new ModelPrivate();
+        model.root = root;
+        normalizeModel(model);
+        do {
+            this.positions.push({
+                path: model.toString(),
+                atom: getCurrentAtom(model),
+                depth: model.path.length,
+            });
+        } while (nextPosition(model));
+    }
+    at(index) {
+        return this.positions[index];
+    }
+    find(atom) {
+        for (let i = 0; i < this.positions.length; i++) {
+            if (this.positions[i].atom === atom) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    get lastPosition() {
+        return this.positions.length;
+    }
+    paths(indexes) {
+        return indexes.map((i) => this.at(i).path);
+    }
+}
+function nextPosition(model) {
+    const NEXT_RELATION = {
+        body: 'numer',
+        numer: 'denom',
+        denom: 'index',
+        index: 'overscript',
+        overscript: 'underscript',
+        underscript: 'subscript',
+        subscript: 'superscript',
+    };
+    if (model.anchorOffset() === model.siblings(false).length - 1) {
+        // We've reached the end of this list.
+        // Is there another list to consider?
+        let relation = NEXT_RELATION[model.relation()];
+        const parent = model.parent();
+        while (relation && !parent[relation]) {
+            relation = NEXT_RELATION[relation];
+        }
+        // We found a new relation/set of siblings...
+        if (relation) {
+            setPosition(model, 0, relation);
+            return true;
+        }
+        // No more siblings, check if we have a sibling cell in an array
+        if (model.parent().array) {
+            const maxCellCount = arrayCellCount(model.parent().array);
+            let cellIndex = parseInt(model.relation().match(/cell([0-9]*)$/)[1]) + 1;
+            while (cellIndex < maxCellCount) {
+                const cell = arrayCell(model.parent().array, cellIndex, false);
+                // Some cells could be null (sparse array), so skip them
+                if (cell && setPosition(model, 0, 'cell' + cellIndex)) {
+                    return true;
+                }
+                cellIndex += 1;
+            }
+        }
+        // No more siblings, go up to the parent.
+        if (model.path.length === 1) {
+            // We're already at the top: nowhere else to go
+            return false;
+        }
+        // We've reached the end of the siblings.
+        model.path.pop();
+        return true;
+    }
+    // Still some siblings to go through. Move on to the next one.
+    setPosition(model, model.anchorOffset() + 1);
+    const anchor = getCurrentAtom(model);
+    // Dive into its components, if the new anchor is a compound atom,
+    // and allows capture of the selection by its sub-elements
+    if (anchor && !anchor.captureSelection) {
+        let relation;
+        if (anchor.array) {
+            // Find the first non-empty cell in this array
+            let cellIndex = 0;
+            relation = '';
+            const maxCellCount = arrayCellCount(anchor.array);
+            while (!relation && cellIndex < maxCellCount) {
+                // Some cells could be null (sparse array), so skip them
+                if (arrayCell(anchor.array, cellIndex, false)) {
+                    relation = 'cell' + cellIndex.toString();
+                }
+                cellIndex += 1;
+            }
+            console.assert(relation);
+            model.path.push({ relation: relation, offset: 0 });
+            setPosition(model, 0, relation);
+            return true;
+        }
+        relation = 'body';
+        while (relation) {
+            if (isArray(anchor[relation])) {
+                model.path.push({ relation: relation, offset: 0 });
+                return true;
+            }
+            relation = NEXT_RELATION[relation];
+        }
+    }
+    return true;
+}
+function setPosition(model, offset = 0, relation = '') {
+    // If no relation ("children", "superscript", etc...) is specified
+    // keep the current relation
+    const oldRelation = model.path[model.path.length - 1].relation;
+    if (!relation)
+        relation = oldRelation;
+    // If the relation is invalid, exit and return false
+    const parent = model.parent();
+    if (!parent && relation !== 'body')
+        return false;
+    const arrayRelation = relation.startsWith('cell');
+    if ((!arrayRelation && !parent[relation]) ||
+        (arrayRelation && !parent.array)) {
+        return false;
+    }
+    // Temporarily set the path to the potentially new relation to get the
+    // right siblings
+    model.path[model.path.length - 1].relation = relation;
+    const siblings = model.siblings(false);
+    const siblingsCount = siblings.length;
+    // Restore the relation
+    model.path[model.path.length - 1].relation = oldRelation;
+    // Calculate the new offset, and make sure it is in range
+    // (`setSelectionOffset()` can be called with an offset greater than
+    // the number of children, for example when doing an up from a
+    // numerator to a smaller denominator, e.g. "1/(x+1)".
+    if (offset < 0) {
+        offset = siblingsCount + offset;
+    }
+    offset = Math.max(0, Math.min(offset, siblingsCount - 1));
+    model.path[model.path.length - 1].relation = relation;
+    model.path[model.path.length - 1].offset = offset;
+    return true;
+}
+function getCurrentAtom(model) {
+    if (model.parent().array) {
+        return arrayCell(model.parent().array, model.relation())[model.anchorOffset()];
+    }
+    const siblings = model.siblings(false);
+    return siblings[Math.min(siblings.length - 1, model.anchorOffset())];
+}
+
+class ModelPrivate {
+    constructor(options, listeners, hooks, target) {
+        this.options = {
+            mode: 'math',
+            removeExtraneousParentheses: false,
+            ...options,
+        };
+        this.root = makeRoot(this.options.mode);
+        this.path = [{ relation: 'body', offset: 0 }];
+        this.extent = 0;
+        this.setListeners(listeners);
+        this.setHooks(hooks);
+        this.mathfield = target;
+        this.suppressChangeNotifications = false;
+    }
+    clone() {
+        const result = new ModelPrivate(this.options, this.listeners, this.hooks, this.mathfield);
+        result.root = this.root;
+        result.path = clone(this.path);
+        return result;
+    }
+    setListeners(listeners) {
+        this.listeners = listeners;
+    }
+    setHooks(hooks) {
+        this.hooks = {
+            announce: (hooks === null || hooks === void 0 ? void 0 : hooks.announce) ? hooks.announce
+                : (_target, _command, _modelBefore, _atoms) => {
+                    return;
+                },
+            moveOut: (hooks === null || hooks === void 0 ? void 0 : hooks.moveOut) ? hooks.moveOut
+                : () => {
+                    return true;
+                },
+            tabOut: (hooks === null || hooks === void 0 ? void 0 : hooks.tabOut) ? hooks.tabOut
+                : () => {
+                    return true;
+                },
+        };
+    }
+    get selection() {
+        const anchor = getAnchor(this);
+        let focus = undefined;
+        if (this.parent().array) {
+            focus = arrayCell(this.parent().array, this.relation())[this.focusOffset()];
+        }
+        else {
+            const siblings = this.siblings();
+            focus = siblings[Math.min(siblings.length - 1, this.focusOffset())];
+        }
+        const iter = new PositionIterator(this.root);
+        return [
+            normalizeRange(iter, {
+                start: iter.find(anchor),
+                end: iter.find(focus),
+            }),
+        ];
+    }
+    set selection(value) {
+        setSelection(this, value);
+    }
+    get lastPosition() {
+        const iter = new PositionIterator(this.root);
+        return iter.lastPosition;
+    }
+    announce(command, // @revisit: be more explicit
+    modelBefore, atoms = []) {
+        this.hooks.announce(this.mathfield, command, modelBefore, atoms);
+    }
+    /**
+     * Return a string representation of the selection.
+     * @todo This is a bad name for this function, since it doesn't return
+     * a representation of the content, which one might expect...
+     *
+     * Note: Not private: used by filter
+     *
+     */
+    toString() {
+        return pathToString(this.path, this.extent);
+    }
+    /**
+     * Note: used by model-utils, so not private.
+     * @return array of children of the parent
+     */
+    siblings(addMisingFirstAtom = true) {
+        var _a;
+        if (this.path.length === 0)
+            return [];
+        let siblings;
+        if (this.parent().array) {
+            siblings = arrayCell(this.parent().array, this.relation());
+        }
+        else {
+            siblings = (_a = this.parent()[this.relation()]) !== null && _a !== void 0 ? _a : [];
+            if (typeof siblings === 'string')
+                siblings = [];
+        }
+        // If the 'first' atom is missing, insert it
+        if (addMisingFirstAtom &&
+            (siblings.length === 0 || siblings[0].type !== 'first')) {
+            siblings.unshift(new Atom(this.parent().mode, 'first'));
+        }
+        return siblings;
+    }
+    anchorOffset() {
+        return this.path.length > 0
+            ? this.path[this.path.length - 1].offset
+            : 0;
+    }
+    focusOffset() {
+        return this.path.length > 0
+            ? this.path[this.path.length - 1].offset + this.extent
+            : 0;
+    }
+    /**
+     *  True if the entire group is selected
+     */
+    groupIsSelected() {
+        return (this.startOffset() === 0 &&
+            this.endOffset() >= this.siblings().length - 1);
+    }
+    /**
+     * Offset of the first atom included in the selection
+     * i.e. `=1` => selection starts with and includes first atom
+     * With expression _x=_ and atoms :
+     * - 0: _<first>_
+     * - 1: _x_
+     * - 2: _=_
+     *
+     * - if caret is before _x_:  `start` = 0, `end` = 0
+     * - if caret is after _x_:   `start` = 1, `end` = 1
+     * - if _x_ is selected:      `start` = 1, `end` = 2
+     * - if _x=_ is selected:   `start` = 1, `end` = 3
+     * Note: accessed by model-selection, not private
+     */
+    startOffset() {
+        return Math.min(this.focusOffset(), this.anchorOffset());
+    }
+    /**
+     * Offset of the first atom not included in the selection
+     * i.e. max value of `siblings.length`
+     * `endOffset - startOffset = extent`
+     *
+     * Note: accessed by model-selection, not private
+     */
+    endOffset() {
+        return Math.max(this.focusOffset(), this.anchorOffset());
+    }
+    /**
+     * Sibling, relative to `anchor`
+     * `sibling(0)` = start of selection
+     * `sibling(-1)` = sibling immediately left of start offset
+     */
+    sibling(offset) {
+        return this.siblings()[this.startOffset() + offset];
+    }
+    // @revisit: move ancestor, and anything related to the selection to model-selection
+    /**
+     * Note: used by model-utils, so not private.
+     * @param ancestor distance from self to ancestor.
+     * - `ancestor` = 0: self
+     * - `ancestor` = 1: parent
+     * - `ancestor` = 2: grand-parent
+     * - etc...
+     */
+    ancestor(ancestor) {
+        // If the requested ancestor goes beyond what's available,
+        // return null
+        if (ancestor > this.path.length)
+            return null;
+        // Start with the root
+        let result = this.root;
+        // Iterate over the path segments, selecting the appropriate
+        for (let i = 0; i < this.path.length - ancestor; i++) {
+            const segment = this.path[i];
+            if (result.array) {
+                result = arrayCell(result.array, segment.relation)[segment.offset];
+            }
+            else if (!result[segment.relation]) {
+                // There is no such relation... (the path got out of sync with the tree)
+                return null;
+            }
+            else {
+                // Make sure the 'first' atom has been inserted, otherwise
+                // the segment.offset might be invalid
+                if (result[segment.relation].length === 0 ||
+                    result[segment.relation][0].type !== 'first') {
+                    result[segment.relation].unshift(new Atom(result[segment.relation][0].mode, 'first'));
+                }
+                const offset = Math.min(segment.offset, result[segment.relation].length - 1);
+                result = result[segment.relation][offset];
+            }
+        }
+        return result;
+    }
+    parent() {
+        return this.ancestor(1);
+    }
+    relation() {
+        return this.path.length > 0
+            ? this.path[this.path.length - 1].relation
+            : '';
+    }
+    /**
+     * If necessary, insert a `first` atom in the sibling list.
+     * If there's already a `first` atom, do nothing.
+     * The `first` atom is used as a 'placeholder' to hold the blinking caret when
+     * the caret is positioned at the very beginning of the mathlist.
+     */
+    insertFirstAtom() {
+        this.siblings();
+    }
+}
+function setSelection(model, value) {
+    // @todo: for now, only consider the first range
+    const range = Array.isArray(value) ? value[0] : value;
+    // Normalize the range
+    const iter = new PositionIterator(model.root);
+    if (!range.direction)
+        range.direction = 'forward';
+    if (typeof range.end === 'undefined')
+        range.end = range.start;
+    if (range.end < 0)
+        range.end = iter.lastPosition;
+    let anchorPath;
+    if (range.direction === 'backward') {
+        anchorPath = iter.at(range.end).path;
+    }
+    else {
+        anchorPath = iter.at(range.start).path;
+    }
+    setPath(model, anchorPath, range.end - range.start);
+}
 
 /**
  * Switch the cursor to the superscript and select it. If there is no subscript
@@ -19460,11 +22345,9 @@ function moveToSuperscript(model) {
             const sibling = model.sibling(1);
             if (sibling === null || sibling === void 0 ? void 0 : sibling.superscript) {
                 model.path[model.path.length - 1].offset += 1;
-                //            setSelection(model, model.anchorOffset() + 1);
             }
             else if (sibling === null || sibling === void 0 ? void 0 : sibling.subscript) {
                 model.path[model.path.length - 1].offset += 1;
-                //            setSelection(model, model.anchorOffset() + 1);
                 getAnchor(model).superscript = [
                     new Atom(model.parent().mode, 'first'),
                 ];
@@ -19475,7 +22358,6 @@ function moveToSuperscript(model) {
                         .siblings()
                         .splice(model.anchorOffset() + 1, 0, new Atom(model.parent().mode, 'msubsup', '\u200b', getAnchorStyle(model)));
                     model.path[model.path.length - 1].offset += 1;
-                    //            setSelection(model, model.anchorOffset() + 1);
                 }
                 getAnchor(model).superscript = [
                     new Atom(model.parent().mode, 'first'),
@@ -19503,11 +22385,9 @@ function moveToSubscript(model) {
             const sibling = model.sibling(1);
             if (sibling === null || sibling === void 0 ? void 0 : sibling.subscript) {
                 model.path[model.path.length - 1].offset += 1;
-                // setSelection(model, model.anchorOffset() + 1);
             }
             else if (sibling === null || sibling === void 0 ? void 0 : sibling.superscript) {
                 model.path[model.path.length - 1].offset += 1;
-                // setSelection(model, model.anchorOffset() + 1);
                 getAnchor(model).subscript = [
                     new Atom(model.parent().mode, 'first'),
                 ];
@@ -19518,7 +22398,6 @@ function moveToSubscript(model) {
                         .siblings()
                         .splice(model.anchorOffset() + 1, 0, new Atom(model.parent().mode, 'msubsup', '\u200b', getAnchorStyle(model)));
                     model.path[model.path.length - 1].offset += 1;
-                    // setSelection(model, model.anchorOffset() + 1);
                 }
                 getAnchor(model).subscript = [
                     new Atom(model.parent().mode, 'first'),
@@ -19557,13 +22436,13 @@ register$2({
                 new Atom(model.parent().mode, 'first'),
             ];
         }
-        setSelection(model, 0, 'end', oppositeRelation);
+        setSelectionOffset(model, 0, 'end', oppositeRelation);
         return true;
     },
     moveBeforeParent: (model) => {
         if (model.path.length > 1) {
             model.path.pop();
-            setSelection(model, model.anchorOffset() - 1);
+            setSelectionOffset(model, model.anchorOffset() - 1);
             return true;
         }
         model.announce('plonk');
@@ -19572,14 +22451,14 @@ register$2({
     moveAfterParent: (model) => moveAfterParent(model),
     moveToNextPlaceholder: (model) => leap(model, +1),
     moveToPreviousPlaceholder: (model) => leap(model, -1),
-    moveToNextChar: (model) => move(model, +1),
-    moveToPreviousChar: (model) => move(model, -1),
-    moveUp: (model) => up(model),
-    moveDown: (model) => down(model),
+    moveToNextChar: (model) => move(model, 'forward'),
+    moveToPreviousChar: (model) => move(model, 'backward'),
+    moveUp: (model) => move(model, 'upward'),
+    moveDown: (model) => move(model, 'downward'),
     moveToNextWord: (model) => skip(model, +1),
     moveToPreviousWord: (model) => skip(model, -1),
-    moveToGroupStart: (model) => setSelection(model, 0),
-    moveToGroupEnd: (model) => setSelection(model, -1),
+    moveToGroupStart: (model) => setSelectionOffset(model, 0),
+    moveToGroupEnd: (model) => setSelectionOffset(model, -1),
     moveToMathFieldStart: (model) => jumpToMathFieldBoundary(model, -1),
     moveToMathFieldEnd: (model) => jumpToMathFieldBoundary(model, +1),
     moveToSuperscript: (model) => moveToSuperscript(model),
@@ -19592,8 +22471,8 @@ register$2({
     extendToPreviousChar: (model) => extend(model, -1),
     extendToNextWord: (model) => skip(model, +1, { extend: true }),
     extendToPreviousWord: (model) => skip(model, -1, { extend: true }),
-    extendUp: (model) => up(model, { extend: true }),
-    extendDown: (model) => down(model, { extend: true }),
+    extendUp: (model) => move(model, 'upward', { extend: true }),
+    extendDown: (model) => move(model, 'downward', { extend: true }),
     /**
      * Extend the selection until the next boundary is reached. A boundary
      * is defined by an atom of a different type (mbin, mord, etc...)
@@ -19610,8 +22489,14 @@ register$2({
      * to "2345".
      */
     extendToPreviousBoundary: (model) => skip(model, -1, { extend: true }),
-    extendToGroupStart: (model) => setSelectionExtent(model, -model.anchorOffset()),
-    extendToGroupEnd: (model) => setSelectionExtent(model, model.siblings().length - model.anchorOffset()),
+    extendToGroupStart: (model) => {
+        setSelectionExtent(model, -model.anchorOffset());
+        return true;
+    },
+    extendToGroupEnd: (model) => {
+        setSelectionExtent(model, model.siblings().length - model.anchorOffset());
+        return true;
+    },
     extendToMathFieldStart: (model) => jumpToMathFieldBoundary(model, -1, { extend: true }),
     extendToMathFieldEnd: (model) => jumpToMathFieldBoundary(model, +1, { extend: true }),
 }, { target: 'model', category: 'selection-extend' });
@@ -19811,13 +22696,15 @@ function delegateKeyboardEvents(textarea, handlers) {
     let keydownEvent = null;
     let keypressEvent = null;
     let compositionInProgress = false;
+    let focusInProgress = false;
+    let blurInProgress = false;
     let deadKey = false;
     // This callback is invoked after a keyboard event has been processed
     // by the textarea
     let callbackTimeoutID;
     function defer(cb) {
         clearTimeout(callbackTimeoutID);
-        callbackTimeoutID = setTimeout(function () {
+        callbackTimeoutID = setTimeout(() => {
             clearTimeout(callbackTimeoutID);
             cb();
         });
@@ -19826,10 +22713,10 @@ function delegateKeyboardEvents(textarea, handlers) {
         // Some browsers (Firefox, Opera) fire a keypress event for commands
         // such as command-C where there might be a non-empty selection.
         // We need to ignore these.
-        if (hasSelection(textarea))
+        if (textarea.selectionStart !== textarea.selectionEnd)
             return;
-        const text = textarea['value'];
-        textarea['value'] = '';
+        const text = textarea.value;
+        textarea.value = '';
         if (text.length > 0)
             handlers.typedText(text);
     }
@@ -19860,7 +22747,7 @@ function delegateKeyboardEvents(textarea, handlers) {
         }
         if (!compositionInProgress &&
             e.code !== 'CapsLock' &&
-            !/(Control|Meta|Alt|Shift)(Right|Left)/.test(e.code)) {
+            !/(Control|Meta|Alt|Shift)(Left|Right)/.test(e.code)) {
             keydownEvent = e;
             keypressEvent = null;
             return handlers.keystroke(keyboardEventToString(e), e);
@@ -19889,20 +22776,28 @@ function delegateKeyboardEvents(textarea, handlers) {
         // In some cases (Linux browsers), the text area might not be focused
         // when doing a middle-click paste command.
         textarea.focus();
-        const text = textarea['value'];
-        textarea['value'] = '';
+        const text = textarea.value;
+        textarea.value = '';
         if (text.length > 0)
             handlers.paste(text);
     }, true);
-    target.addEventListener('blur', () => {
-        keydownEvent = null;
-        keypressEvent = null;
-        if (handlers.blur)
-            handlers.blur();
+    target.addEventListener('blur', (_ev) => {
+        if (!blurInProgress && !focusInProgress) {
+            blurInProgress = true;
+            keydownEvent = null;
+            keypressEvent = null;
+            if (handlers.blur)
+                handlers.blur();
+            blurInProgress = false;
+        }
     }, true);
-    target.addEventListener('focus', () => {
-        if (handlers.focus)
-            handlers.focus();
+    target.addEventListener('focus', (_ev) => {
+        if (!blurInProgress && !focusInProgress) {
+            focusInProgress = true;
+            if (handlers.focus)
+                handlers.focus();
+            focusInProgress = false;
+        }
     }, true);
     target.addEventListener('compositionstart', () => {
         compositionInProgress = true;
@@ -19935,9 +22830,6 @@ function delegateKeyboardEvents(textarea, handlers) {
             defer(handleTypedText);
         }
     });
-}
-function hasSelection(textarea) {
-    return textarea.selectionStart !== textarea.selectionEnd;
 }
 function eventToChar(evt) {
     var _a;
@@ -20026,7 +22918,7 @@ class UndoManager {
         // Add a new entry
         this.stack.push({
             latex: this.model.root.toLatex(false),
-            selection: this.model.toString(),
+            selection: this.model.selection,
         });
         this.index++;
         // If we've reached the maximum number of undo operations, forget the
@@ -20054,7 +22946,7 @@ class UndoManager {
     save() {
         return {
             latex: this.model.root.toLatex(false),
-            selection: this.model.toString(),
+            selection: this.model.selection,
         };
     }
     /**
@@ -20078,7 +22970,7 @@ class UndoManager {
             smartFence: false,
         });
         // Restore the selection
-        setPath(this.model, state ? state.selection : [{ relation: 'body', offset: 0 }]);
+        this.model.selection = state ? state.selection : [{ start: 0 }];
         this.model.suppressChangeNotifications = wasSuppressing;
     }
 }
@@ -20635,7 +23527,7 @@ function complete(mathfield, options) {
             // (commands are only available in math mode)
             mathfield.switchMode('math');
             // Interpret the input as LaTeX code
-            const mathlist = parseString(command, 'math', null, mathfield.config.macros);
+            const mathlist = parseString(command, 'math', null, mathfield.options.macros);
             if (mathlist) {
                 spliceCommandStringAroundInsertionPoint(mathfield.model, mathlist);
             }
@@ -20650,7 +23542,7 @@ function complete(mathfield, options) {
     return false;
 }
 function updateSuggestion(mathfield) {
-    positionInsertionPointAfterCommitedCommand(mathfield.model);
+    setPositionAfterCommitedCommand(mathfield.model);
     removeSuggestion(mathfield.model);
     const command = extractCommandStringAroundInsertionPoint(mathfield.model);
     const suggestions = suggest(command);
@@ -21440,10 +24332,10 @@ function speak(mathfield, scope, speakOptions) {
     }
     const atoms = getAtoms(mathfield, scope);
     if (atoms === null) {
-        mathfield.config.speakHook(getFailedSpeech(scope), mathfield.config);
+        mathfield.options.speakHook(getFailedSpeech(scope), mathfield.options);
         return false;
     }
-    const options = { ...mathfield.config };
+    const options = { ...mathfield.options };
     if (speakOptions.withHighlighting || options.speechEngine === 'amazon') {
         options.textToSpeechMarkup =
             window['sre'] && options.textToSpeechRules === 'sre'
@@ -21454,13 +24346,13 @@ function speak(mathfield, scope, speakOptions) {
     if (speakOptions.withHighlighting) {
         window['mathlive'].readAloudMathField = mathfield;
         render(mathfield, { forHighlighting: true });
-        if (mathfield.config.readAloudHook) {
-            mathfield.config.readAloudHook(mathfield.field, text, mathfield.config);
+        if (mathfield.options.readAloudHook) {
+            mathfield.options.readAloudHook(mathfield.field, text, mathfield.options);
         }
     }
     else {
-        if (mathfield.config.speakHook) {
-            mathfield.config.speakHook(text, options);
+        if (mathfield.options.speakHook) {
+            mathfield.options.speakHook(text, options);
         }
     }
     return false;
@@ -21577,7 +24469,7 @@ function defaultAnnounceHook(mathfield, action, oldModel, atoms) {
         mathfield.resetKeystrokeBuffer();
     }
     else if (action === 'delete') {
-        liveText = speakableText(mathfield.config, 'deleted: ', atoms);
+        liveText = speakableText(mathfield.options, 'deleted: ', atoms);
         //*** FIX: could also be moveUp or moveDown -- do something different like provide context???
     }
     else if (action === 'focus' || /move/.test(action)) {
@@ -21588,13 +24480,13 @@ function defaultAnnounceHook(mathfield, action, oldModel, atoms) {
     }
     else if (action === 'replacement') {
         // announce the contents
-        liveText = speakableText(mathfield.config, '', mathfield.model.sibling(0));
+        liveText = speakableText(mathfield.options, '', mathfield.model.sibling(0));
     }
     else if (action === 'line') {
         // announce the current line -- currently that's everything
-        liveText = speakableText(mathfield.config, '', mathfield.model.root);
-        mathfield.accessibleNode.innerHTML = mathfield.config.createHTML('<math xmlns="http://www.w3.org/1998/Math/MathML">' +
-            atomsToMathML(mathfield.model.root, mathfield.config) +
+        liveText = speakableText(mathfield.options, '', mathfield.model.root);
+        mathfield.accessibleNode.innerHTML = mathfield.options.createHTML('<math xmlns="http://www.w3.org/1998/Math/MathML">' +
+            atomsToMathML(mathfield.model.root, mathfield.options) +
             '</math>');
         mathfield.textarea.setAttribute('aria-label', 'after: ' + liveText);
         /*** FIX -- testing hack for setting braille ***/
@@ -21607,7 +24499,7 @@ function defaultAnnounceHook(mathfield, action, oldModel, atoms) {
     }
     else {
         liveText = atoms
-            ? speakableText(mathfield.config, action + ' ', atoms)
+            ? speakableText(mathfield.options, action + ' ', atoms)
             : action;
     }
     // aria-live regions are only spoken when it changes; force a change by
@@ -21655,7 +24547,7 @@ function nextAtomSpeechText(mathfield, oldModel) {
         oldPath.pop();
     }
     if (!selectionIsCollapsed(mathfield.model)) {
-        return speakableText(mathfield.config, '', getSelectedAtoms(mathfield.model));
+        return speakableText(mathfield.options, '', getSelectedAtoms(mathfield.model));
     }
     // announce start of denominator, etc
     const relationName = relation(mathfield.model.parent(), leaf);
@@ -21665,7 +24557,7 @@ function nextAtomSpeechText(mathfield, oldModel) {
     }
     const atom = mathfield.model.sibling(Math.max(1, mathfield.model.extent));
     if (atom) {
-        result += speakableText(mathfield.config, '', atom);
+        result += speakableText(mathfield.options, '', atom);
     }
     else if (leaf.offset !== 0) {
         // don't say both start and end
@@ -21698,7 +24590,7 @@ function unloadSound(sound) {
 function update(current, updates) {
     const result = get(current, Object.keys(current));
     Object.keys(updates).forEach((key) => {
-        var _a, _b;
+        var _a, _b, _c;
         switch (key) {
             case 'scriptDepth':
                 if (isArray(updates.scriptDepth)) {
@@ -21731,14 +24623,17 @@ function update(current, updates) {
                 break;
             case 'locale':
                 result.locale =
-                    updates.locale === 'auto' ? l10n.locale : updates.locale;
+                    updates.locale === 'auto'
+                        ? (_a = navigator === null || navigator === void 0 ? void 0 : navigator.language.slice(0, 5)) !== null && _a !== void 0 ? _a : 'en' : updates.locale;
+                l10n.locale = result.locale;
                 break;
             case 'strings':
                 l10n.merge(updates.strings);
+                result.strings = l10n.strings;
                 break;
             case 'virtualKeyboardLayout':
                 if (updates.virtualKeyboardLayout === 'auto') {
-                    result.virtualKeyboardLayout = (_a = {
+                    result.virtualKeyboardLayout = (_b = {
                         fr: 'azerty',
                         be: 'azerty',
                         al: 'qwertz',
@@ -21748,7 +24643,7 @@ function update(current, updates) {
                         hu: 'qwertz',
                         sk: 'qwertz',
                         ch: 'qwertz',
-                    }[l10n.locale.substring(0, 2)]) !== null && _a !== void 0 ? _a : 'qwerty';
+                    }[l10n.locale.substring(0, 2)]) !== null && _b !== void 0 ? _b : 'qwerty';
                 }
                 else {
                     result.virtualKeyboardLayout =
@@ -21757,7 +24652,7 @@ function update(current, updates) {
                 break;
             case 'virtualKeyboardMode':
                 {
-                    const isTouchDevice = (_b = window.matchMedia) === null || _b === void 0 ? void 0 : _b.call(window, '(any-pointer: coarse)').matches;
+                    const isTouchDevice = (_c = window.matchMedia) === null || _c === void 0 ? void 0 : _c.call(window, '(any-pointer: coarse)').matches;
                     if (updates.virtualKeyboardMode === 'auto') {
                         result.virtualKeyboardMode = isTouchDevice
                             ? 'onfocus'
@@ -21834,6 +24729,7 @@ function update(current, updates) {
             case 'onUndoStateWillChange':
             case 'onUndoStateDidChange':
             case 'onModeChange':
+            case 'onCommit':
             case 'onVirtualKeyboardToggle':
             case 'onReadAloudStatus':
             case 'onError':
@@ -21919,7 +24815,7 @@ function getDefault() {
         removeExtraneousParentheses: true,
         ignoreSpacebarInMathMode: true,
         locale: l10n.locale,
-        strings: {},
+        strings: l10n.strings,
         keybindings: DEFAULT_KEYBINDINGS,
         overrideDefaultInlineShortcuts: false,
         inlineShortcuts: {},
@@ -21959,6 +24855,7 @@ function getDefault() {
         onModeChange: NO_OP_LISTENER,
         onVirtualKeyboardToggle: NO_OP_LISTENER,
         onReadAloudStatus: NO_OP_LISTENER,
+        onCommit: NO_OP_LISTENER,
         onError: () => {
             return;
         },
@@ -21981,7 +24878,6 @@ function convertLastAtomsToText(mathfield, count, until) {
     }
     let i = 0;
     let done = false;
-    contentWillChange(mathfield.model);
     while (!done) {
         const atom = mathfield.model.sibling(i);
         done =
@@ -22017,7 +24913,6 @@ function convertLastAtomsToMath(mathfield, count, until) {
     if (typeof count === 'undefined') {
         count = Infinity;
     }
-    contentWillChange(mathfield.model);
     let i = 0;
     let done = false;
     while (!done) {
@@ -22056,7 +24951,6 @@ function removeIsolatedSpace(mathfield) {
         mathfield.model.sibling(i).body === ' ' &&
         (!mathfield.model.sibling(i - 1) ||
             mathfield.model.sibling(i - 1).mode === 'math')) {
-        contentWillChange(mathfield.model);
         mathfield.model.siblings().splice(i - 1, 1);
         contentDidChange(mathfield.model);
         // We need to adjust the selection after doing some surgery on the atoms list
@@ -22064,7 +24958,7 @@ function removeIsolatedSpace(mathfield) {
         // which could have a side effect of changing the mode :(
         const save = mathfield.model.suppressChangeNotifications;
         mathfield.model.suppressChangeNotifications = true;
-        setSelection(mathfield.model, mathfield.model.anchorOffset() - 1);
+        setSelectionOffset(mathfield.model, mathfield.model.anchorOffset() - 1);
         mathfield.model.suppressChangeNotifications = save;
     }
 }
@@ -22258,7 +25152,7 @@ function showKeystroke(mathfield, keystroke) {
         const bounds = mathfield.element.getBoundingClientRect();
         vb.style.left = bounds.left + 'px';
         vb.style.top = bounds.top - 64 + 'px';
-        vb.innerHTML = mathfield.config.createHTML('<span>' +
+        vb.innerHTML = mathfield.options.createHTML('<span>' +
             (getKeybindingMarkup(keystroke) || keystroke) +
             '</span>' +
             vb.innerHTML);
@@ -22284,9 +25178,9 @@ function onKeystroke(mathfield, keystroke, evt) {
     if (mathfield.keyboardLayout !== activeLayout.id) {
         console.log('Switching to keyboard layout ' + activeLayout.id);
         mathfield.keyboardLayout = activeLayout.id;
-        mathfield.keybindings = normalizeKeybindings(mathfield.config.keybindings, (e) => {
-            if (typeof mathfield.config.onError === 'function') {
-                mathfield.config.onError({
+        mathfield.keybindings = normalizeKeybindings(mathfield.options.keybindings, (e) => {
+            if (typeof mathfield.options.onError === 'function') {
+                mathfield.options.onError({
                     code: 'invalid-keybinding',
                     arg: e.join('\n'),
                 });
@@ -22299,8 +25193,8 @@ function onKeystroke(mathfield, keystroke, evt) {
     // 3. Reset the timer for the keystroke buffer reset
     clearTimeout(mathfield.keystrokeBufferResetTimer);
     // 4. Give a chance to the custom keystroke handler to intercept the event
-    if (mathfield.config.onKeystroke &&
-        !mathfield.config.onKeystroke(mathfield, keystroke, evt)) {
+    if (mathfield.options.onKeystroke &&
+        !mathfield.options.onKeystroke(mathfield, keystroke, evt)) {
         if (evt === null || evt === void 0 ? void 0 : evt.preventDefault) {
             evt.preventDefault();
             evt.stopPropagation();
@@ -22318,7 +25212,13 @@ function onKeystroke(mathfield, keystroke, evt) {
     // see 5.3)
     if (mathfield.mode !== 'command' &&
         (!evt || (!evt.ctrlKey && !evt.metaKey))) {
-        if (!mightProducePrintableCharacter(evt)) {
+        if (keystroke === '[Backspace]') {
+            // Special case for backspace
+            mathfield.keystrokeBuffer = mathfield.keystrokeBuffer.slice(0, -1);
+            mathfield.keystrokeBufferStates.pop();
+            mathfield.resetKeystrokeBuffer({ defer: true });
+        }
+        else if (!mightProducePrintableCharacter(evt)) {
             // It was a non-alpha character (PageUp, End, etc...)
             mathfield.resetKeystrokeBuffer();
         }
@@ -22330,31 +25230,29 @@ function onKeystroke(mathfield, keystroke, evt) {
             while (!shortcut && i < candidate.length) {
                 let siblings;
                 if (mathfield.keystrokeBufferStates[i]) {
-                    const mathlist = new ModelPrivate();
-                    mathlist.root = makeRoot('math', parseString(mathfield.keystrokeBufferStates[i].latex, mathfield.config.defaultMode, null, mathfield.config.macros));
-                    setPath(mathlist, mathfield.keystrokeBufferStates[i].selection);
-                    siblings = mathlist.siblings();
+                    const iter = new ModelPrivate();
+                    iter.root = makeRoot('math', parseString(mathfield.keystrokeBufferStates[i].latex, mathfield.options.defaultMode, null, mathfield.options.macros));
+                    normalizeModel(iter);
+                    iter.selection =
+                        mathfield.keystrokeBufferStates[i].selection;
+                    siblings = iter.siblings();
                 }
                 else {
                     siblings = mathfield.model.siblings();
                 }
-                shortcut = getInlineShortcut(siblings, candidate.slice(i), mathfield.config.inlineShortcuts);
+                shortcut = getInlineShortcut(siblings, candidate.slice(i), mathfield.options.inlineShortcuts);
                 i += 1;
             }
-            stateIndex = i - 1;
+            stateIndex =
+                mathfield.keystrokeBufferStates.length - (candidate.length - i);
             mathfield.keystrokeBuffer += c;
             mathfield.keystrokeBufferStates.push(mathfield.getUndoRecord());
-            if (getInlineShortcutsStartingWith(candidate, mathfield.config)
+            if (getInlineShortcutsStartingWith(candidate, mathfield.options)
                 .length <= 1) {
                 resetKeystrokeBuffer = true;
             }
             else {
-                if (mathfield.config.inlineShortcutTimeout) {
-                    // Set a timer to reset the shortcut buffer
-                    mathfield.keystrokeBufferResetTimer = setTimeout(() => {
-                        mathfield.resetKeystrokeBuffer();
-                    }, mathfield.config.inlineShortcutTimeout);
-                }
+                mathfield.resetKeystrokeBuffer({ defer: true });
             }
         }
     }
@@ -22362,7 +25260,7 @@ function onKeystroke(mathfield, keystroke, evt) {
     // Need to check this before determing if there's a valid shortcut
     // since if we switch to math mode, we may want to apply the shortcut
     // e.g. "slope = rise/run"
-    if (mathfield.config.smartMode) {
+    if (mathfield.options.smartMode) {
         const previousMode = mathfield.mode;
         if (shortcut) {
             // If we found a shortcut (e.g. "alpha"),
@@ -22375,8 +25273,8 @@ function onKeystroke(mathfield, keystroke, evt) {
         }
         // Notify of mode change
         if (mathfield.mode !== previousMode &&
-            typeof mathfield.config.onModeChange === 'function') {
-            mathfield.config.onModeChange(mathfield, mathfield.mode);
+            typeof mathfield.options.onModeChange === 'function') {
+            mathfield.options.onModeChange(mathfield, mathfield.mode);
         }
     }
     // 5.3 Check if this matches a keybinding
@@ -22386,34 +25284,55 @@ function onKeystroke(mathfield, keystroke, evt) {
     if (!shortcut && !selector) {
         selector = getCommandForKeybinding(mathfield.keybindings, mathfield.mode, keystroke);
     }
+    if (!shortcut &&
+        !selector &&
+        (keystroke === '[Enter]' || keystroke === '[Return]')) {
+        // No matching keybinding: trigger a commit
+        if (typeof mathfield.options.onCommit === 'function') {
+            mathfield.options.onCommit(mathfield);
+            if (evt === null || evt === void 0 ? void 0 : evt.preventDefault) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+            return false;
+        }
+    }
     // No shortcut :( We're done.
     if (!shortcut && !selector) {
         return true;
     }
-    if (mathfield.config.readOnly && selector[0] === 'insert') {
+    if (mathfield.options.readOnly && selector[0] === 'insert') {
         return true;
     }
-    // 6. Perform the action matching this shortcut
+    //
+    // 6. Perform the action matching this selector or insert the shortcut
+    //
+    //
     // 6.1 Remove any error indicator (wavy underline) on the current command
     // sequence (if there are any)
+    //
     decorateCommandStringAroundInsertionPoint(mathfield.model, false);
+    //
     // 6.2 If we have a `moveAfterParent` selector (usually triggered with
     // `spacebar), and we're at the end of a smart fence, close the fence with
     // an empty (.) right delimiter
+    //
     const parent = mathfield.model.parent();
     if (selector === 'moveAfterParent' &&
         parent &&
         parent.type === 'leftright' &&
         mathfield.model.endOffset() === mathfield.model.siblings().length - 1 &&
-        mathfield.config.smartFence &&
+        mathfield.options.smartFence &&
         insertSmartFence(mathfield.model, '.', mathfield.style)) {
         // Pressing the space bar (moveAfterParent selector) when at the end
         // of a potential smartFence will close it as a semi-open fence
         selector = '';
         requestUpdate(mathfield); // Re-render the closed smartFence
     }
+    //
     // 6.3 If this is the Spacebar and we're just before or right after
     // a text zone, insert the space inside the text zone
+    //
     if (mathfield.mode === 'math' && keystroke === '[Spacebar]' && !shortcut) {
         const nextSibling = mathfield.model.sibling(1);
         const previousSibling = mathfield.model.sibling(-1);
@@ -22422,28 +25341,32 @@ function onKeystroke(mathfield, keystroke, evt) {
             insert(mathfield.model, ' ', { mode: 'text' });
         }
     }
+    //
     // 6.4 If there's a selector, perform it.
+    //
     if (selector) {
-        mathfield.$perform(selector);
+        mathfield.executeCommand(selector);
     }
     else if (shortcut) {
-        // 5.5 Insert the shortcut
+        //
+        // 6.5 Insert the shortcut
         // If the shortcut is a mandatory escape sequence (\}, etc...)
         // don't make it undoable, this would result in syntactically incorrect
         // formulas
+        //
+        const style = {
+            ...getAnchorStyle(mathfield.model),
+            ...mathfield.style,
+        };
         if (!/^(\\{|\\}|\\[|\\]|\\@|\\#|\\$|\\%|\\^|\\_|\\backslash)$/.test(shortcut)) {
             // To enable the substitution to be undoable,
             // insert the character before applying the substitution
-            const style = {
-                ...getAnchorStyle(mathfield.model),
-                ...mathfield.style,
-            };
+            const saveMode = mathfield.mode;
             insert(mathfield.model, eventToChar(evt), {
                 suppressChangeNotifications: true,
                 mode: mathfield.mode,
                 style: style,
             });
-            const saveMode = mathfield.mode;
             // Create a snapshot with the inserted character
             mathfield.snapshotAndCoalesce();
             // Revert to the state before the beginning of the shortcut
@@ -22451,14 +25374,9 @@ function onKeystroke(mathfield, keystroke, evt) {
             mathfield.restoreToUndoRecord(mathfield.keystrokeBufferStates[stateIndex]);
             mathfield.mode = saveMode;
         }
-        contentWillChange(mathfield.model);
         const save = mathfield.model.suppressChangeNotifications;
         mathfield.model.suppressChangeNotifications = true;
         // Insert the substitute, possibly as a smart fence
-        const style = {
-            ...getAnchorStyle(mathfield.model),
-            ...mathfield.style,
-        };
         insert(mathfield.model, shortcut, {
             format: 'latex',
             mode: mathfield.mode,
@@ -22475,18 +25393,23 @@ function onKeystroke(mathfield, keystroke, evt) {
         }
         mathfield.model.suppressChangeNotifications = save;
         contentDidChange(mathfield.model);
+        selectionDidChange(mathfield.model);
         mathfield.snapshot();
-        requestUpdate(mathfield);
+        mathfield.dirty = true; // Mark the field as dirty. It will get rendered in scrollIntoView()
         mathfield.model.announce('replacement');
         // If we're done with the shortcuts (found a unique one), reset it.
         if (resetKeystrokeBuffer) {
             mathfield.resetKeystrokeBuffer();
         }
     }
+    //
     // 7. Make sure the insertion point is scrolled into view
+    //
     mathfield.scrollIntoView();
+    //
     // 8. Keystroke has been handled, if it wasn't caught in the default
     // case, so prevent propagation
+    //
     if (evt === null || evt === void 0 ? void 0 : evt.preventDefault) {
         evt.preventDefault();
         evt.stopPropagation();
@@ -22508,17 +25431,17 @@ function onKeystroke(mathfield, keystroke, evt) {
  * @private
  */
 function onTypedText(mathfield, text, options) {
-    if (mathfield.config.readOnly) {
+    if (mathfield.options.readOnly) {
         mathfield.model.announce('plonk');
         return;
     }
     options = options !== null && options !== void 0 ? options : {};
     // Focus, then provide audio and haptic feedback
     if (options.focus) {
-        mathfield.$focus();
+        mathfield.focus();
     }
     if (options.feedback) {
-        if (mathfield.config.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
+        if (mathfield.options.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
             navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
         }
         if (mathfield.keypressSound) {
@@ -22551,7 +25474,7 @@ function onTypedText(mathfield, text, options) {
         // Interpret `text` as a 'smart' expression (could be LaTeX, could be
         // UnicodeMath)
         insert(mathfield.model, text, {
-            smartFence: mathfield.config.smartFence,
+            smartFence: mathfield.options.smartFence,
             mode: 'math',
         });
     }
@@ -22604,22 +25527,22 @@ function onTypedText(mathfield, text, options) {
                 if (selector) {
                     if (selector === 'moveToSuperscript') {
                         if (superscriptDepth(mathfield) >=
-                            mathfield.config.scriptDepth[1]) {
+                            mathfield.options.scriptDepth[1]) {
                             mathfield.model.announce('plonk');
                             return;
                         }
                     }
                     else if (selector === 'moveToSubscript') {
                         if (subscriptDepth(mathfield) >=
-                            mathfield.config.scriptDepth[0]) {
+                            mathfield.options.scriptDepth[0]) {
                             mathfield.model.announce('plonk');
                             return;
                         }
                     }
-                    mathfield.$perform(selector);
+                    mathfield.executeCommand(selector);
                 }
                 else {
-                    if (mathfield.config.smartSuperscript &&
+                    if (mathfield.options.smartSuperscript &&
                         mathfield.model.relation() === 'superscript' &&
                         /[0-9]/.test(c) &&
                         mathfield.model
@@ -22638,7 +25561,7 @@ function onTypedText(mathfield, text, options) {
                         insert(mathfield.model, c, {
                             mode: 'math',
                             style: style,
-                            smartFence: mathfield.config.smartFence,
+                            smartFence: mathfield.options.smartFence,
                         });
                     }
                 }
@@ -22743,9 +25666,15 @@ register$2({
         mathfield.switchMode(mode);
         return true;
     },
-    insert: (mathfield, s, options) => mathfield.$insert(s, options),
+    insert: (mathfield, s, options) => mathfield.insert(s, options),
     typedText: (mathfield, text) => {
         onTypedText(mathfield, text);
+        return true;
+    },
+    commit: (mathfield) => {
+        if (typeof mathfield.options.onCommit === 'function') {
+            mathfield.options.onCommit(mathfield);
+        }
         return true;
     },
 });
@@ -22763,20 +25692,20 @@ function applyStyle$4(mathfield, inStyle) {
             // Convert the selection from one mode to another
             const previousMode = mathfield.mode;
             const targetMode = (getAnchorMode(mathfield.model) ||
-                mathfield.config.defaultMode) === 'math'
+                mathfield.options.defaultMode) === 'math'
                 ? 'text'
                 : 'math';
             let convertedSelection = mathfield.$selectedText('ASCIIMath');
             if (targetMode === 'math' && /^"[^"]+"$/.test(convertedSelection)) {
                 convertedSelection = convertedSelection.slice(1, -1);
             }
-            mathfield.$insert(convertedSelection, {
+            mathfield.insert(convertedSelection, {
                 mode: targetMode,
                 selectionMode: 'item',
                 format: targetMode === 'text' ? 'text' : 'ASCIIMath',
             });
             mathfield.mode = targetMode;
-            if (mathfield.groupIsSelected()) {
+            if (mathfield.model.groupIsSelected()) {
                 // The entire group was selected. Adjust parent mode if
                 // appropriate
                 const parent = mathfield.model.parent();
@@ -22787,8 +25716,8 @@ function applyStyle$4(mathfield, inStyle) {
             }
             // Notify of mode change
             if (mathfield.mode !== previousMode &&
-                typeof mathfield.config.onModeChange === 'function') {
-                mathfield.config.onModeChange(mathfield, mathfield.mode);
+                typeof mathfield.options.onModeChange === 'function') {
+                mathfield.options.onModeChange(mathfield, mathfield.mode);
             }
         }
         delete style.mode;
@@ -22919,9 +25848,9 @@ function onCut(mathfield) {
 }
 function onCopy(mathfield, e) {
     if (selectionIsCollapsed(mathfield.model)) {
-        e.clipboardData.setData('text/plain', '$$' + mathfield.$text('latex-expanded') + '$$');
-        e.clipboardData.setData('application/json', mathfield.$text('json'));
-        e.clipboardData.setData('application/xml', mathfield.$text('mathML'));
+        e.clipboardData.setData('text/plain', '$$' + mathfield.getValue('latex-expanded') + '$$');
+        e.clipboardData.setData('application/json', mathfield.getValue('json'));
+        e.clipboardData.setData('application/xml', mathfield.getValue('mathML'));
     }
     else {
         e.clipboardData.setData('text/plain', '$$' + mathfield.$selectedText('latex-expanded') + '$$');
@@ -22933,22 +25862,22 @@ function onCopy(mathfield, e) {
 }
 register$2({
     copyToClipboard: (mathfield) => {
-        mathfield.$focus();
+        mathfield.focus();
         // If the selection is empty, select the entire field before
         // copying it.
         if (selectionIsCollapsed(mathfield.model)) {
-            mathfield.$select();
+            mathfield.select();
         }
         document.execCommand('copy');
         return false;
     },
     cutToClipboard: (mathfield) => {
-        mathfield.$focus();
+        mathfield.focus();
         document.execCommand('cut');
         return true;
     },
     pasteFromClipboard: (mathfield) => {
-        mathfield.$focus();
+        mathfield.focus();
         document.execCommand('paste');
         return true;
     },
@@ -23071,7 +26000,7 @@ function onPointerDown(mathfield, evt) {
         anchorY >= bounds.top &&
         anchorY <= bounds.bottom) {
         // Focus the mathfield
-        if (!mathfield.$hasFocus()) {
+        if (!mathfield.hasFocus()) {
             dirty = true;
             if (mathfield.textarea.focus) {
                 mathfield.textarea.focus();
@@ -23211,49 +26140,53 @@ function pathFromPoint(mathfield, x, y, options) {
     var _a;
     options = options !== null && options !== void 0 ? options : {};
     options.bias = (_a = options.bias) !== null && _a !== void 0 ? _a : 0;
-    let result;
     // Try to find the deepest element that is near the point that was
     // clicked on (the point could be outside of the element)
     const nearest = nearestElementFromPoint(mathfield.field, x, y);
     const el = nearest.element;
     const id = el ? el.getAttribute('data-atom-id') : null;
-    if (id) {
-        // Let's find the atom that has a matching ID with the element that
-        // was clicked on (or near)
-        const paths = filter(mathfield.model, (_path, atom) => {
-            // If the atom allows children to be selected, match only if
-            // the ID of  the atom matches the one we're looking for.
-            if (!atom.captureSelection) {
-                return atom.id === id;
-            }
-            // If the atom does not allow children to be selected
-            // (captureSelection === true), the element matches if any of
-            // its children has an ID that matches.
-            return atom.filter((childAtom) => childAtom.id === id).length > 0;
-        });
-        if (paths && paths.length > 0) {
-            // (There should be exactly one atom that matches this ID...)
-            // Set the result to the path to this atom
-            result = pathFromString(paths[0]).path;
-            if (options.bias === 0) {
-                // If the point clicked is to the left of the vertical midline,
-                // adjust the path to *before* the atom (i.e. after the
-                // preceding atom)
-                const bounds = el.getBoundingClientRect();
-                if (x < bounds.left + bounds.width / 2 &&
-                    !el.classList.contains('ML__placeholder')) {
-                    result[result.length - 1].offset = Math.max(0, result[result.length - 1].offset - 1);
-                }
-            }
-            else if (options.bias < 0) {
-                result[result.length - 1].offset = Math.min(mathfield.model.siblings().length - 1, Math.max(0, result[result.length - 1].offset + options.bias));
-            }
+    if (!id)
+        return undefined;
+    // Let's find the atom that has a matching ID with the element that
+    // was clicked on (or near)
+    const paths = filter(mathfield.model, (atom) => {
+        // If the atom allows children to be selected, match only if
+        // the ID of  the atom matches the one we're looking for.
+        if (!atom.captureSelection) {
+            return atom.id === id;
         }
+        // If the atom does not allow children to be selected
+        // (captureSelection === true), the element matches if any of
+        // its children has an ID that matches.
+        let found = false;
+        atom.forEach((x) => {
+            if (x.id === id)
+                found = true;
+        });
+        return found;
+    });
+    if (!paths || paths.length === 0)
+        return undefined;
+    // (There should be exactly one atom that matches this ID...)
+    // Set the result to the path to this atom
+    const result = pathFromString(paths[0]).path;
+    if (options.bias === 0) {
+        // If the point clicked is to the left of the vertical midline,
+        // adjust the path to *before* the atom (i.e. after the
+        // preceding atom)
+        const bounds = el.getBoundingClientRect();
+        if (x < bounds.left + bounds.width / 2 &&
+            !el.classList.contains('ML__placeholder')) {
+            result[result.length - 1].offset = Math.max(0, result[result.length - 1].offset - 1);
+        }
+    }
+    else if (options.bias < 0) {
+        result[result.length - 1].offset = Math.min(mathfield.model.siblings().length - 1, Math.max(0, result[result.length - 1].offset + options.bias));
     }
     return result;
 }
 
-var css_248z = ".ML__keyboard{--keyboard-background:rgba(209,213,217,0.97);--keyboard-text:#000;--keyboard-text-active:var(--primary);--keyboard-background-border:#ddd;--keycap-background:#fff;--keycap-background-active:#e5e5e5;--keycap-background-border:#e5e6e9;--keycap-background-border-bottom:#8d8f92;--keycap-text:#000;--keycap-text-active:#fff;--keycap-secondary-text:#000;--keycap-modifier-background:#b9bdc7;--keycap-modifier-border:#c5c9d0;--keycap-modifier-border-bottom:#989da6;--keyboard-alternate-background:#fff;--keyboard-alternate-background-active:#e5e5e5;--keyboard-alternate-text:#000;position:fixed;left:0;bottom:-267px;width:100vw;z-index:var(--ML_keyboard-zindex,105);padding-top:5px;transform:translate(0);opacity:0;visibility:hidden;transition:.28s cubic-bezier(0,0,.2,1);transition-property:transform,opacity;-webkit-backdrop-filter:grayscale(50%);backdrop-filter:grayscale(50%);background-color:var(--keyboard-background);border:1px solid var(--keyboard-background-border);font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:16px;font-weight:400;margin:0;text-shadow:none;box-sizing:border-box;touch-action:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)}.ML__keyboard.is-visible{transform:translateY(-267px);opacity:1;visibility:visible;transition-timing-function:cubic-bezier(.4,0,1,1)}.ML__keyboard .tex{font-family:KaTeX_Main,Cambria Math,Asana Math,OpenSymbol,Symbola,STIX,Times,serif!important}.ML__keyboard .tex-math{font-family:KaTeX_Math,Cambria Math,Asana Math,OpenSymbol,Symbola,STIX,Times,serif!important}.ML__keyboard .tt{font-family:IBM Plex Mono,Source Code Pro,Consolas,Roboto Mono,Menlo,Bitstream Vera Sans Mono,DejaVu Sans Mono,Monaco,Courier,monospace!important;font-size:30px;font-weight:400}.ML__keyboard.alternate-keys{visibility:hidden;max-width:286px;background-color:var(--keyboard-alternate-background);text-align:center;border-radius:6px;position:fixed;bottom:auto;top:0;box-sizing:content-box;transform:none;z-index:calc(var(--ML_keyboard-zindex, 105) + 1);display:flex;flex-direction:row;justify-content:center;align-content:center;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22);transition:none}@media only screen and (max-height:412px){.ML__keyboard.alternate-keys{max-width:320px}}.ML__keyboard.alternate-keys.is-visible{visibility:visible}.ML__keyboard.alternate-keys ul{list-style:none;margin:3px;padding:0;display:flex;flex-flow:row wrap-reverse;justify-content:center}.ML__keyboard.alternate-keys ul>li{display:flex;flex-flow:column;align-items:center;justify-content:center;font-size:30px;height:70px;width:70px;box-sizing:border-box;margin:0;background:transparent;border:1px solid transparent;border-radius:5px;pointer-events:all;color:var(--keyboard-alternate-text);fill:currentColor}@media only screen and (max-height:412px){.ML__keyboard.alternate-keys ul>li{font-size:24px;height:50px;width:50px}}.ML__keyboard.alternate-keys ul>li.active,.ML__keyboard.alternate-keys ul>li.pressed,.ML__keyboard.alternate-keys ul>li:hover{box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);background:var(--keyboard-alternate-background-active);color:var(--keyboard-text-active)}.ML__keyboard.alternate-keys ul>li.small{font-size:18px}.ML__keyboard.alternate-keys ul>li.small-button{width:42px;height:42px;margin:2px;background:#fbfbfb}.ML__keyboard.alternate-keys ul>li.small-button:hover{background:var(--keyboard-alternate-background-active)}.ML__keyboard.alternate-keys ul>li.box>div,.ML__keyboard.alternate-keys ul>li.box>span{border:1px dashed rgba(0,0,0,.24)}.ML__keyboard.alternate-keys ul>li .warning{min-height:60px;min-width:60px;background:#cd0030;color:#fff;padding:5px;display:flex;align-items:center;justify-content:center;border-radius:5px}.ML__keyboard.alternate-keys ul>li .warning.active,.ML__keyboard.alternate-keys ul>li .warning.pressed,.ML__keyboard.alternate-keys ul>li .warning:hover{background:red}.ML__keyboard.alternate-keys ul>li .warning svg{width:50px;height:50px}.ML__keyboard.alternate-keys ul>li aside{font-size:12px;line-height:12px;opacity:.78;padding-top:2px}.ML__keyboard>div.keyboard-layer{display:none;outline:none}.ML__keyboard>div.keyboard-layer.is-visible{display:flex;flex-flow:column}.ML__keyboard>div>div.keyboard-toolbar{align-self:center;display:flex;flex-flow:row;justify-content:space-between;width:736px}@media only screen and (min-width:768px) and (max-width:1024px){.ML__keyboard>div>div.keyboard-toolbar{width:556px}}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar{width:365px;max-width:100vw}}.ML__keyboard>div>div.keyboard-toolbar svg{height:20px;width:20px}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar svg{height:13px;width:17px}}.ML__keyboard>div>div.keyboard-toolbar>.left{position:relative;display:flex;justify-content:flex-start;flex-flow:row}.ML__keyboard>div>div.keyboard-toolbar>.right{display:flex;justify-content:flex-end;flex-flow:row}.ML__keyboard>div>div.keyboard-toolbar>div>div{display:flex;align-items:baseline;justify-content:center;pointer-events:all;color:var(--keyboard-text);fill:currentColor;background:0;font-size:110%;cursor:pointer;min-height:0;padding:4px 10px;margin:7px 4px 6px;box-shadow:none;border:none;border-bottom:2px solid transparent}.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled.pressed svg,.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled:hover svg,.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled svg{color:var(--keyboard-text);opacity:.2}@media only screen and (max-width:414px){.ML__keyboard>div>div.keyboard-toolbar>div>div{font-size:100%;padding:0 6px 0 0}}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar>div>div{padding-left:4px;padding-right:4px;font-size:90%}}.ML__keyboard>div>div.keyboard-toolbar>div>div.active,.ML__keyboard>div>div.keyboard-toolbar>div>div.pressed,.ML__keyboard>div>div.keyboard-toolbar>div>div:active,.ML__keyboard>div>div.keyboard-toolbar>div>div:hover{color:var(--keyboard-text-active)}.ML__keyboard>div>div.keyboard-toolbar>div>div.selected{color:var(--keyboard-text-active);border-bottom:2px solid var(--keyboard-text-active);margin-bottom:8px;padding-bottom:0}.ML__keyboard div .rows{border:0;border-collapse:separate;clear:both;margin:auto;display:flex;flex-flow:column;align-items:center}.ML__keyboard div .rows>ul{list-style:none;height:40px;margin:0 0 3px;padding:0}.ML__keyboard div .rows>ul>li{display:flex;flex-flow:column;align-items:center;justify-content:center;width:34px;margin-right:2px;height:40px;box-sizing:border-box;padding:8px 0;vertical-align:top;text-align:center;float:left;color:var(--keycap-text);fill:currentColor;font-size:20px;background:var(--keycap-background);border:1px solid var(--keycap-background-border);border-bottom-color:var(--keycap-background-border-bottom);border-radius:5px;pointer-events:all;position:relative;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}.ML__keyboard div .rows>ul>li:last-child{margin-right:0}.ML__keyboard div .rows>ul>li.small{font-size:16px}.ML__keyboard div .rows>ul>li.tt{color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.bottom{justify-content:flex-end}.ML__keyboard div .rows>ul>li.left{align-items:flex-start;padding-left:4px}.ML__keyboard div .rows>ul>li.right{align-items:flex-end;padding-right:4px}.ML__keyboard div .rows>ul>li svg{width:20px;height:20px}.ML__keyboard div .rows>ul>li .warning{height:25px;width:25px;min-height:25px;min-width:25px;background:#cd0030;color:#fff;border-radius:100%;padding:5px;display:flex;align-items:center;justify-content:center;margin-bottom:-2px}.ML__keyboard div .rows>ul>li .warning svg{width:16px;height:16px}@media only screen and (max-width:768px){.ML__keyboard div .rows>ul>li .warning{height:16px;width:16px;min-height:16px;min-width:16px}.ML__keyboard div .rows>ul>li .warning svg{width:14px;height:14px}}.ML__keyboard div .rows>ul>li>.w0{width:0}.ML__keyboard div .rows>ul>li>.w5{width:16px}.ML__keyboard div .rows>ul>li>.w15{width:52px}.ML__keyboard div .rows>ul>li>.w20{width:70px}.ML__keyboard div .rows>ul>li>.w50{width:178px}.ML__keyboard div .rows>ul>li.separator{background:transparent;border:none;pointer-events:none}@media only screen and (max-width:560px){.ML__keyboard div .rows>ul>li.if-wide{display:none}}.ML__keyboard div .rows>ul>li.tex-math{font-size:25px}.ML__keyboard div .rows>ul>li.pressed,.ML__keyboard div .rows>ul>li:hover{background:var(--keycap-background-active);color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.action.active,.ML__keyboard div .rows>ul>li.action:active,.ML__keyboard div .rows>ul>li.keycap.active,.ML__keyboard div .rows>ul>li.keycap:active{transform:translateY(-20px) scale(1.4);z-index:calc(var(--ML_keyboard-zindex, 105) - 5);color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.modifier.active,.ML__keyboard div .rows>ul>li.modifier:active{background:var(--keyboard-text-active);color:var(--keycap-text-active)}.ML__keyboard div .rows>ul>li.action.font-glyph,.ML__keyboard div .rows>ul>li.modifier.font-glyph{font-size:18px}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.action.font-glyph,.ML__keyboard div .rows>ul>li.modifier.font-glyph{font-size:16px}}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.bigfnbutton,.ML__keyboard div .rows>ul>li.fnbutton{font-size:12px}}.ML__keyboard div .rows>ul>li.bigfnbutton{font-size:14px}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.bigfnbutton{font-size:9px}}.ML__keyboard div .rows>ul>li.action,.ML__keyboard div .rows>ul>li.modifier{background-color:var(--keycap-modifier-background);border-bottom-color:var(--keycap-modifier-border);border-color:var(--keycap-modifier-border) var(--keycap-modifier-border) var(--keycap-modifier-border-bottom);font-size:65%;font-weight:100}.ML__keyboard div .rows>ul>li.action.selected,.ML__keyboard div .rows>ul>li.modifier.selected{color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.action.selected.active,.ML__keyboard div .rows>ul>li.action.selected.pressed,.ML__keyboard div .rows>ul>li.action.selected:active,.ML__keyboard div .rows>ul>li.action.selected:hover,.ML__keyboard div .rows>ul>li.modifier.selected.active,.ML__keyboard div .rows>ul>li.modifier.selected.pressed,.ML__keyboard div .rows>ul>li.modifier.selected:active,.ML__keyboard div .rows>ul>li.modifier.selected:hover{color:#fff}.ML__keyboard div .rows>ul>li.keycap.w50{font-size:80%;padding-top:10px;font-weight:100}.ML__keyboard div .rows>ul>li small{color:#555}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li small{font-size:9px}}.ML__keyboard div .rows>ul>li aside{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:10px;line-height:10px;color:#666}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li aside{display:none}}@media only screen and (max-width:414px){.ML__keyboard div .rows>ul>li{width:29px;margin-right:2px}.ML__keyboard div .rows>ul>.w5{width:13.5px}.ML__keyboard div .rows>ul>.w15{width:44.5px}.ML__keyboard div .rows>ul>.w20{width:60px}.ML__keyboard div .rows>ul>.w50{width:153px}}@media only screen and (min-width:415px) and (max-width:768px){.ML__keyboard div .rows>ul>li{width:37px;margin-right:3px}.ML__keyboard div .rows>ul>.w5{width:17px}.ML__keyboard div .rows>ul>.w15{width:57px}.ML__keyboard div .rows>ul>.w20{width:77px}.ML__keyboard div .rows>ul>.w50{width:197px}}@media only screen and (min-width:768px) and (max-width:1024px){.ML__keyboard div .rows>ul{height:52px}.ML__keyboard div .rows>ul>li{height:52px;width:51px;margin-right:4px}.ML__keyboard div .rows>ul>.w5{width:23.5px}.ML__keyboard div .rows>ul>.w15{width:78.5px}.ML__keyboard div .rows>ul>.w20{width:106px}.ML__keyboard div .rows>ul>.w50{width:271px}}@media only screen and (min-width:1025px){.ML__keyboard div .rows>ul{height:52px}.ML__keyboard div .rows>ul>li{height:52px;width:66px;margin-right:6px}.ML__keyboard div .rows>ul>.action,.ML__keyboard div .rows>ul>.modifier{font-size:80%}.ML__keyboard div .rows>ul>.w5{width:30px}.ML__keyboard div .rows>ul>.w15{width:102px}.ML__keyboard div .rows>ul>.w20{width:138px}.ML__keyboard div .rows>ul>.w50{width:354px}}@media (prefers-color-scheme:dark){body:not([theme=light]) .ML__keyboard{--hue:206;--keyboard-background:hsl(var(--hue),19%,38%);--keyboard-text:#f0f0f0;--keyboard-text-active:hsl(var(--hue),100%,60%);--keyboard-background-border:#333;--keycap-background:hsl(var(--hue),25%,39%);--keycap-background-active:hsl(var(--hue),35%,42%);--keycap-background-border:hsl(var(--hue),25%,35%);--keycap-background-border-bottom:#426b8a;--keycap-text:#d0d0d0;--keycap-text-active:#000;--keycap-secondary-text:#fff;--keycap-modifier-background:hsl(var(--hue),35%,40%);--keycap-modifier-border:hsl(var(--hue),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue),35%,42%);--keyboard-alternate-background:hsl(var(--hue),19%,38%);--keyboard-alternate-background-active:hsl(var(--hue),35%,42%);--keyboard-alternate-text:#d1d1d1}}body[theme=dark] .ML__keyboard{--hue:206;--keyboard-background:hsl(var(--hue),19%,38%);--keyboard-text:#f0f0f0;--keyboard-text-active:hsl(var(--hue),100%,60%);--keyboard-background-border:#333;--keycap-background:hsl(var(--hue),25%,39%);--keycap-background-active:hsl(var(--hue),35%,42%);--keycap-background-border:hsl(var(--hue),25%,35%);--keycap-background-border-bottom:#426b8a;--keycap-text:#d0d0d0;--keycap-text-active:#000;--keycap-secondary-text:#fff;--keycap-modifier-background:hsl(var(--hue),35%,40%);--keycap-modifier-border:hsl(var(--hue),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue),35%,42%);--keyboard-alternate-background:hsl(var(--hue),19%,38%);--keyboard-alternate-background-active:hsl(var(--hue),35%,42%);--keyboard-alternate-text:#d1d1d1}div.ML__keyboard.material{--keyboard-background:rgba(209,213,217,0.9);--keyboard-background-border:#ddd;--keycap-background:transparent;--keycap-background-active:#cccfd1;--keycap-background-border:transparent;--keyboard-alternate-background:#efefef;--keyboard-alternate-text:#000;font-family:Roboto,sans-serif}div.ML__keyboard.material.alternate-keys{background:var(--keyboard-alternate-background);border:1px solid transparent;border-radius:5px;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22)}div.ML__keyboard.material.alternate-keys ul li.active,div.ML__keyboard.material.alternate-keys ul li.pressed,div.ML__keyboard.material.alternate-keys ul li:active,div.ML__keyboard.material.alternate-keys ul li:hover{border:1px solid transparent;background:#5f97fc;color:#fff;fill:currentColor}div.ML__keyboard.material .keyboard-toolbar>div>div{font-size:16px}div.ML__keyboard.material .keyboard-toolbar div.div.active,div.ML__keyboard.material .keyboard-toolbar div.div.pressed,div.ML__keyboard.material .keyboard-toolbar div div:active,div.ML__keyboard.material .keyboard-toolbar div div:hover{color:#5f97fc;fill:currentColor}div.ML__keyboard.material .keyboard-toolbar>div>.selected{color:#5f97fc;fill:currentColor;border-bottom:2px solid #5f97fc;margin-bottom:8px;padding-bottom:0}div.ML__keyboard.material div>.rows>ul>.keycap{background:transparent;border:1px solid transparent;border-radius:5px;color:var(--keycap-text);fill:currentColor;transition:none}div.ML__keyboard.material div>.rows>ul>.keycap.tt{color:#5f97fc}div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]{margin-top:10px;margin-bottom:10px;height:20px;background:#e0e0e0}div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"].active,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"].pressed,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]:active,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]:hover{background:#d0d0d0;box-shadow:none;transform:none}div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):hover{border:1px solid transparent;background:var(--keycap-background-active);box-shadow:none}div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{background:var(--keyboard-alternate-background);color:var(--keyboard-alternate-text);box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23)}@media only screen and (max-width:767px){div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);font-size:10px;vertical-align:top;width:19.5px;margin-right:10px;margin-left:10px;transform:translateY(-20px) scale(2);transition:none;justify-content:flex-start;padding:2px 0 0;z-index:calc(var(--ML_keyboard-zindex, 105) - 5)}}@media only screen and (max-width:414px){div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{width:16.5px}}@media only screen and (max-width:767px){div.ML__keyboard.material div>.rows>ul>.keycap:last-child.active,div.ML__keyboard.material div>.rows>ul>.keycap:last-child:active{margin-right:0;margin-left:14px}}div.ML__keyboard.material div div.rows ul li.action,div.ML__keyboard.material div div.rows ul li.modifier{background:transparent;border:0;color:#869096;fill:currentColor;font-size:16px;transition:none}div.ML__keyboard.material div div.rows ul li.action.selected,div.ML__keyboard.material div div.rows ul li.modifier.selected{color:#5f97fc;border-radius:0;border-bottom:2px solid #5f97fc}div.ML__keyboard.material div div.rows ul li.action.active,div.ML__keyboard.material div div.rows ul li.action.pressed,div.ML__keyboard.material div div.rows ul li.action:active,div.ML__keyboard.material div div.rows ul li.action:hover,div.ML__keyboard.material div div.rows ul li.modifier.active,div.ML__keyboard.material div div.rows ul li.modifier.pressed,div.ML__keyboard.material div div.rows ul li.modifier:active,div.ML__keyboard.material div div.rows ul li.modifier:hover{border:0;color:var(--keycap-text);background:var(--keycap-background-active);box-shadow:none}div.ML__keyboard.material div div.rows ul li.bigfnbutton,div.ML__keyboard.material div div.rows ul li.fnbutton{background:transparent;border:0}div.ML__keyboard.material div div.rows ul li.bigfnbutton.selected,div.ML__keyboard.material div div.rows ul li.fnbutton.selected{color:#5f97fc;fill:currentColor;border-radius:0;border-bottom:2px solid #5f97fc}div.ML__keyboard.material div div.rows ul li.bigfnbutton.active,div.ML__keyboard.material div div.rows ul li.bigfnbutton.pressed,div.ML__keyboard.material div div.rows ul li.bigfnbutton:active,div.ML__keyboard.material div div.rows ul li.bigfnbutton:hover,div.ML__keyboard.material div div.rows ul li.fnbutton.active,div.ML__keyboard.material div div.rows ul li.fnbutton.pressed,div.ML__keyboard.material div div.rows ul li.fnbutton:active,div.ML__keyboard.material div div.rows ul li.fnbutton:hover{border:0;color:#5f97fc;fill:currentColor;background:var(--keycap-background-active);box-shadow:none}@media (prefers-color-scheme:dark){body:not([theme=light]) div.ML__keyboard.material{--hue:198;--keyboard-background:hsl(var(--hue),19%,18%);--keyboard-text:#d4d6d7;--keyboard-text-active:#5f97fc;--keyboard-background-border:#333;--keycap-background:hsl(var(--hue),25%,39%);--keycap-background-active:#5f97fc;--keycap-background-border:transparent;--keycap-background-border-bottom:transparent;--keycap-text:#d0d0d0;--keycap-text-active:#d4d6d7;--keycap-secondary-text:#5f97fc;--keycap-modifier-background:hsl(var(--hue),35%,40%);--keycap-modifier-border:hsl(var(--hue),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue),35%,42%);--keyboard-alternate-background:hsl(var(--hue),8%,2%);--keyboard-alternate-background-active:hsl(var(--hue),35%,42%);--keyboard-alternate-text:#d1d1d1}}body[theme=dark] div.ML__keyboard.material{--hue:198;--keyboard-background:hsl(var(--hue),19%,18%);--keyboard-text:#d4d6d7;--keyboard-text-active:#5f97fc;--keyboard-background-border:#333;--keycap-background:hsl(var(--hue),25%,39%);--keycap-background-active:#5f97fc;--keycap-background-border:transparent;--keycap-background-border-bottom:transparent;--keycap-text:#d0d0d0;--keycap-text-active:#d4d6d7;--keycap-secondary-text:#5f97fc;--keycap-modifier-background:hsl(var(--hue),35%,40%);--keycap-modifier-border:hsl(var(--hue),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue),35%,42%);--keyboard-alternate-background:hsl(var(--hue),8%,2%);--keyboard-alternate-background-active:hsl(var(--hue),35%,42%);--keyboard-alternate-text:#d1d1d1}";
+var css_248z = ".ML__keyboard{--keyboard-background:rgba(209,213,217,0.97);--keyboard-text:#000;--keyboard-text-active:var(--primary,hsl(var(--hue,212),40%,50%));--keyboard-background-border:#ddd;--keycap-background:#fff;--keycap-background-active:#e5e5e5;--keycap-background-border:#e5e6e9;--keycap-background-border-bottom:#8d8f92;--keycap-text:#000;--keycap-text-active:#fff;--keycap-secondary-text:#000;--keycap-modifier-background:#b9bdc7;--keycap-modifier-border:#c5c9d0;--keycap-modifier-border-bottom:#989da6;--keyboard-alternate-background:#fff;--keyboard-alternate-background-active:#e5e5e5;--keyboard-alternate-text:#000;position:fixed;left:0;bottom:-267px;width:100vw;z-index:var(--keyboard-zindex,105);padding-top:5px;transform:translate(0);opacity:0;visibility:hidden;transition:.28s cubic-bezier(0,0,.2,1);transition-property:transform,opacity;-webkit-backdrop-filter:grayscale(50%);backdrop-filter:grayscale(50%);background-color:var(--keyboard-background);border:1px solid var(--keyboard-background-border);font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:16px;font-weight:400;margin:0;text-shadow:none;box-sizing:border-box;touch-action:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)}.ML__keyboard.is-visible{transform:translateY(-267px);opacity:1;visibility:visible;transition-timing-function:cubic-bezier(.4,0,1,1)}.ML__keyboard .tex{font-family:KaTeX_Main,Cambria Math,Asana Math,OpenSymbol,Symbola,STIX,Times,serif!important}.ML__keyboard .tex-math{font-family:KaTeX_Math,Cambria Math,Asana Math,OpenSymbol,Symbola,STIX,Times,serif!important}.ML__keyboard .tt{font-family:IBM Plex Mono,Source Code Pro,Consolas,Roboto Mono,Menlo,Bitstream Vera Sans Mono,DejaVu Sans Mono,Monaco,Courier,monospace!important;font-size:30px;font-weight:400}.ML__keyboard.alternate-keys{visibility:hidden;max-width:286px;background-color:var(--keyboard-alternate-background);text-align:center;border-radius:6px;position:fixed;bottom:auto;top:0;box-sizing:content-box;transform:none;z-index:calc(var(--keyboard-zindex, 105) + 1);display:flex;flex-direction:row;justify-content:center;align-content:center;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22);transition:none}@media only screen and (max-height:412px){.ML__keyboard.alternate-keys{max-width:320px}}.ML__keyboard.alternate-keys.is-visible{visibility:visible}.ML__keyboard.alternate-keys ul{list-style:none;margin:3px;padding:0;display:flex;flex-flow:row wrap-reverse;justify-content:center}.ML__keyboard.alternate-keys ul>li{display:flex;flex-flow:column;align-items:center;justify-content:center;font-size:30px;height:70px;width:70px;box-sizing:border-box;margin:0;background:transparent;border:1px solid transparent;border-radius:5px;pointer-events:all;color:var(--keyboard-alternate-text);fill:currentColor}@media only screen and (max-height:412px){.ML__keyboard.alternate-keys ul>li{font-size:24px;height:50px;width:50px}}.ML__keyboard.alternate-keys ul>li.active,.ML__keyboard.alternate-keys ul>li.pressed,.ML__keyboard.alternate-keys ul>li:hover{box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);background:var(--keyboard-alternate-background-active);color:var(--keyboard-text-active)}.ML__keyboard.alternate-keys ul>li.small{font-size:18px}.ML__keyboard.alternate-keys ul>li.small-button{width:42px;height:42px;margin:2px;background:#fbfbfb}.ML__keyboard.alternate-keys ul>li.small-button:hover{background:var(--keyboard-alternate-background-active)}.ML__keyboard.alternate-keys ul>li.box>div,.ML__keyboard.alternate-keys ul>li.box>span{border:1px dashed rgba(0,0,0,.24)}.ML__keyboard.alternate-keys ul>li .warning{min-height:60px;min-width:60px;background:#cd0030;color:#fff;padding:5px;display:flex;align-items:center;justify-content:center;border-radius:5px}.ML__keyboard.alternate-keys ul>li .warning.active,.ML__keyboard.alternate-keys ul>li .warning.pressed,.ML__keyboard.alternate-keys ul>li .warning:hover{background:red}.ML__keyboard.alternate-keys ul>li .warning svg{width:50px;height:50px}.ML__keyboard.alternate-keys ul>li aside{font-size:12px;line-height:12px;opacity:.78;padding-top:2px}.ML__keyboard>div.keyboard-layer{display:none;outline:none}.ML__keyboard>div.keyboard-layer.is-visible{display:flex;flex-flow:column}.ML__keyboard>div>div.keyboard-toolbar{align-self:center;display:flex;flex-flow:row;justify-content:space-between;width:736px}@media only screen and (min-width:768px) and (max-width:1024px){.ML__keyboard>div>div.keyboard-toolbar{width:556px}}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar{width:365px;max-width:100vw}}.ML__keyboard>div>div.keyboard-toolbar svg{height:20px;width:20px}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar svg{height:13px;width:17px}}.ML__keyboard>div>div.keyboard-toolbar>.left{position:relative;display:flex;justify-content:flex-start;flex-flow:row}.ML__keyboard>div>div.keyboard-toolbar>.right{display:flex;justify-content:flex-end;flex-flow:row}.ML__keyboard>div>div.keyboard-toolbar>div>div{display:flex;align-items:baseline;justify-content:center;pointer-events:all;color:var(--keyboard-text);fill:currentColor;background:0;font-size:110%;cursor:pointer;min-height:0;padding:4px 10px;margin:7px 4px 6px;box-shadow:none;border:none;border-bottom:2px solid transparent}.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled.pressed svg,.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled:hover svg,.ML__keyboard>div>div.keyboard-toolbar>div>div.disabled svg{color:var(--keyboard-text);opacity:.2}@media only screen and (max-width:414px){.ML__keyboard>div>div.keyboard-toolbar>div>div{font-size:100%;padding:0 6px 0 0}}@media only screen and (max-width:767px){.ML__keyboard>div>div.keyboard-toolbar>div>div{padding-left:4px;padding-right:4px;font-size:90%}}.ML__keyboard>div>div.keyboard-toolbar>div>div.active,.ML__keyboard>div>div.keyboard-toolbar>div>div.pressed,.ML__keyboard>div>div.keyboard-toolbar>div>div:active,.ML__keyboard>div>div.keyboard-toolbar>div>div:hover{color:var(--keyboard-text-active)}.ML__keyboard>div>div.keyboard-toolbar>div>div.selected{color:var(--keyboard-text-active);border-bottom:2px solid var(--keyboard-text-active);margin-bottom:8px;padding-bottom:0}.ML__keyboard div .rows{border:0;border-collapse:separate;clear:both;margin:auto;display:flex;flex-flow:column;align-items:center}.ML__keyboard div .rows>ul{list-style:none;height:40px;margin:0 0 3px;padding:0}.ML__keyboard div .rows>ul>li{display:flex;flex-flow:column;align-items:center;justify-content:center;width:34px;margin-right:2px;height:40px;box-sizing:border-box;padding:8px 0;vertical-align:top;text-align:center;float:left;color:var(--keycap-text);fill:currentColor;font-size:20px;background:var(--keycap-background);border:1px solid var(--keycap-background-border);border-bottom-color:var(--keycap-background-border-bottom);border-radius:5px;pointer-events:all;position:relative;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}.ML__keyboard div .rows>ul>li:last-child{margin-right:0}.ML__keyboard div .rows>ul>li.small{font-size:16px}.ML__keyboard div .rows>ul>li.tt{color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.bottom{justify-content:flex-end}.ML__keyboard div .rows>ul>li.left{align-items:flex-start;padding-left:4px}.ML__keyboard div .rows>ul>li.right{align-items:flex-end;padding-right:4px}.ML__keyboard div .rows>ul>li svg{width:20px;height:20px}.ML__keyboard div .rows>ul>li .warning{height:25px;width:25px;min-height:25px;min-width:25px;background:#cd0030;color:#fff;border-radius:100%;padding:5px;display:flex;align-items:center;justify-content:center;margin-bottom:-2px}.ML__keyboard div .rows>ul>li .warning svg{width:16px;height:16px}@media only screen and (max-width:768px){.ML__keyboard div .rows>ul>li .warning{height:16px;width:16px;min-height:16px;min-width:16px}.ML__keyboard div .rows>ul>li .warning svg{width:14px;height:14px}}.ML__keyboard div .rows>ul>li>.w0{width:0}.ML__keyboard div .rows>ul>li>.w5{width:16px}.ML__keyboard div .rows>ul>li>.w15{width:52px}.ML__keyboard div .rows>ul>li>.w20{width:70px}.ML__keyboard div .rows>ul>li>.w50{width:178px}.ML__keyboard div .rows>ul>li.separator{background:transparent;border:none;pointer-events:none}@media only screen and (max-width:560px){.ML__keyboard div .rows>ul>li.if-wide{display:none}}.ML__keyboard div .rows>ul>li.tex-math{font-size:25px}.ML__keyboard div .rows>ul>li.pressed,.ML__keyboard div .rows>ul>li:hover{background:var(--keycap-background-active);color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.action.active,.ML__keyboard div .rows>ul>li.action:active,.ML__keyboard div .rows>ul>li.keycap.active,.ML__keyboard div .rows>ul>li.keycap:active{transform:translateY(-20px) scale(1.4);z-index:calc(var(--keyboard-zindex, 105) - 5);color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.modifier.active,.ML__keyboard div .rows>ul>li.modifier:active{background:var(--keyboard-text-active);color:var(--keycap-text-active)}.ML__keyboard div .rows>ul>li.action.font-glyph,.ML__keyboard div .rows>ul>li.modifier.font-glyph{font-size:18px}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.action.font-glyph,.ML__keyboard div .rows>ul>li.modifier.font-glyph{font-size:16px}}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.bigfnbutton,.ML__keyboard div .rows>ul>li.fnbutton{font-size:12px}}.ML__keyboard div .rows>ul>li.bigfnbutton{font-size:14px}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li.bigfnbutton{font-size:9px}}.ML__keyboard div .rows>ul>li.action,.ML__keyboard div .rows>ul>li.modifier{background-color:var(--keycap-modifier-background);border-bottom-color:var(--keycap-modifier-border);border-color:var(--keycap-modifier-border) var(--keycap-modifier-border) var(--keycap-modifier-border-bottom);font-size:65%;font-weight:100}.ML__keyboard div .rows>ul>li.action.selected,.ML__keyboard div .rows>ul>li.modifier.selected{color:var(--keyboard-text-active)}.ML__keyboard div .rows>ul>li.action.selected.active,.ML__keyboard div .rows>ul>li.action.selected.pressed,.ML__keyboard div .rows>ul>li.action.selected:active,.ML__keyboard div .rows>ul>li.action.selected:hover,.ML__keyboard div .rows>ul>li.modifier.selected.active,.ML__keyboard div .rows>ul>li.modifier.selected.pressed,.ML__keyboard div .rows>ul>li.modifier.selected:active,.ML__keyboard div .rows>ul>li.modifier.selected:hover{color:#fff}.ML__keyboard div .rows>ul>li.keycap.w50{font-size:80%;padding-top:10px;font-weight:100}.ML__keyboard div .rows>ul>li small{color:#555}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li small{font-size:9px}}.ML__keyboard div .rows>ul>li aside{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:10px;line-height:10px;color:#666}@media only screen and (max-width:767px){.ML__keyboard div .rows>ul>li aside{display:none}}@media only screen and (max-width:414px){.ML__keyboard div .rows>ul>li{width:calc(10vw - 2px);margin-right:2px}.ML__keyboard div .rows>ul>.w5{width:calc(5vw - 2px)}.ML__keyboard div .rows>ul>.w15{width:calc(15vw - 2px)}.ML__keyboard div .rows>ul>.w20{width:calc(20vw - 2px)}.ML__keyboard div .rows>ul>.w50{width:calc(50vw - 2px)}}@media only screen and (min-width:415px) and (max-width:768px){.ML__keyboard div .rows>ul>li{width:37px;margin-right:3px}.ML__keyboard div .rows>ul>.w5{width:17px}.ML__keyboard div .rows>ul>.w15{width:57px}.ML__keyboard div .rows>ul>.w20{width:77px}.ML__keyboard div .rows>ul>.w50{width:197px}}@media only screen and (min-width:768px) and (max-width:1024px){.ML__keyboard div .rows>ul{height:52px}.ML__keyboard div .rows>ul>li{height:52px;width:51px;margin-right:4px}.ML__keyboard div .rows>ul>.w5{width:23.5px}.ML__keyboard div .rows>ul>.w15{width:78.5px}.ML__keyboard div .rows>ul>.w20{width:106px}.ML__keyboard div .rows>ul>.w50{width:271px}}@media only screen and (min-width:1025px){.ML__keyboard div .rows>ul{height:52px}.ML__keyboard div .rows>ul>li{height:52px;width:66px;margin-right:6px}.ML__keyboard div .rows>ul>.action,.ML__keyboard div .rows>ul>.modifier{font-size:80%}.ML__keyboard div .rows>ul>.w5{width:30px}.ML__keyboard div .rows>ul>.w15{width:102px}.ML__keyboard div .rows>ul>.w20{width:138px}.ML__keyboard div .rows>ul>.w50{width:354px}}@media (prefers-color-scheme:dark){body:not([theme=light]) .ML__keyboard{--hue:206;--keyboard-background:hsl(var(--hue,212),19%,38%);--keyboard-text:#f0f0f0;--keyboard-text-active:hsl(var(--hue,212),100%,60%);--keyboard-background-border:#333;--keycap-background:hsl(var(--hue,212),25%,39%);--keycap-background-active:hsl(var(--hue,212),35%,42%);--keycap-background-border:hsl(var(--hue,212),25%,35%);--keycap-background-border-bottom:#426b8a;--keycap-text:#d0d0d0;--keycap-text-active:#000;--keycap-secondary-text:#fff;--keycap-modifier-background:hsl(var(--hue,212),35%,40%);--keycap-modifier-border:hsl(var(--hue,212),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue,212),35%,42%);--keyboard-alternate-background:hsl(var(--hue,212),19%,38%);--keyboard-alternate-background-active:hsl(var(--hue,212),35%,42%);--keyboard-alternate-text:#d1d1d1}}body[theme=dark] .ML__keyboard{--hue:206;--keyboard-background:hsl(var(--hue,212),19%,38%);--keyboard-text:#f0f0f0;--keyboard-text-active:hsl(var(--hue,212),100%,60%);--keyboard-background-border:#333;--keycap-background:hsl(var(--hue,212),25%,39%);--keycap-background-active:hsl(var(--hue,212),35%,42%);--keycap-background-border:hsl(var(--hue,212),25%,35%);--keycap-background-border-bottom:#426b8a;--keycap-text:#d0d0d0;--keycap-text-active:#000;--keycap-secondary-text:#fff;--keycap-modifier-background:hsl(var(--hue,212),35%,40%);--keycap-modifier-border:hsl(var(--hue,212),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue,212),35%,42%);--keyboard-alternate-background:hsl(var(--hue,212),19%,38%);--keyboard-alternate-background-active:hsl(var(--hue,212),35%,42%);--keyboard-alternate-text:#d1d1d1}div.ML__keyboard.material{--keyboard-background:rgba(209,213,217,0.9);--keyboard-background-border:#ddd;--keycap-background:transparent;--keycap-background-active:#cccfd1;--keycap-background-border:transparent;--keyboard-alternate-background:#efefef;--keyboard-alternate-text:#000;font-family:Roboto,sans-serif}div.ML__keyboard.material.alternate-keys{background:var(--keyboard-alternate-background);border:1px solid transparent;border-radius:5px;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22)}div.ML__keyboard.material.alternate-keys ul li.active,div.ML__keyboard.material.alternate-keys ul li.pressed,div.ML__keyboard.material.alternate-keys ul li:active,div.ML__keyboard.material.alternate-keys ul li:hover{border:1px solid transparent;background:#5f97fc;color:#fff;fill:currentColor}div.ML__keyboard.material .keyboard-toolbar>div>div{font-size:16px}div.ML__keyboard.material .keyboard-toolbar div.div.active,div.ML__keyboard.material .keyboard-toolbar div.div.pressed,div.ML__keyboard.material .keyboard-toolbar div div:active,div.ML__keyboard.material .keyboard-toolbar div div:hover{color:#5f97fc;fill:currentColor}div.ML__keyboard.material .keyboard-toolbar>div>.selected{color:#5f97fc;fill:currentColor;border-bottom:2px solid #5f97fc;margin-bottom:8px;padding-bottom:0}div.ML__keyboard.material div>.rows>ul>.keycap{background:transparent;border:1px solid transparent;border-radius:5px;color:var(--keycap-text);fill:currentColor;transition:none}div.ML__keyboard.material div>.rows>ul>.keycap.tt{color:#5f97fc}div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]{margin-top:10px;margin-bottom:10px;height:20px;background:#e0e0e0}div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"].active,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"].pressed,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]:active,div.ML__keyboard.material div>.rows>ul>.keycap[data-key=\" \"]:hover{background:#d0d0d0;box-shadow:none;transform:none}div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):hover{border:1px solid transparent;background:var(--keycap-background-active);box-shadow:none}div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{background:var(--keyboard-alternate-background);color:var(--keyboard-alternate-text);box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23)}@media only screen and (max-width:767px){div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);font-size:10px;vertical-align:top;width:19.5px;margin-right:10px;margin-left:10px;transform:translateY(-20px) scale(2);transition:none;justify-content:flex-start;padding:2px 0 0;z-index:calc(var(--ML_keyboard-zindex, 105) - 5)}}@media only screen and (max-width:414px){div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).active,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]).pressed,div.ML__keyboard.material div>.rows>ul>.keycap:not([data-key=\" \"]):active{width:16.5px}}@media only screen and (max-width:767px){div.ML__keyboard.material div>.rows>ul>.keycap:last-child.active,div.ML__keyboard.material div>.rows>ul>.keycap:last-child:active{margin-right:0;margin-left:14px}}div.ML__keyboard.material div div.rows ul li.action,div.ML__keyboard.material div div.rows ul li.modifier{background:transparent;border:0;color:#869096;fill:currentColor;font-size:16px;transition:none}div.ML__keyboard.material div div.rows ul li.action.selected,div.ML__keyboard.material div div.rows ul li.modifier.selected{color:#5f97fc;border-radius:0;border-bottom:2px solid #5f97fc}div.ML__keyboard.material div div.rows ul li.action.active,div.ML__keyboard.material div div.rows ul li.action.pressed,div.ML__keyboard.material div div.rows ul li.action:active,div.ML__keyboard.material div div.rows ul li.action:hover,div.ML__keyboard.material div div.rows ul li.modifier.active,div.ML__keyboard.material div div.rows ul li.modifier.pressed,div.ML__keyboard.material div div.rows ul li.modifier:active,div.ML__keyboard.material div div.rows ul li.modifier:hover{border:0;color:var(--keycap-text);background:var(--keycap-background-active);box-shadow:none}div.ML__keyboard.material div div.rows ul li.bigfnbutton,div.ML__keyboard.material div div.rows ul li.fnbutton{background:transparent;border:0}div.ML__keyboard.material div div.rows ul li.bigfnbutton.selected,div.ML__keyboard.material div div.rows ul li.fnbutton.selected{color:#5f97fc;fill:currentColor;border-radius:0;border-bottom:2px solid #5f97fc}div.ML__keyboard.material div div.rows ul li.bigfnbutton.active,div.ML__keyboard.material div div.rows ul li.bigfnbutton.pressed,div.ML__keyboard.material div div.rows ul li.bigfnbutton:active,div.ML__keyboard.material div div.rows ul li.bigfnbutton:hover,div.ML__keyboard.material div div.rows ul li.fnbutton.active,div.ML__keyboard.material div div.rows ul li.fnbutton.pressed,div.ML__keyboard.material div div.rows ul li.fnbutton:active,div.ML__keyboard.material div div.rows ul li.fnbutton:hover{border:0;color:#5f97fc;fill:currentColor;background:var(--keycap-background-active);box-shadow:none}@media (prefers-color-scheme:dark){body:not([theme=light]) div.ML__keyboard.material{--hue:198;--keyboard-background:hsl(var(--hue,212),19%,18%);--keyboard-text:#d4d6d7;--keyboard-text-active:#5f97fc;--keyboard-background-border:#333;--keycap-background:hsl(var(--hue,212),25%,39%);--keycap-background-active:#5f97fc;--keycap-background-border:transparent;--keycap-background-border-bottom:transparent;--keycap-text:#d0d0d0;--keycap-text-active:#d4d6d7;--keycap-secondary-text:#5f97fc;--keycap-modifier-background:hsl(var(--hue,212),35%,40%);--keycap-modifier-border:hsl(var(--hue,212),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue,212),35%,42%);--keyboard-alternate-background:hsl(var(--hue,212),8%,2%);--keyboard-alternate-background-active:hsl(var(--hue,212),35%,42%);--keyboard-alternate-text:#d1d1d1}}body[theme=dark] div.ML__keyboard.material{--hue:198;--keyboard-background:hsl(var(--hue,212),19%,18%);--keyboard-text:#d4d6d7;--keyboard-text-active:#5f97fc;--keyboard-background-border:#333;--keycap-background:hsl(var(--hue,212),25%,39%);--keycap-background-active:#5f97fc;--keycap-background-border:transparent;--keycap-background-border-bottom:transparent;--keycap-text:#d0d0d0;--keycap-text-active:#d4d6d7;--keycap-secondary-text:#5f97fc;--keycap-modifier-background:hsl(var(--hue,212),35%,40%);--keycap-modifier-border:hsl(var(--hue,212),35%,35%);--keycap-modifier-border-bottom:hsl(var(--hue,212),35%,42%);--keyboard-alternate-background:hsl(var(--hue,212),8%,2%);--keyboard-alternate-background-active:hsl(var(--hue,212),35%,42%);--keyboard-alternate-text:#d1d1d1}";
 
 const KEYBOARDS = {
     numeric: {
@@ -24056,8 +26989,8 @@ function latexToMarkup$1(latex, arg, mf) {
     latex = latex.replace(/(^|[^\\])#@/g, '$1#?');
     return makeStruts(makeSpan(decompose({
         mathstyle: MATHSTYLES.displaystyle,
-        macros: mf.config.macros,
-    }, parseString(latex, 'math', arg, mf.config.macros)), 'ML__base'), 'ML__mathlive').toMarkup();
+        macros: mf.options.macros,
+    }, parseString(latex, 'math', arg, mf.options.macros)), 'ML__base'), 'ML__mathlive').toMarkup();
 }
 /**
  * Return a markup string for the keyboard toolbar for the specified layer.
@@ -24070,7 +27003,7 @@ function makeKeyboardToolbar(mf, keyboardIDs, currentKeyboard) {
     if (keyboardList.length > 1) {
         const keyboards = {
             ...KEYBOARDS,
-            ...((_a = mf.config.customVirtualKeyboards) !== null && _a !== void 0 ? _a : {}),
+            ...((_a = mf.options.customVirtualKeyboards) !== null && _a !== void 0 ? _a : {}),
         };
         for (const keyboard of keyboardList) {
             if (!keyboards[keyboard]) {
@@ -24157,7 +27090,7 @@ function makeKeycap(mf, elList, chainedCommand) {
                     '</aside>';
         }
         if (typeof html !== 'undefined') {
-            el.innerHTML = mf.config.createHTML(html);
+            el.innerHTML = mf.options.createHTML(html);
         }
         if (el.getAttribute('data-classes')) {
             el.classList.add(el.getAttribute('data-classes'));
@@ -24286,8 +27219,8 @@ function expandLayerMarkup(mf, layer) {
             'upper-3': '^ZXCVBKM~',
         },
     };
-    const layout = ROWS[mf.config.virtualKeyboardLayout]
-        ? ROWS[mf.config.virtualKeyboardLayout]
+    const layout = ROWS[mf.options.virtualKeyboardLayout]
+        ? ROWS[mf.options.virtualKeyboardLayout]
         : ROWS['qwerty'];
     let result = layer;
     let row;
@@ -24449,7 +27382,7 @@ function makeKeyboard(mf, theme) {
     //     <path d="M256 40c118.621 0 216 96.075 216 216 0 119.291-96.61 216-216 216-119.244 0-216-96.562-216-216 0-119.203 96.602-216 216-216m0-32C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm-36 344h12V232h-12c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h48c6.627 0 12 5.373 12 12v140h12c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12h-72c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12zm36-240c-17.673 0-32 14.327-32 32s14.327 32 32 32 32-14.327 32-32-14.327-32-32-32z"/>
     // </symbol>
     let markup = svgIcons;
-    inject(mf.element, css_248z);
+    inject(null, css_248z);
     // Auto-populate the ALT_KEYS table
     ALT_KEYS_BASE['foreground-color'] = [];
     for (const color of LINE_COLORS) {
@@ -24575,18 +27508,18 @@ function makeKeyboard(mf, theme) {
             insert: '\\mathfrak{' + key + '}',
         });
     }
-    let keyboardIDs = mf.config.virtualKeyboards;
+    let keyboardIDs = mf.options.virtualKeyboards;
     if (!keyboardIDs) {
         keyboardIDs = 'all';
     }
     keyboardIDs = keyboardIDs.replace(/\ball\b/i, 'numeric functions symbols roman  greek');
     const layers = {
         ...LAYERS,
-        ...((_a = mf.config.customVirtualKeyboardLayers) !== null && _a !== void 0 ? _a : {}),
+        ...((_a = mf.options.customVirtualKeyboardLayers) !== null && _a !== void 0 ? _a : {}),
     };
     const keyboards = {
         ...KEYBOARDS,
-        ...((_b = mf.config.customVirtualKeyboards) !== null && _b !== void 0 ? _b : {}),
+        ...((_b = mf.options.customVirtualKeyboards) !== null && _b !== void 0 ? _b : {}),
     };
     const keyboardList = keyboardIDs.replace(/\s+/g, ' ').split(' ');
     for (const keyboard of keyboardList) {
@@ -24601,85 +27534,84 @@ function makeKeyboard(mf, theme) {
             keyboardLayers.push(keyboards[keyboard].layer);
         }
         keyboardLayers = Array.from(new Set(keyboardLayers));
-        for (const layer of keyboardLayers) {
-            if (!layers[layer]) {
-                console.error('Unknown virtual keyboard layer: "' + layer + '"');
+        for (const layerName of keyboardLayers) {
+            if (!layers[layerName]) {
+                console.error('Unknown virtual keyboard layer: "' + layerName + '"');
                 break;
             }
-            if (typeof layers[layer] === 'object') {
+            if (typeof layers[layerName] === 'object') {
+                const layer = layers[layerName];
                 // Process JSON layer to web element based layer.
-                let tempLayer = ``;
-                if (layers[layer].styles) {
-                    tempLayer += `<style>${layers[layer].styles}</style>`;
+                let tempLayer = '';
+                if (layer.styles) {
+                    tempLayer += `<style>${layer.styles}</style>`;
                 }
-                if (layers[layer].backdrop) {
-                    tempLayer += `<div class='${layers[layer].backdrop}'>`;
+                if (layer.backdrop) {
+                    tempLayer += `<div class='${layer.backdrop}'>`;
                 }
-                if (layers[layer].container) {
-                    tempLayer += `<div class='${layers[layer].container}'>`;
+                if (layer.container) {
+                    tempLayer += `<div class='${layer.container}'>`;
                 }
-                if (layers[layer].rows) {
+                if (layer.rows) {
                     tempLayer += `<div class='rows'>`;
-                    for (const row of layers[layer].rows) {
+                    for (const row of layer.rows) {
                         tempLayer += `<ul>`;
-                        for (const col of row) {
+                        for (const keycap of row) {
                             tempLayer += `<li`;
-                            if (col.class) {
-                                tempLayer += ` class="${col.class}"`;
+                            if (keycap.class) {
+                                tempLayer += ` class="${keycap.class}"`;
                             }
-                            if (col.key) {
-                                tempLayer += ` data-key="${col.key}"`;
+                            if (keycap.key) {
+                                tempLayer += ` data-key="${keycap.key}"`;
                             }
-                            if (col.command) {
-                                if (typeof col.command === 'string') {
-                                    tempLayer += ` data-command='"${col.command}"'`;
+                            if (keycap.command) {
+                                if (typeof keycap.command === 'string') {
+                                    tempLayer += ` data-command='"${keycap.command}"'`;
                                 }
                                 else {
                                     tempLayer += ` data-command='`;
-                                    tempLayer += JSON.stringify(col.command);
+                                    tempLayer += JSON.stringify(keycap.command);
                                     tempLayer += `'`;
                                 }
                             }
-                            if (col.insert) {
-                                tempLayer += ` data-insert="${col.insert}"`;
+                            if (keycap.insert) {
+                                tempLayer += ` data-insert="${keycap.insert}"`;
                             }
-                            if (col.latex) {
-                                tempLayer += ` data-latex="${col.latex}"`;
+                            if (keycap.latex) {
+                                tempLayer += ` data-latex="${keycap.latex}"`;
                             }
-                            if (col.aside) {
-                                tempLayer += ` data-aside="${col.aside}"`;
+                            if (keycap.aside) {
+                                tempLayer += ` data-aside="${keycap.aside}"`;
                             }
-                            if (col.altKeys) {
-                                tempLayer += ` data-alt-keys="${col.altKeys}"`;
+                            if (keycap.altKeys) {
+                                tempLayer += ` data-alt-keys="${keycap.altKeys}"`;
                             }
-                            if (col.shifted) {
-                                tempLayer += ` data-shifted="${col.shifted}"`;
+                            if (keycap.shifted) {
+                                tempLayer += ` data-shifted="${keycap.shifted}"`;
                             }
-                            if (col.shiftedCommand) {
-                                tempLayer += ` data-shifted-command="${col.shiftedCommand}"`;
+                            if (keycap.shiftedCommand) {
+                                tempLayer += ` data-shifted-command="${keycap.shiftedCommand}"`;
                             }
-                            tempLayer += `>${col.label ? col.label : ''}</li>`;
+                            tempLayer += `>${keycap.label ? keycap.label : ''}</li>`;
                         }
                         tempLayer += `</ul>`;
                     }
                     tempLayer += `</div>`;
                 }
-                if (layers[layer].container) {
+                if (layer.container) {
                     tempLayer += '</div>';
                 }
-                if (layers[layer].backdrop) {
+                if (layer.backdrop) {
                     tempLayer += '</div>';
                 }
-                layers[layer] = tempLayer;
+                layers[layerName] = tempLayer;
             }
             markup +=
                 `<div tabindex="-1" class='keyboard-layer' data-layer='` +
-                    layer +
+                    layerName +
                     `'>`;
             markup += makeKeyboardToolbar(mf, keyboardIDs, keyboard);
-            const layerMarkup = typeof layers[layer] === 'function'
-                ? layers[layer]()
-                : layers[layer];
+            const layerMarkup = layers[layerName];
             // A layer can contain 'shortcuts' (i.e. <row> tags) that need to
             // be expanded
             markup += expandLayerMarkup(mf, layerMarkup);
@@ -24691,10 +27623,10 @@ function makeKeyboard(mf, theme) {
     if (theme) {
         result.classList.add(theme);
     }
-    else if (mf.config.virtualKeyboardTheme) {
-        result.classList.add(mf.config.virtualKeyboardTheme);
+    else if (mf.options.virtualKeyboardTheme) {
+        result.classList.add(mf.options.virtualKeyboardTheme);
     }
-    result.innerHTML = mf.config.createHTML(markup);
+    result.innerHTML = mf.options.createHTML(markup);
     // Attach the element handlers
     makeKeycap(mf, [].slice.call(result.querySelectorAll('.keycap, .action, .fnbutton, .bigfnbutton')));
     const elList = result.getElementsByClassName('layer-switch');
@@ -24782,11 +27714,11 @@ function unshiftKeyboardLayer(mathfield) {
             const keycap = keycaps[i];
             const content = keycap.getAttribute('data-unshifted-content');
             if (content) {
-                keycap.innerHTML = mathfield.config.createHTML(content);
+                keycap.innerHTML = mathfield.options.createHTML(content);
             }
             const command = keycap.getAttribute('data-unshifted-command');
             if (command) {
-                keycap.setAttribute('data-' + mathfield.config.namespace + 'command', command);
+                keycap.setAttribute('data-' + mathfield.options.namespace + 'command', command);
             }
         }
     }
@@ -24889,7 +27821,7 @@ register$2({
             markup += '</li>';
         }
         markup = '<ul>' + markup + '</ul>';
-        altContainer.innerHTML = mathfield.config.createHTML(markup);
+        altContainer.innerHTML = mathfield.options.createHTML(markup);
         makeKeycap(mathfield, [].slice.call(altContainer.getElementsByTagName('li')), 'performAlternateKeys');
         const keycapEl = mathfield.virtualKeyboard.querySelector('div.keyboard-layer.is-visible div.rows ul li[data-alt-keys="' +
             keycap +
@@ -24923,7 +27855,7 @@ register$2({
     },
 }, { target: 'virtual-keyboard' });
 function switchKeyboardLayer(mathfield, layer) {
-    if (mathfield.config.virtualKeyboardMode !== 'off') {
+    if (mathfield.options.virtualKeyboardMode !== 'off') {
         if (layer !== 'lower-command' &&
             layer !== 'upper-command' &&
             layer !== 'symbols-command') {
@@ -24957,7 +27889,7 @@ function switchKeyboardLayer(mathfield, layer) {
                 }
             }
         }
-        mathfield.$focus();
+        mathfield.focus();
     }
     return true;
 }
@@ -24977,14 +27909,14 @@ register$2({
                     if (!shiftedContent) {
                         shiftedContent = keycap.innerHTML.toUpperCase();
                     }
-                    keycap.innerHTML = mathfield.config.createHTML(shiftedContent);
-                    const command = keycap.getAttribute('data-' + mathfield.config.namespace + 'command');
+                    keycap.innerHTML = mathfield.options.createHTML(shiftedContent);
+                    const command = keycap.getAttribute('data-' + mathfield.options.namespace + 'command');
                     if (command) {
                         keycap.setAttribute('data-unshifted-command', command);
                         const shifteCommand = keycap.getAttribute('data-shifted-command');
                         if (shifteCommand) {
                             keycap.setAttribute('data-' +
-                                mathfield.config.namespace +
+                                mathfield.options.namespace +
                                 'command', shifteCommand);
                         }
                         else {
@@ -24993,7 +27925,7 @@ register$2({
                                 commandObj[1] = commandObj[1].toUpperCase();
                             }
                             keycap.setAttribute('data-' +
-                                mathfield.config.namespace +
+                                mathfield.options.namespace +
                                 'command', JSON.stringify(commandObj));
                         }
                     }
@@ -25012,12 +27944,12 @@ register$2({
      */
     performAlternateKeys: (mathfield, command) => {
         hideAlternateKeys();
-        return mathfield.$perform(command);
+        return mathfield.executeCommand(command);
     },
     switchKeyboardLayer: (mathfield, layer) => switchKeyboardLayer(mathfield, layer),
     unshiftKeyboardLayer: (mathfield) => unshiftKeyboardLayer(mathfield),
     insertAndUnshiftKeyboardLayer: (mathfield, c) => {
-        mathfield.$insert(c);
+        mathfield.insert(c);
         unshiftKeyboardLayer(mathfield);
         return true;
     },
@@ -25038,13 +27970,13 @@ register$2({
     /** Toggle the virtual keyboard, but switch another keyboard layout */
     toggleVirtualKeyboardShift: (mathfield) => {
         var _a, _b;
-        mathfield.config.virtualKeyboardLayout = {
+        mathfield.options.virtualKeyboardLayout = {
             qwerty: 'azerty',
             azerty: 'qwertz',
             qwertz: 'dvorak',
             dvorak: 'colemak',
             colemak: 'qwerty',
-        }[mathfield.config.virtualKeyboardLayout];
+        }[mathfield.options.virtualKeyboardLayout];
         const layer = (_b = (_a = mathfield.virtualKeyboard) === null || _a === void 0 ? void 0 : _a.querySelector('div.keyboard-layer.is-visible').id) !== null && _b !== void 0 ? _b : '';
         if (mathfield.virtualKeyboard) {
             mathfield.virtualKeyboard.remove();
@@ -25071,6 +28003,7 @@ function hideVirtualKeyboard(mathfield) {
 function toggleVirtualKeyboard(mathfield, theme) {
     mathfield.virtualKeyboardVisible = !mathfield.virtualKeyboardVisible;
     if (mathfield.virtualKeyboardVisible) {
+        mathfield.focus();
         if (mathfield.virtualKeyboard) {
             mathfield.virtualKeyboard.classList.add('is-visible');
         }
@@ -25079,7 +28012,7 @@ function toggleVirtualKeyboard(mathfield, theme) {
             mathfield.virtualKeyboard = makeKeyboard(mathfield, theme);
             // Let's make sure that tapping on the keyboard focuses the field
             on(mathfield.virtualKeyboard, 'touchstart:passive mousedown', () => {
-                mathfield.$focus();
+                mathfield.focus();
             });
             document.body.appendChild(mathfield.virtualKeyboard);
         }
@@ -25092,8 +28025,8 @@ function toggleVirtualKeyboard(mathfield, theme) {
     else if (mathfield.virtualKeyboard) {
         mathfield.virtualKeyboard.classList.remove('is-visible');
     }
-    if (typeof mathfield.config.onVirtualKeyboardToggle === 'function') {
-        mathfield.config.onVirtualKeyboardToggle(mathfield, mathfield.virtualKeyboardVisible, mathfield.virtualKeyboard);
+    if (typeof mathfield.options.onVirtualKeyboardToggle === 'function') {
+        mathfield.options.onVirtualKeyboardToggle(mathfield, mathfield.virtualKeyboardVisible, mathfield.virtualKeyboard);
     }
     return false;
 }
@@ -25103,13 +28036,13 @@ register$2({
     showVirtualKeyboard: (mathfield, theme) => showVirtualKeyboard(mathfield, theme),
 }, { target: 'virtual-keyboard' });
 
-var css_248z$1 = "@-webkit-keyframes ML__caret-blink{0%,to{opacity:1}50%{opacity:0}}@keyframes ML__caret-blink{0%,to{opacity:1}50%{opacity:0}}.ML__caret:after{content:\"\";border:none;border-radius:2px;border-right:2px solid var(--caret);margin-right:-2px;position:relative;left:-1px;-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__text-caret:after{content:\"\";border:none;border-radius:1px;border-right:1px solid var(--caret);margin-right:-1px;position:relative;left:0;-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__command-caret:after{content:\"_\";border:none;margin-right:-1ex;position:relative;color:var(--caret);-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__fieldcontainer{display:flex;flex-flow:row;justify-content:space-between;align-items:flex-end;min-height:39px;touch-action:none;width:100%;--hue:212;--highlight:hsl(var(--hue),97%,85%);--caret:hsl(var(--hue),40%,49%);--highlight-inactive:#ccc;--primary:hsl(var(--hue),40%,50%);--secondary:hsl(var(--hue),19%,26%);--on-secondary:hsl(var(--hue),19%,26%)}@media (prefers-color-scheme:dark){body:not([theme=light]) .ML__fieldcontainer{--highlight:hsl(var(--hue),40%,49%);--highlight-inactive:hsl(var(--hue),10%,35%);--caret:hsl(var(--hue),97%,85%);--secondary:hsl(var(--hue),25%,35%);--on-secondary:#fafafa}}body[theme=dark] .ML__fieldcontainer{--highlight:hsl(var(--hue),40%,49%);--highlight-inactive:hsl(var(--hue),10%,35%);--caret:hsl(var(--hue),97%,85%);--secondary:hsl(var(--hue),25%,35%);--on-secondary:#fafafa}.ML__fieldcontainer:focus{outline:2px solid var(--primary);outline-offset:3px}.ML__fieldcontainer__field{align-self:center;position:relative;overflow:hidden;line-height:0;padding:2px;width:100%}.ML__virtual-keyboard-toggle{display:flex;align-self:center;align-items:center;flex-shrink:0;flex-direction:column;justify-content:center;width:34px;height:34px;padding:0;margin-right:4px;cursor:pointer;box-sizing:border-box;border-radius:50%;border:1px solid transparent;transition:background .2s cubic-bezier(.64,.09,.08,1);color:var(--primary);fill:currentColor;background:transparent}.ML__virtual-keyboard-toggle:hover{background:hsl(var(--hue),25%,35%);color:#fafafa;fill:currentColor;border-radius:50%;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12),0 3px 1px -2px rgba(0,0,0,.2)}.ML__popover{visibility:hidden;min-width:160px;background-color:rgba(97,97,97,.95);color:#fff;text-align:center;border-radius:6px;position:fixed;z-index:1;display:flex;flex-direction:column;justify-content:center;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22);transition:all .2s cubic-bezier(.64,.09,.08,1)}.ML__popover:after{content:\"\";position:absolute;top:-5px;left:calc(50% - 3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;font-size:1rem;border-bottom:5px solid rgba(97,97,97,.9)}.ML__popover--reverse-direction:after{top:auto;bottom:-5px;border-top:5px solid rgba(97,97,97,.9);border-bottom:0}.ML__textarea__textarea{transform:scale(0);resize:none;position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;font-size:16px}.ML__focused .ML__text{background:hsla(var(--hue),40%,50%,.1)}.ML__smart-fence__close{opacity:.5}.ML__selection{background:var(--highlight-inactive);box-sizing:border-box}.ML__focused .ML__selection{background:var(--highlight)!important;color:var(--on-highlight)}.ML__contains-caret.ML__close,.ML__contains-caret.ML__open,.ML__contains-caret>.ML__close,.ML__contains-caret>.ML__open,.sqrt.ML__contains-caret>.sqrt-sign,.sqrt.ML__contains-caret>.vlist>span>.sqrt-line{color:var(--caret)}.ML__command{font-family:IBM Plex Mono,Source Code Pro,Consolas,Roboto Mono,Menlo,Bitstream Vera Sans Mono,DejaVu Sans Mono,Monaco,Courier,monospace;letter-spacing:-1px;font-weight:400;line-height:1em;color:var(--primary)}:not(.ML__command)+.ML__command{margin-left:.25em}.ML__command+:not(.ML__command){padding-left:.25em}.ML__suggestion{opacity:.5}.ML__virtual-keyboard-toggle.pressed{background:hsla(0,0%,70%,.5)}.ML__virtual-keyboard-toggle:focus{outline:none;border-radius:50%;border:2px solid var(--primary)}.ML__virtual-keyboard-toggle.active,.ML__virtual-keyboard-toggle.active:hover{background:hsla(0,0%,70%,.5);color:#000;fill:currentColor}.ML__scroller{position:fixed;z-index:1;top:0;height:100vh;width:200px}[data-ML__tooltip]{position:relative}[data-ML__tooltip][data-placement=top]:after{top:inherit;bottom:100%}[data-ML__tooltip]:after{position:absolute;visibility:hidden;content:attr(data-ML__tooltip);display:inline-table;top:110%;width:-webkit-max-content;width:-moz-max-content;width:max-content;max-width:200px;padding:8px;background:#616161;color:#fff;text-align:center;z-index:2;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12),0 3px 1px -2px rgba(0,0,0,.2);border-radius:2px;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:400;font-size:12px;opacity:0;transform:scale(.5);transition:all .15s cubic-bezier(.4,0,1,1)}@media only screen and (max-width:767px){[data-ML__tooltip]:after{height:32px;padding:4px 16px;font-size:14px}}[data-ML__tooltip]:hover{position:relative}[data-ML__tooltip]:hover:after{visibility:visible;opacity:1;transform:scale(1)}[data-ML__tooltip][data-delay]:after{transition-delay:0s}[data-ML__tooltip][data-delay]:hover:after{transition-delay:1s}";
+var css_248z$1 = "@-webkit-keyframes ML__caret-blink{0%,to{opacity:1}50%{opacity:0}}@keyframes ML__caret-blink{0%,to{opacity:1}50%{opacity:0}}.ML__caret:after{content:\"\";border:none;border-radius:2px;border-right:2px solid var(--caret,hsl(var(--hue,212),40%,49%));margin-right:-2px;position:relative;left:-1px;-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__text-caret:after{content:\"\";border:none;border-radius:1px;border-right:1px solid var(--caret,hsl(var(--hue,212),40%,49%));margin-right:-1px;position:relative;left:0;-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__command-caret:after{content:\"_\";border:none;margin-right:-1ex;position:relative;color:var(--caret,hsl(var(--hue,212),40%,49%));-webkit-animation:ML__caret-blink 1.05s step-end infinite forwards;animation:ML__caret-blink 1.05s step-end infinite forwards}.ML__fieldcontainer{display:flex;flex-flow:row;justify-content:space-between;align-items:flex-end;min-height:39px;touch-action:none;width:100%;--hue:212;--secondary:hsl(var(--hue,212),19%,26%);--on-secondary:hsl(var(--hue,212),19%,26%)}.ML__fieldcontainer:focus{outline:2px solid var(--primary,hsl(var(--hue,212),40%,50%));outline-offset:3px}.ML__fieldcontainer__field{align-self:center;position:relative;overflow:hidden;line-height:0;padding:2px;width:100%}.ML__virtual-keyboard-toggle{display:flex;align-self:center;align-items:center;flex-shrink:0;flex-direction:column;justify-content:center;width:34px;height:34px;padding:0;margin-right:4px;cursor:pointer;box-sizing:border-box;border-radius:50%;border:1px solid transparent;transition:background .2s cubic-bezier(.64,.09,.08,1);color:var(--primary,hsl(var(--hue,212),40%,50%));fill:currentColor;background:transparent}.ML__virtual-keyboard-toggle:hover{background:hsl(var(--hue,212),25%,35%);color:#fafafa;fill:currentColor;border-radius:50%;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12),0 3px 1px -2px rgba(0,0,0,.2)}.ML__popover{visibility:hidden;min-width:160px;background-color:rgba(97,97,97,.95);color:#fff;text-align:center;border-radius:6px;position:fixed;z-index:1;display:flex;flex-direction:column;justify-content:center;box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22);transition:all .2s cubic-bezier(.64,.09,.08,1)}.ML__popover:after{content:\"\";position:absolute;top:-5px;left:calc(50% - 3px);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;font-size:1rem;border-bottom:5px solid rgba(97,97,97,.9)}.ML__popover--reverse-direction:after{top:auto;bottom:-5px;border-top:5px solid rgba(97,97,97,.9);border-bottom:0}.ML__textarea__textarea{transform:scale(0);resize:none;position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;font-size:16px}.ML__focused .ML__text{background:hsla(var(--hue,212),40%,50%,.1)}.ML__smart-fence__close{opacity:.5}.ML__selection{background:var(--highlight-inactive,#ccc);box-sizing:border-box}.ML__focused .ML__selection{background:var(--highlight,hsl(var(--hue,212),97%,85%))!important;color:var(--on-highlight)}.ML__contains-caret.ML__close,.ML__contains-caret.ML__open,.ML__contains-caret>.ML__close,.ML__contains-caret>.ML__open,.sqrt.ML__contains-caret>.sqrt-sign,.sqrt.ML__contains-caret>.vlist>span>.sqrt-line{color:var(--caret,hsl(var(--hue,212),40%,49%))}.ML__command{font-family:IBM Plex Mono,Source Code Pro,Consolas,Roboto Mono,Menlo,Bitstream Vera Sans Mono,DejaVu Sans Mono,Monaco,Courier,monospace;letter-spacing:-1px;font-weight:400;line-height:1em;color:var(--primary,hsl(var(--hue,212),40%,50%))}:not(.ML__command)+.ML__command{margin-left:.25em}.ML__command+:not(.ML__command){padding-left:.25em}.ML__suggestion{opacity:.5}.ML__virtual-keyboard-toggle.pressed{background:hsla(0,0%,70%,.5)}.ML__virtual-keyboard-toggle:focus{outline:none;border-radius:50%;border:2px solid var(--primary,hsl(var(--hue,212),40%,50%))}.ML__virtual-keyboard-toggle.active,.ML__virtual-keyboard-toggle.active:hover{background:hsla(0,0%,70%,.5);color:#000;fill:currentColor}.ML__scroller{position:fixed;z-index:1;top:0;height:100vh;width:200px}[data-ML__tooltip]{position:relative}[data-ML__tooltip][data-placement=top]:after{top:inherit;bottom:100%}[data-ML__tooltip]:after{position:absolute;visibility:hidden;content:attr(data-ML__tooltip);display:inline-table;top:110%;width:-webkit-max-content;width:-moz-max-content;width:max-content;max-width:200px;padding:8px;background:#616161;color:#fff;text-align:center;z-index:2;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12),0 3px 1px -2px rgba(0,0,0,.2);border-radius:2px;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-weight:400;font-size:12px;opacity:0;transform:scale(.5);transition:all .15s cubic-bezier(.4,0,1,1)}@media only screen and (max-width:767px){[data-ML__tooltip]:after{padding:8px 16px;font-size:14px}}[data-ML__tooltip]:hover{position:relative}[data-ML__tooltip]:hover:after{visibility:visible;opacity:1;transform:scale(1)}[data-ML__tooltip][data-delay]:after{transition-delay:0s}[data-ML__tooltip][data-delay]:hover:after{transition-delay:1s}";
 
-var css_248z$2 = ".ML__sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}body.ML__fonts-loading .ML__base{visibility:hidden}.ML__base{visibility:inherit;display:inline-block;position:relative;cursor:text}.ML__strut,.ML__strut--bottom{display:inline-block;min-height:.5em}.ML__small-delim{font-family:KaTeX_Main}.ML__text{font-family:var(--ml_text-font-family,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Roboto\",\"Oxygen\",\"Ubuntu\",\"Cantarell\",\"Fira Sans\",\"Droid Sans\",\"Helvetica Neue\",sans-serif);white-space:pre}.ML__cmr{font-family:KaTeX_Main;font-style:normal}.ML__mathit{font-family:KaTeX_Math;font-style:italic}.ML__mathbf{font-family:KaTeX_Main;font-weight:700}.lcGreek.ML__mathbf{font-family:KaTeX_Math;font-weight:400}.ML__mathbfit{font-family:KaTeX_Math;font-weight:700;font-style:italic}.ML__ams,.ML__bb{font-family:KaTeX_AMS}.ML__cal{font-family:KaTeX_Caligraphic}.ML__frak{font-family:KaTeX_Fraktur}.ML__tt{font-family:KaTeX_Typewriter}.ML__script{font-family:KaTeX_Script}.ML__sans{font-family:KaTeX_SansSerif}.ML__series_el,.ML__series_ul{font-weight:100}.ML__series_l{font-weight:200}.ML__series_sl{font-weight:300}.ML__series_sb{font-weight:500}.ML__bold,.ML__boldsymbol{font-weight:700}.ML__series_eb{font-weight:800}.ML__series_ub{font-weight:900}.ML__series_uc{font-stretch:ultra-condensed}.ML__series_ec{font-stretch:extra-condensed}.ML__series_c{font-stretch:condensed}.ML__series_sc{font-stretch:semi-condensed}.ML__series_sx{font-stretch:semi-expanded}.ML__series_x{font-stretch:expanded}.ML__series_ex{font-stretch:extra-expanded}.ML__series_ux{font-stretch:ultra-expanded}.ML__it{font-style:italic}.ML__shape_ol{-webkit-text-stroke:1px #000;text-stroke:1px #000;color:transparent}.ML__shape_sc{font-variant:small-caps}.ML__shape_sl{font-style:oblique}.ML__emph{color:#bc2612}.ML__emph .ML__emph{color:#0c7f99}.ML__highlight{color:#007cb2;background:#edd1b0}.ML__mathlive{display:inline-block;line-height:0;direction:ltr;text-align:left;text-indent:0;text-rendering:auto;font-family:KaTeX_Main;font-style:normal;font-size-adjust:none;letter-spacing:normal;word-wrap:normal;word-spacing:normal;white-space:nowrap;text-shadow:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:-webkit-min-content;width:-moz-min-content;width:min-content;transform:translateZ(0)}.ML__mathlive .reset-textstyle.scriptstyle{font-size:.7em}.ML__mathlive .reset-textstyle.scriptscriptstyle{font-size:.5em}.ML__mathlive .reset-scriptstyle.textstyle{font-size:1.42857em}.ML__mathlive .reset-scriptstyle.scriptscriptstyle{font-size:.71429em}.ML__mathlive .reset-scriptscriptstyle.textstyle{font-size:2em}.ML__mathlive .reset-scriptscriptstyle.scriptstyle{font-size:1.4em}.ML__mathlive .style-wrap{position:relative}.ML__mathlive .vlist{display:inline-block}.ML__mathlive .vlist>span{display:block;height:0;position:relative;line-height:0}.ML__mathlive .vlist>span>span{display:inline-block}.ML__mathlive .msubsup{text-align:left}.ML__mathlive .mfrac>span{text-align:center}.ML__mathlive .mfrac .frac-line{width:100%}.ML__mathlive .mfrac .frac-line:after{content:\"\";display:block;margin-top:-.04em;border-bottom-style:solid;border-bottom-width:.04em;min-height:.04em;box-sizing:content-box}.ML__mathlive .rspace.negativethinspace{margin-right:-.16667em}.ML__mathlive .rspace.thinspace{margin-right:.16667em}.ML__mathlive .rspace.negativemediumspace{margin-right:-.22222em}.ML__mathlive .rspace.mediumspace{margin-right:.22222em}.ML__mathlive .rspace.thickspace{margin-right:.27778em}.ML__mathlive .rspace.sixmuspace{margin-right:.333333em}.ML__mathlive .rspace.eightmuspace{margin-right:.444444em}.ML__mathlive .rspace.enspace{margin-right:.5em}.ML__mathlive .rspace.twelvemuspace{margin-right:.666667em}.ML__mathlive .rspace.quad{margin-right:1em}.ML__mathlive .rspace.qquad{margin-right:2em}.ML__mathlive .mspace{display:inline-block}.ML__mathlive .mspace.negativethinspace{margin-left:-.16667em}.ML__mathlive .mspace.thinspace{width:.16667em}.ML__mathlive .mspace.negativemediumspace{margin-left:-.22222em}.ML__mathlive .mspace.mediumspace{width:.22222em}.ML__mathlive .mspace.thickspace{width:.27778em}.ML__mathlive .mspace.sixmuspace{width:.333333em}.ML__mathlive .mspace.eightmuspace{width:.444444em}.ML__mathlive .mspace.enspace{width:.5em}.ML__mathlive .mspace.twelvemuspace{width:.666667em}.ML__mathlive .mspace.quad{width:1em}.ML__mathlive .mspace.qquad{width:2em}.ML__mathlive .llap,.ML__mathlive .rlap{width:0;position:relative}.ML__mathlive .llap>.inner,.ML__mathlive .rlap>.inner{position:absolute}.ML__mathlive .llap>.fix,.ML__mathlive .rlap>.fix{display:inline-block}.ML__mathlive .llap>.inner{right:0}.ML__mathlive .rlap>.inner{left:0}.ML__mathlive .rule{display:inline-block;border:0 solid;position:relative}.ML__mathlive .overline .overline-line,.ML__mathlive .underline .underline-line{width:100%}.ML__mathlive .overline .overline-line:before,.ML__mathlive .underline .underline-line:before{border-bottom-style:solid;border-bottom-width:.04em;content:\"\";display:block}.ML__mathlive .overline .overline-line:after,.ML__mathlive .underline .underline-line:after{border-bottom-style:solid;border-bottom-width:.04em;min-height:thin;content:\"\";display:block;margin-top:-1px}.ML__mathlive .stretchy{display:block;position:absolute;width:100%;left:0;overflow:hidden}.ML__mathlive .stretchy:after,.ML__mathlive .stretchy:before{content:\"\"}.ML__mathlive .stretchy svg{display:block;position:absolute;width:100%;height:inherit;fill:currentColor;stroke:currentColor;fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.ML__mathlive .slice-1-of-2{left:0}.ML__mathlive .slice-1-of-2,.ML__mathlive .slice-2-of-2{display:inline-flex;position:absolute;width:50.2%;overflow:hidden}.ML__mathlive .slice-2-of-2{right:0}.ML__mathlive .slice-1-of-3{display:inline-flex;position:absolute;left:0;width:25.1%;overflow:hidden}.ML__mathlive .slice-2-of-3{display:inline-flex;position:absolute;left:25%;width:50%;overflow:hidden}.ML__mathlive .slice-3-of-3{display:inline-flex;position:absolute;right:0;width:25.1%;overflow:hidden}.ML__mathlive .slice-1-of-1{display:inline-flex;position:absolute;width:100%;left:0;overflow:hidden}.ML__mathlive .sqrt{display:inline-block}.ML__mathlive .sqrt>.sqrt-sign{font-family:KaTeX_Main;position:relative}.ML__mathlive .sqrt .sqrt-line{height:.04em;width:100%}.ML__mathlive .sqrt .sqrt-line:before{content:\"\";display:block;margin-top:-.04em;border-bottom-style:solid;border-bottom-width:.04em;min-height:.5px}.ML__mathlive .sqrt .sqrt-line:after{border-bottom-width:1px;content:\" \";display:block;margin-top:-.1em}.ML__mathlive .sqrt>.root{margin-left:.27777778em;margin-right:-.55555556em}.ML__mathlive .fontsize-ensurer,.ML__mathlive .sizing{display:inline-block}.ML__mathlive .fontsize-ensurer.reset-size1.size1,.ML__mathlive .sizing.reset-size1.size1{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size1.size2,.ML__mathlive .sizing.reset-size1.size2{font-size:1.4em}.ML__mathlive .fontsize-ensurer.reset-size1.size3,.ML__mathlive .sizing.reset-size1.size3{font-size:1.6em}.ML__mathlive .fontsize-ensurer.reset-size1.size4,.ML__mathlive .sizing.reset-size1.size4{font-size:1.8em}.ML__mathlive .fontsize-ensurer.reset-size1.size5,.ML__mathlive .sizing.reset-size1.size5{font-size:2em}.ML__mathlive .fontsize-ensurer.reset-size1.size6,.ML__mathlive .sizing.reset-size1.size6{font-size:2.4em}.ML__mathlive .fontsize-ensurer.reset-size1.size7,.ML__mathlive .sizing.reset-size1.size7{font-size:2.88em}.ML__mathlive .fontsize-ensurer.reset-size1.size8,.ML__mathlive .sizing.reset-size1.size8{font-size:3.46em}.ML__mathlive .fontsize-ensurer.reset-size1.size9,.ML__mathlive .sizing.reset-size1.size9{font-size:4.14em}.ML__mathlive .fontsize-ensurer.reset-size1.size10,.ML__mathlive .sizing.reset-size1.size10{font-size:4.98em}.ML__mathlive .fontsize-ensurer.reset-size2.size1,.ML__mathlive .sizing.reset-size2.size1{font-size:.71428571em}.ML__mathlive .fontsize-ensurer.reset-size2.size2,.ML__mathlive .sizing.reset-size2.size2{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size2.size3,.ML__mathlive .sizing.reset-size2.size3{font-size:1.14285714em}.ML__mathlive .fontsize-ensurer.reset-size2.size4,.ML__mathlive .sizing.reset-size2.size4{font-size:1.28571429em}.ML__mathlive .fontsize-ensurer.reset-size2.size5,.ML__mathlive .sizing.reset-size2.size5{font-size:1.42857143em}.ML__mathlive .fontsize-ensurer.reset-size2.size6,.ML__mathlive .sizing.reset-size2.size6{font-size:1.71428571em}.ML__mathlive .fontsize-ensurer.reset-size2.size7,.ML__mathlive .sizing.reset-size2.size7{font-size:2.05714286em}.ML__mathlive .fontsize-ensurer.reset-size2.size8,.ML__mathlive .sizing.reset-size2.size8{font-size:2.47142857em}.ML__mathlive .fontsize-ensurer.reset-size2.size9,.ML__mathlive .sizing.reset-size2.size9{font-size:2.95714286em}.ML__mathlive .fontsize-ensurer.reset-size2.size10,.ML__mathlive .sizing.reset-size2.size10{font-size:3.55714286em}.ML__mathlive .fontsize-ensurer.reset-size3.size1,.ML__mathlive .sizing.reset-size3.size1{font-size:.625em}.ML__mathlive .fontsize-ensurer.reset-size3.size2,.ML__mathlive .sizing.reset-size3.size2{font-size:.875em}.ML__mathlive .fontsize-ensurer.reset-size3.size3,.ML__mathlive .sizing.reset-size3.size3{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size3.size4,.ML__mathlive .sizing.reset-size3.size4{font-size:1.125em}.ML__mathlive .fontsize-ensurer.reset-size3.size5,.ML__mathlive .sizing.reset-size3.size5{font-size:1.25em}.ML__mathlive .fontsize-ensurer.reset-size3.size6,.ML__mathlive .sizing.reset-size3.size6{font-size:1.5em}.ML__mathlive .fontsize-ensurer.reset-size3.size7,.ML__mathlive .sizing.reset-size3.size7{font-size:1.8em}.ML__mathlive .fontsize-ensurer.reset-size3.size8,.ML__mathlive .sizing.reset-size3.size8{font-size:2.1625em}.ML__mathlive .fontsize-ensurer.reset-size3.size9,.ML__mathlive .sizing.reset-size3.size9{font-size:2.5875em}.ML__mathlive .fontsize-ensurer.reset-size3.size10,.ML__mathlive .sizing.reset-size3.size10{font-size:3.1125em}.ML__mathlive .fontsize-ensurer.reset-size4.size1,.ML__mathlive .sizing.reset-size4.size1{font-size:.55555556em}.ML__mathlive .fontsize-ensurer.reset-size4.size2,.ML__mathlive .sizing.reset-size4.size2{font-size:.77777778em}.ML__mathlive .fontsize-ensurer.reset-size4.size3,.ML__mathlive .sizing.reset-size4.size3{font-size:.88888889em}.ML__mathlive .fontsize-ensurer.reset-size4.size4,.ML__mathlive .sizing.reset-size4.size4{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size4.size5,.ML__mathlive .sizing.reset-size4.size5{font-size:1.11111111em}.ML__mathlive .fontsize-ensurer.reset-size4.size6,.ML__mathlive .sizing.reset-size4.size6{font-size:1.33333333em}.ML__mathlive .fontsize-ensurer.reset-size4.size7,.ML__mathlive .sizing.reset-size4.size7{font-size:1.6em}.ML__mathlive .fontsize-ensurer.reset-size4.size8,.ML__mathlive .sizing.reset-size4.size8{font-size:1.92222222em}.ML__mathlive .fontsize-ensurer.reset-size4.size9,.ML__mathlive .sizing.reset-size4.size9{font-size:2.3em}.ML__mathlive .fontsize-ensurer.reset-size4.size10,.ML__mathlive .sizing.reset-size4.size10{font-size:2.76666667em}.ML__mathlive .fontsize-ensurer.reset-size5.size1,.ML__mathlive .sizing.reset-size5.size1{font-size:.5em}.ML__mathlive .fontsize-ensurer.reset-size5.size2,.ML__mathlive .sizing.reset-size5.size2{font-size:.7em}.ML__mathlive .fontsize-ensurer.reset-size5.size3,.ML__mathlive .sizing.reset-size5.size3{font-size:.8em}.ML__mathlive .fontsize-ensurer.reset-size5.size4,.ML__mathlive .sizing.reset-size5.size4{font-size:.9em}.ML__mathlive .fontsize-ensurer.reset-size5.size5,.ML__mathlive .sizing.reset-size5.size5{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size5.size6,.ML__mathlive .sizing.reset-size5.size6{font-size:1.2em}.ML__mathlive .fontsize-ensurer.reset-size5.size7,.ML__mathlive .sizing.reset-size5.size7{font-size:1.44em}.ML__mathlive .fontsize-ensurer.reset-size5.size8,.ML__mathlive .sizing.reset-size5.size8{font-size:1.73em}.ML__mathlive .fontsize-ensurer.reset-size5.size9,.ML__mathlive .sizing.reset-size5.size9{font-size:2.07em}.ML__mathlive .fontsize-ensurer.reset-size5.size10,.ML__mathlive .sizing.reset-size5.size10{font-size:2.49em}.ML__mathlive .fontsize-ensurer.reset-size6.size1,.ML__mathlive .sizing.reset-size6.size1{font-size:.41666667em}.ML__mathlive .fontsize-ensurer.reset-size6.size2,.ML__mathlive .sizing.reset-size6.size2{font-size:.58333333em}.ML__mathlive .fontsize-ensurer.reset-size6.size3,.ML__mathlive .sizing.reset-size6.size3{font-size:.66666667em}.ML__mathlive .fontsize-ensurer.reset-size6.size4,.ML__mathlive .sizing.reset-size6.size4{font-size:.75em}.ML__mathlive .fontsize-ensurer.reset-size6.size5,.ML__mathlive .sizing.reset-size6.size5{font-size:.83333333em}.ML__mathlive .fontsize-ensurer.reset-size6.size6,.ML__mathlive .sizing.reset-size6.size6{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size6.size7,.ML__mathlive .sizing.reset-size6.size7{font-size:1.2em}.ML__mathlive .fontsize-ensurer.reset-size6.size8,.ML__mathlive .sizing.reset-size6.size8{font-size:1.44166667em}.ML__mathlive .fontsize-ensurer.reset-size6.size9,.ML__mathlive .sizing.reset-size6.size9{font-size:1.725em}.ML__mathlive .fontsize-ensurer.reset-size6.size10,.ML__mathlive .sizing.reset-size6.size10{font-size:2.075em}.ML__mathlive .fontsize-ensurer.reset-size7.size1,.ML__mathlive .sizing.reset-size7.size1{font-size:.34722222em}.ML__mathlive .fontsize-ensurer.reset-size7.size2,.ML__mathlive .sizing.reset-size7.size2{font-size:.48611111em}.ML__mathlive .fontsize-ensurer.reset-size7.size3,.ML__mathlive .sizing.reset-size7.size3{font-size:.55555556em}.ML__mathlive .fontsize-ensurer.reset-size7.size4,.ML__mathlive .sizing.reset-size7.size4{font-size:.625em}.ML__mathlive .fontsize-ensurer.reset-size7.size5,.ML__mathlive .sizing.reset-size7.size5{font-size:.69444444em}.ML__mathlive .fontsize-ensurer.reset-size7.size6,.ML__mathlive .sizing.reset-size7.size6{font-size:.83333333em}.ML__mathlive .fontsize-ensurer.reset-size7.size7,.ML__mathlive .sizing.reset-size7.size7{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size7.size8,.ML__mathlive .sizing.reset-size7.size8{font-size:1.20138889em}.ML__mathlive .fontsize-ensurer.reset-size7.size9,.ML__mathlive .sizing.reset-size7.size9{font-size:1.4375em}.ML__mathlive .fontsize-ensurer.reset-size7.size10,.ML__mathlive .sizing.reset-size7.size10{font-size:1.72916667em}.ML__mathlive .fontsize-ensurer.reset-size8.size1,.ML__mathlive .sizing.reset-size8.size1{font-size:.28901734em}.ML__mathlive .fontsize-ensurer.reset-size8.size2,.ML__mathlive .sizing.reset-size8.size2{font-size:.40462428em}.ML__mathlive .fontsize-ensurer.reset-size8.size3,.ML__mathlive .sizing.reset-size8.size3{font-size:.46242775em}.ML__mathlive .fontsize-ensurer.reset-size8.size4,.ML__mathlive .sizing.reset-size8.size4{font-size:.52023121em}.ML__mathlive .fontsize-ensurer.reset-size8.size5,.ML__mathlive .sizing.reset-size8.size5{font-size:.57803468em}.ML__mathlive .fontsize-ensurer.reset-size8.size6,.ML__mathlive .sizing.reset-size8.size6{font-size:.69364162em}.ML__mathlive .fontsize-ensurer.reset-size8.size7,.ML__mathlive .sizing.reset-size8.size7{font-size:.83236994em}.ML__mathlive .fontsize-ensurer.reset-size8.size8,.ML__mathlive .sizing.reset-size8.size8{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size8.size9,.ML__mathlive .sizing.reset-size8.size9{font-size:1.19653179em}.ML__mathlive .fontsize-ensurer.reset-size8.size10,.ML__mathlive .sizing.reset-size8.size10{font-size:1.43930636em}.ML__mathlive .fontsize-ensurer.reset-size9.size1,.ML__mathlive .sizing.reset-size9.size1{font-size:.24154589em}.ML__mathlive .fontsize-ensurer.reset-size9.size2,.ML__mathlive .sizing.reset-size9.size2{font-size:.33816425em}.ML__mathlive .fontsize-ensurer.reset-size9.size3,.ML__mathlive .sizing.reset-size9.size3{font-size:.38647343em}.ML__mathlive .fontsize-ensurer.reset-size9.size4,.ML__mathlive .sizing.reset-size9.size4{font-size:.43478261em}.ML__mathlive .fontsize-ensurer.reset-size9.size5,.ML__mathlive .sizing.reset-size9.size5{font-size:.48309179em}.ML__mathlive .fontsize-ensurer.reset-size9.size6,.ML__mathlive .sizing.reset-size9.size6{font-size:.57971014em}.ML__mathlive .fontsize-ensurer.reset-size9.size7,.ML__mathlive .sizing.reset-size9.size7{font-size:.69565217em}.ML__mathlive .fontsize-ensurer.reset-size9.size8,.ML__mathlive .sizing.reset-size9.size8{font-size:.83574879em}.ML__mathlive .fontsize-ensurer.reset-size9.size9,.ML__mathlive .sizing.reset-size9.size9{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size9.size10,.ML__mathlive .sizing.reset-size9.size10{font-size:1.20289855em}.ML__mathlive .fontsize-ensurer.reset-size10.size1,.ML__mathlive .sizing.reset-size10.size1{font-size:.20080321em}.ML__mathlive .fontsize-ensurer.reset-size10.size2,.ML__mathlive .sizing.reset-size10.size2{font-size:.2811245em}.ML__mathlive .fontsize-ensurer.reset-size10.size3,.ML__mathlive .sizing.reset-size10.size3{font-size:.32128514em}.ML__mathlive .fontsize-ensurer.reset-size10.size4,.ML__mathlive .sizing.reset-size10.size4{font-size:.36144578em}.ML__mathlive .fontsize-ensurer.reset-size10.size5,.ML__mathlive .sizing.reset-size10.size5{font-size:.40160643em}.ML__mathlive .fontsize-ensurer.reset-size10.size6,.ML__mathlive .sizing.reset-size10.size6{font-size:.48192771em}.ML__mathlive .fontsize-ensurer.reset-size10.size7,.ML__mathlive .sizing.reset-size10.size7{font-size:.57831325em}.ML__mathlive .fontsize-ensurer.reset-size10.size8,.ML__mathlive .sizing.reset-size10.size8{font-size:.69477912em}.ML__mathlive .fontsize-ensurer.reset-size10.size9,.ML__mathlive .sizing.reset-size10.size9{font-size:.8313253em}.ML__mathlive .fontsize-ensurer.reset-size10.size10,.ML__mathlive .sizing.reset-size10.size10{font-size:1em}.ML__mathlive .delimsizing.size1{font-family:KaTeX_Size1}.ML__mathlive .delimsizing.size2{font-family:KaTeX_Size2}.ML__mathlive .delimsizing.size3{font-family:KaTeX_Size3}.ML__mathlive .delimsizing.size4{font-family:KaTeX_Size4}.ML__mathlive .delimsizing.mult .delim-size1{font-family:KaTeX_Size1;vertical-align:top}.ML__mathlive .delimsizing.mult .delim-size4{font-family:KaTeX_Size4;vertical-align:top}.ML__mathlive .nulldelimiter{width:.12em}.ML__mathlive .op-symbol{position:relative}.ML__mathlive .op-symbol.small-op{font-family:KaTeX_Size1}.ML__mathlive .op-symbol.large-op{font-family:KaTeX_Size2}.ML__mathlive .op-limits .vlist>span{text-align:center}.ML__mathlive .op-over-under>.vlist>span:first-child,.ML__mathlive .op-over-under>.vlist>span:last-child{text-align:center}.ML__mathlive .accent>.vlist>span{text-align:center}.ML__mathlive .accent .accent-body>span{font-family:KaTeX_Main;width:0}.ML__mathlive .accent .accent-body.accent-vec>span{position:relative;left:.326em}.ML__mathlive .mtable .vertical-separator{display:inline-block;margin:0 -.025em;border-right:.05em solid}.ML__mathlive .mtable .arraycolsep{display:inline-block}.ML__mathlive .mtable .col-align-m>.vlist{text-align:center}.ML__mathlive .mtable .col-align-c>.vlist{text-align:center}.ML__mathlive .mtable .col-align-l>.vlist{text-align:left}.ML__mathlive .mtable .col-align-r>.vlist{text-align:right}.ML__error{background-image:radial-gradient(ellipse at center,#cc0041,transparent 70%);background-repeat:repeat-x;background-size:3px 3px;background-position:0 98%}.ML__placeholder{opacity:.7;padding-left:.4ex;padding-right:.4ex;padding-top:.4ex}";
+var css_248z$2 = ".ML__sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}body.ML__fonts-loading .ML__base{visibility:hidden}.ML__base{visibility:inherit;display:inline-block;position:relative;cursor:text}.ML__strut,.ML__strut--bottom{display:inline-block;min-height:.5em}.ML__small-delim{font-family:KaTeX_Main}.ML__text{font-family:var(--text-font-family,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Roboto\",\"Oxygen\",\"Ubuntu\",\"Cantarell\",\"Fira Sans\",\"Droid Sans\",\"Helvetica Neue\",sans-serif);white-space:pre}.ML__cmr{font-family:KaTeX_Main;font-style:normal}.ML__mathit{font-family:KaTeX_Math;font-style:italic}.ML__mathbf{font-family:KaTeX_Main;font-weight:700}.lcGreek.ML__mathbf{font-family:KaTeX_Math;font-weight:400}.ML__mathbfit{font-family:KaTeX_Math;font-weight:700;font-style:italic}.ML__ams,.ML__bb{font-family:KaTeX_AMS}.ML__cal{font-family:KaTeX_Caligraphic}.ML__frak{font-family:KaTeX_Fraktur}.ML__tt{font-family:KaTeX_Typewriter}.ML__script{font-family:KaTeX_Script}.ML__sans{font-family:KaTeX_SansSerif}.ML__series_el,.ML__series_ul{font-weight:100}.ML__series_l{font-weight:200}.ML__series_sl{font-weight:300}.ML__series_sb{font-weight:500}.ML__bold,.ML__boldsymbol{font-weight:700}.ML__series_eb{font-weight:800}.ML__series_ub{font-weight:900}.ML__series_uc{font-stretch:ultra-condensed}.ML__series_ec{font-stretch:extra-condensed}.ML__series_c{font-stretch:condensed}.ML__series_sc{font-stretch:semi-condensed}.ML__series_sx{font-stretch:semi-expanded}.ML__series_x{font-stretch:expanded}.ML__series_ex{font-stretch:extra-expanded}.ML__series_ux{font-stretch:ultra-expanded}.ML__it{font-style:italic}.ML__shape_ol{-webkit-text-stroke:1px #000;text-stroke:1px #000;color:transparent}.ML__shape_sc{font-variant:small-caps}.ML__shape_sl{font-style:oblique}.ML__emph{color:#bc2612}.ML__emph .ML__emph{color:#0c7f99}.ML__highlight{color:#007cb2;background:#edd1b0}.ML__mathlive{display:inline-block;line-height:0;direction:ltr;text-align:left;text-indent:0;text-rendering:auto;font-family:KaTeX_Main;font-style:normal;font-size-adjust:none;letter-spacing:normal;word-wrap:normal;word-spacing:normal;white-space:nowrap;text-shadow:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:-webkit-min-content;width:-moz-min-content;width:min-content;transform:translateZ(0)}.ML__mathlive .reset-textstyle.scriptstyle{font-size:.7em}.ML__mathlive .reset-textstyle.scriptscriptstyle{font-size:.5em}.ML__mathlive .reset-scriptstyle.textstyle{font-size:1.42857em}.ML__mathlive .reset-scriptstyle.scriptscriptstyle{font-size:.71429em}.ML__mathlive .reset-scriptscriptstyle.textstyle{font-size:2em}.ML__mathlive .reset-scriptscriptstyle.scriptstyle{font-size:1.4em}.ML__mathlive .style-wrap{position:relative}.ML__mathlive .vlist{display:inline-block}.ML__mathlive .vlist>span{display:block;height:0;position:relative;line-height:0}.ML__mathlive .vlist>span>span{display:inline-block}.ML__mathlive .msubsup{text-align:left}.ML__mathlive .mfrac>span{text-align:center}.ML__mathlive .mfrac .frac-line{width:100%}.ML__mathlive .mfrac .frac-line:after{content:\"\";display:block;margin-top:-.04em;min-height:.04em;background:currentColor;box-sizing:content-box;transform:translate(0)}.ML__mathlive .rspace.negativethinspace{margin-right:-.16667em}.ML__mathlive .rspace.thinspace{margin-right:.16667em}.ML__mathlive .rspace.negativemediumspace{margin-right:-.22222em}.ML__mathlive .rspace.mediumspace{margin-right:.22222em}.ML__mathlive .rspace.thickspace{margin-right:.27778em}.ML__mathlive .rspace.sixmuspace{margin-right:.333333em}.ML__mathlive .rspace.eightmuspace{margin-right:.444444em}.ML__mathlive .rspace.enspace{margin-right:.5em}.ML__mathlive .rspace.twelvemuspace{margin-right:.666667em}.ML__mathlive .rspace.quad{margin-right:1em}.ML__mathlive .rspace.qquad{margin-right:2em}.ML__mathlive .mspace{display:inline-block}.ML__mathlive .mspace.negativethinspace{margin-left:-.16667em}.ML__mathlive .mspace.thinspace{width:.16667em}.ML__mathlive .mspace.negativemediumspace{margin-left:-.22222em}.ML__mathlive .mspace.mediumspace{width:.22222em}.ML__mathlive .mspace.thickspace{width:.27778em}.ML__mathlive .mspace.sixmuspace{width:.333333em}.ML__mathlive .mspace.eightmuspace{width:.444444em}.ML__mathlive .mspace.enspace{width:.5em}.ML__mathlive .mspace.twelvemuspace{width:.666667em}.ML__mathlive .mspace.quad{width:1em}.ML__mathlive .mspace.qquad{width:2em}.ML__mathlive .llap,.ML__mathlive .rlap{width:0;position:relative}.ML__mathlive .llap>.inner,.ML__mathlive .rlap>.inner{position:absolute}.ML__mathlive .llap>.fix,.ML__mathlive .rlap>.fix{display:inline-block}.ML__mathlive .llap>.inner{right:0}.ML__mathlive .rlap>.inner{left:0}.ML__mathlive .rule{display:inline-block;border:0 solid;position:relative}.ML__mathlive .overline .overline-line,.ML__mathlive .underline .underline-line{width:100%}.ML__mathlive .overline .overline-line:before,.ML__mathlive .underline .underline-line:before{border-bottom-style:solid;border-bottom-width:.04em;content:\"\";display:block}.ML__mathlive .overline .overline-line:after,.ML__mathlive .underline .underline-line:after{border-bottom-style:solid;border-bottom-width:.04em;min-height:thin;content:\"\";display:block;margin-top:-1px}.ML__mathlive .stretchy{display:block;position:absolute;width:100%;left:0;overflow:hidden}.ML__mathlive .stretchy:after,.ML__mathlive .stretchy:before{content:\"\"}.ML__mathlive .stretchy svg{display:block;position:absolute;width:100%;height:inherit;fill:currentColor;stroke:currentColor;fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.ML__mathlive .slice-1-of-2{left:0}.ML__mathlive .slice-1-of-2,.ML__mathlive .slice-2-of-2{display:inline-flex;position:absolute;width:50.2%;overflow:hidden}.ML__mathlive .slice-2-of-2{right:0}.ML__mathlive .slice-1-of-3{display:inline-flex;position:absolute;left:0;width:25.1%;overflow:hidden}.ML__mathlive .slice-2-of-3{display:inline-flex;position:absolute;left:25%;width:50%;overflow:hidden}.ML__mathlive .slice-3-of-3{display:inline-flex;position:absolute;right:0;width:25.1%;overflow:hidden}.ML__mathlive .slice-1-of-1{display:inline-flex;position:absolute;width:100%;left:0;overflow:hidden}.ML__mathlive .sqrt{display:inline-block}.ML__mathlive .sqrt>.sqrt-sign{font-family:KaTeX_Main;position:relative}.ML__mathlive .sqrt .sqrt-line{height:.04em;width:100%}.ML__mathlive .sqrt .sqrt-line:before{content:\"\";display:block;margin-top:-.04em;min-height:.04em;background:currentColor}.ML__mathlive .sqrt .sqrt-line:after{border-bottom-width:1px;content:\" \";display:block;margin-top:-.1em;transform:translate(0)}.ML__mathlive .sqrt>.root{margin-left:.27777778em;margin-right:-.55555556em}.ML__mathlive .fontsize-ensurer,.ML__mathlive .sizing{display:inline-block}.ML__mathlive .fontsize-ensurer.reset-size1.size1,.ML__mathlive .sizing.reset-size1.size1{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size1.size2,.ML__mathlive .sizing.reset-size1.size2{font-size:1.4em}.ML__mathlive .fontsize-ensurer.reset-size1.size3,.ML__mathlive .sizing.reset-size1.size3{font-size:1.6em}.ML__mathlive .fontsize-ensurer.reset-size1.size4,.ML__mathlive .sizing.reset-size1.size4{font-size:1.8em}.ML__mathlive .fontsize-ensurer.reset-size1.size5,.ML__mathlive .sizing.reset-size1.size5{font-size:2em}.ML__mathlive .fontsize-ensurer.reset-size1.size6,.ML__mathlive .sizing.reset-size1.size6{font-size:2.4em}.ML__mathlive .fontsize-ensurer.reset-size1.size7,.ML__mathlive .sizing.reset-size1.size7{font-size:2.88em}.ML__mathlive .fontsize-ensurer.reset-size1.size8,.ML__mathlive .sizing.reset-size1.size8{font-size:3.46em}.ML__mathlive .fontsize-ensurer.reset-size1.size9,.ML__mathlive .sizing.reset-size1.size9{font-size:4.14em}.ML__mathlive .fontsize-ensurer.reset-size1.size10,.ML__mathlive .sizing.reset-size1.size10{font-size:4.98em}.ML__mathlive .fontsize-ensurer.reset-size2.size1,.ML__mathlive .sizing.reset-size2.size1{font-size:.71428571em}.ML__mathlive .fontsize-ensurer.reset-size2.size2,.ML__mathlive .sizing.reset-size2.size2{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size2.size3,.ML__mathlive .sizing.reset-size2.size3{font-size:1.14285714em}.ML__mathlive .fontsize-ensurer.reset-size2.size4,.ML__mathlive .sizing.reset-size2.size4{font-size:1.28571429em}.ML__mathlive .fontsize-ensurer.reset-size2.size5,.ML__mathlive .sizing.reset-size2.size5{font-size:1.42857143em}.ML__mathlive .fontsize-ensurer.reset-size2.size6,.ML__mathlive .sizing.reset-size2.size6{font-size:1.71428571em}.ML__mathlive .fontsize-ensurer.reset-size2.size7,.ML__mathlive .sizing.reset-size2.size7{font-size:2.05714286em}.ML__mathlive .fontsize-ensurer.reset-size2.size8,.ML__mathlive .sizing.reset-size2.size8{font-size:2.47142857em}.ML__mathlive .fontsize-ensurer.reset-size2.size9,.ML__mathlive .sizing.reset-size2.size9{font-size:2.95714286em}.ML__mathlive .fontsize-ensurer.reset-size2.size10,.ML__mathlive .sizing.reset-size2.size10{font-size:3.55714286em}.ML__mathlive .fontsize-ensurer.reset-size3.size1,.ML__mathlive .sizing.reset-size3.size1{font-size:.625em}.ML__mathlive .fontsize-ensurer.reset-size3.size2,.ML__mathlive .sizing.reset-size3.size2{font-size:.875em}.ML__mathlive .fontsize-ensurer.reset-size3.size3,.ML__mathlive .sizing.reset-size3.size3{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size3.size4,.ML__mathlive .sizing.reset-size3.size4{font-size:1.125em}.ML__mathlive .fontsize-ensurer.reset-size3.size5,.ML__mathlive .sizing.reset-size3.size5{font-size:1.25em}.ML__mathlive .fontsize-ensurer.reset-size3.size6,.ML__mathlive .sizing.reset-size3.size6{font-size:1.5em}.ML__mathlive .fontsize-ensurer.reset-size3.size7,.ML__mathlive .sizing.reset-size3.size7{font-size:1.8em}.ML__mathlive .fontsize-ensurer.reset-size3.size8,.ML__mathlive .sizing.reset-size3.size8{font-size:2.1625em}.ML__mathlive .fontsize-ensurer.reset-size3.size9,.ML__mathlive .sizing.reset-size3.size9{font-size:2.5875em}.ML__mathlive .fontsize-ensurer.reset-size3.size10,.ML__mathlive .sizing.reset-size3.size10{font-size:3.1125em}.ML__mathlive .fontsize-ensurer.reset-size4.size1,.ML__mathlive .sizing.reset-size4.size1{font-size:.55555556em}.ML__mathlive .fontsize-ensurer.reset-size4.size2,.ML__mathlive .sizing.reset-size4.size2{font-size:.77777778em}.ML__mathlive .fontsize-ensurer.reset-size4.size3,.ML__mathlive .sizing.reset-size4.size3{font-size:.88888889em}.ML__mathlive .fontsize-ensurer.reset-size4.size4,.ML__mathlive .sizing.reset-size4.size4{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size4.size5,.ML__mathlive .sizing.reset-size4.size5{font-size:1.11111111em}.ML__mathlive .fontsize-ensurer.reset-size4.size6,.ML__mathlive .sizing.reset-size4.size6{font-size:1.33333333em}.ML__mathlive .fontsize-ensurer.reset-size4.size7,.ML__mathlive .sizing.reset-size4.size7{font-size:1.6em}.ML__mathlive .fontsize-ensurer.reset-size4.size8,.ML__mathlive .sizing.reset-size4.size8{font-size:1.92222222em}.ML__mathlive .fontsize-ensurer.reset-size4.size9,.ML__mathlive .sizing.reset-size4.size9{font-size:2.3em}.ML__mathlive .fontsize-ensurer.reset-size4.size10,.ML__mathlive .sizing.reset-size4.size10{font-size:2.76666667em}.ML__mathlive .fontsize-ensurer.reset-size5.size1,.ML__mathlive .sizing.reset-size5.size1{font-size:.5em}.ML__mathlive .fontsize-ensurer.reset-size5.size2,.ML__mathlive .sizing.reset-size5.size2{font-size:.7em}.ML__mathlive .fontsize-ensurer.reset-size5.size3,.ML__mathlive .sizing.reset-size5.size3{font-size:.8em}.ML__mathlive .fontsize-ensurer.reset-size5.size4,.ML__mathlive .sizing.reset-size5.size4{font-size:.9em}.ML__mathlive .fontsize-ensurer.reset-size5.size5,.ML__mathlive .sizing.reset-size5.size5{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size5.size6,.ML__mathlive .sizing.reset-size5.size6{font-size:1.2em}.ML__mathlive .fontsize-ensurer.reset-size5.size7,.ML__mathlive .sizing.reset-size5.size7{font-size:1.44em}.ML__mathlive .fontsize-ensurer.reset-size5.size8,.ML__mathlive .sizing.reset-size5.size8{font-size:1.73em}.ML__mathlive .fontsize-ensurer.reset-size5.size9,.ML__mathlive .sizing.reset-size5.size9{font-size:2.07em}.ML__mathlive .fontsize-ensurer.reset-size5.size10,.ML__mathlive .sizing.reset-size5.size10{font-size:2.49em}.ML__mathlive .fontsize-ensurer.reset-size6.size1,.ML__mathlive .sizing.reset-size6.size1{font-size:.41666667em}.ML__mathlive .fontsize-ensurer.reset-size6.size2,.ML__mathlive .sizing.reset-size6.size2{font-size:.58333333em}.ML__mathlive .fontsize-ensurer.reset-size6.size3,.ML__mathlive .sizing.reset-size6.size3{font-size:.66666667em}.ML__mathlive .fontsize-ensurer.reset-size6.size4,.ML__mathlive .sizing.reset-size6.size4{font-size:.75em}.ML__mathlive .fontsize-ensurer.reset-size6.size5,.ML__mathlive .sizing.reset-size6.size5{font-size:.83333333em}.ML__mathlive .fontsize-ensurer.reset-size6.size6,.ML__mathlive .sizing.reset-size6.size6{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size6.size7,.ML__mathlive .sizing.reset-size6.size7{font-size:1.2em}.ML__mathlive .fontsize-ensurer.reset-size6.size8,.ML__mathlive .sizing.reset-size6.size8{font-size:1.44166667em}.ML__mathlive .fontsize-ensurer.reset-size6.size9,.ML__mathlive .sizing.reset-size6.size9{font-size:1.725em}.ML__mathlive .fontsize-ensurer.reset-size6.size10,.ML__mathlive .sizing.reset-size6.size10{font-size:2.075em}.ML__mathlive .fontsize-ensurer.reset-size7.size1,.ML__mathlive .sizing.reset-size7.size1{font-size:.34722222em}.ML__mathlive .fontsize-ensurer.reset-size7.size2,.ML__mathlive .sizing.reset-size7.size2{font-size:.48611111em}.ML__mathlive .fontsize-ensurer.reset-size7.size3,.ML__mathlive .sizing.reset-size7.size3{font-size:.55555556em}.ML__mathlive .fontsize-ensurer.reset-size7.size4,.ML__mathlive .sizing.reset-size7.size4{font-size:.625em}.ML__mathlive .fontsize-ensurer.reset-size7.size5,.ML__mathlive .sizing.reset-size7.size5{font-size:.69444444em}.ML__mathlive .fontsize-ensurer.reset-size7.size6,.ML__mathlive .sizing.reset-size7.size6{font-size:.83333333em}.ML__mathlive .fontsize-ensurer.reset-size7.size7,.ML__mathlive .sizing.reset-size7.size7{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size7.size8,.ML__mathlive .sizing.reset-size7.size8{font-size:1.20138889em}.ML__mathlive .fontsize-ensurer.reset-size7.size9,.ML__mathlive .sizing.reset-size7.size9{font-size:1.4375em}.ML__mathlive .fontsize-ensurer.reset-size7.size10,.ML__mathlive .sizing.reset-size7.size10{font-size:1.72916667em}.ML__mathlive .fontsize-ensurer.reset-size8.size1,.ML__mathlive .sizing.reset-size8.size1{font-size:.28901734em}.ML__mathlive .fontsize-ensurer.reset-size8.size2,.ML__mathlive .sizing.reset-size8.size2{font-size:.40462428em}.ML__mathlive .fontsize-ensurer.reset-size8.size3,.ML__mathlive .sizing.reset-size8.size3{font-size:.46242775em}.ML__mathlive .fontsize-ensurer.reset-size8.size4,.ML__mathlive .sizing.reset-size8.size4{font-size:.52023121em}.ML__mathlive .fontsize-ensurer.reset-size8.size5,.ML__mathlive .sizing.reset-size8.size5{font-size:.57803468em}.ML__mathlive .fontsize-ensurer.reset-size8.size6,.ML__mathlive .sizing.reset-size8.size6{font-size:.69364162em}.ML__mathlive .fontsize-ensurer.reset-size8.size7,.ML__mathlive .sizing.reset-size8.size7{font-size:.83236994em}.ML__mathlive .fontsize-ensurer.reset-size8.size8,.ML__mathlive .sizing.reset-size8.size8{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size8.size9,.ML__mathlive .sizing.reset-size8.size9{font-size:1.19653179em}.ML__mathlive .fontsize-ensurer.reset-size8.size10,.ML__mathlive .sizing.reset-size8.size10{font-size:1.43930636em}.ML__mathlive .fontsize-ensurer.reset-size9.size1,.ML__mathlive .sizing.reset-size9.size1{font-size:.24154589em}.ML__mathlive .fontsize-ensurer.reset-size9.size2,.ML__mathlive .sizing.reset-size9.size2{font-size:.33816425em}.ML__mathlive .fontsize-ensurer.reset-size9.size3,.ML__mathlive .sizing.reset-size9.size3{font-size:.38647343em}.ML__mathlive .fontsize-ensurer.reset-size9.size4,.ML__mathlive .sizing.reset-size9.size4{font-size:.43478261em}.ML__mathlive .fontsize-ensurer.reset-size9.size5,.ML__mathlive .sizing.reset-size9.size5{font-size:.48309179em}.ML__mathlive .fontsize-ensurer.reset-size9.size6,.ML__mathlive .sizing.reset-size9.size6{font-size:.57971014em}.ML__mathlive .fontsize-ensurer.reset-size9.size7,.ML__mathlive .sizing.reset-size9.size7{font-size:.69565217em}.ML__mathlive .fontsize-ensurer.reset-size9.size8,.ML__mathlive .sizing.reset-size9.size8{font-size:.83574879em}.ML__mathlive .fontsize-ensurer.reset-size9.size9,.ML__mathlive .sizing.reset-size9.size9{font-size:1em}.ML__mathlive .fontsize-ensurer.reset-size9.size10,.ML__mathlive .sizing.reset-size9.size10{font-size:1.20289855em}.ML__mathlive .fontsize-ensurer.reset-size10.size1,.ML__mathlive .sizing.reset-size10.size1{font-size:.20080321em}.ML__mathlive .fontsize-ensurer.reset-size10.size2,.ML__mathlive .sizing.reset-size10.size2{font-size:.2811245em}.ML__mathlive .fontsize-ensurer.reset-size10.size3,.ML__mathlive .sizing.reset-size10.size3{font-size:.32128514em}.ML__mathlive .fontsize-ensurer.reset-size10.size4,.ML__mathlive .sizing.reset-size10.size4{font-size:.36144578em}.ML__mathlive .fontsize-ensurer.reset-size10.size5,.ML__mathlive .sizing.reset-size10.size5{font-size:.40160643em}.ML__mathlive .fontsize-ensurer.reset-size10.size6,.ML__mathlive .sizing.reset-size10.size6{font-size:.48192771em}.ML__mathlive .fontsize-ensurer.reset-size10.size7,.ML__mathlive .sizing.reset-size10.size7{font-size:.57831325em}.ML__mathlive .fontsize-ensurer.reset-size10.size8,.ML__mathlive .sizing.reset-size10.size8{font-size:.69477912em}.ML__mathlive .fontsize-ensurer.reset-size10.size9,.ML__mathlive .sizing.reset-size10.size9{font-size:.8313253em}.ML__mathlive .fontsize-ensurer.reset-size10.size10,.ML__mathlive .sizing.reset-size10.size10{font-size:1em}.ML__mathlive .delimsizing.size1{font-family:KaTeX_Size1}.ML__mathlive .delimsizing.size2{font-family:KaTeX_Size2}.ML__mathlive .delimsizing.size3{font-family:KaTeX_Size3}.ML__mathlive .delimsizing.size4{font-family:KaTeX_Size4}.ML__mathlive .delimsizing.mult .delim-size1{font-family:KaTeX_Size1;vertical-align:top}.ML__mathlive .delimsizing.mult .delim-size4{font-family:KaTeX_Size4;vertical-align:top}.ML__mathlive .nulldelimiter{width:.12em}.ML__mathlive .op-symbol{position:relative}.ML__mathlive .op-symbol.small-op{font-family:KaTeX_Size1}.ML__mathlive .op-symbol.large-op{font-family:KaTeX_Size2}.ML__mathlive .op-limits .vlist>span{text-align:center}.ML__mathlive .op-over-under{position:relative}.ML__mathlive .op-over-under>.vlist>span:first-child,.ML__mathlive .op-over-under>.vlist>span:last-child{text-align:center}.ML__mathlive .accent>.vlist>span{text-align:center}.ML__mathlive .accent .accent-body>span{font-family:KaTeX_Main;width:0}.ML__mathlive .accent .accent-body.accent-vec>span{position:relative;left:.326em}.ML__mathlive .mtable .vertical-separator{display:inline-block;margin:0 -.025em;border-right:.05em solid}.ML__mathlive .mtable .arraycolsep{display:inline-block}.ML__mathlive .mtable .col-align-m>.vlist{text-align:center}.ML__mathlive .mtable .col-align-c>.vlist{text-align:center}.ML__mathlive .mtable .col-align-l>.vlist{text-align:left}.ML__mathlive .mtable .col-align-r>.vlist{text-align:right}.ML__error{background-image:radial-gradient(ellipse at center,#cc0041,transparent 70%);background-repeat:repeat-x;background-size:3px 3px;background-position:0 98%}.ML__placeholder{opacity:.7;padding-left:.4ex;padding-right:.4ex;padding-top:.4ex}";
 
 var css_248z$3 = "div.ML__popover.is-visible{visibility:inherit;-webkit-animation:ML__fade-in .15s cubic-bezier(0,0,.2,1);animation:ML__fade-in .15s cubic-bezier(0,0,.2,1)}@-webkit-keyframes ML__fade-in{0%{opacity:0}to{opacity:1}}@keyframes ML__fade-in{0%{opacity:0}to{opacity:1}}.ML__popover__content{border-radius:6px;padding:2px;cursor:pointer;min-height:100px;display:flex;flex-direction:column;justify-content:center;margin-left:8px;margin-right:8px}.ML__popover__content a{color:#5ea6fd;padding-top:.3em;margin-top:.4em;display:block}.ML__popover__content a:hover{color:#5ea6fd;text-decoration:underline}.ML__popover__content.active,.ML__popover__content.pressed,.ML__popover__content:hover{background:hsla(0,0%,100%,.1)}.ML__popover__command{font-size:1.6rem}.ML__popover__prev-shortcut{height:31px;opacity:.1;cursor:pointer;margin-left:8px;margin-right:8px;padding-top:4px;padding-bottom:2px}.ML__popover__next-shortcut:hover,.ML__popover__prev-shortcut:hover{opacity:.3}.ML__popover__next-shortcut.active,.ML__popover__next-shortcut.pressed,.ML__popover__prev-shortcut.active,.ML__popover__prev-shortcut.pressed{opacity:1}.ML__popover__next-shortcut>span,.ML__popover__prev-shortcut>span{padding:5px;border-radius:50%;width:20px;height:20px;display:inline-block}.ML__popover__prev-shortcut>span>span{margin-top:-2px;display:block}.ML__popover__next-shortcut>span>span{margin-top:2px;display:block}.ML__popover__next-shortcut:hover>span,.ML__popover__prev-shortcut:hover>span{background:hsla(0,0%,100%,.1)}.ML__popover__next-shortcut{height:34px;opacity:.1;cursor:pointer;margin-left:8px;margin-right:8px;padding-top:2px;padding-bottom:4px}.ML__popover__shortcut{font-size:.8em;margin-top:.25em}.ML__popover__note,.ML__popover__shortcut{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;opacity:.7;padding-top:.25em}.ML__popover__note{font-size:.8rem;line-height:1em;padding-left:.5em;padding-right:.5em}.ML__shortcut-join{opacity:.5}";
 
-var css_248z$4 = ".ML__keystroke-caption{visibility:hidden;background:var(--secondary);border-color:var(--secondary-border);box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23);text-align:center;border-radius:6px;padding:16px;position:absolute;z-index:1;display:flex;flex-direction:row;justify-content:center;--keystroke:#fff;--on-keystroke:#555;--keystroke-border:#f7f7f7}@media (prefers-color-scheme:dark){body:not([theme=light]) .ML__keystroke-caption{--keystroke:hsl(var(--hue),50%,30%);--on-keystroke:#fafafa;--keystroke-border:hsl(var(--hue),50%,25%)}}body[theme=dark] .ML__keystroke-caption{--keystroke:hsl(var(--hue),50%,30%);--on-keystroke:#fafafa;--keystroke-border:hsl(var(--hue),50%,25%)}.ML__keystroke-caption>span{min-width:14px;margin:0 8px 0 0;padding:4px;background-color:var(--keystroke);color:var(--on-keystroke);fill:currentColor;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:1em;border-radius:6px;border:2px solid var(--keystroke-border)}";
+var css_248z$4 = ".ML__keystroke-caption{visibility:hidden;background:var(--secondary);border-color:var(--secondary-border);box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23);text-align:center;border-radius:6px;padding:16px;position:absolute;z-index:1;display:flex;flex-direction:row;justify-content:center;--keystroke:#fff;--on-keystroke:#555;--keystroke-border:#f7f7f7}@media (prefers-color-scheme:dark){body:not([theme=light]) .ML__keystroke-caption{--keystroke:hsl(var(--hue,212),50%,30%);--on-keystroke:#fafafa;--keystroke-border:hsl(var(--hue,212),50%,25%)}}body[theme=dark] .ML__keystroke-caption{--keystroke:hsl(var(--hue,212),50%,30%);--on-keystroke:#fafafa;--keystroke-border:hsl(var(--hue,212),50%,25%)}.ML__keystroke-caption>span{min-width:14px;margin:0 8px 0 0;padding:4px;background-color:var(--keystroke);color:var(--on-keystroke);fill:currentColor;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:1em;border-radius:6px;border:2px solid var(--keystroke-border)}";
 
 /**
  * This module parses and outputs an Abstract Syntax Tree representing the
@@ -27446,10 +30379,12 @@ class MathfieldPrivate {
      * @param element - The DOM element that this mathfield is attached to.
      * Note that `element.mathfield` is this object.
      */
-    constructor(element, config) {
+    constructor(element, options) {
+        var _a;
         this.stylesheets = [];
+        this.eventHandlingInProgress = '';
         // Setup default config options
-        this.config = update(getDefault(), config);
+        this.options = update(getDefault(), options);
         this.element = element;
         element['mathfield'] = this;
         // Save existing content
@@ -27459,7 +30394,7 @@ class MathfieldPrivate {
             elementText = elementText.trim();
         }
         // Load the fonts, inject the core and mathfield stylesheets
-        loadFonts(this.config.fontsDirectory, this.config.onError);
+        loadFonts(this.options.fontsDirectory, this.options.onError);
         this.stylesheets.push(inject(element, css_248z$2));
         this.stylesheets.push(inject(element, css_248z$1));
         // Additional elements used for UI.
@@ -27474,13 +30409,13 @@ class MathfieldPrivate {
         //         screen reader to read it
         // 5.1/ The aria-live region for announcements
         let markup = '';
-        if (!this.config.substituteTextArea) {
+        if (!this.options.substituteTextArea) {
             if (/android|ipad|ipod|iphone/i.test(navigator === null || navigator === void 0 ? void 0 : navigator.userAgent)) {
                 // On Android or iOS, don't use a textarea, which has the side effect of
                 // bringing up the OS virtual keyboard
                 markup += `<span class='ML__textarea'>
                 <span class='ML__textarea__textarea'
-                    tabindex="0" role="textbox"
+                    tabindex="-1" role="textbox"
                     style='display:inline-block;height:1px;width:1px' >
                 </span>
             </span>`;
@@ -27489,14 +30424,14 @@ class MathfieldPrivate {
                 markup +=
                     '<span class="ML__textarea">' +
                         '<textarea class="ML__textarea__textarea" autocapitalize="off" autocomplete="off" ' +
-                        'autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="0">' +
+                        `autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="${(_a = element.tabIndex) !== null && _a !== void 0 ? _a : 0}">` +
                         '</textarea>' +
                         '</span>';
             }
         }
         else {
-            if (typeof this.config.substituteTextArea === 'string') {
-                markup += this.config.substituteTextArea;
+            if (typeof this.options.substituteTextArea === 'string') {
+                markup += this.options.substituteTextArea;
             }
             else {
                 // We don't really need this one, but we keep it here so that the
@@ -27510,11 +30445,11 @@ class MathfieldPrivate {
                 '<span class="ML__fieldcontainer__field"></span>';
         // Only display the virtual keyboard toggle if the virtual keyboard mode is
         // 'manual'
-        if (this.config.virtualKeyboardMode === 'manual') {
-            markup += `<div class="ML__virtual-keyboard-toggle" role="button" data-ML__tooltip="${localize('tooltip.toggle virtual keyboard')}">`;
+        if (this.options.virtualKeyboardMode === 'manual') {
+            markup += `<div part='virtual-keyboard-toggle' class="ML__virtual-keyboard-toggle" role="button" data-ML__tooltip="${localize('tooltip.toggle virtual keyboard')}">`;
             // data-ML__tooltip='Toggle Virtual Keyboard'
-            if (this.config.virtualKeyboardToggleGlyph) {
-                markup += this.config.virtualKeyboardToggleGlyph;
+            if (this.options.virtualKeyboardToggleGlyph) {
+                markup += this.options.virtualKeyboardToggleGlyph;
             }
             else {
                 markup += `<span style="width: 21px; margin-top: 4px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M528 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h480c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm16 336c0 8.823-7.177 16-16 16H48c-8.823 0-16-7.177-16-16V112c0-8.823 7.177-16 16-16h480c8.823 0 16 7.177 16 16v288zM168 268v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm-336 80v-24c0-6.627-5.373-12-12-12H84c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm384 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zM120 188v-24c0-6.627-5.373-12-12-12H84c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm96 0v-24c0-6.627-5.373-12-12-12h-24c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h24c6.627 0 12-5.373 12-12zm-96 152v-8c0-6.627-5.373-12-12-12H180c-6.627 0-12 5.373-12 12v8c0 6.627 5.373 12 12 12h216c6.627 0 12-5.373 12-12z"/></svg></span>`;
@@ -27531,10 +30466,10 @@ class MathfieldPrivate {
             <span></span>
         </div>
     `;
-        this.element.innerHTML = this.config.createHTML(markup);
+        this.element.innerHTML = this.options.createHTML(markup);
         let iChild = 0; // index of child -- used to make changes below easier
-        if (typeof this.config.substituteTextArea === 'function') {
-            this.textarea = this.config.substituteTextArea();
+        if (typeof this.options.substituteTextArea === 'function') {
+            this.textarea = this.options.substituteTextArea();
         }
         else {
             this.textarea = this.element.children[iChild++]
@@ -27553,9 +30488,9 @@ class MathfieldPrivate {
                 });
             }
         }, { passive: false });
-        this.virtualKeyboardToggleDOMNode = this.element.children[iChild++]
+        this.virtualKeyboardToggle = this.element.children[iChild++]
             .children[1];
-        attachButtonHandlers(this, this.virtualKeyboardToggleDOMNode, {
+        attachButtonHandlers(this, this.virtualKeyboardToggle, {
             default: 'toggleVirtualKeyboard',
             alt: 'toggleVirtualKeyboardAlt',
             shift: 'toggleVirtualKeyboardShift',
@@ -27567,9 +30502,9 @@ class MathfieldPrivate {
         // Some panels are shared amongst instances of mathfield
         // (there's a single instance in the document)
         this.popover = getSharedElement('mathlive-popover-panel', 'ML__popover');
-        this.stylesheets.push(inject(element, css_248z$3));
+        this.stylesheets.push(inject(null, css_248z$3));
         this.keystrokeCaption = getSharedElement('mathlive-keystroke-caption-panel', 'ML__keystroke-caption');
-        this.stylesheets.push(inject(element, css_248z$4));
+        this.stylesheets.push(inject(null, css_248z$4));
         // The keystroke caption panel and the command bar are
         // initially hidden
         this.keystrokeCaptionVisible = false;
@@ -27587,7 +30522,7 @@ class MathfieldPrivate {
         // It is often identical to getAnchorMode() since changing the selection
         // changes the mode, but sometimes it is not, for example when a user
         // enters a mode changing command.
-        this.mode = this.config.defaultMode;
+        this.mode = this.options.defaultMode;
         this.smartModeSuppressed = false;
         // Current style (color, weight, italic, etc...)
         // Reflects the style to be applied on next insertion, if any
@@ -27604,12 +30539,10 @@ class MathfieldPrivate {
         delegateKeyboardEvents(this.textarea, {
             allowDeadKey: () => this.mode === 'text',
             typedText: (text) => onTypedText(this, text),
-            paste: () => {
-                return onPaste(this);
-            },
+            paste: () => onPaste(this),
             keystroke: (keystroke, e) => onKeystroke(this, keystroke, e),
-            focus: () => this._onFocus(),
-            blur: () => this._onBlur(),
+            focus: () => this.onFocus(),
+            blur: () => this.onBlur(),
         });
         // Delegate mouse and touch events
         if (window.PointerEvent) {
@@ -27625,20 +30558,20 @@ class MathfieldPrivate {
         on(window, 'resize', this);
         // Setup the model
         this.model = new ModelPrivate({
-            mode: this.config.defaultMode,
-            macros: this.config.macros,
-            removeExtraneousParentheses: this.config
+            mode: this.options.defaultMode,
+            macros: this.options.macros,
+            removeExtraneousParentheses: this.options
                 .removeExtraneousParentheses,
         }, {
-            onContentDidChange: (_sender) => this.config.onContentDidChange(this),
+            onContentDidChange: (_sender) => this.options.onContentDidChange(this),
             onSelectionDidChange: (_sender) => this._onSelectionDidChange(),
-            onContentWillChange: () => this.config.onContentWillChange(this),
-            onSelectionWillChange: () => this.config.onSelectionWillChange(this),
-            onError: this.config.onError,
+            onContentWillChange: () => this.options.onContentWillChange(this),
+            onSelectionWillChange: () => this.options.onSelectionWillChange(this),
+            onError: this.options.onError,
         }, {
-            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.config).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
-            moveOut: (_sender, direction) => this.config.onMoveOutOf(this, direction),
-            tabOut: (_sender, direction) => this.config.onTabOutOf(this, direction),
+            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.options).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
+            moveOut: (_sender, direction) => this.options.onMoveOutOf(this, direction),
+            tabOut: (_sender, direction) => this.options.onTabOutOf(this, direction),
         }, this);
         // Prepare to manage undo/redo
         this.undoManager = new UndoManager(this.model);
@@ -27649,29 +30582,29 @@ class MathfieldPrivate {
             format: 'latex',
             mode: 'math',
             suppressChangeNotifications: true,
-            macros: this.config.macros,
+            macros: this.options.macros,
         });
         // Now start recording potentially undoable actions
         this.undoManager.startRecording();
-        this.undoManager.snapshot(this.config);
+        this.undoManager.snapshot(this.options);
         this.model.setListeners({
-            onContentDidChange: (_sender) => this.config.onContentDidChange(this),
+            onContentDidChange: (_sender) => this.options.onContentDidChange(this),
             onSelectionDidChange: (_sender) => this._onSelectionDidChange(),
-            onContentWillChange: () => this.config.onContentWillChange(this),
-            onSelectionWillChange: () => this.config.onSelectionWillChange(this),
-            onError: this.config.onError,
+            onContentWillChange: () => this.options.onContentWillChange(this),
+            onSelectionWillChange: () => this.options.onSelectionWillChange(this),
+            onError: this.options.onError,
         });
         this.model.setHooks({
-            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.config).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
-            moveOut: (_sender, direction) => this.config.onMoveOutOf(this, direction),
-            tabOut: (_sender, direction) => this.config.onTabOutOf(this, direction),
+            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.options).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
+            moveOut: (_sender, direction) => this.options.onMoveOutOf(this, direction),
+            tabOut: (_sender, direction) => this.options.onTabOutOf(this, direction),
         });
-        if (!this.config.locale.startsWith(getActiveKeyboardLayout().locale)) {
-            setKeyboardLayoutLocale(this.config.locale);
+        if (!this.options.locale.startsWith(getActiveKeyboardLayout().locale)) {
+            setKeyboardLayoutLocale(this.options.locale);
         }
-        this.keybindings = normalizeKeybindings(this.config.keybindings, (e) => {
-            if (typeof this.config.onError === 'function') {
-                this.config.onError({
+        this.keybindings = normalizeKeybindings(this.options.keybindings, (e) => {
+            if (typeof this.options.onError === 'function') {
+                this.options.onError({
                     code: 'invalid-keybinding',
                     arg: e.join('\n'),
                 });
@@ -27680,44 +30613,68 @@ class MathfieldPrivate {
         });
         requestUpdate(this);
     }
+    /** @deprecated */
     $setConfig(config) {
-        this.config = update(this.config, config);
+        deprecated('$setConfig');
+        this.setOptions(config);
+    }
+    setOptions(config) {
+        this.options = update(this.options, config);
         this.model.setListeners({
-            onContentDidChange: (_sender) => this.config.onContentDidChange(this),
+            onContentDidChange: (_sender) => this.options.onContentDidChange(this),
             onSelectionDidChange: (_sender) => this._onSelectionDidChange(),
-            onContentWillChange: () => this.config.onContentWillChange(this),
-            onSelectionWillChange: () => this.config.onSelectionWillChange(this),
-            onError: this.config.onError,
+            onContentWillChange: () => this.options.onContentWillChange(this),
+            onSelectionWillChange: () => this.options.onSelectionWillChange(this),
+            onError: this.options.onError,
         });
         this.model.setHooks({
-            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.config).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
-            moveOut: (_sender, direction) => this.config.onMoveOutOf(this, direction),
-            tabOut: (_sender, direction) => this.config.onTabOutOf(this, direction),
+            announce: (_sender, command, modelBefore, atoms) => { var _a, _b; return (_b = (_a = this.options).onAnnounce) === null || _b === void 0 ? void 0 : _b.call(_a, this, command, modelBefore, atoms); },
+            moveOut: (_sender, direction) => this.options.onMoveOutOf(this, direction),
+            tabOut: (_sender, direction) => this.options.onTabOutOf(this, direction),
         });
-        if (!this.config.locale.startsWith(getActiveKeyboardLayout().locale)) {
-            setKeyboardLayoutLocale(this.config.locale);
+        if (!this.options.locale.startsWith(getActiveKeyboardLayout().locale)) {
+            setKeyboardLayoutLocale(this.options.locale);
         }
-        this.keybindings = normalizeKeybindings(this.config.keybindings, (e) => {
-            if (typeof this.config.onError === 'function') {
-                this.config.onError({
+        this.keybindings = normalizeKeybindings(this.options.keybindings, (e) => {
+            if (typeof this.options.onError === 'function') {
+                this.options.onError({
                     code: 'invalid-keybinding',
                     arg: e.join('\n'),
                 });
             }
             console.log(e.join('\n'));
         });
-        if (!this.config.readOnly) {
-            this._onBlur();
+        if (!this.options.readOnly) {
+            this.onBlur();
         }
+        // Changing some config options (i.e. `macros`) may
+        // require the content to be reparsed and re-rendered
+        const content = this.model.root.toLatex();
+        insert(this.model, content, {
+            insertionMode: 'replaceAll',
+            selectionMode: 'after',
+            format: 'latex',
+            mode: 'math',
+            suppressChangeNotifications: true,
+            macros: this.options.macros,
+        });
         requestUpdate(this);
     }
+    /** @deprecated */
     getConfig(keys) {
-        return get(this.config, keys);
+        deprecated('$getConfig');
+        return get(this.options, keys);
+    }
+    getOptions(keys) {
+        return get(this.options, keys);
+    }
+    getOption(key) {
+        return get(this.options, key);
     }
     /*
      * handleEvent is a function invoked when an event is registered with an
      * object instead ( see `addEventListener()` in `on()`)
-     * The name is defined by addEventListener() and cannot be changed.
+     * The name is defined by `addEventListener()` and cannot be changed.
      * This pattern is used to be able to release bound event handlers,
      * (event handlers that need access to `this`) as the bind() function
      * would create a new function that would have to be kept track off
@@ -27726,10 +30683,18 @@ class MathfieldPrivate {
     handleEvent(evt) {
         switch (evt.type) {
             case 'focus':
-                this._onFocus();
+                if (!this.eventHandlingInProgress) {
+                    this.eventHandlingInProgress = 'focus';
+                    this.onFocus();
+                    this.eventHandlingInProgress = '';
+                }
                 break;
             case 'blur':
-                this._onBlur();
+                if (!this.eventHandlingInProgress) {
+                    this.eventHandlingInProgress = 'blur';
+                    this.onBlur();
+                    this.eventHandlingInProgress = '';
+                }
                 break;
             case 'touchstart':
             case 'mousedown':
@@ -27759,8 +30724,14 @@ class MathfieldPrivate {
                 console.warn('Unexpected event type', evt.type);
         }
     }
+    /** @deprecated */
     $revertToOriginalContent() {
-        this.element.innerHTML = this.config.createHTML(this.originalContent);
+        deprecated('$revertToOriginalContent');
+        this.dispose();
+        this.element.innerHTML = this.options.createHTML(this.originalContent);
+    }
+    dispose() {
+        this.element.innerHTML = '$$' + this.getValue() + '$$';
         delete this.element['mathfield'];
         delete this.accessibleNode;
         delete this.ariaLiveText;
@@ -27770,8 +30741,8 @@ class MathfieldPrivate {
         off(this.textarea, 'paste', this);
         this.textarea.remove();
         delete this.textarea;
-        this.virtualKeyboardToggleDOMNode.remove();
-        delete this.virtualKeyboardToggleDOMNode;
+        this.virtualKeyboardToggle.remove();
+        delete this.virtualKeyboardToggle;
         releaseSharedElement(this.popover);
         delete this.popover;
         releaseSharedElement(this.keystrokeCaption);
@@ -27787,7 +30758,17 @@ class MathfieldPrivate {
         delete this.element;
         this.stylesheets.forEach((x) => x.release());
     }
-    resetKeystrokeBuffer() {
+    resetKeystrokeBuffer(options) {
+        options = options !== null && options !== void 0 ? options : { defer: false };
+        if (options.defer) {
+            if (this.options.inlineShortcutTimeout) {
+                // Set a timer to reset the shortcut buffer
+                this.keystrokeBufferResetTimer = setTimeout(() => {
+                    this.resetKeystrokeBuffer();
+                }, this.options.inlineShortcutTimeout);
+            }
+            return;
+        }
         this.keystrokeBuffer = '';
         this.keystrokeBufferStates = [];
         clearTimeout(this.keystrokeBufferResetTimer);
@@ -27805,7 +30786,7 @@ class MathfieldPrivate {
             textarea.value = result;
             // The textarea may be a span (on mobile, for example), so check that
             // it has a select() before calling it.
-            if (this.$hasFocus() && textarea.select) {
+            if (this.hasFocus() && textarea.select) {
                 textarea.select();
             }
         }
@@ -27816,10 +30797,10 @@ class MathfieldPrivate {
         // Update the mode
         {
             const previousMode = this.mode;
-            this.mode = getAnchorMode(this.model) || this.config.defaultMode;
+            this.mode = getAnchorMode(this.model) || this.options.defaultMode;
             if (this.mode !== previousMode &&
-                typeof this.config.onModeChange === 'function') {
-                this.config.onModeChange(this, this.mode);
+                typeof this.options.onModeChange === 'function') {
+                this.options.onModeChange(this, this.mode);
             }
             if (previousMode === 'command' && this.mode !== 'command') {
                 hidePopover(this);
@@ -27830,12 +30811,12 @@ class MathfieldPrivate {
         // re-rendered first to get an updated caret position
         updatePopoverPosition(this, { deferred: true });
         // Invoke client listeners, if provided.
-        if (typeof this.config.onSelectionDidChange === 'function') {
-            this.config.onSelectionDidChange(this);
+        if (typeof this.options.onSelectionDidChange === 'function') {
+            this.options.onSelectionDidChange(this);
         }
     }
-    _onFocus() {
-        if (this.config.readOnly)
+    onFocus() {
+        if (this.options.readOnly)
             return;
         if (this.blurred) {
             this.blurred = false;
@@ -27844,27 +30825,36 @@ class MathfieldPrivate {
             if (this.textarea.focus) {
                 this.textarea.focus();
             }
-            if (this.config.virtualKeyboardMode === 'onfocus') {
+            if (this.options.virtualKeyboardMode === 'onfocus') {
                 showVirtualKeyboard(this);
             }
             updatePopoverPosition(this);
-            if (this.config.onFocus) {
-                this.config.onFocus(this);
+            if (this.options.onFocus) {
+                this.options.onFocus(this);
             }
+            // Save the current value.
+            // It will be compared in `onBlur()` to see if the
+            // `onCommit` listener needs to be invoked. This
+            // mimic the `<input>` and `<textarea>` behavior
+            this.valueOnFocus = this.getValue();
             requestUpdate(this);
         }
     }
-    _onBlur() {
+    onBlur() {
         if (!this.blurred) {
             this.blurred = true;
             this.ariaLiveText.textContent = '';
-            if (this.config.virtualKeyboardMode === 'onfocus') {
+            if (/onfocus|manual/.test(this.options.virtualKeyboardMode)) {
                 hideVirtualKeyboard(this);
             }
             complete(this, { discard: true });
             requestUpdate(this);
-            if (this.config.onBlur) {
-                this.config.onBlur(this);
+            if (typeof this.options.onBlur === 'function') {
+                this.options.onBlur(this);
+            }
+            if (typeof this.options.onCommit === 'function' &&
+                this.getValue() !== this.valueOnFocus) {
+                this.options.onCommit(this);
             }
         }
     }
@@ -27881,47 +30871,51 @@ class MathfieldPrivate {
         }
         updatePopoverPosition(this);
     }
+    /** @deprecated */
     $perform(command) {
+        deprecated('$perform');
+        return this.executeCommand(command);
+    }
+    executeCommand(command) {
         return perform(this, command);
     }
-    formatMathlist(root, format) {
+    atomToString(root, format) {
         format = format || 'latex';
         let result = '';
         if (format === 'latex' || format === 'latex-expanded') {
             result = root.toLatex(format === 'latex-expanded');
         }
         else if (format === 'mathML') {
-            result = atomsToMathML(root, this.config);
+            result = atomsToMathML(root, this.options);
         }
         else if (format === 'spoken') {
-            result = atomToSpeakableText(root, this.config);
+            result = atomToSpeakableText(root, this.options);
         }
         else if (format === 'spoken-text') {
-            const saveTextToSpeechMarkup = this.config.textToSpeechMarkup;
-            this.config.textToSpeechMarkup = '';
-            result = atomToSpeakableText(root, this.config);
-            this.config.textToSpeechMarkup = saveTextToSpeechMarkup;
+            const saveTextToSpeechMarkup = this.options.textToSpeechMarkup;
+            this.options.textToSpeechMarkup = '';
+            result = atomToSpeakableText(root, this.options);
+            this.options.textToSpeechMarkup = saveTextToSpeechMarkup;
         }
         else if (format === 'spoken-ssml' ||
             format === 'spoken-ssml-withHighlighting') {
-            const saveTextToSpeechMarkup = this.config.textToSpeechMarkup;
+            const saveTextToSpeechMarkup = this.options.textToSpeechMarkup;
             // const savedAtomIdsSettings = this.config.atomIdsSettings;    // @revisit
-            this.config.textToSpeechMarkup = 'ssml';
+            this.options.textToSpeechMarkup = 'ssml';
             // if (format === 'spoken-ssml-withHighlighting') {     // @revisit
             //     this.config.atomIdsSettings = { seed: 'random' };
             // }
-            result = atomToSpeakableText(root, this.config);
-            this.config.textToSpeechMarkup = saveTextToSpeechMarkup;
+            result = atomToSpeakableText(root, this.options);
+            this.options.textToSpeechMarkup = saveTextToSpeechMarkup;
             // this.config.atomIdsSettings = savedAtomIdsSettings;      // @revisit
         }
         else if (format === 'json') {
+            console.log('deprecated format. Use MathJSON');
             const json = atomtoMathJson(root);
-            // const json = parseLatex(root.toLatex(true), {
-            //     form: 'canonical',
-            // });
             result = JSON.stringify(json);
         }
         else if (format === 'json-2') {
+            console.log('deprecated format. Use MathJSON');
             const json = atomtoMathJson(root);
             // const json = parseLatex(root.toLatex(true), {
             //     form: 'canonical',
@@ -27936,40 +30930,115 @@ class MathfieldPrivate {
         }
         return result;
     }
-    $text(format) {
-        return this.formatMathlist(this.model.root, format);
+    get lastPosition() {
+        return this.model.lastPosition;
     }
+    get selection() {
+        return this.model.selection;
+    }
+    set selection(value) {
+        this.model.selection = value;
+    }
+    /** @deprecated */
+    $text(format) {
+        return this.atomToString(this.model.root, format);
+    }
+    getValue(arg1, arg2, arg3) {
+        if (typeof arg1 === 'undefined') {
+            return this.atomToString(this.model.root, 'latex');
+        }
+        let format;
+        if (typeof arg1 === 'string') {
+            format = arg1;
+            return this.atomToString(this.model.root, format);
+        }
+        let ranges;
+        if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+            ranges = [
+                {
+                    start: arg1,
+                    end: arg2,
+                },
+            ];
+            format = arg3 !== null && arg3 !== void 0 ? arg3 : 'latex';
+        }
+        else if (Array.isArray(arg1)) {
+            ranges = arg1;
+        }
+        else {
+            ranges = [arg1];
+        }
+        const iter = new PositionIterator(this.model.root);
+        const result = ranges
+            .map((range) => {
+            let res = '';
+            range = normalizeRange(iter, range, {
+                accessibleAtomsOnly: true,
+            });
+            if (range.start >= 0 && !range.collapsed) {
+                const depth = iter.at(range.start).depth;
+                for (let i = range.start + 1; i <= range.end; i++) {
+                    if (iter.at(i).depth === depth) {
+                        res += this.atomToString(iter.at(i).atom, 'latex');
+                    }
+                }
+            }
+            return res;
+        })
+            .join('');
+        return result;
+    }
+    setValue(value, options) {
+        if (value === this.getValue())
+            return;
+        options = options !== null && options !== void 0 ? options : { mode: 'math' };
+        insert(this.model, value, {
+            insertionMode: 'replaceAll',
+            selectionMode: 'after',
+            format: 'latex',
+            mode: 'math',
+            suppressChangeNotifications: options.suppressChangeNotifications,
+            macros: this.options.macros,
+        });
+        this.undoManager.snapshot(this.options);
+        requestUpdate(this);
+    }
+    /** @deprecated */
     $selectedText(format) {
+        deprecated('$selectedText');
         const atoms = getSelectedAtoms(this.model);
         if (!atoms) {
             return '';
         }
-        const root = makeRoot('math', atoms);
-        return this.formatMathlist(root, format);
+        return this.atomToString(makeRoot('math', atoms), format);
     }
+    /** @deprecated */
     $selectionIsCollapsed() {
+        deprecated('$selectionIsCollapsed');
         return selectionIsCollapsed(this.model);
     }
+    /** @deprecated */
     $selectionDepth() {
+        deprecated('$selectionDepth');
         return this.model.path.length;
     }
     /**
      * Checks if the selection starts at the beginning of the selection group.
+     *
+     * @deprecated
      */
     $selectionAtStart() {
-        return this.model.startOffset() === 0;
+        deprecated('$selectionAtStart');
+        return false;
     }
+    /** @deprecated */
     $selectionAtEnd() {
-        return this.model.endOffset() >= this.model.siblings().length - 1;
+        deprecated('$selectionAtEnd');
+        return false;
     }
-    /**
-     *  True if the entire group is selected
-     */
-    groupIsSelected() {
-        return (this.model.startOffset() === 0 &&
-            this.model.endOffset() >= this.model.siblings().length - 1);
-    }
+    /** @deprecated */
     $latex(text, options) {
+        deprecated('$latex');
         if (typeof text === 'string') {
             const oldValue = this.model.root.toLatex();
             if (text !== oldValue) {
@@ -27980,9 +31049,9 @@ class MathfieldPrivate {
                     format: 'latex',
                     mode: 'math',
                     suppressChangeNotifications: options.suppressChangeNotifications,
-                    macros: this.config.macros,
+                    macros: this.options.macros,
                 });
-                this.undoManager.snapshot(this.config);
+                this.undoManager.snapshot(this.options);
                 requestUpdate(this);
             }
             return text;
@@ -27990,7 +31059,9 @@ class MathfieldPrivate {
         // Return the content as LaTeX
         return this.model.root.toLatex();
     }
+    /** @deprecated */
     $el() {
+        deprecated('$el');
         return this.element;
     }
     scrollIntoView() {
@@ -28029,14 +31100,19 @@ class MathfieldPrivate {
             }
         }
     }
+    /** @deprecated */
     $insert(s, options) {
+        deprecated('$insert');
+        return this.insert(s, options);
+    }
+    insert(s, options) {
         if (typeof s === 'string' && s.length > 0) {
             options = options !== null && options !== void 0 ? options : { mode: 'math' };
             if (options.focus) {
-                this.$focus();
+                this.focus();
             }
             if (options.feedback) {
-                if (this.config.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
+                if (this.options.keypressVibration && (navigator === null || navigator === void 0 ? void 0 : navigator.vibrate)) {
                     navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
                 }
                 if (this.keypressSound) {
@@ -28062,7 +31138,7 @@ class MathfieldPrivate {
                     this.style = savedStyle;
                 }
             }
-            this.undoManager.snapshot(this.config);
+            this.undoManager.snapshot(this.options);
             requestUpdate(this);
             return true;
         }
@@ -28075,7 +31151,7 @@ class MathfieldPrivate {
         this.smartModeSuppressed =
             /text|math/.test(this.mode) && /text|math/.test(mode);
         if (prefix) {
-            this.$insert(prefix, {
+            this.insert(prefix, {
                 format: 'latex',
                 mode: { math: 'text', text: 'math' }[mode],
             });
@@ -28096,22 +31172,27 @@ class MathfieldPrivate {
             this.mode = mode;
         }
         if (suffix) {
-            this.$insert(suffix, {
+            this.insert(suffix, {
                 format: 'latex',
                 mode: mode,
             });
         }
         // Notify of mode change
-        if (typeof this.config.onModeChange === 'function') {
-            this.config.onModeChange(this, this.mode);
+        if (typeof this.options.onModeChange === 'function') {
+            this.options.onModeChange(this, this.mode);
         }
         requestUpdate(this);
     }
+    /** @deprecated */
     $hasFocus() {
+        deprecated('$hasFocus');
+        return this.hasFocus();
+    }
+    hasFocus() {
         return (document.hasFocus() && deepActiveElement(document) === this.textarea);
     }
-    $focus() {
-        if (!this.$hasFocus()) {
+    focus() {
+        if (!this.hasFocus()) {
             // The textarea may be a span (on mobile, for example), so check that
             // it has a focus() before calling it.
             if (typeof this.textarea.focus === 'function') {
@@ -28120,27 +31201,65 @@ class MathfieldPrivate {
             this.model.announce('line');
         }
     }
-    $blur() {
-        if (this.$hasFocus()) {
-            if (this.textarea.blur) {
+    blur() {
+        if (this.hasFocus()) {
+            if (typeof this.textarea.blur === 'function') {
                 this.textarea.blur();
             }
         }
     }
+    /** @deprecated */
+    $focus() {
+        deprecated('$focus');
+        return this.focus();
+    }
+    /** @deprecated */
+    $blur() {
+        deprecated('$blur');
+        return this.blur();
+    }
+    /** @deprecated */
     $select() {
         selectAll(this.model);
     }
+    select() {
+        selectAll(this.model);
+    }
+    /** @deprecated */
     $clearSelection() {
+        deprecated('$clearSelection');
         deleteChar(this.model);
     }
+    applyStyle(style) {
+        applyStyle$3(this.model, style);
+    }
+    /** @deprecated */
     $applyStyle(style) {
         applyStyle$3(this.model, style);
     }
+    /** @deprecated */
     $keystroke(keys, evt) {
+        deprecated('$keystroke');
         return onKeystroke(this, keys, evt);
     }
+    /** @deprecated */
     $typedText(text) {
+        deprecated('$typedText');
         onTypedText(this, text);
+    }
+    getCaretPosition() {
+        const caretPosition = getCaretPosition(this.field);
+        return caretPosition
+            ? { x: caretPosition.x, y: caretPosition.y }
+            : null;
+    }
+    setCaretPosition(x, y) {
+        const oldPath = this.model.clone();
+        const anchor = pathFromPoint(this, x, y, { bias: 0 });
+        const result = setPath(this.model, anchor, 0);
+        this.model.announce('move', oldPath);
+        requestUpdate(this);
+        return result;
     }
     canUndo() {
         return this.undoManager.canUndo();
@@ -28153,19 +31272,19 @@ class MathfieldPrivate {
     }
     snapshot() {
         this.undoManager.snapshot({
-            ...this.config,
+            ...this.options,
             onUndoStateDidChange: (mf, reason) => {
                 updateUndoRedoButtons(this);
-                this.config.onUndoStateDidChange(mf, reason);
+                this.options.onUndoStateDidChange(mf, reason);
             },
         });
     }
     snapshotAndCoalesce() {
         this.undoManager.snapshotAndCoalesce({
-            ...this.config,
+            ...this.options,
             onUndoStateDidChange: (mf, reason) => {
                 updateUndoRedoButtons(this);
-                this.config.onUndoStateDidChange(mf, reason);
+                this.options.onUndoStateDidChange(mf, reason);
             },
         });
     }
@@ -28174,25 +31293,25 @@ class MathfieldPrivate {
     }
     restoreToUndoRecord(s) {
         this.undoManager.restore(s, {
-            ...this.config,
+            ...this.options,
             suppressChangeNotifications: true,
         });
     }
     undo() {
         return this.undoManager.undo({
-            ...this.config,
+            ...this.options,
             onUndoStateDidChange: (mf, reason) => {
                 updateUndoRedoButtons(this);
-                this.config.onUndoStateDidChange(mf, reason);
+                this.options.onUndoStateDidChange(mf, reason);
             },
         });
     }
     redo() {
         return this.undoManager.redo({
-            ...this.config,
+            ...this.options,
             onUndoStateDidChange: (mf, reason) => {
                 updateUndoRedoButtons(this);
-                this.config.onUndoStateDidChange(mf, reason);
+                this.options.onUndoStateDidChange(mf, reason);
             },
         });
     }
@@ -28203,6 +31322,9 @@ function deepActiveElement(root = document) {
         return deepActiveElement(root.activeElement.shadowRoot);
     }
     return root.activeElement;
+}
+function deprecated(method) {
+    console.warn(`Method "${method}" is deprecated`);
 }
 
 /* eslint no-console:0 */
@@ -28949,7 +32071,6 @@ function defaultReadAloudHook(element, text, config) {
     if (!config && window['mathlive']) {
         config = window['mathlive'].config;
     }
-    config = config !== null && config !== void 0 ? config : {};
     if (config.speechEngine !== 'amazon') {
         console.warn('Use Amazon TTS Engine for synchronized highlighting');
         if (config.speakHook)
@@ -29939,10 +33060,860 @@ metadata('Triangles', [
 metadata('Shapes', ['\\ast', '\\star'], COMMON);
 metadata('Shapes', ['\\diamond', '\\Diamond', '\\lozenge', '\\blacklozenge', '\\bigstar'], RARE);
 
-// import { ErrorCode, Form, Expression, Dictionary } from './math-json/public';
-// import { parseLatex, emitLatex } from './math-json/math-json';
-// import { ParseLatexOptions, EmitLatexOptions } from './math-json/latex/public';
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+function __classPrivateFieldGet(receiver, privateMap) {
+    if (!privateMap.has(receiver)) {
+        throw new TypeError("attempted to get private field on non-instance");
+    }
+    return privateMap.get(receiver);
+}
+
+function __classPrivateFieldSet(receiver, privateMap, value) {
+    if (!privateMap.has(receiver)) {
+        throw new TypeError("attempted to set private field on non-instance");
+    }
+    privateMap.set(receiver, value);
+    return value;
+}
+
+var _mathfield;
+const MATHFIELD_TEMPLATE = document.createElement('template');
+MATHFIELD_TEMPLATE.innerHTML = `<style>
+:host {
+    display: block;
+}
+:host([hidden]) {
+    display: none;
+}
+:host([disabled]) {
+    opacity:  .5;
+}
+:host(:host:focus), :host(:host:focus-within) {
+    outline: -webkit-focus-ring-color auto 1px;
+}
+:host(:host:focus:not(:focus-visible)) {
+    outline: none;
+}
+</style>
+<div></div><slot style="display:none"></slot>`;
+//
+// Deferred State
+//
+// Methods such as `setOptions()` or `getOptions()` could be called before
+// the element has been connected (i.e. `mf = new MathfieldElement(); mf.setConfig()`...)
+// and therefore before the matfield instance has been created.
+// So we'll stash any deferred operations on options (and value) here, and
+// will apply them to the element when it gets connected to the DOM.
+//
+const gDeferredState = new WeakMap();
+/**
+ * The `MathfieldElement` class provides special properties and
+ * methods to control the display and behavior of `<math-field>`
+ * elements.
+ *
+ * It inherits many useful properties and methods from [[`HTMLElement`]] such
+ * as `style`, `tabIndex`, `addListener()`, etc...
+ *
+ * To create a new `MathfieldElement`:
+ *
+ * ```javascript
+ * // Create a new MathfieldElement
+ * const mfe = new MathfieldElement();
+ * // Attach it to the document
+ * document.body.appendChild(mfe);
+ * ```
+ *
+ * The `MathfieldElement` constructor has an optional argument of
+ * [[`MathfieldOptions`]] to configure the element. The options can also
+ * be modified later:
+ * ```javascript
+ * mfe.setOptions({smartFence: true});
+ * ```
+ *
+ * ### CSS Variables
+ *
+ * The following CSS variables, if applied to the mathfield element or
+ * to one of its ancestors, can be used to customize the appearance of the
+ * mathfield.
+ *
+ * | CSS Variable | Usage |
+ * |:---|:---|
+ * | `--hue` | Hue of the highlight color and the caret |
+ * | `--highlight` | Color of the selection |
+ * | `--highlight-inactive` | Color of the selection, when the mathfield is not focused |
+ * | `--caret` | Color of the caret/insertion point |
+ * | `--primary` | Primary accent color, used for example in the virtual keyboard |
+ * | `--text-font-family` | The font stack used in text mode |
+ * | `--keyboard-zindex` | The z-index attribute of the virtual keyboard panel |
+ *
+ * ### CSS Parts
+ *
+ * The `virtual-keyboard-toggle` CSS part can be used to style the virtual
+ * keyboard toggle. To use it, define a CSS style with a `::part()` selector
+ * for example:
+ * ```css
+ * math-field::part(virtual-keyboard-toggle) {
+ *  color: red;
+ * }
+ * ```
+ *
+ *
+ * ### Attributes
+ *
+ * An attribute is a key-value pair set as part of the tag, for example in
+ * `<math-field locale="fr"></math-field>`, `locale` is an attribute.
+ *
+ * The supported attributes are listed in the table below with their correspnding
+ * property. The property can be changed either directly on the
+ * `MathfieldElement` object, or using `setOptions()` when it is prefixed with
+ * `options.`, for example
+ * ```
+ *  getElementById('mf').value = '\\sin x';
+ *  getElementById('mf').setOptions({horizontalSpacingScale: 1.1});
+ * ```
+ *
+ * Most properties are reflected: changing the attribute will also change the
+ * property and vice versa) except for `value` whose attribute value is not
+ * updated.
+ *
+ *
+ * In addition, the following [global attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes)
+ * can also be used:
+ * - `class`
+ * - `data-*`
+ * - `hidden`
+ * - `id`
+ * - `item*`
+ * - `style`
+ * - `tabindex`
+ *
+ * | Attribute | Property |
+ * |:---|:---|
+ * | `disabled` | `disabled` |
+ * | `default-mode` | `options.defaultMode` |
+ * | `fonts-directory` | `options.fontsDirectory` |
+ * | `horizontal-spacing-scale` | `options.horizontalSpacingScale` |
+ * | `ignore-spacebar-in-math-mode` | `options.ignoreSpacbarInMathMode` |
+ * | `inline-shortcut-timeout` | `options.inlineShortcutTimeout` |
+ * | `keypress-vibration` | `options.keypressVibration` |
+ * | `letter-shape-style` | `options.letterShapeStyle` |
+ * | `locale` | `options.locale` |
+ * | `read-only` | `options.readOnly` |
+ * | `remove-extraneous-parentheses` | `options.removeExtraneousParentheses` |
+ * | `smart-fence` | `options.smartFence` |
+ * | `smart-mode` | `options.smartMode` |
+ * | `smart-superscript` | `options.superscript` |
+ * | `speech-engine` | `options.speechEngine` |
+ * | `speech-engine-rate` | `options.speechEngineRate` |
+ * | `speech-engine-voice` | `options.speechEngineVoice` |
+ * | `text-to-speech-markup` | `options.textToSpeechMarkup` |
+ * | `text-to-speech-rules` | `options.textToSpeechRules` |
+ * | `virtual-keyboard-layout` | `options.keyboardLayout` |
+ * | `virtual-keyboard-mode` | `options.keyboardMode` |
+ * | `virtual-keyboard-theme` | `options.keyboardTheme` |
+ * | `virtual-keyboards` | `options.keyboards` |
+ *
+ *  See [[`MathfieldOptions`]] for more details about these options.
+ *
+ * ### Events
+ *
+ * Listen to these events by using `addEventListener()`. For events with additional
+ * arguments, the arguments are availble in `event.detail`.
+ *
+ * | Event Name | Event Arguments | Description |
+ * |:---|:---|:---|
+ * | `input |  | The value of the mathfield has been modified |
+ * | `change` |  | The user has commited the value of the mathfield |
+ * | `selection-change` |  | The selection of the mathfield has changed |
+ * | `mode-change` |  | The mode of the mathfield has changed |
+ * | `undo-state-change` |  | The state of the undo stack has changed |
+ * | `read-aloud-status-change` |  | The status of a read aloud operation has changed |
+ * | `virtual-keyboard-toggle` |  | The visibility of the virtual keyboard has changed |
+ * | `blur` |  | The mathfield is losing focus |
+ * | `focus` |  | The mathfield is gaining focus |
+ * | `focus-out` | `(direction: 'forward' | 'backward' | 'upward' | 'downward'): boolean` | The user is navigating out of the mathfield, typically using the keyboard |
+ * | `math-error` | `ErrorListener<ParserErrorCode | MathfieldErrorCode>` | A parsing or configuration error happened |
+ * | `keystroke` | `(keystroke: string, event: KeyboardEvent): boolean` | The user typed a keystroke with a physical keyboard |
+ * | `mount` | | Fired once when the element has been attached to the DOM |
+ * | `unmount` | | Fired once when the element is about to be removed from the DOM |
+ *
+ */
+class MathfieldElement extends HTMLElement {
+    /**
+     * A new mathfield can be created using
+     * ```javascript
+    let mfe = new MathfieldElement();
+    // Set initial value and options
+    mfe.value = "\\frac{\\sin(x)}{\\cos(x)}";
+    // Options can be set either as an attribute (for simple options)...
+    mfe.setAttribute('virtual-keyboard-layout', 'dvorak');
+    // ... or using `setOptions()`
+    mfe.setOptions({
+        virtualKeyboardMode: 'manual',
+    });
+    // Attach the element
+    document.body.appendChild(mfe);
+    * ```
+    */
+    constructor(options) {
+        var _a;
+        super();
+        _mathfield.set(this, void 0);
+        this.attachShadow({ mode: 'open' });
+        this.shadowRoot.appendChild(MATHFIELD_TEMPLATE.content.cloneNode(true));
+        const slot = this.shadowRoot.querySelector('slot:not([name])');
+        // When the elements get focused (through tabbing for example)
+        // focus the mathfield
+        this.shadowRoot.host.addEventListener('focus', (_event) => this.focus());
+        // Inline options (as a JSON structure in the markup)
+        try {
+            const json = slot
+                .assignedElements()
+                .filter((x) => x['type'] !== 'application/json')
+                .map((x) => x.textContent)
+                .join('');
+            if (json) {
+                this.setOptions(JSON.parse(json));
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+        // Record the (optional) configuration options, as a deferred state
+        if (options) {
+            this.setOptions(options);
+        }
+        // Check if there is a `value` attribute and set the initial value
+        // of the mathfield from it
+        if (this.hasAttribute('value')) {
+            this.value = this.getAttribute('value');
+        }
+        else {
+            this.value = (_a = slot === null || slot === void 0 ? void 0 : slot.assignedNodes().map((x) => (x.nodeType === 3 ? x.textContent : '')).join('').trim()) !== null && _a !== void 0 ? _a : '';
+        }
+        slot.addEventListener('slotchange', (e) => {
+            if (e.target !== slot)
+                return;
+            const value = slot
+                .assignedNodes()
+                .map((x) => (x.nodeType === 3 ? x.textContent : ''))
+                .join('')
+                .trim();
+            if (!__classPrivateFieldGet(this, _mathfield)) {
+                this.value = value;
+            }
+            else {
+                // Don't suppress notification changes. We need to know
+                // if the value has changed indirectly through slot manipulation
+                __classPrivateFieldGet(this, _mathfield).setValue(value, {
+                    insertionMode: 'replaceAll',
+                });
+            }
+        });
+    }
+    /**
+     * Private lifecycle hooks
+     * @internal
+     */
+    static get optionsAttributes() {
+        return {
+            'default-mode': 'string',
+            'fonts-directory': 'string',
+            'horizontal-spacing-scale': 'number',
+            'ignore-spacebar-in-math-mode': 'boolean',
+            'inline-shortcut-timeout': 'number',
+            'keypress-vibration': 'boolean',
+            'letter-shape-style': 'string',
+            locale: 'string',
+            'read-only': 'boolean',
+            'remove-extraneous-parentheses': 'boolean',
+            'smart-fence': 'boolean',
+            'smart-mode': 'boolean',
+            'smart-superscript': 'boolean',
+            'speech-engine': 'string',
+            'speech-engine-rate': 'string',
+            'speech-engine-voice': 'string',
+            'text-to-speech-markup': 'string',
+            'text-to-speech-rules': 'string',
+            'virtual-keyboard-layout': 'string',
+            'virtual-keyboard-mode': 'string',
+            'virtual-keyboard-theme': 'string',
+            'virtual-keyboards': 'string',
+        };
+    }
+    /**
+     * Custom elements lifecycle hooks
+     * @internal
+     */
+    static get observedAttributes() {
+        return [...Object.keys(MathfieldElement.optionsAttributes), 'disabled'];
+    }
+    get mode() {
+        var _a;
+        return (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.mode;
+    }
+    set mode(value) {
+        if (!__classPrivateFieldGet(this, _mathfield))
+            return;
+        __classPrivateFieldGet(this, _mathfield).mode = value;
+    }
+    getOptions(keys) {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            return get(__classPrivateFieldGet(this, _mathfield).options, keys);
+        }
+        if (!gDeferredState.has(this))
+            return null;
+        return get(update(getDefault(), gDeferredState.get(this).options), keys);
+    }
+    getOption(key) {
+        return this.getOptions([key]);
+    }
+    /**
+     *  @category Options
+     */
+    setOptions(options) {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            __classPrivateFieldGet(this, _mathfield).setOptions(options);
+        }
+        else {
+            if (gDeferredState.has(this)) {
+                gDeferredState.set(this, {
+                    value: gDeferredState.get(this).value,
+                    selection: [{ start: 0, end: -1 }],
+                    options: {
+                        ...gDeferredState.get(this).options,
+                        ...options,
+                    },
+                });
+            }
+            else {
+                gDeferredState.set(this, {
+                    value: '',
+                    selection: [{ start: 0 }],
+                    options: options,
+                });
+            }
+        }
+        // Reflect options to attributes
+        reflectAttributes(this);
+    }
+    /**
+     * Execute a [[`Commands`|command]] defined by a selector.
+     * ```javascript
+     * mfe.executeCommand('add-column-after');
+     * mfe.executeCommand(['switch-mode', 'math']);
+     * ```
+     *
+     * @param command - A selector, or an array whose first element
+     * is a selector, and whose subsequent elements are arguments to the selector.
+     *
+     * Selectors can be passed either in camelCase or kebab-case.
+     *
+     * ```javascript
+     * // Both calls do the same thing
+     * mfe.executeCommand('selectAll');
+     * mfe.executeCommand('select-all');
+     * ```
+     */
+    executeCommand(command) {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.executeCommand(command)) !== null && _b !== void 0 ? _b : false;
+    }
+    /**
+     *  @category Accessing and Changing the content
+     */
+    getValue(format) {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            return __classPrivateFieldGet(this, _mathfield).getValue(format);
+        }
+        if (gDeferredState.has(this)) {
+            return gDeferredState.get(this).value;
+        }
+        return '';
+    }
+    /**
+     *  @category Accessing and Changing the content
+     */
+    setValue(value, options) {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            __classPrivateFieldGet(this, _mathfield).setValue(value, options);
+            return;
+        }
+        if (gDeferredState.has(this)) {
+            gDeferredState.set(this, {
+                value,
+                selection: [{ start: 0, end: -1, direction: 'forward' }],
+                options: gDeferredState.get(this).options,
+            });
+            return;
+        }
+        gDeferredState.set(this, {
+            value,
+            selection: [{ start: 0, end: -1, direction: 'forward' }],
+            options: getOptionsFromAttributes(this),
+        });
+    }
+    /**
+     * Return true if the mathfield is currently focused (responds to keyboard
+     * input).
+     *
+     * @category Focus
+     *
+     */
+    hasFocus() {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.hasFocus()) !== null && _b !== void 0 ? _b : false;
+    }
+    /**
+     * Sets the focus to the mathfield (will respond to keyboard input).
+     *
+     * @category Focus
+     *
+     */
+    focus() {
+        var _a;
+        (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.focus();
+    }
+    /**
+     * Remove the focus from the mathfield (will no longer respond to keyboard
+     * input).
+     *
+     * @category Focus
+     *
+     */
+    blur() {
+        var _a;
+        (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.blur();
+    }
+    /**
+     * Select the content of the mathfield.
+     * @category Selection
+     */
+    select() {
+        var _a;
+        (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.select();
+    }
+    /**
+     * Inserts a block of text at the current insertion point.
+     *
+     * This method can be called explicitly or invoked as a selector with
+     * `executeCommand("insert")`.
+     *
+     * After the insertion, the selection will be set according to the
+     * `options.selectionMode`.
+     *
+     *  @category Accessing and Changing the content
+     */
+    insert(s, options) {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.insert(s, options)) !== null && _b !== void 0 ? _b : false;
+    }
+    /**
+     * Updates the style (color, bold, italic, etc...) of the selection or sets
+     * the style to be applied to future input.
+     *
+     * If there is a selection, the style is applied to the selection
+     *
+     * If the selection already has this style, it is removed.
+     *
+     * If the selection has the style partially applied (i.e. only some
+     * sections), it is removed from those sections, and applied to the
+     * entire selection.
+     *
+     * If there is no selection, the style will apply to the next character typed.
+     *
+     * @category Accessing and Changing the content
+     */
+    applyStyle(style) {
+        var _a;
+        return (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.applyStyle(style);
+    }
+    /**
+     * @category Selection
+     */
+    getCaretPosition() {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.getCaretPosition()) !== null && _b !== void 0 ? _b : null;
+    }
+    /**
+     * @category Selection
+     */
+    setCaretPosition(x, y) {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.setCaretPosition(x, y)) !== null && _b !== void 0 ? _b : false;
+    }
+    /**
+     * Custom elements lifecycle hooks
+     * @internal
+     */
+    connectedCallback() {
+        if (!this.hasAttribute('role'))
+            this.setAttribute('role', 'textbox');
+        // this.setAttribute('aria-multiline', 'false');
+        if (!this.hasAttribute('tabindex'))
+            this.setAttribute('tabindex', '0');
+        __classPrivateFieldSet(this, _mathfield, new MathfieldPrivate(this.shadowRoot.querySelector(':host > div'), {
+            ...getOptionsFromAttributes(this),
+            ...(gDeferredState.has(this)
+                ? gDeferredState.get(this).options
+                : {}),
+            onBlur: () => {
+                this.dispatchEvent(new Event('blur', {
+                    cancelable: false,
+                    bubbles: false,
+                }));
+            },
+            onContentDidChange: () => {
+                this.dispatchEvent(new Event('input', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onError: (err) => {
+                this.dispatchEvent(new CustomEvent('math-error', {
+                    detail: {
+                        code: err.code,
+                        arg: err.arg,
+                        latex: err.latex,
+                        before: err.before,
+                        after: err.after,
+                    },
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onFocus: () => {
+                this.dispatchEvent(new Event('focus', {
+                    cancelable: false,
+                    bubbles: false,
+                }));
+            },
+            onKeystroke: (_sender, keystroke, ev) => {
+                return this.dispatchEvent(new CustomEvent('keystroke', {
+                    detail: {
+                        keystroke,
+                        event: ev,
+                    },
+                    cancelable: true,
+                    bubbles: true,
+                }));
+            },
+            onModeChange: (_sender, _mode) => {
+                this.dispatchEvent(new Event('mode-change', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onCommit: (_sender) => {
+                // Match the DOM event sent by `<input>`, `<textarea>`, etc...
+                // Sent when the [Return] or [Enter] key is pressed, or on
+                // focus loss if the content has changed.
+                this.dispatchEvent(new Event('change', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onMoveOutOf: (_sender, direction) => {
+                return this.dispatchEvent(new CustomEvent('focus-out', {
+                    detail: { direction },
+                    cancelable: true,
+                    bubbles: true,
+                }));
+            },
+            onTabOutOf: (_sender, direction) => {
+                return this.dispatchEvent(new CustomEvent('focus-out', {
+                    detail: { direction },
+                    cancelable: true,
+                    bubbles: true,
+                }));
+            },
+            onReadAloudStatus: () => {
+                this.dispatchEvent(new Event('read-aloud-status-change', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onSelectionDidChange: () => {
+                this.dispatchEvent(new Event('selection-change', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onUndoStateDidChange: () => {
+                this.dispatchEvent(new Event('undo-state-change', {
+                    cancelable: false,
+                    bubbles: true,
+                }));
+            },
+            onVirtualKeyboardToggle: (_sender, _visible, _keyboardElement) => {
+                this.dispatchEvent(new Event('virtual-keyboard-toggle', {
+                    bubbles: true,
+                    cancelable: false,
+                }));
+            },
+        }));
+        if (gDeferredState.has(this)) {
+            const suppressChangeNotifications = __classPrivateFieldGet(this, _mathfield).model
+                .suppressChangeNotifications;
+            __classPrivateFieldGet(this, _mathfield).model.suppressChangeNotifications = true;
+            __classPrivateFieldGet(this, _mathfield).setValue(gDeferredState.get(this).value);
+            __classPrivateFieldGet(this, _mathfield).selection = gDeferredState.get(this).selection;
+            gDeferredState.delete(this);
+            __classPrivateFieldGet(this, _mathfield).model.suppressChangeNotifications = suppressChangeNotifications;
+        }
+        this.upgradeProperty('disabled');
+        // Notify listeners that we're mounted and ready
+        this.dispatchEvent(new Event('mount', {
+            cancelable: false,
+            bubbles: true,
+        }));
+    }
+    /**
+     * Custom elements lifecycle hooks
+     * @internal
+     */
+    disconnectedCallback() {
+        // Notify listeners that we're about to be unmounted
+        this.dispatchEvent(new Event('unmount', {
+            cancelable: false,
+            bubbles: true,
+        }));
+        if (!__classPrivateFieldGet(this, _mathfield))
+            return;
+        // Save the state (in case the elements get reconnected later)
+        const options = {};
+        Object.keys(MathfieldElement.optionsAttributes).forEach((x) => {
+            options[toCamelCase(x)] = __classPrivateFieldGet(this, _mathfield).getConfig(toCamelCase(x));
+        });
+        gDeferredState.set(this, {
+            value: __classPrivateFieldGet(this, _mathfield).getValue(),
+            selection: __classPrivateFieldGet(this, _mathfield).selection,
+            options,
+        });
+        // Dispose of the mathfield
+        __classPrivateFieldGet(this, _mathfield).dispose();
+        __classPrivateFieldSet(this, _mathfield, null);
+    }
+    /**
+     * Private lifecycle hooks
+     * @internal
+     */
+    upgradeProperty(prop) {
+        if (this.hasOwnProperty(prop)) {
+            const value = this[prop];
+            // A property may have already been set on the object, before
+            // the element was connected: delete the property (after saving its value)
+            // and use the setter to (re-)set its value.
+            delete this[prop];
+            this[prop] = value;
+        }
+    }
+    /**
+     * Custom elements lifecycle hooks
+     * @internal
+     */
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue)
+            return;
+        const hasValue = newValue !== null;
+        switch (name) {
+            case 'disabled':
+                this.disabled = hasValue;
+                break;
+        }
+    }
+    set disabled(value) {
+        const isDisabled = Boolean(value);
+        if (isDisabled)
+            this.setAttribute('disabled', '');
+        else
+            this.removeAttribute('disabled');
+        this.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        this.setOptions({ readOnly: isDisabled });
+    }
+    get disabled() {
+        return this.hasAttribute('disabled');
+    }
+    /**
+     *  @category Accessing and Changing the content
+     */
+    set value(value) {
+        this.setValue(value);
+    }
+    /**
+     * The content of the mathfield as a Latex expression.
+     * ```
+     * document.querySelector('mf').value = '\\frac{1}{\\pi}'
+     * ```
+     *  @category Accessing and Changing the content
+     */
+    get value() {
+        return this.getValue();
+    }
+    /**
+     * An array of ranges representing the selection.
+     *
+     * It is guaranteed there will be at least one element. If a discontinuous
+     * selection is present, the result will include more than one element.
+     *
+     * @category Selection
+     *
+     */
+    get selection() {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            return __classPrivateFieldGet(this, _mathfield).selection;
+        }
+        if (gDeferredState.has(this)) {
+            return gDeferredState.get(this).selection;
+        }
+        return [{ start: 0, direction: 'forward' }];
+    }
+    /**
+     * Change the selection
+     *
+     * @category Selection
+     */
+    set selection(value) {
+        if (__classPrivateFieldGet(this, _mathfield)) {
+            __classPrivateFieldGet(this, _mathfield).selection = value;
+        }
+        if (gDeferredState.has(this)) {
+            gDeferredState.set(this, {
+                value: gDeferredState.get(this).value,
+                selection: value,
+                options: gDeferredState.get(this).options,
+            });
+            return;
+        }
+        gDeferredState.set(this, {
+            value: '',
+            selection: value,
+            options: getOptionsFromAttributes(this),
+        });
+    }
+    /**
+     * The position of the caret/insertion point, from 0 to `lastPosition`.
+     *
+     * @category Selection
+     *
+     */
+    get position() {
+        var _a;
+        const selection = this.selection;
+        if (selection[selection.length - 1].direction === 'backward') {
+            return selection[selection.length - 1].start;
+        }
+        return (_a = selection[0].end) !== null && _a !== void 0 ? _a : selection[0].start;
+    }
+    /**
+     * @category Selection
+     */
+    set position(value) {
+        this.selection = [{ start: value }];
+    }
+    /**
+     * The last valid position.
+     * @category Selection
+     */
+    get lastPosition() {
+        var _a, _b;
+        return (_b = (_a = __classPrivateFieldGet(this, _mathfield)) === null || _a === void 0 ? void 0 : _a.lastPosition) !== null && _b !== void 0 ? _b : -1;
+    }
+}
+_mathfield = new WeakMap();
+function toCamelCase(s) {
+    return s
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase());
+}
+function reflectAttributes(el) {
+    const defaultOptions = getDefault();
+    const options = el.getOptions();
+    Object.keys(MathfieldElement.optionsAttributes).forEach((x) => {
+        const prop = toCamelCase(x);
+        if (defaultOptions[prop] !== options[prop]) {
+            if (MathfieldElement.optionsAttributes[x] === 'boolean') {
+                if (options[prop]) {
+                    // add attribute
+                    el.setAttribute(x, '');
+                }
+                else {
+                    // remove attribute
+                    el.removeAttribute(x);
+                }
+            }
+            else {
+                // set attribute (as string)
+                el.setAttribute(x, options[prop].toString());
+            }
+        }
+    });
+}
+// function toKebabCase(s: string): string {
+//     return s
+//         .match(
+//             /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
+//         )
+//         .map((x: string) => x.toLowerCase())
+//         .join('-');
+// }
+function getOptionsFromAttributes(mfe) {
+    const result = {};
+    const attribs = MathfieldElement.optionsAttributes;
+    Object.keys(attribs).forEach((x) => {
+        if (mfe.hasAttribute(x)) {
+            const value = mfe.getAttribute(x);
+            if (attribs[x] === 'boolean') {
+                const lcValue = value.toLowerCase();
+                if (lcValue === 'true' ||
+                    lcValue === 'yes' ||
+                    lcValue === 'on') {
+                    result[toCamelCase(x)] = true;
+                }
+                else {
+                    result[toCamelCase(x)] = false;
+                }
+            }
+            else if (attribs[x] === 'number') {
+                result[toCamelCase(x)] = parseFloat(value);
+            }
+            else {
+                result[toCamelCase(x)] = value;
+            }
+        }
+    });
+    return result;
+}
+if (!window.customElements.get('math-field')) {
+    window.MathfieldElement = MathfieldElement;
+    window.customElements.define('math-field', MathfieldElement);
+}
+
+function makeMathField(element, options = {}) {
+    var _a, _b;
+    options.speakHook = (_a = options.speakHook) !== null && _a !== void 0 ? _a : defaultSpeakHook;
+    options.readAloudHook = (_b = options.readAloudHook) !== null && _b !== void 0 ? _b : defaultReadAloudHook;
+    return new MathfieldPrivate(getElement(element), options);
+}
+/** @deprecated */
 function latexToMarkup$2(text, options) {
+    return convertLatexToMarkup(text, options);
+}
+function convertLatexToMarkup(text, options) {
     var _a;
     options = options !== null && options !== void 0 ? options : {};
     options.mathstyle = options.mathstyle || 'displaystyle';
@@ -29977,19 +33948,16 @@ function latexToMarkup$2(text, options) {
     //
     return wrapper.toMarkup();
 }
-function makeMathField(element, config) {
-    var _a, _b;
-    config = config !== null && config !== void 0 ? config : {};
-    config.speakHook = (_a = config.speakHook) !== null && _a !== void 0 ? _a : defaultSpeakHook;
-    config.readAloudHook = (_b = config.readAloudHook) !== null && _b !== void 0 ? _b : defaultReadAloudHook;
-    return new MathfieldPrivate(getElement(element), config);
-}
-function latexToMathML(latex, options) {
+function convertLatexToMathMl(latex, options = {}) {
     var _a;
-    options = options !== null && options !== void 0 ? options : {};
     options.macros = { ...MACROS, ...((_a = options.macros) !== null && _a !== void 0 ? _a : {}) };
     return atomsToMathML(parseString(latex, 'math', [], options.macros, false, options.onError), options);
 }
+/** @deprecated */
+function latexToMathML(latex, options) {
+    return convertLatexToMathMl(latex, options);
+}
+/** @deprecated Use MathJSON */
 function latexToAST(latex, options) {
     var _a;
     options = options !== null && options !== void 0 ? options : {};
@@ -29997,38 +33965,21 @@ function latexToAST(latex, options) {
     // return parseLatex(latex, options);
     return atomtoMathJson(parseString(latex, 'math', null, options.macros, false, options.onError), options);
 }
+/** @deprecated Use MathJSON */
 function astToLatex(expr, options) {
     return jsonToLatex(typeof expr === 'string' ? JSON.parse(expr) : expr, options);
     // return emitLatex(expr, options);
 }
-// function latexToAST(
-//     latex: string,
-//     options?: ParseLatexOptions & {
-//         macros?: MacroDictionary;
-//         onError?: ErrorListener<ErrorCode>;
-//         form?: Form | Form[];
-//     }
-// ): Expression {
-//     options = options ?? {};
-//     options.macros = { ...MACROS, ...(options.macros ?? {}) };
-//     return parseLatex(latex, options);
-// }
-// function astToLatex(
-//     expr: Expression,
-//     options: EmitLatexOptions & {
-//         dictionary?: Dictionary;
-//         onError?: ErrorListener<ErrorCode>;
-//     }
-// ): string {
-//     return emitLatex(expr, options);
-// }
-function latexToSpeakableText(latex, options) {
+function convertLatexToSpeakableText(latex, options = {}) {
     var _a;
-    options = options !== null && options !== void 0 ? options : {};
     options.macros = (_a = options.macros) !== null && _a !== void 0 ? _a : {};
     Object.assign(options.macros, MACROS);
     const mathlist = parseString(latex, 'math', null, options.macros, false, options.onError);
     return atomToSpeakableText(mathlist, options);
+}
+/** @deprecated */
+function latexToSpeakableText(latex, options) {
+    return convertLatexToSpeakableText(latex, options);
 }
 function renderMathInDocument(options) {
     renderMathInElement$1(document.body, options);
@@ -30046,9 +33997,9 @@ function getElement(element) {
 function renderMathInElement$1(element, options) {
     var _a, _b, _c, _d;
     options = options !== null && options !== void 0 ? options : {};
-    options.renderToMarkup = (_a = options.renderToMarkup) !== null && _a !== void 0 ? _a : latexToMarkup$2;
-    options.renderToMathML = (_b = options.renderToMathML) !== null && _b !== void 0 ? _b : latexToMathML;
-    options.renderToSpeakableText = (_c = options.renderToSpeakableText) !== null && _c !== void 0 ? _c : latexToSpeakableText;
+    options.renderToMarkup = (_a = options.renderToMarkup) !== null && _a !== void 0 ? _a : convertLatexToMarkup;
+    options.renderToMathML = (_b = options.renderToMathML) !== null && _b !== void 0 ? _b : convertLatexToMathMl;
+    options.renderToSpeakableText = (_c = options.renderToSpeakableText) !== null && _c !== void 0 ? _c : convertLatexToSpeakableText;
     options.macros = (_d = options.macros) !== null && _d !== void 0 ? _d : MACROS;
     AutoRender.renderMathInElement(getElement(element), options);
 }
@@ -30062,25 +34013,28 @@ function validateNamespace(options) {
         }
     }
 }
+/** @deprecated */
 function revertToOriginalContent(element, options) {
     var _a;
-    if (element instanceof MathfieldPrivate) {
-        element.$revertToOriginalContent();
-    }
-    else {
-        // element is a pair: accessible span, math -- set it to the math part
-        element = getElement(element).children[1];
-        options = options !== null && options !== void 0 ? options : {};
-        validateNamespace(options);
-        const html = element.getAttribute('data-' + ((_a = options.namespace) !== null && _a !== void 0 ? _a : '') + 'original-content');
-        element.innerHTML =
-            typeof options.createHTML === 'function'
-                ? options.createHTML(html)
-                : html;
-    }
+    deprecated$1('revertToOriginalContent');
+    //  if (element instanceof MathfieldPrivate) {
+    //      element.$revertToOriginalContent();
+    //    } else {
+    // element is a pair: accessible span, math -- set it to the math part
+    element = getElement(element).children[1];
+    options = options !== null && options !== void 0 ? options : {};
+    validateNamespace(options);
+    const html = element.getAttribute('data-' + ((_a = options.namespace) !== null && _a !== void 0 ? _a : '') + 'original-content');
+    element.innerHTML =
+        typeof options.createHTML === 'function'
+            ? options.createHTML(html)
+            : html;
+    //  }
 }
+/** @deprecated */
 function getOriginalContent(element, options) {
     var _a;
+    deprecated$1('getOriginalContent');
     if (element instanceof MathfieldPrivate) {
         return element.originalContent;
     }
@@ -30091,39 +34045,91 @@ function getOriginalContent(element, options) {
     return element.getAttribute('data-' + ((_a = options.namespace) !== null && _a !== void 0 ? _a : '') + 'original-content');
 }
 // This SDK_VERSION variable will be replaced during the build process.
-const version = '0.55.0';
+const version = '0.58.0';
+function deprecated$1(method) {
+    console.warn(`Function "${method}" is deprecated`);
+}
+const debug = {
+    getStyle: MathLiveDebug.getStyle,
+    getType: MathLiveDebug.getType,
+    spanToString: MathLiveDebug.spanToString,
+    hasClass: MathLiveDebug.hasClass,
+    latexToAsciiMath: MathLiveDebug.latexToAsciiMath,
+    asciiMathToLatex: MathLiveDebug.asciiMathToLatex,
+    FUNCTIONS: MathLiveDebug.FUNCTIONS,
+    MATH_SYMBOLS: MathLiveDebug.MATH_SYMBOLS,
+    TEXT_SYMBOLS: MathLiveDebug.TEXT_SYMBOLS,
+    ENVIRONMENTS: MathLiveDebug.ENVIRONMENTS,
+    MACROS: MathLiveDebug.MACROS,
+    DEFAULT_KEYBINDINGS: MathLiveDebug.DEFAULT_KEYBINDINGS,
+    getKeybindingMarkup: MathLiveDebug.getKeybindingMarkup,
+};
 var mathlive = {
-    version,
-    latexToMarkup: latexToMarkup$2,
-    latexToMathML,
-    latexToSpeakableText,
-    latexToAST,
-    astToLatex,
-    makeMathField,
-    renderMathInDocument,
-    renderMathInElement: renderMathInElement$1,
-    revertToOriginalContent,
-    getOriginalContent,
-    readAloud: defaultReadAloudHook,
-    readAloudStatus,
-    pauseReadAloud,
-    resumeReadAloud,
-    playReadAloud,
-    debug: {
-        getStyle: MathLiveDebug.getStyle,
-        getType: MathLiveDebug.getType,
-        spanToString: MathLiveDebug.spanToString,
-        hasClass: MathLiveDebug.hasClass,
-        latexToAsciiMath: MathLiveDebug.latexToAsciiMath,
-        asciiMathToLatex: MathLiveDebug.asciiMathToLatex,
-        FUNCTIONS: MathLiveDebug.FUNCTIONS,
-        MATH_SYMBOLS: MathLiveDebug.MATH_SYMBOLS,
-        TEXT_SYMBOLS: MathLiveDebug.TEXT_SYMBOLS,
-        ENVIRONMENTS: MathLiveDebug.ENVIRONMENTS,
-        MACROS: MathLiveDebug.MACROS,
-        DEFAULT_KEYBINDINGS: MathLiveDebug.DEFAULT_KEYBINDINGS,
-        getKeybindingMarkup: MathLiveDebug.getKeybindingMarkup,
+    version: () => {
+        deprecated$1('export default version');
+        return version;
+    },
+    latexToMarkup: (text, options) => {
+        deprecated$1('export default latexToMarkup');
+        return latexToMarkup$2(text, options);
+    },
+    latexToMathML: (latex, options) => {
+        deprecated$1('export default latexToMathML');
+        return latexToMathML(latex, options);
+    },
+    latexToSpeakableText: (latex, options) => {
+        deprecated$1('export default latexToSpeakableText');
+        return latexToSpeakableText(latex, options);
+    },
+    latexToAST: (latex, options) => {
+        deprecated$1('export default latexToAST: use MathJSON');
+        return latexToAST(latex, options);
+    },
+    astToLatex: (expr, options) => {
+        deprecated$1('export default astToLatex: use MathJSON');
+        return astToLatex(expr, options);
+    },
+    makeMathField: (element, options) => {
+        deprecated$1('export default makeMathField');
+        return makeMathField(element, options);
+    },
+    renderMathInDocument: (options) => {
+        deprecated$1('export default renderMathInDocument');
+        renderMathInDocument(options);
+    },
+    renderMathInElement: (el, options) => {
+        deprecated$1('export default renderMathInElement');
+        renderMathInElement$1(el, options);
+    },
+    revertToOriginalContent: (el, options) => {
+        deprecated$1('export default revertToOriginalContent');
+        revertToOriginalContent(el, options);
+    },
+    getOriginalContent: (el, options) => {
+        deprecated$1('export default getOriginalContent');
+        getOriginalContent(el, options);
+    },
+    readAloud: (element, text, config) => {
+        deprecated$1('export default readAloud');
+        return defaultReadAloudHook(element, text, config);
+    },
+    readAloudStatus: () => {
+        deprecated$1('export default readAloudStatus');
+        return readAloudStatus();
+    },
+    pauseReadAloud: () => {
+        deprecated$1('export default pauseReadAloud');
+        pauseReadAloud();
+    },
+    resumeReadAloud: () => {
+        deprecated$1('export default resumeReadAloud');
+        resumeReadAloud();
+    },
+    playReadAloud: (token, count) => {
+        deprecated$1('export default playReadAloud');
+        playReadAloud(token, count);
     },
 };
 
 export default mathlive;
+export { MathfieldElement, convertLatexToMarkup, convertLatexToMathMl, convertLatexToSpeakableText, debug, makeMathField };

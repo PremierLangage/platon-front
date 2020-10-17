@@ -1,13 +1,12 @@
-/* 0.55.0 *//**
+/* 0.58.0 *//**
  * The mode that indicates how a portion of content is interpreted
  *
- * @deprecated The 'command'mode will be dropped in a future release
  */
-export declare type ParseMode = 'math' | 'text' | 'command';
+export declare type ParseMode = 'math' | 'text' | 'command' | 'chem';
 /**
  * Error code passed to the [[`ErrorListener`]] function.
  *
- * See [[`MathfieldConfig`]], [[`latexToMarkup`]],  [[`latexToMathML`]],  [[`latexToAST`]],
+ * See [[`MathfieldOptions`]], [[`convertLatexToMarkup`]]
  *
  *
     |  | |
@@ -42,7 +41,7 @@ export declare type ErrorListener<T> = (err: {
  * Variants indicate a stylistic alternate for some characters.
  *
  * Typically, those are controlled with explicit commands, such as `\mathbb{}` or
- * `\mathfrak{}`. This type is used with the [[`$applyStyle`]] method to change
+ * `\mathfrak{}`. This type is used with the [[`applyStyle`]] method to change
  * the styling of a range of selected characters.
  *
  * In mathematical notation these variants are used not only for visual
@@ -62,6 +61,9 @@ export declare type ErrorListener<T> = (err: {
  * letter shape and spacing (a bit more space after the "f" for example), so
  * it's not completely equivalent to a `main` variant with `italic` variant style
  * applied.
+ *
+ * **See Also**
+ * * [[`Style`]]
  */
 export declare type Variant = 'ams' | 'double-struck' | 'calligraphic' | 'script' | 'fraktur' | 'sans-serif' | 'monospace' | 'normal' | 'main' | 'math';
 /**
@@ -95,8 +97,15 @@ export interface Style {
     fontSize?: string;
     cssId?: string;
     cssClass?: string;
+    isPhantom?: boolean;
     letterShapeStyle?: 'tex' | 'french' | 'iso' | 'upright' | 'auto';
 }
+/**
+ * **See Also**
+ * * [[`MacroDictionary`]]
+ * * [Macros Example](/mathlive/examples/macros/)
+ *
+ */
 export declare type MacroDefinition = {
     def: string;
     args?: number;
@@ -106,7 +115,7 @@ export declare type MacroDefinition = {
  *
  * For example:
 ```typescript
-mf.$setConfig({
+mf.setOptions({
     macros: {
         smallfrac: '^{#1}\\!\\!/\\!_{#2}',
     },
@@ -116,7 +125,9 @@ The code above will support the following notation:
 ```latex
 \smallfrac{5}{16}
 ```
-*/
+ * **See Also**
+ * * [Macros Example](/mathlive/examples/macros/)
+ */
 export declare type MacroDictionary = {
     [name: string]: string | MacroDefinition;
 };

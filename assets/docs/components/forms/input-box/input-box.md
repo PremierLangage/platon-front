@@ -17,15 +17,14 @@ Le comportement de ce composant dépend de la valeur de sa propriété `type`.
 
 * `textarea`: Le même comportement que pour le type `text` sauf que la chaine peut être saisi sur plusieurs lignes.
 
-
 ### Les propriétés `prefix` et `suffix`
 
-Les propriétés `prefix` et `suffix` vous permettent d'afficher un icon à gauche et/ou à droite
+Les propriétés `prefix` et `suffix` vous permettent d'afficher une icône à gauche et/ou à droite
 du champ de saisi en utilisant suivante:
 
 `type nom`
 
-Dans cette syntaxe, `type` fait référence à une librairie d'icon (ex: fontawesome) et `name` au nom d'un icon dans cette librairie.
+Dans cette syntaxe, `type` fait référence à une librairie d'icône (ex: fontawesome) et `name` au nom d'une icône dans cette librairie.
 
 Exemple:
 
@@ -33,7 +32,7 @@ Exemple:
 
 @fontawesome address-book@
 
-Vous pouvez spécifier une couleur pour votre icon en ajoutant `color=C` où `C` est une couleur en héxadécimal sans le `#`.
+Vous pouvez spécifier une couleur pour votre icône en ajoutant `color=C` où `C` est une couleur en héxadécimal sans le `#`.
 
 Exemple:
 

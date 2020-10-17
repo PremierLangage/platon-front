@@ -1,4 +1,4 @@
-/* 0.55.0 */import type { Keys } from './types-utils';
+/* 0.58.0 */import type { Keys } from './types-utils';
 import type { ParseMode, Style } from './core';
 import type { Mathfield, Model } from './mathfield';
 /**
@@ -15,10 +15,16 @@ import type { Mathfield, Model } from './mathfield';
 export declare type SpeechScope = 'all' | 'selection' | 'left' | 'right' | 'group' | 'parent';
 /**
  * Commands return true if they resulted in a dirty state
- * @command mathfield.perform
+ * @command executeCommand
  */
 export interface Commands {
+    /**
+     * @category Undo/Redo
+     */
     undo: (mathfield: Mathfield) => boolean;
+    /**
+     * @category Undo/Redo
+     */
     redo: (mathfield: Mathfield) => boolean;
     /**
      * Perform a command and include interactive feedback such as sound and
@@ -26,6 +32,7 @@ export interface Commands {
      * for example for commands from the virtual keyboard
      */
     performWithFeedback: (mathfield: Mathfield, command: string) => boolean;
+    commit: (mathfield: Mathfield) => boolean;
     /**
      * @category Auto-complete
      */
@@ -36,7 +43,6 @@ export interface Commands {
     nextSuggestion: (mathfield: Mathfield) => boolean;
     /**
      * @category Auto-complete
-
      */
     previousSuggestion: (mathfield: Mathfield) => boolean;
     /**
