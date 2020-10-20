@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { Matrix, MatrixComponentDefinition } from './matrix';
 
@@ -10,36 +10,43 @@ import { Matrix, MatrixComponentDefinition } from './matrix';
 })
 @WebComponent(MatrixComponentDefinition)
 export class MatrixComponent implements WebComponentHooks<Matrix> {
-    /**
-     * The state of the component.
-     * The @WebComponent decorator create a getter and a setter during runtime to
-     * synchronize the changes and call the methods `onAfterSerialize` (after the getter runs)
-     * and `onAfterDeserialize` (after the setter runs).
-     */
     @Input() state!: Matrix;
+
+    @HostBinding('style')
+    get styles() {
+        return {
+            "--cols": this.state.cols,
+            "--rows": this.state.rows,
+        };
+    }
 
     constructor(
         readonly injector: Injector
     ) {}
 
-    /**
-     * This method is called immediately after the `state` getter runs with the object that
-     * will be returned by the getter.
-     * Define this method to handle any additional post validation tasks.
-     *
-     * @param state The object that will be returned by the getter.
-     * @returns the object or a computed version of the object.
-     */
-    onGetState(state: Matrix) {
-        return state;
+    onSetState() {
+        const { cols, rows } = this.state;
+        if (!this.state.cells) {
+            this.state.cells = [];
+        }
+        const length = this.state.cells.length;
+        const maxLength = cols *  rows;
+        if (length < maxLength) {
+            for (let i = length; i < maxLength; i++) {
+                this.state.cells.push({ value: '0' });
+            }
+        } else if (length > maxLength) {
+            this.state.cells = this.state.cells.slice(0, maxLength)
+        }
     }
 
-    /**
-     * A callback method that is invoked immediately after the `state` setter runs.
-     * Define this method to handle any additional validation and initialization tasks.
-     *
-     */
-    onSetState() {
+    resize(dimension: { cols: number, rows: number}) {
+        this.state.cols = dimension.cols;
+        this.state.rows = dimension.rows;
+    }
+
+    trackBy(index: number) {
+        return index;
     }
 
 }
