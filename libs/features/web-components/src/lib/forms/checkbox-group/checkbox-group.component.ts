@@ -22,7 +22,7 @@ export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroup> 
         }
         this.state.items.forEach((item, index) => {
             if (typeof item === 'string') {
-                item = this.state.items[index] = {
+                this.state.items[index] = {
                     content: item,
                     checked: false,
                 }
