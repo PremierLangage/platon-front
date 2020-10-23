@@ -128,7 +128,7 @@ export function WebComponent(
                 await ngOnInit.apply(this);
             }
             this.$__ngOnInitCalled__$ = true;
-            this.state = this.state;
+            stateSetter(this, definition, this.state);
         };
         return target;
     };
