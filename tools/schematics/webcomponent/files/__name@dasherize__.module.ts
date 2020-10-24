@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 
 import { <%= classify(name) %>Component } from './<%= name %>.component';
 
 @NgModule({
     declarations: [<%= classify(name) %>Component],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [<%= classify(name) %>Component],
 })
