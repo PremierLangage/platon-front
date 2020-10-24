@@ -1,4 +1,4 @@
-.math-field-wrapper {
+.math-field-box {
   display: flex;
   align-items: center;
   border: 1px solid #fafafa;
@@ -17,10 +17,11 @@
     pointer-events: none;
     border: 1px dashed;
   }
-  math-field {
-    width: 100%;
+  &::ng-deep {
+    math-field {
+      width: 100%;
+    }
   }
-
   .prefix,
   .suffix {
     width: 18px;

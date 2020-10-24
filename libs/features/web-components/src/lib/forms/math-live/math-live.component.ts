@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
-import { AssetLoaderService } from '@platon/shared/utils';
+import {
+    ChangeDetectionStrategy,
+    Injector,
+    Component,
+    Input,
+    ElementRef,
+    OnInit,
+} from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { MathLive, MathLiveComponentDefinition } from './math-live';
 import { MathfieldElement } from 'mathlive';
@@ -8,50 +14,43 @@ import { MathfieldElement } from 'mathlive';
     selector: 'wc-math-live',
     templateUrl: 'math-live.component.html',
     styleUrls: ['math-live.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(MathLiveComponentDefinition)
-export class MathLiveComponent implements OnInit, OnDestroy, WebComponentHooks<MathLive> {
-    private readonly listeners: (() => void)[] = [];
+export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
+    private mathfield!: MathfieldElement;
 
     @Input() state!: MathLive;
 
-    @ViewChild('mathfield', { static: true, })
-    mathfield!: ElementRef<MathfieldElement>;
-
-    constructor(
-        readonly injector: Injector
-    ) {}
+    constructor(readonly injector: Injector) {}
 
     async ngOnInit() {
-        const assets = this.injector.get(AssetLoaderService);
-        await assets.loadAllAsync([
-            ['script', 'assets/vendors/mathlive/mathlive.min.js'],
-        ]).toPromise();
-        const math = this.mathfield.nativeElement;
-        math.oninput = () => {
-           this.state.value = math.getValue('latex')
-        }
-    }
-
-    onSetState() {
-        const field = this.mathfield.nativeElement;
-        field.disabled = this.state.disabled;
-        field.setOptions({
+        this.mathfield = new MathfieldElement();
+        this.mathfield.setOptions({
+            locale: 'fr',
             smartFence: false,
             smartSuperscript: true,
             virtualKeyboards: 'all',
+            virtualKeyboardMode: 'manual',
             virtualKeyboardTheme: 'material',
-            virtualKeyboardMode: 'onfocus',
-            ...(this.state.config || {})
+            fontsDirectory: 'assets/vendors/mathlive/fonts'
         });
-        field.setValue(this.state.value, {
-            format: 'latex',
-        });
+        this.mathfield.oninput = () => {
+            this.state.value = this.mathfield.getValue('latex');
+        };
+
+        this.injector
+            .get(ElementRef)
+            .nativeElement
+            .querySelector('.math-field')
+            ?.replaceWith(this.mathfield);
     }
 
-    ngOnDestroy(): void {
-        this.listeners.forEach(l => l());
+    onSetState() {
+        this.mathfield.disabled = this.state.disabled;
+        this.mathfield.setValue(this.state.value, {
+            format: 'latex'
+        });
+        this.mathfield.setOptions((this.state.config || {}));
     }
-
 }
