@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { NgModule, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'icongr'
@@ -17,3 +17,9 @@ export class IconGrPipe implements PipeTransform {
         });
     }
 }
+
+@NgModule({
+    declarations: [IconGrPipe],
+    exports: [IconGrPipe]
+})
+export class IconGrPipeModule {}
