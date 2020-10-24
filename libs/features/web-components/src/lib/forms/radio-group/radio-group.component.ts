@@ -16,7 +16,7 @@ export class RadioGroupComponent implements WebComponentHooks<RadioGroup> {
         readonly injector: Injector
     ) {}
 
-    onSetState() {
+    onChangeState() {
         if (!Array.isArray(this.state.items)) {
             this.state.items = [];
         }

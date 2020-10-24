@@ -39,7 +39,7 @@ export class PickerComponent implements WebComponentHooks<Picker> {
      * Define this method to handle any additional validation and initialization tasks.
      *
      */
-    onSetState() {
+    onChangeState() {
     }
 
 }

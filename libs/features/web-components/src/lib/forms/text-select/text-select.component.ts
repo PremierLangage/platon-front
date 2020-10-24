@@ -46,7 +46,7 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         private readonly cssPipe: CssPipe,
     ) {}
 
-    onSetState() {
+    onChangeState() {
         switch (this.state.mode) {
             case 'units':
                 this.renderModeUnits();

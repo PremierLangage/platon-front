@@ -59,7 +59,7 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
         this.destroyBoard();
     }
 
-    onSetState() {
+    onChangeState() {
         const changes = this.changeDetector.changes(this);
         if (changes.includes('script') || changes.includes('attributes')) {
             this.createBoard();

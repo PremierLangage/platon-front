@@ -19,7 +19,7 @@ export class AutomatonViewerComponent implements WebComponentHooks<AutomatonView
         readonly injector: Injector
     ) {}
 
-    onSetState() {
+    onChangeState() {
         this.dot = automatonToDotFormat(
             automatonFromString(this.state.automaton)
         );

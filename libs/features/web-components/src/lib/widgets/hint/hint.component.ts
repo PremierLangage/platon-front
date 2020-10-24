@@ -39,7 +39,7 @@ export class HintComponent implements WebComponentHooks<Hint> {
      * Define this method to handle any additional validation and initialization tasks.
      *
      */
-    onSetState() {
+    onChangeState() {
     }
 
 }

@@ -16,8 +16,8 @@ export class WebComponentsChangeDetectionService {
 
         action();
 
-        if (component.onSetState) {
-            component.onSetState();
+        if (component.onChangeState) {
+            component.onChangeState();
         }
 
         if (!component.$__changeDetector__$) {

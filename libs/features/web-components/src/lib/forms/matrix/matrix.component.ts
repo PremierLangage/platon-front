@@ -24,7 +24,7 @@ export class MatrixComponent implements WebComponentHooks<Matrix> {
         readonly injector: Injector
     ) {}
 
-    onSetState() {
+    onChangeState() {
         const { cols, rows } = this.state;
         if (!this.state.cells) {
             this.state.cells = [];

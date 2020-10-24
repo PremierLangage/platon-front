@@ -39,7 +39,7 @@ export class TimerComponent implements WebComponentHooks<Timer> {
      * Define this method to handle any additional validation and initialization tasks.
      *
      */
-    onSetState() {
+    onChangeState() {
     }
 
 }

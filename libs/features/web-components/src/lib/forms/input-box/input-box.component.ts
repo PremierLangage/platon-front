@@ -49,7 +49,7 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
         this.subscription?.unsubscribe();
     }
 
-    onSetState() {
+    onChangeState() {
         this.updateFormState();
     }
 

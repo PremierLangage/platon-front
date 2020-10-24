@@ -17,7 +17,7 @@ export class SortListComponent implements WebComponentHooks<SortList> {
         readonly injector: Injector
     ) {}
 
-    onSetState() {
+    onChangeState() {
         if (!Array.isArray(this.state.items)) {
             this.state.items = [];
         }

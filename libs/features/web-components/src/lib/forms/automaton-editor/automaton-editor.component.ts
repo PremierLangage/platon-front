@@ -39,7 +39,7 @@ export class AutomatonEditorComponent implements WebComponentHooks<AutomatonEdit
      * Define this method to handle any additional validation and initialization tasks.
      *
      */
-    onSetState() {
+    onChangeState() {
     }
 
 }

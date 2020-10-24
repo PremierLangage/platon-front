@@ -67,7 +67,6 @@ export interface WebComponentHooks<T> {
      * @returns the state or a computed version of the state.
      */
     onGetState?(state: T): T;
-
     /**
      * A callback method that is invoked immediately after the `state` setter runs.
      * Define this method to handle any additional validation and initialization tasks.
@@ -76,7 +75,7 @@ export interface WebComponentHooks<T> {
      * - `ngOnInit` hook is always called before this one.
      * - change detector is triggered right after the end of this method refresh the view.
      */
-    onSetState?(): void;
+    onChangeState?(): void;
 }
 
 /**
@@ -90,11 +89,12 @@ export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<
  * Defines the properties created by the WebComponent decorator.
  */
 export interface WebComponentInstance extends WebComponentHooks<any> {
+    /** A copy of $__state__$ to known which properties has changed during change detection. */
     $__stateCopy__$?: any;
     /** Backed field for the `state` property of the component. */
     $__state__$?: any;
     /**
-     * Since onSetState hook is called for each property change
+     * Since onChangeState hook is called for each property change
      * setting this property to `true` allow to stop watching properties mutation
      * until the value is set to `false`.
      */
@@ -261,8 +261,8 @@ function detectChanges(component: WebComponentInstance) {
 
     component.$__suspendChanges__$ = true;
 
-    if (component.onSetState) {
-        component.onSetState();
+    if (component.onChangeState) {
+        component.onChangeState();
     }
 
     if (!component.$__changeDetector__$) {

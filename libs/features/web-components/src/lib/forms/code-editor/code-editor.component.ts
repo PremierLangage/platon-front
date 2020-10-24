@@ -72,7 +72,7 @@ export class CodeEditorComponent implements OnDestroy, WebComponentHooks<CodeEdi
         );
     }
 
-    onSetState() {
+    onChangeState() {
         if (!this.model)
             return;
 

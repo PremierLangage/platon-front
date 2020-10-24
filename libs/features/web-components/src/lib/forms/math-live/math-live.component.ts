@@ -46,7 +46,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
             ?.replaceWith(this.mathfield);
     }
 
-    onSetState() {
+    onChangeState() {
         this.mathfield.disabled = this.state.disabled;
         this.mathfield.setValue(this.state.value, {
             format: 'latex'

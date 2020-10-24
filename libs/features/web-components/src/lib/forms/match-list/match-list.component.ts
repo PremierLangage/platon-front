@@ -59,7 +59,7 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
 
         this.instance.bind('ready', () => {
             this.ready = true;
-            this.onSetState();
+            this.onChangeState();
         });
     }
 
@@ -78,7 +78,7 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
         this.instance?.unbind();
     }
 
-    onSetState() {
+    onChangeState() {
         if (!this.ready)
             return;
 
