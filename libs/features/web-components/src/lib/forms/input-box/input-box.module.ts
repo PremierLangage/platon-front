@@ -1,5 +1,5 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared//components/base/base.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';

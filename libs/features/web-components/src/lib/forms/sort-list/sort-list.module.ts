@@ -3,7 +3,7 @@ import { NgModule, Type } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 
-import { BaseModule } from '../../shared//components/base/base.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
 import { NgeMarkdownModule } from 'nge-markdown';
 

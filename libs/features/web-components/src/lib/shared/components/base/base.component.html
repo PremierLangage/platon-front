@@ -1,6 +1,3 @@
-<div #container (cdkObserveContent)="onChangeContent()">
-  <ng-content></ng-content>
-</div>
 <ng-container *ngIf="state?.debug">
   <nge-monaco-viewer [code]="state|json" language="json"></nge-monaco-viewer>
 </ng-container>

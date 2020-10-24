@@ -1,6 +1,6 @@
 import { NgModule, Type } from '@angular/core';
 import { NgeMarkdownModule } from 'nge-markdown';
-import { BaseModule } from '../../shared//components/base/base.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 import { MatchListComponent } from './match-list.component';
 
 

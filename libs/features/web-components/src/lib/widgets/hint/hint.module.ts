@@ -1,5 +1,5 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared//components/base/base.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 
 import { HintComponent } from './hint.component';
 

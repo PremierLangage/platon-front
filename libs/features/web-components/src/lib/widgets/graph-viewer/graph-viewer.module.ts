@@ -1,6 +1,6 @@
 import { NgModule, Type } from '@angular/core';
 import { RenderDotModule } from '../../shared/directives/render-dot.directive';
-import { BaseModule } from '../../shared//components/base/base.module';
+import { BaseModule } from '../../shared/components/base/base.module';
 
 import { GraphViewerComponent } from './graph-viewer.component';
 

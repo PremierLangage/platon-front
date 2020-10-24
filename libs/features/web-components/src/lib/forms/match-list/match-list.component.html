@@ -13,6 +13,4 @@
 <ng-template #nodeTemplate let-node>
   <nge-markdown [id]="node.id" [data]="node.content"></nge-markdown>
 </ng-template>
-<wc-base [(state)]="state">
-  <ng-content></ng-content>
-</wc-base>
+<wc-base [(state)]="state"></wc-base>
