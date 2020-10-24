@@ -1,3 +1,5 @@
+import * as dequal from 'fast-deep-equal';
+
 export function deepCopy(obj: any): any {
     if (obj) {
         if (Array.isArray(obj)) {
@@ -18,4 +20,8 @@ export function deepCopy(obj: any): any {
         }
     }
     return obj;
+}
+
+export function deepEqual(a: any, b: any) {
+    return dequal(a, b);
 }
