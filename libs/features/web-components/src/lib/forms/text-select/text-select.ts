@@ -8,6 +8,7 @@ import {
 export interface TextSelectSelection {
     position: number | number[];
     content?: string;
+    css?: string;
 }
 export interface TextSelect extends IWebComponent {
     text: string;
@@ -51,7 +52,12 @@ export const TextSelectComponentDefinition = defineWebComponent({
                 description: 'La liste des éléments sélectionnés.',
                 items: {
                     type: 'object',
+                    required: ['position'],
                     properties: {
+                        css: {
+                            type: 'string',
+                            description: 'Voir API CSS',
+                        },
                         content: {
                             type: 'string',
                             description: 'Texte de la sélection (sans les espaces de début et fin).'

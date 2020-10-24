@@ -7,6 +7,7 @@ import {
     Injector,
     Input,
 } from '@angular/core';
+import { CssPipe } from '../../shared/pipes/css.pipe';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { TextSelect, TextSelectComponentDefinition } from './text-select';
 
@@ -41,7 +42,8 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
 
     constructor(
         readonly injector: Injector,
-        private readonly el: ElementRef<HTMLElement>
+        private readonly el: ElementRef<HTMLElement>,
+        private readonly cssPipe: CssPipe,
     ) {}
 
     onSetState() {
@@ -190,13 +192,13 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
             });
     }
 
-    private highlightRange(i: number, j: number) {
+    private highlightRange(i: number, j: number, classes?: string) {
         const container = this.container;
         const selectedText: string[] = [];
         for (let index = i; index <= j; index++) {
             const node = container.querySelector(`[${INDEX}="${index}"]`);
             if (node) {
-                node.className = HIGHLIGHT;
+                node.className = classes || HIGHLIGHT;
                 selectedText.push(node.innerHTML);
             }
         }
@@ -210,16 +212,17 @@ export class TextSelectComponent implements WebComponentHooks<TextSelect> {
         });
 
         this.state.selections.forEach(item => {
+            const classes = this.cssPipe.transform(item.css, 'class');
             if (typeof item.position === 'number') {
                 const node = container.querySelector(`[${INDEX}="${item.position}"]`);
                 if (node) {
-                    node.className = HIGHLIGHT;
+                    node.className = classes || HIGHLIGHT;
                     if (item.content !== node.textContent) {
                         item.content = node.textContent as string;
                     }
                 }
             } else {
-                const content = this.highlightRange(item.position[0], item.position[1]);
+                const content = this.highlightRange(item.position[0], item.position[1], classes);
                 if (item.content !== content) {
                     item.content = content;
                 }

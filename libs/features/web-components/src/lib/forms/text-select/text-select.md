@@ -6,8 +6,9 @@
 
   ```typescript
   {
-    "position": [number, number], // [position du premier caracère, position du dernier caractère]
-    "content": string // Le texte de la partie sélectionnée
+    "css"?: string, // Voir API CSS.
+    "content": string, // Le texte de la partie sélectionnée,
+    "position": [number, number] // [position du premier caracère, position du dernier caractère]
   }
   ```
 
@@ -23,8 +24,9 @@ Dans les modes `units` et `regex` chaque sélection est représentée par un obj
 
 ```typescript
 {
-  "position": number, // position de la selection par rapport aux autres
-  "content": string // Le texte de la partie sélectionnée
+  "css"?: string, // Voir API CSS.
+  "content": string, // Le texte de la partie sélectionnée
+  "position": number // position de la selection par rapport aux autres
 }
 ```
 
