@@ -50,7 +50,7 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: GraphViewerComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: HintComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: InputBoxComponentDefinition },
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: JsxComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: JsxComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MarkdownComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MatchListComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MathLiveComponentDefinition },

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, InjectionToken, Injector } from '@angular/core';
+import { ChangeDetectorRef, Injectable, InjectionToken, Injector } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
 import { JSONSchema7 } from 'json-schema';
 
@@ -89,7 +89,7 @@ export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<
 /**
  * Defines the properties created by the WebComponent decorator.
  */
-interface WebComponentInstance extends WebComponentHooks<any> {
+export interface WebComponentInstance extends WebComponentHooks<any> {
     /** Backed field for the `state` property of the component. */
     $__state__$?: any;
     /**
@@ -103,6 +103,10 @@ interface WebComponentInstance extends WebComponentHooks<any> {
      * of the decorated component is already called.
      */
     $__ngOnInitCalled__$?: boolean;
+    /**
+     * ChangeDetectorRef instance of the component.
+     */
+    $__changeDetector__$?: ChangeDetectorRef;
 }
 
 /**
@@ -168,6 +172,28 @@ export function defineWebComponent(
         'selector',
     ];
     return definition;
+}
+
+/**
+ * Suspends the change detection for `component`, invokes the given `action` then
+ * call change detection for `component`.
+ * @param component A webcomponent instance.
+ * @param action function to invoke.
+ */
+export function batchUpdate(component: WebComponentInstance, action: () => void) {
+    const suspended = component.$__suspendChanges__$;
+    component.$__suspendChanges__$ = true;
+    action();
+    if (component.onSetState) {
+        component.onSetState();
+    }
+    if (!component.$__changeDetector__$) {
+        component.$__changeDetector__$ = component.injector.get(
+            ChangeDetectorRef
+        );
+    }
+    component.$__changeDetector__$.detectChanges();
+    component.$__suspendChanges__$ = suspended;
 }
 
 function createState(
@@ -253,16 +279,19 @@ function detectChanges(component: WebComponentInstance) {
     if (component.$__suspendChanges__$ || !component.$__ngOnInitCalled__$) {
         return;
     }
+
     component.$__suspendChanges__$ = true;
 
     if (component.onSetState) {
         component.onSetState();
     }
 
-    const detector = component.injector.get(
-        ChangeDetectorRef
-    ) as ChangeDetectorRef;
-    detector.detectChanges();
+    if (!component.$__changeDetector__$) {
+        component.$__changeDetector__$ = component.injector.get(
+            ChangeDetectorRef
+        );
+    }
+    component.$__changeDetector__$.detectChanges();
 
     component.$__suspendChanges__$ = false;
 }
