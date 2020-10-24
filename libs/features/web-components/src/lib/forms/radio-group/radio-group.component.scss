@@ -43,6 +43,6 @@ mat-radio-group {
   position: relative;
   &:hover,
   &.selected {
-    border: 2px solid #3f51b5;
+    border: 2px solid var(--brand-color-primary);
   }
 }
