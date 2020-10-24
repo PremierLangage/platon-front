@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Injectable, InjectionToken, Injector } from '@angular/core';
+import { ChangeDetectorRef, InjectionToken, Injector } from '@angular/core';
 import { deepCopy } from '@platon/shared/utils';
 import { JSONSchema7 } from 'json-schema';
 
@@ -90,6 +90,7 @@ export const WEB_COMPONENT_DEFINITIONS = new InjectionToken<
  * Defines the properties created by the WebComponent decorator.
  */
 export interface WebComponentInstance extends WebComponentHooks<any> {
+    $__stateCopy__$?: any;
     /** Backed field for the `state` property of the component. */
     $__state__$?: any;
     /**
@@ -172,28 +173,6 @@ export function defineWebComponent(
         'selector',
     ];
     return definition;
-}
-
-/**
- * Suspends the change detection for `component`, invokes the given `action` then
- * call change detection for `component`.
- * @param component A webcomponent instance.
- * @param action function to invoke.
- */
-export function batchUpdate(component: WebComponentInstance, action: () => void) {
-    const suspended = component.$__suspendChanges__$;
-    component.$__suspendChanges__$ = true;
-    action();
-    if (component.onSetState) {
-        component.onSetState();
-    }
-    if (!component.$__changeDetector__$) {
-        component.$__changeDetector__$ = component.injector.get(
-            ChangeDetectorRef
-        );
-    }
-    component.$__changeDetector__$.detectChanges();
-    component.$__suspendChanges__$ = suspended;
 }
 
 function createState(

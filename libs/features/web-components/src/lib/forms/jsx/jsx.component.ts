@@ -5,7 +5,8 @@ import {
     OnDestroy, OnInit
 } from '@angular/core';
 import { AssetLoaderService, deepEqual } from '@platon/shared/utils';
-import { batchUpdate, WebComponent, WebComponentHooks } from '../../web-components';
+import { WebComponent, WebComponentHooks } from '../../web-components';
+import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
 import { Jsx, JsxComponentDefinition } from './jsx';
 
 declare const JXG: any;
@@ -20,8 +21,6 @@ declare const JXG: any;
 export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
     private static NEXT_ID = 0;
     private board?: any;
-    private currentScript?: string;
-    private currentAttributes = {};
 
     readonly boardId = 'jsx_graph' + ++JsxComponent.NEXT_ID;
 
@@ -29,6 +28,7 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
 
     constructor(
         readonly injector: Injector,
+        readonly changeDetector: WebComponentsChangeDetectionService,
     ) {}
 
     async ngOnInit() {
@@ -60,12 +60,15 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
     }
 
     onSetState() {
-        const scriptChanged = !deepEqual(this.state.script, this.currentScript);
-        const attribChanged = !deepEqual(this.state.attributes, this.currentAttributes);
-        if (scriptChanged || attribChanged) {
+        const changes = this.changeDetector.changes(this);
+        if (changes.includes('script') || changes.includes('attributes')) {
             this.createBoard();
         }
-        this.writePoints();
+
+        if (changes.includes('points')) {
+            this.writePoints();
+        }
+
         if (this.state.disabled) {
             this.board.removeEventHandlers();
         } else if (!this.board.hasPointerHandlers) {
@@ -81,13 +84,10 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
         });
 
         this.board.on('update', () => {
-            batchUpdate(this, () => {
+            this.changeDetector.batch(this, () => {
                 this.readPoints();
             });
         });
-
-        this.currentScript = this.state.script;
-        this.currentAttributes = this.state.attributes;
 
         const code = decodeURIComponent(this.state.script);
         const exec = new Function('board', code);
