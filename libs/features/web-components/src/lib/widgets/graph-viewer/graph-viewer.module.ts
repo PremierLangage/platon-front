@@ -1,13 +1,13 @@
 import { NgModule, Type } from '@angular/core';
 import { RenderDotModule } from '../../shared/directives/render-dot.directive';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { GraphViewerComponent } from './graph-viewer.component';
 
 @NgModule({
     declarations: [GraphViewerComponent],
     imports: [
-        SharedModule,
+        BaseModule,
         RenderDotModule,
     ],
     exports: [GraphViewerComponent],

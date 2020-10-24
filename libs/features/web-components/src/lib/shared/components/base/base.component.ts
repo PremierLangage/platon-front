@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild, Input, OnInit, OnDestroy } from '@angular/core';
-import { WebComponentDefinition } from '../../web-components';
-import { WebComponentsService } from '../../web-components.service';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { WebComponentDefinition } from '../../../web-components';
+import { WebComponentsService } from '../../../web-components.service';
 
 
 @Component({

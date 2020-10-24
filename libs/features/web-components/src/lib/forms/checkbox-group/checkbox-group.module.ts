@@ -1,14 +1,18 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
 
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CheckboxGroupComponent } from './checkbox-group.component';
+
+import { BaseModule } from '../../shared//components/base/base.module';
+import { CssPipeModule } from '../../shared/pipes/css.pipe';
+
 import { NgeMarkdownModule } from 'nge-markdown';
 
 @NgModule({
     declarations: [CheckboxGroupComponent],
     imports: [
-        SharedModule,
+        BaseModule,
+        CssPipeModule,
         MatCheckboxModule,
         NgeMarkdownModule,
     ],

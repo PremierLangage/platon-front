@@ -1,18 +1,23 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
 
-import { MatRadioModule } from '@angular/material/radio';
-import { RadioGroupComponent } from './radio-group.component';
 import { FormsModule } from '@angular/forms';
+import { MatRadioModule } from '@angular/material/radio';
+
+import { BaseModule } from '../../shared//components/base/base.module';
+import { CssPipeModule } from '../../shared/pipes/css.pipe';
 import { NgeMarkdownModule } from 'nge-markdown';
+
+import { RadioGroupComponent } from './radio-group.component';
 
 @NgModule({
     declarations: [RadioGroupComponent],
     imports: [
-        SharedModule,
+        BaseModule,
+        CssPipeModule,
+        NgeMarkdownModule,
+
         FormsModule,
         MatRadioModule,
-        NgeMarkdownModule,
     ],
     exports: [RadioGroupComponent],
 })

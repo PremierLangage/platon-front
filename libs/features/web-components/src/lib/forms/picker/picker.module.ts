@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { PickerComponent } from './picker.component';
 
 @NgModule({
     declarations: [PickerComponent],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [PickerComponent],
 })

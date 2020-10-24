@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { NgModule, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'css'
@@ -20,3 +20,9 @@ export class CssPipe implements PipeTransform {
         }, {} as Record<string, any>);
     }
 }
+
+@NgModule({
+    declarations: [CssPipe],
+    exports: [CssPipe]
+})
+export class CssPipeModule {}

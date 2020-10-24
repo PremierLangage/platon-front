@@ -1,9 +1,10 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 
+import { BaseModule } from '../../shared//components/base/base.module';
+import { CssPipeModule } from '../../shared/pipes/css.pipe';
 import { NgeMarkdownModule } from 'nge-markdown';
 
 import { SortListComponent } from './sort-list.component';
@@ -11,10 +12,12 @@ import { SortListComponent } from './sort-list.component';
 @NgModule({
     declarations: [SortListComponent],
     imports: [
-        SharedModule,
+        BaseModule,
+        CssPipeModule,
+        NgeMarkdownModule,
+
         MatIconModule,
         DragDropModule,
-        NgeMarkdownModule,
     ],
     exports: [SortListComponent],
 })

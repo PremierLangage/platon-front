@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { HintComponent } from './hint.component';
 
 @NgModule({
     declarations: [HintComponent],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [HintComponent],
 })

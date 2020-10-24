@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { TextSelectComponent } from './text-select.component';
 
 @NgModule({
     declarations: [TextSelectComponent],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [TextSelectComponent],
 })

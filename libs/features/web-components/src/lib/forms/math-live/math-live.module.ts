@@ -1,12 +1,14 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { IconGrPipeModule } from '@platon/shared/utils';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { MathLiveComponent } from './math-live.component';
 
 @NgModule({
     declarations: [MathLiveComponent],
     imports: [
-        SharedModule
+        BaseModule,
+        IconGrPipeModule,
     ],
     exports: [MathLiveComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]

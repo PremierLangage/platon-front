@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { AutomatonEditorComponent } from './automaton-editor.component';
 
 @NgModule({
     declarations: [AutomatonEditorComponent],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [AutomatonEditorComponent],
 })

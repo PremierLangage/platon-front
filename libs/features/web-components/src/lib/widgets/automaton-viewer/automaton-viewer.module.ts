@@ -1,13 +1,13 @@
 import { NgModule, Type } from '@angular/core';
 import { RenderDotModule } from '../../shared/directives/render-dot.directive';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { AutomatonViewerComponent } from './automaton-viewer.component';
 
 @NgModule({
     declarations: [AutomatonViewerComponent],
     imports: [
-        SharedModule,
+        BaseModule,
         RenderDotModule
     ],
     exports: [AutomatonViewerComponent],

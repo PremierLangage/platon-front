@@ -1,12 +1,12 @@
 import { NgModule, Type } from '@angular/core';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { TimerComponent } from './timer.component';
 
 @NgModule({
     declarations: [TimerComponent],
     imports: [
-        SharedModule
+        BaseModule
     ],
     exports: [TimerComponent],
 })

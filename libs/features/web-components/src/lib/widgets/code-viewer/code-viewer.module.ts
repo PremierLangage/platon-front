@@ -1,13 +1,13 @@
 import { NgModule, Type } from '@angular/core';
 import { NgeMonacoModule } from 'nge-monaco';
-import { SharedModule } from '../../shared/shared.module';
+import { BaseModule } from '../../shared//components/base/base.module';
 
 import { CodeViewerComponent } from './code-viewer.component';
 
 @NgModule({
     declarations: [CodeViewerComponent],
     imports: [
-        SharedModule,
+        BaseModule,
         NgeMonacoModule
     ],
     exports: [CodeViewerComponent],
