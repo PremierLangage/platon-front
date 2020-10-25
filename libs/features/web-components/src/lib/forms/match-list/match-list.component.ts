@@ -1,6 +1,7 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Connection, Endpoint, jsPlumb, jsPlumbInstance } from 'jsplumb';
 import { WebComponent, WebComponentHooks } from '../../web-components';
+import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
 import { MatchList, MatchListComponentDefinition, MatchListItem } from './match-list';
 
 @Component({
@@ -10,13 +11,12 @@ import { MatchList, MatchListComponentDefinition, MatchListItem } from './match-
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(MatchListComponentDefinition)
-export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDestroy, WebComponentHooks<MatchList> {
+export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, WebComponentHooks<MatchList> {
     @Input() state!: MatchList;
 
     @ViewChild('container', { static: true })
     container!: ElementRef<HTMLElement>;
 
-    private ready = false;
     private width = 0;
     private height = 0;
     private instance?: jsPlumbInstance;
@@ -32,9 +32,10 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
 
     constructor(
         readonly injector: Injector,
+        readonly changeDetector: WebComponentsChangeDetectionService
     ) {}
 
-    ngAfterViewInit() {
+    async ngOnInit() {
         this.instance = jsPlumb.getInstance({
             Container: this.container.nativeElement,
             ConnectionsDetachable: false,
@@ -56,10 +57,10 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
             ],
             DragOptions: { cursor: 'pointer', zIndex: 2000 },
         });
-
-        this.instance.bind('ready', () => {
-            this.ready = true;
-            this.onChangeState();
+        await new Promise((resolve) => {
+            this.instance?.bind('ready', () => {
+                resolve();
+            });
         });
     }
 
@@ -79,18 +80,13 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
     }
 
     onChangeState() {
-        if (!this.ready)
-            return;
-
         this.instance?.batch(() => {
-            setTimeout(() => {
-                this.removeListeners();
-                this.instance?.setSuspendEvents(this.state.disabled);
-                this.instance?.deleteEveryEndpoint();
-                this.renderConnections();
-                this.renderEndPoints();
-                this.attachListeners();
-            }); // the browser freeze without the call to setTimeout
+            this.removeListeners();
+            this.instance?.setSuspendEvents(this.state.disabled);
+            this.instance?.deleteEveryEndpoint();
+            this.renderEndPoints();
+            this.renderConnections();
+            this.attachListeners();
         });
     }
 
@@ -114,7 +110,6 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
         this.state.links.forEach(link => {
             if (!link.source || !link.target)
                 return;
-
             this.instance?.connect({
                 source: link.source,
                 target: link.target,
@@ -192,17 +187,20 @@ export class MatchListComponent implements AfterViewInit, AfterViewChecked, OnDe
         const index = this.indexOfConnection(connection);
         if (index !== -1)
             return;
-
-        this.state.links.push({
-            source: connection.sourceId,
-            target: connection.targetId
+        this.changeDetector.ignore(this, () => {
+            this.state.links.push({
+                source: connection.sourceId,
+                target: connection.targetId
+            });
         });
     }
 
     private onRemoveConnection(connection: Connection) {
         const index = this.indexOfConnection(connection);
         if (index !== -1) {
-            this.state.links.splice(index, 1);
+            this.changeDetector.ignore(this, () => {
+                this.state.links.splice(index, 1);
+            });
         }
     }
 

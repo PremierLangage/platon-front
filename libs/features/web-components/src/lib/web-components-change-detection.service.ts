@@ -6,7 +6,7 @@ import { WebComponentInstance } from './web-components';
 export class WebComponentsChangeDetectionService {
     /**
      * Suspends the change detection for `component`, invokes the given `action` then
-     * call change detection for `component`.
+     * call `onChangeState` hook of `component`.
      * @param component A webcomponent instance.
      * @param action function to invoke.
      */
@@ -19,6 +19,33 @@ export class WebComponentsChangeDetectionService {
         if (component.onChangeState) {
             component.onChangeState();
         }
+
+        if (!component.$__changeDetector__$) {
+            component.$__changeDetector__$ = component.injector.get(
+                ChangeDetectorRef
+            );
+        }
+
+        component.$__changeDetector__$.detectChanges();
+        component.$__suspendChanges__$ = suspended;
+    }
+
+    /**
+     * Suspends the change detection for `component`, invokes the given `action` then
+     * call angular change detection to refresh the view of `component`.
+     *
+     * Note:
+     *  The difference between this method and `batch` is that this one
+     *  will not call `onChangeState` hook of the component.
+     *
+     * @param component A webcomponent instance.
+     * @param action function to invoke.
+     */
+    ignore(component: WebComponentInstance, action: () => void) {
+        const suspended = component.$__suspendChanges__$;
+        component.$__suspendChanges__$ = true;
+
+        action();
 
         if (!component.$__changeDetector__$) {
             component.$__changeDetector__$ = component.injector.get(
