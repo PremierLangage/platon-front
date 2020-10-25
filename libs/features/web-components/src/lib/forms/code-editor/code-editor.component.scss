@@ -1,5 +1,6 @@
 :host {
   display: block;
+  height: 100%;
 }
 
 footer {
@@ -19,9 +20,14 @@ footer {
   .footer-item:hover {
     background-color: rgba(216, 222, 233, .2);
   }
+
+  .footer-item-icon {
+    vertical-align: text-bottom !important;
+  }
 }
 
 
 .spacer {
   flex: 1;
 }
+

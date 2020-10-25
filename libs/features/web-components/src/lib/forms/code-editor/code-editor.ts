@@ -3,7 +3,10 @@ import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-
 
 export interface CodeEditor extends IWebComponent {
   code: string;
+  height: number;
+  tabSize: number;
   language: string;
+  quickSuggestions: boolean;
 }
 
 export const CodeEditorComponentDefinition = defineWebComponent({
@@ -18,7 +21,10 @@ export const CodeEditorComponentDefinition = defineWebComponent({
         title: 'CodeEditor',
         properties: {
             code: { type: 'string', default: '', description: 'Le contenu de l\'éditeur.' },
+            height: { type: 'number', default: 400, description: 'Le hauteur de l\'éditeur en px.' },
+            tabSize: { type: 'number', default: 4, description: 'Le nombre d\'espaces correspondant à une tabulation.' },
             language: { type: 'string', default: 'plaintext', description: 'Le langage pour la coloration syntaxique.' },
+            quickSuggestions: { type: 'boolean', default: true, description: 'Activer l\'auto-complétion des mots?' },
         }
     },
     showcase: {
