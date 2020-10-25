@@ -2,9 +2,11 @@ import { NgModule, SecurityContext } from '@angular/core';
 
 // required by Angular Material https://www.npmjs.com/package/@angular/material
 import 'hammerjs';
+
 import { NgeMarkdownProviders } from './nge-markdown/nge-markdown';
-import { NgeMonacoImport } from './nge-monaco/nge-monaco';
+import { NgeMonaco } from './nge-monaco/nge-monaco';
 import { NgeDocRenderers } from './nge-doc/nge-doc';
+import { Material } from './material/material';
 
 
 /**
@@ -12,7 +14,11 @@ import { NgeDocRenderers } from './nge-doc/nge-doc';
  */
 @NgModule({
     imports: [
-        NgeMonacoImport
+        NgeMonaco,
+        ...Material
+    ],
+    exports: [
+
     ],
     providers: [
         ...NgeMarkdownProviders,
