@@ -1,4 +1,3 @@
-
 export interface Automaton {
     states: string[];
     alphabet: string[];
@@ -57,16 +56,16 @@ export function stringFromAutomaton(automaton: Automaton) {
 
 export function automatonFromString(input: string) {
     const lines = input.split(/\r?\n/);
-    const automaton = emptyAutomaton();
     let states: string[] = [];
     let initials: string[] = [];
     let accepting: string[] = [];
     let alphabet: string[] = [];
-    const transitions: Transition[] = [];
+
+    const transitions = [];
 
     let parseState = null;
 
-    const parseCounts: any = {
+    const parseCounts: Record<string, number> = {
       states : 0,
       initials : 0,
       accepting : 0,
@@ -105,25 +104,21 @@ export function automatonFromString(input: string) {
             } else if (parseState === 'alphabet') {
                 alphabet = alphabet.concat(line.split(';'));
             } else if (parseState === 'transitions') {
-                const state_rest = line.split(':');
-                const fromStates = state_rest[0].split(',');
-                const parts = state_rest[1].split(';');
-
-                let symbols: string[] = [];
-                let toStates: string[] = [];
-                for (let j = 0; j < parts.length; j++) {
-                    const left_right = parts[j].split('>');
-                    symbols = left_right[0].split(',');
-                    toStates = left_right[1].split(',');
+                const parts = line.split(';');
+                for (const part of parts) {
+                    const state_rest = part.split(':');
+                    const fromState = state_rest[0];
+                    const rest = state_rest[1].split('>');
+                    const symbols = rest[0].split(',');
+                    const toState = rest[1];
+                    transitions.push({
+                        fromState: fromState,
+                        toState: toState,
+                        symbols: symbols
+                    });
                 }
-
-                transitions.push({
-                    fromState: fromStates[0],
-                    toState: toStates[0],
-                    symbols: symbols
-                });
             }
-      }
+        }
     }
 
     for (const k in parseCounts) {
@@ -133,12 +128,12 @@ export function automatonFromString(input: string) {
         }
     }
 
+    const automaton = emptyAutomaton();
     automaton.states = states;
     automaton.initialStates = initials;
     automaton.alphabet = alphabet;
     automaton.acceptingStates = accepting;
     automaton.transitions = transitions;
-
     return automaton;
 }
 
@@ -185,6 +180,7 @@ export function automatonToDotFormat(automaton: Automaton) {
                 return true;
             }
         });
+
         if (!initTransition) {
             trans = [' '];
             trans.push(transition.fromState.toString());
@@ -201,4 +197,10 @@ export function automatonToDotFormat(automaton: Automaton) {
     result.push('}');
 
     return result.join('\n').replace(/\$/g, '$');
+}
+
+export function parseAutomaton(automaton: string | Automaton) {
+    if (typeof automaton === 'string')
+        return automatonFromString(automaton);
+    return automaton;
 }

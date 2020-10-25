@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
-import { automatonFromString, automatonToDotFormat } from '../../shared/models/automaton';
+import { automatonToDotFormat, parseAutomaton } from '../../shared/models/automaton';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { AutomatonViewer, AutomatonViewerComponentDefinition } from './automaton-viewer';
 
@@ -21,7 +21,7 @@ export class AutomatonViewerComponent implements WebComponentHooks<AutomatonView
 
     onChangeState() {
         this.dot = automatonToDotFormat(
-            automatonFromString(this.state.automaton)
+            parseAutomaton(this.state.automaton)
         );
     }
 
