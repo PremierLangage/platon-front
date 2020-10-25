@@ -27,8 +27,8 @@ export class <%= classify(name) %>Component implements WebComponentHooks<<%= cla
      * will be returned by the getter.
      * Define this method to handle any additional post validation tasks.
      *
-     * @param state The object that will be returned by the getter.
-     * @returns the object or a computed version of the object.
+     * @param state The state that will be returned by the getter.
+     * @returns the state or a computed version of the state.
      */
     onGetState(state: <%= classify(name) %>) {
         return state;
@@ -38,8 +38,11 @@ export class <%= classify(name) %>Component implements WebComponentHooks<<%= cla
      * A callback method that is invoked immediately after the `state` setter runs.
      * Define this method to handle any additional validation and initialization tasks.
      *
+     * Remarks:
+     * - `ngOnInit` hook is always called before this one.
+     * - change detector is triggered right after the end of this method refresh the view.
      */
-    onSetState() {
+    onChangeState() {
     }
 
 }
