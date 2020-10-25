@@ -1,18 +1,75 @@
-import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
+import {
+    defineWebComponent,
+    IWebComponent,
+    WebComponentTypes,
+} from '../../web-components';
 
 export interface Picker extends IWebComponent {
-  myproperty: string;
+    hint: string;
+    items: string[];
+    prefix: string;
+    suffix: string;
+    selection: string;
+    placeholder: string;
+    disabled: boolean;
 }
 
 export const PickerComponentDefinition = defineWebComponent({
     type: WebComponentTypes.form,
     name: 'Picker',
-    icon: 'assets/images/components/forms/automaton-editor/automaton-editor.svg',
+    icon: 'assets/images/components/forms/picker/picker.svg',
     selector: 'wc-picker',
-    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
+    description: 'Permets de choisir une proposition parmi liste.',
+    fullDescriptionUrl: 'assets/docs/components/forms/picker/picker.md',
     schema: {
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
-        properties: {}
+        required: ['items'],
+        properties: {
+            items: {
+                type: 'array',
+                default: [],
+                description: 'La liste des choix.',
+                items: { type: 'string' },
+            },
+            prefix: {
+                type: 'string',
+                default: '',
+                description: 'Une icône à afficher à gauche du picker.',
+            },
+            suffix: {
+                type: 'string',
+                default: '',
+                description: 'Une icône à afficher à droite du picker.',
+            },
+            hint: {
+                type: 'string',
+                default: '',
+                description:
+                    'Une indication à afficher en bas du picker.',
+            },
+            selection: {
+                type: 'string',
+                default: '',
+                description: "L'élément sélectionné dans la liste items."
+            },
+            placeholder: {
+                type: 'string',
+                default: '',
+                description: 'Le texte indicatif du picker.',
+            },
+            disabled: {
+                type: 'boolean',
+                default: false,
+                description: 'Désactiver la sélection?'
+            }
+        },
+    },
+    showcase: {
+        items: [
+            'Choix 1',
+            'Choix 2',
+            'Choix 3',
+        ]
     }
 });

@@ -57,7 +57,7 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MatchListComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MathLiveComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: MatrixComponentDefinition },
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: PickerComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: PickerComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: RadioGroupComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: SortListComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: TextSelectComponentDefinition },

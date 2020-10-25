@@ -20,7 +20,7 @@ Le comportement de ce composant dépend de la valeur de sa propriété `type`.
 ### Les propriétés `prefix` et `suffix`
 
 Les propriétés `prefix` et `suffix` vous permettent d'afficher une icône à gauche et/ou à droite
-du champ de saisi en utilisant suivante:
+du champ de saisi en utilisant la syntaxe suivante:
 
 `type nom`
 
