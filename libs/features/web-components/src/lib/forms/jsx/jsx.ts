@@ -18,7 +18,8 @@ export const JsxComponentDefinition = defineWebComponent({
     name: 'Jsx',
     icon: 'assets/images/components/forms/jsx/jsx.svg',
     selector: 'wc-jsx',
-    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
+    description: 'Permets de dessiner, visualiser et interagir avec des figures géométriques.',
+    fullDescriptionUrl: 'assets/docs/components/forms/jsx/jsx.md',
     schema: {
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
@@ -36,7 +37,7 @@ export const JsxComponentDefinition = defineWebComponent({
             disabled: {
                 type: 'boolean',
                 default: false,
-                description: 'Désactiver?'
+                description: 'Désactiver l\'interaction avec JSX?'
             },
             attributes: {
                 type: 'object',
@@ -46,6 +47,7 @@ export const JsxComponentDefinition = defineWebComponent({
         }
     },
     showcase: {
+        // debug: true,
         script: stripIndent`
         const grid = board.create('grid', [], {gridX: 0.25, gridY: 0.25});
         const Ox = board.create('axis', [[0, 0], [1, 0]], {ticks: {visible: false}});
