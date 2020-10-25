@@ -9,6 +9,7 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { MathLive, MathLiveComponentDefinition } from './math-live';
 import { MathfieldElement } from 'mathlive';
+import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
 
 @Component({
     selector: 'wc-math-live',
@@ -22,7 +23,10 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
 
     @Input() state!: MathLive;
 
-    constructor(readonly injector: Injector) {}
+    constructor(
+        readonly injector: Injector,
+        readonly changeDetection: WebComponentsChangeDetectionService,
+    ) {}
 
     async ngOnInit() {
         this.mathfield = new MathfieldElement();
@@ -36,7 +40,9 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
             fontsDirectory: 'assets/vendors/mathlive/fonts'
         });
         this.mathfield.oninput = () => {
-            this.state.value = this.mathfield.getValue('latex');
+            this.changeDetection.ignore(this, () => {
+                this.state.value = this.mathfield.getValue('latex');
+            });
         };
 
         this.injector
