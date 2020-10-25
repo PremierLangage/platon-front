@@ -1,11 +1,12 @@
-<h1>{{definition.name}}</h1>
-<p>
-  <code>&lt;{{definition.selector}}&gt;&lt;/{{definition.selector}}&gt;</code>
-</p>
+
+<nge-markdown ngPreserveWhitespaces>
+# {{definition.name}}
+
+`&lt;{{definition.selector}}&gt;&lt;/{{definition.selector}}&gt;`
+
+{{definition.description}}
+</nge-markdown>
 <br/>
-
-<p>{{definition.description}}</p>
-
 <ng-container *ngIf="definition.fullDescriptionUrl">
   <h2>Description</h2>
   <nge-markdown [file]="definition.fullDescriptionUrl"></nge-markdown>

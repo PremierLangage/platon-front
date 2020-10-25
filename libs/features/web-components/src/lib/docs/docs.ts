@@ -18,6 +18,9 @@ export const WebComponentsDocRoute =  {
             },
         },
         pages: [
+            { title: 'Présentation', href: 'presentation', renderer: 'assets/docs/components/docs/presentation.md' },
+            { title: 'Utilisation', href: 'usage', renderer: 'assets/docs/components/docs/usage.md'  },
+            { title: 'API CSS', href: 'css-api', renderer: () => import('./css/css.module').then(m => m.CssModule) },
             (injector: any) => {
                 const api = injector.get(WebComponentsService);
                 return {
