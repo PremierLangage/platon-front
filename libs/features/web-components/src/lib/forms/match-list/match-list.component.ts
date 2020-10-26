@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Connection, Endpoint, jsPlumb, jsPlumbInstance } from 'jsplumb';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';

@@ -5,6 +5,8 @@ import {
     Input,
     ElementRef,
     OnInit,
+    OnDestroy,
+    ViewChild,
 } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { MathLive, MathLiveComponentDefinition } from './math-live';
@@ -22,6 +24,8 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
     private mathfield!: MathfieldElement;
 
     @Input() state!: MathLive;
+    @ViewChild('container', { static: true })
+    container!: ElementRef<HTMLElement>;
 
     constructor(
         readonly injector: Injector,
@@ -44,12 +48,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
                 this.state.value = this.mathfield.getValue('latex');
             });
         };
-
-        this.injector
-            .get(ElementRef)
-            .nativeElement
-            .querySelector('.math-field')
-            ?.replaceWith(this.mathfield);
+        this.container.nativeElement.replaceWith(this.mathfield);
     }
 
     onChangeState() {
