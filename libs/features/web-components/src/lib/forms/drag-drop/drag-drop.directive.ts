@@ -19,7 +19,7 @@ export class DragDropDirective implements OnDestroy, AfterContentInit {
     dropped = new EventEmitter<DragDropEvent>();
 
     constructor(
-        private readonly el: ElementRef,
+        private readonly el: ElementRef<HTMLElement>,
         private readonly renderer: Renderer2,
     ) {
         this.id = 'dnd-' + ++DragDropDirective.NODE_ID;
@@ -42,6 +42,11 @@ export class DragDropDirective implements OnDestroy, AfterContentInit {
             if (!e.dataTransfer)
                 return false;
             e.dataTransfer.effectAllowed = 'move';
+
+            const x = this.el.nativeElement.offsetWidth / 2;
+            const y = this.el.nativeElement.offsetHeight / 2;
+            e.dataTransfer.setDragImage(this.el.nativeElement, x, y);
+
             e.dataTransfer.setData('dnd-id', node.id);
             this.renderer.addClass(node, 'dnd-drag');
             return false;
@@ -59,9 +64,7 @@ export class DragDropDirective implements OnDestroy, AfterContentInit {
             if (!e.dataTransfer)
                 return false;
             e.dataTransfer.dropEffect = 'move';
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
+            e.preventDefault();
             this.renderer.addClass(node, 'dnd-over');
             return false;
         };
@@ -85,6 +88,8 @@ export class DragDropDirective implements OnDestroy, AfterContentInit {
             }
 
             e.preventDefault();
+            e.stopPropagation();
+
             this.renderer.removeClass(node, 'dnd-over');
 
             const dndId = e.dataTransfer.getData('dnd-id');
