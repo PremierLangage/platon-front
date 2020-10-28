@@ -1,21 +1,19 @@
+export interface Point {
+    x: number;
+    y: number;
+}
 export interface Automaton {
     states: string[];
     alphabet: string[];
     initialStates: string[];
     transitions: Transition[];
     acceptingStates: string[];
-    position?: { [k: string]: Position };
+    position?: Record<string, Point>;
 }
-
 export interface Transition {
     symbols: string[];
     toState:  string;
     fromState: string;
-}
-
-export interface Position {
-    x: number;
-    y: number;
 }
 
 export function emptyAutomaton(): Automaton {

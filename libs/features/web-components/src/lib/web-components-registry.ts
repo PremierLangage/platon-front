@@ -44,7 +44,7 @@ export const WEB_COMPONENTS_BUNDLES: LazyComponentDef[] = [
 ];
 
 export const WEB_COMPONENTS_REGISTRY: Provider[] = [
-    // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonEditorComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonEditorComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AutomatonViewerComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: CheckboxGroupComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: CodeEditorComponentDefinition },

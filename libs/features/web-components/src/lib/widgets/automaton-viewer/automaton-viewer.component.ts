@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
-import { automatonToDotFormat, parseAutomaton } from '../../shared/models/automaton';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
+import { automatonToDotFormat, parseAutomaton } from '../../forms/automaton-editor/automaton';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { AutomatonViewer, AutomatonViewerComponentDefinition } from './automaton-viewer';
 
