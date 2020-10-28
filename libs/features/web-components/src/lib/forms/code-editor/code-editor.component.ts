@@ -3,7 +3,7 @@
 import { ChangeDetectionStrategy, Injector, Component, Input, OnDestroy, ChangeDetectorRef, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { GOTO_LINE_ACTION, INDENT_LINES_ACTION, QUICK_COMMAND_ACTION } from 'nge-monaco';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
+import { WebComponentsChangeDetector } from '../../web-components-change-detector';
 import { CodeEditor, CodeEditorComponentDefinition } from './code-editor';
 
 @Component({
@@ -33,7 +33,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
     constructor(
         readonly injector: Injector,
-        readonly changeDetector: WebComponentsChangeDetectionService,
+        readonly changeDetector: WebComponentsChangeDetector,
     ) {}
 
     ngAfterViewChecked() {

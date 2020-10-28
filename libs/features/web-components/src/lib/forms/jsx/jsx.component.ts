@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { AssetLoaderService, deepEqual } from '@platon/shared/utils';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
+import { WebComponentsChangeDetector } from '../../web-components-change-detector';
 import { Jsx, JsxComponentDefinition } from './jsx';
 
 declare const JXG: any;
@@ -28,7 +28,7 @@ export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
 
     constructor(
         readonly injector: Injector,
-        readonly changeDetector: WebComponentsChangeDetectionService,
+        readonly changeDetector: WebComponentsChangeDetector,
     ) {}
 
     async ngOnInit() {

@@ -11,7 +11,7 @@ import {
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { MathLive, MathLiveComponentDefinition } from './math-live';
 import { MathfieldElement } from 'mathlive';
-import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
+import { WebComponentsChangeDetector } from '../../web-components-change-detector';
 
 @Component({
     selector: 'wc-math-live',
@@ -29,7 +29,7 @@ export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
 
     constructor(
         readonly injector: Injector,
-        readonly changeDetection: WebComponentsChangeDetectionService,
+        readonly changeDetection: WebComponentsChangeDetector,
     ) {}
 
     async ngOnInit() {

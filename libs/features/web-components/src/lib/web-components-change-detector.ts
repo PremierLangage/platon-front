@@ -3,7 +3,7 @@ import { deepCopy, deepEqual } from '@platon/shared/utils';
 import { WebComponentInstance } from './web-components';
 
 @Injectable({ providedIn: 'root' })
-export class WebComponentsChangeDetectionService {
+export class WebComponentsChangeDetector {
     /**
      * Suspends the change detection for `component`, invokes the given `action` then
      * call `onChangeState` hook of `component`.
@@ -41,11 +41,11 @@ export class WebComponentsChangeDetectionService {
      * @param component A webcomponent instance.
      * @param action function to invoke.
      */
-    ignore(component: WebComponentInstance, action: () => void) {
+    async ignore<T>(component: WebComponentInstance, action: () => T | Promise<T>) {
         const suspended = component.$__suspendChanges__$;
         component.$__suspendChanges__$ = true;
 
-        action();
+        const r = await action();
 
         if (!component.$__changeDetector__$) {
             component.$__changeDetector__$ = component.injector.get(
@@ -55,6 +55,7 @@ export class WebComponentsChangeDetectionService {
 
         component.$__changeDetector__$.detectChanges();
         component.$__suspendChanges__$ = suspended;
+        return r;
     }
 
     /**

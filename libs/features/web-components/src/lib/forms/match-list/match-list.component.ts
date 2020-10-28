@@ -1,7 +1,7 @@
 import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Connection, Endpoint, jsPlumb, jsPlumbInstance } from 'jsplumb';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { WebComponentsChangeDetectionService } from '../../web-components-change-detection.service';
+import { WebComponentsChangeDetector } from '../../web-components-change-detector';
 import { MatchList, MatchListComponentDefinition, MatchListItem } from './match-list';
 
 @Component({
@@ -19,7 +19,7 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
 
     private width = 0;
     private height = 0;
-    private instance?: jsPlumbInstance;
+    private jsPlumb!: jsPlumbInstance;
     private selectedPoints: Endpoint[] = [];
 
     get sources() {
@@ -32,11 +32,11 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
 
     constructor(
         readonly injector: Injector,
-        readonly changeDetector: WebComponentsChangeDetectionService
+        readonly changeDetector: WebComponentsChangeDetector
     ) {}
 
     async ngOnInit() {
-        this.instance = jsPlumb.getInstance({
+        this.jsPlumb = jsPlumb.getInstance({
             Container: this.container.nativeElement,
             ConnectionsDetachable: false,
             Endpoint: [ 'Dot', { radius: 6 } ],
@@ -58,9 +58,10 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
             DragOptions: { cursor: 'pointer', zIndex: 2000 },
         });
         await new Promise((resolve) => {
-            this.instance?.bind('ready', () => {
+            this.jsPlumb.ready(() => {
+                this.addListeners();
                 resolve();
-            });
+            })
         });
     }
 
@@ -68,7 +69,7 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
         const { offsetWidth, offsetHeight } = this.container.nativeElement;
         if (this.width !== offsetWidth || this.height !== offsetHeight) {
             if (this.width !== 0 && this.height !== 0) {
-                this.instance?.repaintEverything();
+                this.jsPlumb?.repaintEverything();
             }
         }
         this.width = offsetWidth;
@@ -76,17 +77,15 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
     }
 
     ngOnDestroy() {
-        this.instance?.unbind();
+        this.jsPlumb?.reset();
     }
 
     onChangeState() {
-        this.instance?.batch(() => {
-            this.removeListeners();
-            this.instance?.setSuspendEvents(this.state.disabled);
-            this.instance?.deleteEveryEndpoint();
+        this.jsPlumb.batch(() => {
+            this.jsPlumb.reset(true);
+            this.jsPlumb.setSuspendEvents(this.state.disabled);
             this.renderEndPoints();
             this.renderConnections();
-            this.attachListeners();
         });
     }
 
@@ -96,7 +95,7 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
 
     private renderEndPoints() {
         this.state.nodes.forEach(node => {
-            this.instance?.addEndpoint(node.id, {
+            this.jsPlumb?.addEndpoint(node.id, {
                 id: node.id,
                 isSource: node.type === 'source',
                 isTarget: node.type === 'target',
@@ -110,7 +109,7 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
         this.state.links.forEach(link => {
             if (!link.source || !link.target)
                 return;
-            this.instance?.connect({
+            this.jsPlumb?.connect({
                 source: link.source,
                 target: link.target,
                 anchors: ['RightMiddle', 'LeftMiddle'],
@@ -119,17 +118,17 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
         });
     }
 
-    private attachListeners() {
-        this.instance?.bind('click', connection => {
-            this.instance?.deleteConnection(connection);
+    private addListeners() {
+        this.jsPlumb.bind('click', connection => {
+            this.jsPlumb?.deleteConnection(connection);
         });
-        this.instance?.bind('connection', info => {
+        this.jsPlumb.bind('connection', info => {
             this.onCreateConnection(info.connection);
         });
-        this.instance?.bind('connectionDetached', info => {
+        this.jsPlumb.bind('connectionDetached', info => {
             this.onRemoveConnection(info.connection);
         });
-        this.instance?.bind('endpointClick', info => {
+        this.jsPlumb.bind('endpointClick', info => {
             const point = <any>info as Endpoint;
             this.selectPoint(point);
             if (this.selectedPoints.length >= 2) {
@@ -148,13 +147,6 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
                 }
             }
         });
-    }
-
-    private removeListeners() {
-        this.instance?.unbind('click');
-        this.instance?.unbind('connection');
-        this.instance?.unbind('connectionDetached');
-        this.instance?.unbind('endpointClick');
     }
 
     private selectPoint(point: Endpoint) {
