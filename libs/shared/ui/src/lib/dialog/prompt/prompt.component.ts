@@ -2,12 +2,16 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-    selector: 'lib-prompt',
+    selector: 'ui-dialog-prompt',
     templateUrl: './prompt.component.html',
     styleUrls: ['./prompt.component.scss']
   })
 export class PromptComponent {
-    constructor(public dialog: MatDialogRef<PromptComponent>, @Inject(MAT_DIALOG_DATA) public data: PrompOptions) {
+    constructor(
+        readonly dialog: MatDialogRef<PromptComponent>,
+        @Inject(MAT_DIALOG_DATA)
+        readonly data: PrompOptions
+    ) {
         data.okTitle = data.okTitle || 'OK';
         data.noTitle = data.noTitle || 'CANCEL';
     }

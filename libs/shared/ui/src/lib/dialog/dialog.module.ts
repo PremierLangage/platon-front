@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { OverlayModule } from '@angular/cdk/overlay';
+import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -21,6 +22,7 @@ import { PromptComponent } from './prompt/prompt.component';
   imports: [
       CommonModule,
       OverlayModule,
+      MatInputModule,
       MatButtonModule,
       MatDialogModule,
       MatSnackBarModule,

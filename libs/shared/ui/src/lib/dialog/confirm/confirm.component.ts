@@ -2,7 +2,7 @@ import { Component, Inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-    selector: 'lib-confirm',
+    selector: 'ui-dialog-confirm',
     templateUrl: './confirm.component.html',
     styleUrls: ['./confirm.component.scss']
 })
