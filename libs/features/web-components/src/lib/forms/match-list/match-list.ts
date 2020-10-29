@@ -11,7 +11,7 @@ export interface MatchListItem {
     type: 'source' | 'target';
     content: string;
 }
-export interface MatchList extends IWebComponent {
+export interface MatchListState extends IWebComponent {
   disabled: boolean;
   links: MathListLink[];
   nodes: MatchListItem[];

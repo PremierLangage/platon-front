@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { Markdown, MarkdownComponentDefinition } from './markdown';
+import { MarkdownComponentDefinition, MarkdownState } from './markdown';
 
 @Component({
     selector: 'wc-markdown',
@@ -9,8 +9,8 @@ import { Markdown, MarkdownComponentDefinition } from './markdown';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(MarkdownComponentDefinition)
-export class MarkdownComponent implements WebComponentHooks<Markdown> {
-    @Input() state!: Markdown;
+export class MarkdownComponent implements WebComponentHooks<MarkdownState> {
+    @Input() state!: MarkdownState;
     constructor(
         readonly injector: Injector
     ) {}

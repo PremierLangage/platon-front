@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags'
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface CodeEditor extends IWebComponent {
+export interface CodeEditorState extends IWebComponent {
   code: string;
   height: number;
   tabSize: number;

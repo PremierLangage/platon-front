@@ -9,7 +9,7 @@ export interface CheckboxItem {
     content: string;
     checked?: boolean;
 }
-export interface CheckboxGroup extends IWebComponent {
+export interface CheckboxGroupState extends IWebComponent {
     items: CheckboxItem[];
     disabled: boolean;
     horizontal: boolean;

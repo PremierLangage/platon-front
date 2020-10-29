@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { CheckboxGroup, CheckboxGroupComponentDefinition, CheckboxItem } from './checkbox-group';
+import { CheckboxGroupComponentDefinition, CheckboxGroupState, CheckboxItem } from './checkbox-group';
 
 @Component({
     selector: 'wc-checkbox-group',
@@ -9,8 +9,8 @@ import { CheckboxGroup, CheckboxGroupComponentDefinition, CheckboxItem } from '.
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(CheckboxGroupComponentDefinition)
-export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroup> {
-    @Input() state!: CheckboxGroup;
+export class CheckboxGroupComponent implements WebComponentHooks<CheckboxGroupState> {
+    @Input() state!: CheckboxGroupState;
 
     constructor(
         readonly injector: Injector

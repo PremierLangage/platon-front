@@ -9,7 +9,7 @@ export interface SortListItem {
     content: string;
 }
 
-export interface SortList extends IWebComponent {
+export interface SortListState extends IWebComponent {
     items: SortListItem[];
     disabled: boolean;
 }

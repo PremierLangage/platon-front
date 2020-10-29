@@ -10,7 +10,7 @@ export interface TextSelectSelection {
     content?: string;
     css?: string;
 }
-export interface TextSelect extends IWebComponent {
+export interface TextSelectState extends IWebComponent {
     text: string;
     mode: string;
     regex: string;

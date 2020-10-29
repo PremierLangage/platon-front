@@ -5,7 +5,7 @@ export interface MatrixCell {
     disabled?: string;
 }
 
-export interface Matrix extends IWebComponent {
+export interface MatrixState extends IWebComponent {
     cols: number;
     rows: number;
     disabled: boolean;

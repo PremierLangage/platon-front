@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Automaton, automatonFromString, emptyAutomaton, Point, Transition } from './automaton';
-import { AutomatonEditor } from './automaton-editor';
+import { AutomatonEditorState } from './automaton-editor';
 
 /**
  * Automaton editor API.
  */
 @Injectable()
 export class AutomatonEditorService {
-    private state!: AutomatonEditor;
+    private state!: AutomatonEditorState;
 
     private readonly createStateEvent = new Subject<string>();
     private readonly createTransitionEvent = new Subject<Transition>();
@@ -138,7 +138,7 @@ export class AutomatonEditorService {
         this.automaton.acceptingStates = value;
     }
 
-    sync(state: AutomatonEditor) {
+    sync(state: AutomatonEditorState) {
         this.state = state;
         this.validate();
     }

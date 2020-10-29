@@ -4,7 +4,7 @@ import {
     WebComponentTypes,
 } from '../../web-components';
 
-export interface InputBox extends IWebComponent {
+export interface InputBoxState extends IWebComponent {
     type: 'number' | 'text' | 'textarea';
     hint: string;
     value: string | number;

@@ -4,7 +4,7 @@ import {
     WebComponentTypes,
 } from '../../web-components';
 
-export interface MathLive extends IWebComponent {
+export interface MathLiveState extends IWebComponent {
     value: string;
     prefix: string;
     suffix: string;

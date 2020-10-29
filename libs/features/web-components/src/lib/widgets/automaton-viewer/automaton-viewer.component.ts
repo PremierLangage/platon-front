@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { automatonToDotFormat, parseAutomaton } from '../../forms/automaton-editor/automaton';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { AutomatonViewer, AutomatonViewerComponentDefinition } from './automaton-viewer';
+import { AutomatonViewerComponentDefinition, AutomatonViewerState } from './automaton-viewer';
 
 @Component({
     selector: 'wc-automaton-viewer',
@@ -10,8 +10,8 @@ import { AutomatonViewer, AutomatonViewerComponentDefinition } from './automaton
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(AutomatonViewerComponentDefinition)
-export class AutomatonViewerComponent implements WebComponentHooks<AutomatonViewer> {
-    @Input() state!: AutomatonViewer;
+export class AutomatonViewerComponent implements WebComponentHooks<AutomatonViewerState> {
+    @Input() state!: AutomatonViewerState;
 
     dot?: string;
 

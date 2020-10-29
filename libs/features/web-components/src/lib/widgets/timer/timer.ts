@@ -1,6 +1,6 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface Timer extends IWebComponent {
+export interface TimerState extends IWebComponent {
   myproperty: string;
 }
 

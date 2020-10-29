@@ -9,7 +9,7 @@ export interface RadioGroupItem {
     content: string;
 }
 
-export interface RadioGroup extends IWebComponent {
+export interface RadioGroupState extends IWebComponent {
     items: RadioGroupItem[];
     disabled: boolean;
     selection: string;

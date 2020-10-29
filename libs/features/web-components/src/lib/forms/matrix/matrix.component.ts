@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostBinding, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { Matrix, MatrixComponentDefinition } from './matrix';
+import { MatrixComponentDefinition, MatrixState } from './matrix';
 
 @Component({
     selector: 'wc-matrix',
@@ -9,8 +9,8 @@ import { Matrix, MatrixComponentDefinition } from './matrix';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(MatrixComponentDefinition)
-export class MatrixComponent implements WebComponentHooks<Matrix> {
-    @Input() state!: Matrix;
+export class MatrixComponent implements WebComponentHooks<MatrixState> {
+    @Input() state!: MatrixState;
 
     @HostBinding('style')
     get styles() {

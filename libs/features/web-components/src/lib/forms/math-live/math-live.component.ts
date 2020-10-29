@@ -1,17 +1,15 @@
 import {
     ChangeDetectionStrategy,
-    Injector,
     Component,
+    ElementRef, Injector,
     Input,
-    ElementRef,
     OnInit,
-    OnDestroy,
-    ViewChild,
+    ViewChild
 } from '@angular/core';
-import { WebComponent, WebComponentHooks } from '../../web-components';
-import { MathLive, MathLiveComponentDefinition } from './math-live';
 import { MathfieldElement } from 'mathlive';
+import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetector } from '../../web-components-change-detector';
+import { MathLiveComponentDefinition, MathLiveState } from './math-live';
 
 @Component({
     selector: 'wc-math-live',
@@ -20,10 +18,11 @@ import { WebComponentsChangeDetector } from '../../web-components-change-detecto
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(MathLiveComponentDefinition)
-export class MathLiveComponent implements OnInit, WebComponentHooks<MathLive> {
+export class MathLiveComponent implements OnInit, WebComponentHooks<MathLiveState> {
     private mathfield!: MathfieldElement;
 
-    @Input() state!: MathLive;
+    @Input() state!: MathLiveState;
+
     @ViewChild('container', { static: true })
     container!: ElementRef<HTMLElement>;
 

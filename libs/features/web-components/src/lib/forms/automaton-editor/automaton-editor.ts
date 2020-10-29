@@ -1,7 +1,7 @@
-import { Automaton } from '../../shared/models/automaton';
+import { Automaton } from './automaton';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface AutomatonEditor extends IWebComponent {
+export interface AutomatonEditorState extends IWebComponent {
   height: number;
   automaton: Automaton;
 }
@@ -17,7 +17,7 @@ export const AutomatonEditorComponentDefinition = defineWebComponent({
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
         properties: {
-            height: { type: 'number', default: 400, description: "La hauteur de l'éditeur en px." },
+            height: { type: 'number', default: 500, description: "La hauteur de l'éditeur en px." },
             automaton: { type: 'object', default: {}, description: 'Automate dessiner.' }
         }
     },

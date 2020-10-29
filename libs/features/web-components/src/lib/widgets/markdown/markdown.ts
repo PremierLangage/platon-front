@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface Markdown extends IWebComponent {
+export interface MarkdownState extends IWebComponent {
   data: string;
   file: string;
 }

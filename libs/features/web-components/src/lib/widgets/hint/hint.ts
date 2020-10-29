@@ -1,6 +1,6 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface Hint extends IWebComponent {
+export interface HintState extends IWebComponent {
   myproperty: string;
 }
 

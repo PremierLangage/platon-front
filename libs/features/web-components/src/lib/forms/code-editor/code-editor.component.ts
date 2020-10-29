@@ -1,10 +1,10 @@
 // tslint:disable: no-bitwise
 
-import { ChangeDetectionStrategy, Injector, Component, Input, OnDestroy, ChangeDetectorRef, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
-import { GOTO_LINE_ACTION, INDENT_LINES_ACTION, QUICK_COMMAND_ACTION } from 'nge-monaco';
+import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, ViewChild } from '@angular/core';
+import { GOTO_LINE_ACTION, QUICK_COMMAND_ACTION } from 'nge-monaco';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetector } from '../../web-components-change-detector';
-import { CodeEditor, CodeEditorComponentDefinition } from './code-editor';
+import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor';
 
 @Component({
     selector: 'wc-code-editor',
@@ -13,14 +13,14 @@ import { CodeEditor, CodeEditorComponentDefinition } from './code-editor';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(CodeEditorComponentDefinition)
-export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComponentHooks<CodeEditor> {
+export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComponentHooks<CodeEditorState> {
     private readonly disposables: monaco.IDisposable[] = [];
     private model?: monaco.editor.ITextModel;
     private editor?: monaco.editor.IStandaloneCodeEditor;
     private width = 0;
     private height = 0;
 
-    @Input() state!: CodeEditor;
+    @Input() state!: CodeEditorState;
     @ViewChild('footer', { static: true })
     footer!: ElementRef<HTMLElement>;
 

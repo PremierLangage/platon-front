@@ -2,7 +2,7 @@ import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Injec
 import { Connection, Endpoint, jsPlumb, jsPlumbInstance } from 'jsplumb';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetector } from '../../web-components-change-detector';
-import { MatchList, MatchListComponentDefinition, MatchListItem } from './match-list';
+import { MatchListComponentDefinition, MatchListItem, MatchListState } from './match-list';
 
 @Component({
     selector: 'wc-match-list',
@@ -11,8 +11,8 @@ import { MatchList, MatchListComponentDefinition, MatchListItem } from './match-
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(MatchListComponentDefinition)
-export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, WebComponentHooks<MatchList> {
-    @Input() state!: MatchList;
+export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, WebComponentHooks<MatchListState> {
+    @Input() state!: MatchListState;
 
     @ViewChild('container', { static: true })
     container!: ElementRef<HTMLElement>;

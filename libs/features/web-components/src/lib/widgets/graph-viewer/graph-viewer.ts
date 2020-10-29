@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface GraphViewer extends IWebComponent {
+export interface GraphViewerState extends IWebComponent {
   graph: string;
 }
 

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { RadioGroup, RadioGroupComponentDefinition, RadioGroupItem } from './radio-group';
+import { RadioGroupComponentDefinition, RadioGroupItem, RadioGroupState } from './radio-group';
 
 @Component({
     selector: 'wc-radio-group',
@@ -9,8 +9,8 @@ import { RadioGroup, RadioGroupComponentDefinition, RadioGroupItem } from './rad
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(RadioGroupComponentDefinition)
-export class RadioGroupComponent implements WebComponentHooks<RadioGroup> {
-    @Input() state!: RadioGroup;
+export class RadioGroupComponent implements WebComponentHooks<RadioGroupState> {
+    @Input() state!: RadioGroupState;
 
     constructor(
         readonly injector: Injector

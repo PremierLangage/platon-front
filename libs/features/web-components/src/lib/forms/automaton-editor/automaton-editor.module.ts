@@ -14,7 +14,7 @@ import { AutomatonEditorComponent } from './automaton-editor.component';
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
-        SharedUiDialogModule
+        SharedUiDialogModule,
     ],
     exports: [AutomatonEditorComponent],
 })

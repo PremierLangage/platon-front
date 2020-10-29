@@ -4,7 +4,7 @@ import {
     WebComponentTypes,
 } from '../../web-components';
 
-export interface Picker extends IWebComponent {
+export interface PickerState extends IWebComponent {
     hint: string;
     items: string[];
     prefix: string;

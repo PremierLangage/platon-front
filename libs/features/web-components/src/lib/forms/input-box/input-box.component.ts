@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 import { debounceTime, map, startWith } from 'rxjs/operators';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { InputBox, InputBoxComponentDefinition } from './input-box';
+import { InputBoxComponentDefinition, InputBoxState } from './input-box';
 
 @Component({
     selector: 'wc-input-box',
@@ -12,8 +12,8 @@ import { InputBox, InputBoxComponentDefinition } from './input-box';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(InputBoxComponentDefinition)
-export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<InputBox> {
-    @Input() state!: InputBox;
+export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<InputBoxState> {
+    @Input() state!: InputBoxState;
 
     private subscription?: Subscription;
 

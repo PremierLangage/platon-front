@@ -2,14 +2,13 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
-    HostBinding,
     HostListener,
     Injector,
-    Input,
+    Input
 } from '@angular/core';
 import { CssPipe } from '../../shared/pipes/css.pipe';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { TextSelect, TextSelectComponentDefinition } from './text-select';
+import { TextSelectComponentDefinition, TextSelectState } from './text-select';
 
 // https://javascript.info/selection-range
 
@@ -23,8 +22,8 @@ const HIGHLIGHT = 'highlight-state';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(TextSelectComponentDefinition)
-export class TextSelectComponent implements WebComponentHooks<TextSelect> {
-    @Input() state!: TextSelect;
+export class TextSelectComponent implements WebComponentHooks<TextSelectState> {
+    @Input() state!: TextSelectState;
 
     get container() {
         const native = this.el.nativeElement;

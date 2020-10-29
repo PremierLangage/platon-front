@@ -4,10 +4,10 @@ import {
     Input,
     OnDestroy, OnInit
 } from '@angular/core';
-import { AssetLoaderService, deepEqual } from '@platon/shared/utils';
+import { AssetLoaderService } from '@platon/shared/utils';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetector } from '../../web-components-change-detector';
-import { Jsx, JsxComponentDefinition } from './jsx';
+import { JsxComponentDefinition, JsxState } from './jsx';
 
 declare const JXG: any;
 
@@ -18,13 +18,13 @@ declare const JXG: any;
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(JsxComponentDefinition)
-export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<Jsx> {
+export class JsxComponent implements OnInit, OnDestroy, WebComponentHooks<JsxState> {
     private static NEXT_ID = 0;
     private board?: any;
 
     readonly boardId = 'jsx_graph' + ++JsxComponent.NEXT_ID;
 
-    @Input() state!: Jsx;
+    @Input() state!: JsxState;
 
     constructor(
         readonly injector: Injector,

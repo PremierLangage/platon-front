@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { Timer, TimerComponentDefinition } from './timer';
+import { TimerComponentDefinition, TimerState } from './timer';
 
 @Component({
     selector: 'wc-timer',
@@ -9,14 +9,14 @@ import { Timer, TimerComponentDefinition } from './timer';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(TimerComponentDefinition)
-export class TimerComponent implements WebComponentHooks<Timer> {
+export class TimerComponent implements WebComponentHooks<TimerState> {
     /**
      * The state of the component.
      * The @WebComponent decorator create a getter and a setter during runtime to
      * synchronize the changes and call the methods `onAfterSerialize` (after the getter runs)
      * and `onAfterDeserialize` (after the setter runs).
      */
-    @Input() state!: Timer;
+    @Input() state!: TimerState;
 
     constructor(
         readonly injector: Injector
@@ -30,7 +30,7 @@ export class TimerComponent implements WebComponentHooks<Timer> {
      * @param state The object that will be returned by the getter.
      * @returns the object or a computed version of the object.
      */
-    onGetState(state: Timer) {
+    onGetState(state: TimerState) {
         return state;
     }
 

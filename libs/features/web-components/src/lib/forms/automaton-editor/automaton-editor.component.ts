@@ -23,7 +23,7 @@ import { ActionSetNonInitialProvider } from './actions/states/set-non-initial';
 import { ActionDeleteTransitionProvider } from './actions/transitions/delete-transition';
 import { ActionRenameTransitionProvider } from './actions/transitions/rename-transition';
 import { Transition } from './automaton';
-import { AutomatonEditor, AutomatonEditorComponentDefinition } from './automaton-editor';
+import { AutomatonEditorComponentDefinition, AutomatonEditorState } from './automaton-editor';
 import { AutomatonEditorService } from './automaton-editor.service';
 
 declare type Connection = JsPlumbConnection & { canvas?: HTMLElement };
@@ -56,17 +56,17 @@ export const INITIAL_STATE_CLASS = 'automaton-state--initial';
     ],
 })
 @WebComponent(AutomatonEditorComponentDefinition)
-export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponentHooks<AutomatonEditor> {
-    private jsp!: jsPlumbInstance;
-
-    private zoom = 1.0;
+export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponentHooks<AutomatonEditorState> {
     private readonly subs: Subscription[] = [];
     private readonly context: AutomatonEditorActionContext = {
         state: undefined,
         transition: undefined
     };
 
-    @Input() state!: AutomatonEditor;
+    private zoom = 1.0;
+    private jsp!: jsPlumbInstance;
+
+    @Input() state!: AutomatonEditorState;
 
     @ViewChild('container', { static: true })
     container!: ElementRef<HTMLElement>;
@@ -330,8 +330,8 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
     }
 
     private createEndpoint(name: string, x?: number, y?: number) {
-        x = x ?? Math.random() * 400;
-        y = y ?? Math.random() * 200;
+        x = x ?? Math.random() * this.container.nativeElement.offsetWidth;
+        y = y ?? Math.random() * this.container.nativeElement.offsetHeight;
         this.editor.addState(name, x * this.zoom, y * this.zoom);
     }
 

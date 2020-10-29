@@ -6,7 +6,7 @@ export interface Point {
     y: number;
 }
 
-export interface Jsx extends IWebComponent {
+export interface JsxState extends IWebComponent {
   script: string;
   points: Record<string, Point>;
   disabled: boolean;

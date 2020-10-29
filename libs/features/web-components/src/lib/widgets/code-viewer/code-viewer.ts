@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
 
-export interface CodeViewer extends IWebComponent {
+export interface CodeViewerState extends IWebComponent {
   code: string;
   lines: string;
   language: string;

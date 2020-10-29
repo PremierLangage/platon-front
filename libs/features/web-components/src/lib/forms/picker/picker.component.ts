@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { Picker, PickerComponentDefinition } from './picker';
+import { PickerComponentDefinition, PickerState } from './picker';
 
 @Component({
     selector: 'wc-picker',
@@ -9,8 +9,8 @@ import { Picker, PickerComponentDefinition } from './picker';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(PickerComponentDefinition)
-export class PickerComponent implements WebComponentHooks<Picker> {
-    @Input() state!: Picker;
+export class PickerComponent implements WebComponentHooks<PickerState> {
+    @Input() state!: PickerState;
     constructor(
         readonly injector: Injector
     ) {}

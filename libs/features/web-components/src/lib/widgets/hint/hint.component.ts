@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { Hint, HintComponentDefinition } from './hint';
+import { HintComponentDefinition, HintState } from './hint';
 
 @Component({
     selector: 'wc-hint',
@@ -9,14 +9,14 @@ import { Hint, HintComponentDefinition } from './hint';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(HintComponentDefinition)
-export class HintComponent implements WebComponentHooks<Hint> {
+export class HintComponent implements WebComponentHooks<HintState> {
     /**
      * The state of the component.
      * The @WebComponent decorator create a getter and a setter during runtime to
      * synchronize the changes and call the methods `onAfterSerialize` (after the getter runs)
      * and `onAfterDeserialize` (after the setter runs).
      */
-    @Input() state!: Hint;
+    @Input() state!: HintState;
 
     constructor(
         readonly injector: Injector
@@ -30,7 +30,7 @@ export class HintComponent implements WebComponentHooks<Hint> {
      * @param state The object that will be returned by the getter.
      * @returns the object or a computed version of the object.
      */
-    onGetState(state: Hint) {
+    onGetState(state: HintState) {
         return state;
     }
 

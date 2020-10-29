@@ -4,7 +4,7 @@ import {
     WebComponentTypes,
 } from '../../web-components';
 
-export interface DragDrop extends IWebComponent {
+export interface DragDropState extends IWebComponent {
     css: string;
     group: string;
     content: string;

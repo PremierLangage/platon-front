@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-components';
-import { SortList, SortListComponentDefinition, SortListItem } from './sort-list';
-import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { SortListComponentDefinition, SortListItem, SortListState } from './sort-list';
 
 @Component({
     selector: 'wc-sort-list',
@@ -10,8 +10,8 @@ import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(SortListComponentDefinition)
-export class SortListComponent implements WebComponentHooks<SortList> {
-    @Input() state!: SortList;
+export class SortListComponent implements WebComponentHooks<SortListState> {
+    @Input() state!: SortListState;
 
     constructor(
         readonly injector: Injector
