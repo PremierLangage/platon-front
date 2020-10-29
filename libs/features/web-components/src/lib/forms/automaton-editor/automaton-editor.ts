@@ -21,7 +21,5 @@ export const AutomatonEditorComponentDefinition = defineWebComponent({
             automaton: { type: 'object', default: {}, description: 'Automate dessiner.' }
         }
     },
-    showcase: {
-        debug: true,
-    }
+    showcase: {}
 });

@@ -7,6 +7,8 @@ import {
     NgeMarkdownIconsProvider,
     NgeMarkdownHighlighterProvider,
     NgeMarkdownHighlighterMonacoProvider,
+    NgeMarkdownKatexOptionsProvider,
+    NgeMarkdownEmojiOptionsProvider,
 } from 'nge-markdown';
 
 import { NgeMonacoColorizerService } from 'nge-monaco';
@@ -19,5 +21,11 @@ export const NgeMarkdownProviders = [
     NgeMarkdownLinkAnchorProvider,
     NgeMarkdownAdmonitionsProvider,
     NgeMarkdownHighlighterProvider,
-    NgeMarkdownHighlighterMonacoProvider(NgeMonacoColorizerService)
+    NgeMarkdownHighlighterMonacoProvider(NgeMonacoColorizerService),
+    NgeMarkdownKatexOptionsProvider({
+        baseUrl: 'assets/vendors/katex'
+    }),
+    NgeMarkdownEmojiOptionsProvider({
+        url: 'assets/vendors/emoji-toolkit/joypixels.min.js'
+    })
 ];

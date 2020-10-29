@@ -6,6 +6,7 @@
     "declaration": true,
     "inlineSources": true,
     "types": [],
+    "strictNullChecks": false,
     "lib": ["dom", "es2018"]
   },
   "angularCompilerOptions": {

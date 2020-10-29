@@ -1,7 +1,7 @@
 // tslint:disable: no-bitwise
 
 import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Injector, Input, OnDestroy, ViewChild } from '@angular/core';
-import { GOTO_LINE_ACTION, QUICK_COMMAND_ACTION } from 'nge-monaco';
+import { ACTION_GOTO_LINE, ACTION_INDENT_USING_SPACES, ACTION_QUICK_COMMAND } from 'nge-monaco';
 import { WebComponent, WebComponentHooks } from '../../web-components';
 import { WebComponentsChangeDetector } from '../../web-components-change-detector';
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor';
@@ -137,7 +137,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
     goToLine() {
         if (!this.editor)
             return;
-        const action = this.editor.getAction(GOTO_LINE_ACTION);
+        const action = this.editor.getAction(ACTION_GOTO_LINE);
         this.editor.focus();
         action.run();
     }
@@ -145,7 +145,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
     quickCommand() {
         if (!this.editor)
             return;
-        const action = this.editor.getAction(QUICK_COMMAND_ACTION);
+        const action = this.editor.getAction(ACTION_QUICK_COMMAND);
         this.editor.focus();
         action.run();
     }
@@ -153,11 +153,10 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
     changeIndent() {
         if (!this.editor)
             return;
-        const action = this.editor.getAction('editor.action.indentUsingSpaces');
+        const action = this.editor.getAction(ACTION_INDENT_USING_SPACES);
         this.editor.focus();
         action.run();
     }
-
 
     private detectOptionsChange() {
         if (!this.model)

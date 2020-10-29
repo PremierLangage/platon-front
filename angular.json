@@ -28,12 +28,14 @@
               { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
               { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
 
+              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
               { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/", "output": "./assets/vendors/jsxgraph/" },
               { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
               { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
               { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/", "output": "./assets/vendors/nge-monaco/" },
+              { "glob": "**/*.js", "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
               { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/" }
             ],
             "styles": [
@@ -60,7 +62,8 @@
               "node_modules/@angular/forms/bundles/forms.umd.js"
             ],
             "allowedCommonJsDependencies": [
-              "hammerjs"
+              "hammerjs",
+              "d3-graphviz"
             ]
           },
           "configurations": {
@@ -187,12 +190,14 @@
               { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
               { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
 
+              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
               { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/", "output": "./assets/vendors/jsxgraph/" },
               { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
               { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
               { "glob": "**/*", "input": "./node_modules/nge-monaco/assets/", "output": "./assets/vendors/nge-monaco/" },
+              { "glob": "**/*.js", "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
               { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/" }
             ],
             "styles": [
@@ -219,7 +224,8 @@
               "node_modules/@angular/forms/bundles/forms.umd.js"
             ],
             "allowedCommonJsDependencies": [
-              "hammerjs"
+              "hammerjs",
+              "d3-graphviz"
             ]
           },
           "configurations": {

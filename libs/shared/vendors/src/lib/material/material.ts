@@ -4,7 +4,7 @@ import { MatSnackBarModule } from "@angular/material/snack-bar";
 
 // The modules should be imported into app module to be usabled in lazy loaded modules.
 // https://github.com/angular/components/issues/19335
-export const Material = [
+export const MaterialImports = [
     MatDialogModule,
     OverlayModule,
     MatSnackBarModule,

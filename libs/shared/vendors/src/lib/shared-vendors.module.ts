@@ -1,28 +1,25 @@
-import { NgModule, SecurityContext } from '@angular/core';
+import { NgModule } from '@angular/core';
 
 // required by Angular Material https://www.npmjs.com/package/@angular/material
 import 'hammerjs';
 
+import { MaterialImports } from './material/material';
+import { NgeDocProviders } from './nge-doc/nge-doc';
+import { NgeMonacoImports } from './nge-monaco/nge-monaco';
 import { NgeMarkdownProviders } from './nge-markdown/nge-markdown';
-import { NgeMonaco } from './nge-monaco/nge-monaco';
-import { NgeDocRenderers } from './nge-doc/nge-doc';
-import { Material } from './material/material';
-
 
 /**
  * 3rd party librairies integrations in the project.
  */
 @NgModule({
     imports: [
-        NgeMonaco,
-        ...Material
+        ...MaterialImports,
+        ...NgeMonacoImports,
     ],
-    exports: [
-
-    ],
+    exports: [],
     providers: [
+        ...NgeDocProviders,
         ...NgeMarkdownProviders,
-        NgeDocRenderers,
     ]
 })
 export class SharedVendorsModule {}
