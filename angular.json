@@ -25,8 +25,8 @@
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
-              { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
+              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
 
               { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
@@ -187,8 +187,8 @@
               "apps/doc/src/favicon.ico",
               "apps/doc/src/assets",
               { "glob": "**/*", "input": "assets", "output": "./assets" },
-              { "glob": "**/*.md", "input": "libs/features/web-components/src/lib", "output": "./assets/docs/components" },
-              { "glob": "**/*.svg", "input": "libs/features/web-components/src/lib", "output": "./assets/images/components" },
+              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
 
               { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
               { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
@@ -418,31 +418,31 @@
         }
       }
     },
-    "features-web-components": {
+    "feature-web-component": {
       "projectType": "library",
-      "root": "libs/features/web-components",
-      "sourceRoot": "libs/features/web-components/src",
+      "root": "libs/feature/web-component",
+      "sourceRoot": "libs/feature/web-component/src",
       "prefix": "wc",
       "architect": {
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "libs/features/web-components/tsconfig.lib.json",
-              "libs/features/web-components/tsconfig.spec.json"
+              "libs/feature/web-component/tsconfig.lib.json",
+              "libs/feature/web-component/tsconfig.spec.json"
             ],
             "exclude": [
               "**/node_modules/**",
-              "!libs/features/web-components/**/*"
+              "!libs/feature/web-component/**/*"
             ]
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "libs/features/web-components/src/test.ts",
-            "tsConfig": "libs/features/web-components/tsconfig.spec.json",
-            "karmaConfig": "libs/features/web-components/karma.conf.js"
+            "main": "libs/feature/web-component/src/test.ts",
+            "tsConfig": "libs/feature/web-component/tsconfig.spec.json",
+            "karmaConfig": "libs/feature/web-component/karma.conf.js"
           }
         }
       },

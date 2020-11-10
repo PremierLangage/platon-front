@@ -42,8 +42,8 @@
     "shared-vendors": {
       "tags": ["scope:shared", "type:vendors"]
     },
-    "features-web-components": {
-      "tags": ["scope:feature", "type:web-components"]
+    "feature-web-component": {
+      "tags": ["scope:feature", "type:web-component"]
     }
   },
   "affected": {
