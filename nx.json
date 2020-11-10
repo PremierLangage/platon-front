@@ -44,9 +44,6 @@
     },
     "features-web-components": {
       "tags": ["scope:feature", "type:web-components"]
-    },
-    "core": {
-      "tags": ["scope:core"]
     }
   },
   "affected": {
