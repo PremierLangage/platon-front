@@ -61,7 +61,7 @@
     "jsxgraph": "^1.1.0",
     "katex": "^0.12.0",
     "marked": "^1.1.1",
-    "mathlive": "^0.58.0",
+    "mathlive": "^0.59.0",
     "monaco-editor": "^0.21.2",
     "ng-zorro-antd": "^10.0.2",
     "nge-doc": "^1.1.0",
