@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { WebComponentsDocRoute } from '@platon/features/web-components';
+import { WebComponentDocumentationRoute } from '@platon/feature/web-component';
 import { NgeDocSettings } from 'nge-doc';
 
 const routes: Routes = [
+    WebComponentDocumentationRoute,
     { path: '', loadChildren: () => import('./home/home.module').then(m => m.HomeModule) },
-    WebComponentsDocRoute,
     {
         path: 'developers',
         loadChildren: () => import('nge-doc').then(m => m.NgeDocModule),

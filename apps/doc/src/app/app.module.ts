@@ -5,8 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // LIBS
-import { NgxLazyElModule } from '@juristr/ngx-lazy-el';
-import { FeaturesWebComponentsModule, WEB_COMPONENTS_BUNDLES } from '@platon/features/web-components';
+import { FeatureWebComponentModule } from '@platon/feature/web-component';
 import { SharedVendorsModule } from '@platon/shared/vendors';
 
 // MODULE
@@ -21,11 +20,8 @@ import { AppRoutingModule } from './app-routing.module';
         HttpClientModule,
         BrowserAnimationsModule,
         AppRoutingModule,
-
         SharedVendorsModule,
-        FeaturesWebComponentsModule.forRoot(),
-
-        NgxLazyElModule.forRoot(WEB_COMPONENTS_BUNDLES)
+        FeatureWebComponentModule,
     ],
     providers: [],
     bootstrap: [AppComponent]
