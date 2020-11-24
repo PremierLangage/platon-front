@@ -1,0 +1,97 @@
+{
+  "levels": [
+    "6e",
+    "5e",
+    "4e",
+    "3e",
+    "2nd",
+    "1ere",
+    "Terminale",
+    "L1",
+    "L2",
+    "L3",
+    "M1",
+    "M2"
+  ],
+  "domains": [
+    {
+      "name": "Informatique",
+      "subdomains": [
+        {
+          "name": "Algo",
+          "concepts": [
+            "notion 1",
+            "notion 2",
+            "..."
+          ]
+        },
+        {
+          "name": "Automate",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "C",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "C",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "C++",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "Java",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "Système",
+          "concepts": [
+            "..."
+          ]
+        },
+        {
+          "name": "Base de données",
+          "concepts": [
+            "..."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mathématiques"
+    },
+    {
+      "name": "Histoire"
+    },
+    {
+      "name": "Géographie"
+    },
+    {
+      "name": "Électronique"
+    },
+    {
+      "name": "Physique"
+    },
+    {
+      "name": "Chimie"
+    },
+    {
+      "name": "Langues"
+    },
+    {
+      "name": "SVT"
+    }
+  ]
+}
