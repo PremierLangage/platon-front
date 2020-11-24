@@ -1,0 +1,36 @@
+<mat-icon>search</mat-icon>
+<input
+  type="search"
+  [placeholder]="placeholder"
+  [formControl]="control"
+  [nzAutocomplete]="auto">
+<nz-autocomplete #auto>
+  <ng-container *ngIf="completing; else: result;">
+    <nz-auto-option>
+      <div style="display: flex; justify-content: center;">
+        <nz-spin nzSimple></nz-spin>
+      </div>
+    </nz-auto-option>
+  </ng-container>
+  <ng-template #result>
+    <nz-auto-optgroup
+      *ngFor="let group of completions"
+      [nzLabel]="group.title">
+      <nz-auto-option
+        *ngFor="let completion of group.completions"
+        [nzValue]="completion">
+        <ng-container *ngIf="completionTemplate; else: defaultTemplate">
+          <ng-container *ngTemplateOutlet="
+            completionTemplate;
+            context: {
+              $implicit: completion,
+              group: group,
+              completion: completion
+            }">
+          </ng-container>
+        </ng-container>
+        <ng-template #defaultTemplate>completion</ng-template>
+      </nz-auto-option>
+    </nz-auto-optgroup>
+  </ng-template>
+</nz-autocomplete>
