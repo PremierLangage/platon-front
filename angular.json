@@ -409,6 +409,68 @@
         }
       }
     },
+    "core-auth": {
+      "projectType": "library",
+      "root": "libs/core/auth",
+      "sourceRoot": "libs/core/auth/src",
+      "prefix": "auth",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/core/auth/tsconfig.lib.json",
+              "libs/core/auth/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/core/auth/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/core/auth/src/test.ts",
+            "tsConfig": "libs/core/auth/tsconfig.spec.json",
+            "karmaConfig": "libs/core/auth/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "core-config": {
+      "projectType": "library",
+      "root": "libs/core/config",
+      "sourceRoot": "libs/core/config/src",
+      "prefix": "config",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/core/config/tsconfig.lib.json",
+              "libs/core/config/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/core/config/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/core/config/src/test.ts",
+            "tsConfig": "libs/core/config/tsconfig.spec.json",
+            "karmaConfig": "libs/core/config/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
     "shared-ui": {
       "projectType": "library",
       "root": "libs/shared/ui",
@@ -536,133 +598,28 @@
         }
       }
     },
-    "feature-workspace-circle": {
+    "feature-workspace": {
       "projectType": "library",
-      "root": "libs/feature/workspace/circle",
-      "sourceRoot": "libs/feature/workspace/circle/src",
-      "prefix": "circle",
+      "root": "libs/feature/workspace",
+      "sourceRoot": "libs/feature/workspac/src",
+      "prefix": "workspace",
       "architect": {
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "libs/feature/workspace/circle/tsconfig.lib.json",
-              "libs/feature/workspace/circle/tsconfig.spec.json"
+              "libs/feature/workspace/tsconfig.lib.json",
+              "libs/feature/workspace/tsconfig.spec.json"
             ],
-            "exclude": [
-              "**/node_modules/**",
-              "!libs/feature/workspace/circle/**/*"
-            ]
+            "exclude": ["**/node_modules/**", "!libs/feature/workspace/**/*"]
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "libs/feature/workspace/circle/src/test.ts",
-            "tsConfig": "libs/feature/workspace/circle/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/workspace/circle/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      }
-    },
-    "feature-workspace-exercise": {
-      "projectType": "library",
-      "root": "libs/feature/workspace/exercise",
-      "sourceRoot": "libs/feature/workspace/exercise/src",
-      "prefix": "exercise",
-      "architect": {
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "libs/feature/workspace/exercise/tsconfig.lib.json",
-              "libs/feature/workspace/exercise/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!libs/feature/workspace/exercise/**/*"
-            ]
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/feature/workspace/exercise/src/test.ts",
-            "tsConfig": "libs/feature/workspace/exercise/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/workspace/exercise/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      }
-    },
-    "feature-workspace-activity": {
-      "projectType": "library",
-      "root": "libs/feature/workspace/activity",
-      "sourceRoot": "libs/feature/workspace/activity/src",
-      "prefix": "activity",
-      "architect": {
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "libs/feature/workspace/activity/tsconfig.lib.json",
-              "libs/feature/workspace/activity/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!libs/feature/workspace/activity/**/*"
-            ]
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/feature/workspace/activity/src/test.ts",
-            "tsConfig": "libs/feature/workspace/activity/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/workspace/activity/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      }
-    },
-    "feature-workspace-extension": {
-      "projectType": "library",
-      "root": "libs/feature/workspace/extension",
-      "sourceRoot": "libs/feature/workspace/extension/src",
-      "prefix": "extension",
-      "architect": {
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "libs/feature/workspace/extension/tsconfig.lib.json",
-              "libs/feature/workspace/extension/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!libs/feature/workspace/extension/**/*"
-            ]
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/feature/workspace/extension/src/test.ts",
-            "tsConfig": "libs/feature/workspace/extension/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/workspace/extension/karma.conf.js"
+            "main": "libs/feature/workspace/src/test.ts",
+            "tsConfig": "libs/feature/workspace/tsconfig.spec.json",
+            "karmaConfig": "libs/feature/workspace/karma.conf.js"
           }
         }
       },

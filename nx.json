@@ -33,6 +33,12 @@
       "tags": [],
       "implicitDependencies": ["doc"]
     },
+    "core-auth": {
+      "tags": ["scope:core", "type:auth"]
+    },
+    "core-config": {
+      "tags": ["scope:core", "type:config"]
+    },
     "shared-ui": {
       "tags": ["scope:shared", "type:ui"]
     },
@@ -45,19 +51,9 @@
     "feature-web-component": {
       "tags": ["scope:feature", "type:web-component"]
     },
-    "feature-workspace-circle": {
-      "tags": ["scope:feature", "type:workspace"]
-    },
-    "feature-workspace-exercise": {
-      "tags": ["scope:feature", "type:workspace"]
-    },
-    "feature-workspace-activity": {
-      "tags": ["scope:feature", "type:workspace"]
-    },
-    "feature-workspace-extension": {
+    "feature-workspace": {
       "tags": ["scope:feature", "type:workspace"]
     }
-
   },
   "affected": {
     "defaultBase": "master"
