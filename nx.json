@@ -44,7 +44,20 @@
     },
     "feature-web-component": {
       "tags": ["scope:feature", "type:web-component"]
+    },
+    "feature-workspace-circle": {
+      "tags": ["scope:feature", "type:workspace"]
+    },
+    "feature-workspace-exercise": {
+      "tags": ["scope:feature", "type:workspace"]
+    },
+    "feature-workspace-activity": {
+      "tags": ["scope:feature", "type:workspace"]
+    },
+    "feature-workspace-extension": {
+      "tags": ["scope:feature", "type:workspace"]
     }
+
   },
   "affected": {
     "defaultBase": "master"
