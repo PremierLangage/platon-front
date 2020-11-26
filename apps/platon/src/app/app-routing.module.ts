@@ -5,7 +5,14 @@ import { WebComponentDocumentationRoute } from '@platon/feature/web-component';
 
 const routes: Routes = [
     WebComponentDocumentationRoute,
-    { path: '**', redirectTo: 'components', pathMatch: 'full' }
+    {
+        path: 'login',
+        loadChildren: () => import(
+            /* webpackChunkName: "login" */
+            './pages/login/login.module'
+        ).then(m => m.LoginModule)
+    },
+    { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
 
 @NgModule({
