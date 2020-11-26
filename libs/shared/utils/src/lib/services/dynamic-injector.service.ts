@@ -10,10 +10,6 @@ export interface IDynamicService {
     injectable(): boolean;
 }
 
-export interface IDynamicInjectorConfig {
-    contextToken: Type<any> | InjectionToken<any> | AbstractType<any>;
-}
-
 @Injectable({ providedIn: 'root' })
 export class DynamicInjectorService {
 
