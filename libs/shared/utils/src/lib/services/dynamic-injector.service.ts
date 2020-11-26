@@ -17,9 +17,13 @@ export class DynamicInjectorService {
 
     get<T extends IDynamicService>(
         token: Type<any> | InjectionToken<any> | AbstractType<any>
-    ) {
-        return (this.injector.get(token, []) as T[]).find((e) =>
+    ): T {
+        const service = (this.injector.get(token, []) as T[]).find((e) =>
             e.injectable()
         );
+        if (!service) {
+            throw new Error('[DynamicInjectorService]: No provider found for ' + token);
+        }
+        return service;
     }
 }
