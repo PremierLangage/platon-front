@@ -1,10 +1,9 @@
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
-import { Injectable, NgZone, TemplateRef, ViewContainerRef } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Overlay } from '@angular/cdk/overlay';
+import { ComponentType } from '@angular/cdk/portal';
+import { Injectable, NgZone } from '@angular/core';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { fromEvent, Subscription } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { ConfirmComponent, ConfirmOptions } from './confirm/confirm.component';
 import { PrompOptions, PromptComponent } from './prompt/prompt.component';
 
@@ -13,8 +12,6 @@ import { PrompOptions, PromptComponent } from './prompt/prompt.component';
   providedIn: 'root'
 })
 export class DialogService {
-    private overlayRef?: OverlayRef;
-    private subscription?: Subscription;
 
     constructor(
         private readonly zone: NgZone,
@@ -22,6 +19,10 @@ export class DialogService {
         private readonly overlay: Overlay,
         private readonly snackbar: MatSnackBar,
     ) {}
+
+    open(options: IMaterialDialogOptions) {
+        return this.dialog.open(options.component, options.config);
+    }
 
     promptAsync(options: PrompOptions) {
         const ref: MatDialogRef<PromptComponent, PrompOptions> = this.dialog.open(PromptComponent, {
@@ -60,51 +61,6 @@ export class DialogService {
         });
     }
 
-    contextMenu<T>(options: IContextMenuOptions<T>): void {
-        const { event, templateRef, containerRef, data } = options;
-
-        this.closeContextMenu();
-
-        const { x, y } = event;
-        const positionStrategy = this.overlay.position()
-            .flexibleConnectedTo({ x, y })
-            .withPositions([
-                {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                }
-            ]);
-
-        this.overlayRef = this.overlay.create({
-            positionStrategy,
-            scrollStrategy: this.overlay.scrollStrategies.close()
-        });
-
-        this.overlayRef.attach(new TemplatePortal(templateRef, containerRef, {
-            $implicit: data || {}
-        }));
-
-        this.subscription = fromEvent<MouseEvent>(document, 'click')
-        .pipe(
-            filter(e => {
-                const target = e.target as HTMLElement;
-                return !!this.overlayRef && !this.overlayRef.overlayElement.contains(target);
-            }),
-            take(1)
-        ).subscribe(this.closeContextMenu.bind(this));
-    }
-
-    closeContextMenu(): void {
-        // tslint:disable-next-line: no-unused-expression
-        this.subscription && this.subscription.unsubscribe();
-        if (this.overlayRef) {
-            this.overlayRef.dispose();
-            this.overlayRef = undefined;
-        }
-    }
-
     snack(message: string, config?: MatSnackBarConfig) {
         this.zone.run(() => {
             this.snackbar.open(message, '', {
@@ -113,11 +69,10 @@ export class DialogService {
             });
         });
     }
+
 }
 
-export interface IContextMenuOptions<T> {
-    data?: T;
-    event: MouseEvent;
-    templateRef: TemplateRef<any>;
-    containerRef: ViewContainerRef;
+export interface IMaterialDialogOptions {
+    component: ComponentType<any>;
+    config?: MatDialogConfig<any>;
 }

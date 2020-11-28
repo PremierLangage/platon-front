@@ -33,6 +33,9 @@ import { PromptComponent } from './prompt/prompt.component';
   exports: [
     ConfirmComponent,
     PromptComponent,
+
+    OverlayModule,
+    MatDialogModule,
   ],
   entryComponents: [
     ConfirmComponent,
