@@ -41,6 +41,11 @@
               },
               {
                 "glob": "**/*",
+                "input": "./node_modules/intro.js/",
+                "output": "./assets/vendors/intro.js/"
+              },
+              {
+                "glob": "**/*",
                 "input": "./node_modules/katex/dist/",
                 "output": "./assets/vendors/katex/"
               },
