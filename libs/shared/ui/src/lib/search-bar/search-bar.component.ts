@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {
     SearchBarAutoCompletionGroup
 } from './search-bar';
@@ -46,8 +46,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.subscriptions.push(
             this.control.valueChanges
-                .pipe(debounceTime(300))
-                .subscribe(this.filter.bind(this))
+                .pipe(
+                    debounceTime(500), // Wait for the user to stop typing (1/2 second in this case)
+                    distinctUntilChanged(), // Wait until the search text changes.
+                    switchMap(this.filter.bind(this)) // https://angular.io/guide/http#using-the-switchmap-operator
+                )
+                .subscribe()
         );
 
         this.subscriptions.push(
