@@ -8,10 +8,10 @@ export const WebComponentDocumentationRoute =  {
     data: {
         meta: {
             name: 'Composants PLaTon',
-            root: '/components/',
+            root: '/doc/components/',
             logo: 'assets/logo/platon.svg',
             url: 'https://premierlangage.github.io/platon-front/',
-            backUrl: '/',
+            backUrl: '/doc',
             repo: {
                 name: 'platon-front',
                 url: 'https://github.com/PremierLangage/platon-front'

@@ -38,6 +38,6 @@ export class WebComponentService {
     }
 
     linkFromDefinition(def: WebComponentDefinition) {
-        return `/components/${def.type}s/${def.selector}`;
+        return `/doc/components/${def.type}s/${def.selector}`;
     }
 }
