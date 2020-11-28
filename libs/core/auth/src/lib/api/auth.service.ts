@@ -46,16 +46,21 @@ export class AuthService {
             return this.request.toPromise();
         }
 
-        const uid = await this.uid();
-        if (!uid) {
-            this.redirect('/login');
-            return undefined;
+        let uid: string | undefined;
+        try {
+            uid = await this.uid();
+        } finally {
+            if (!uid) {
+                this.redirect('/login');
+                return undefined;
+            }
         }
 
         if (!this.user) {
             if (!this.request) {
                 this.request = new Observable<AuthUser|undefined>(observer => {
-                    this.connect(uid).then((user) => {
+                    // tslint:disable-next-line: no-non-null-assertion
+                    this.connect(uid!).then((user) => {
                         observer.next(user);
                         observer.complete();
                         this.request = undefined;

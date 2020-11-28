@@ -13,7 +13,7 @@ export class RemoteUserProvider extends AuthUserProvider {
     }
 
     injectable(): boolean {
-        return !this.config.isDemo;
+        return this.config.isServerRunning;
     }
 
     findById(uid: string): Observable<AuthUser | undefined> {

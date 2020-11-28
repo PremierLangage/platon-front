@@ -11,7 +11,7 @@ export class RemoteAuthProvider extends AuthProvider {
     }
 
     injectable(): boolean {
-        return !this.config.isDemo;
+        return this.config.isServerRunning;
     }
 
     uid(): Promise<string | undefined> {
