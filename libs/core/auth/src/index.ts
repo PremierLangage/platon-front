@@ -5,3 +5,4 @@ export * from './lib/guards/auth.guard';
 export * from './lib/models/auth';
 export * from './lib/models/auth-user';
 export * from './lib/providers';
+export * from './lib/services/in-memory-user-db';

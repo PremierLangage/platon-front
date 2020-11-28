@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Démonstration</h2>
+<mat-dialog-content>
+  <nge-markdown ngPreserveWhitespaces>
+    Le mode démonstration permet de lancer une simulation de la plateforme en générant
+    des données aléatoires afin de vous permettre de tester cette dernière.
+
+    > Vous ne pourrez pas tester les fonctionnalités de la plateforme qui dépendent du serveur PLaTon dans ce mode !
+  </nge-markdown>
+  <p> Choisissez un profil pour lancer une simulation !</p>
+  <mat-button-toggle-group [(ngModel)]="role" name="role" aria-label="Role">
+    <mat-button-toggle value="Student">Étudiant</mat-button-toggle>
+    <mat-button-toggle value="Teacher">Enseignant</mat-button-toggle>
+  </mat-button-toggle-group>
+  <ng-container *ngIf="role === 'Teacher'">
+    <mat-checkbox [(ngModel)]="admin">Souhaitez-vous que l'enseignant soit un administrateur?</mat-checkbox>
+  </ng-container>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button
+    color="primary"
+    [disabled]="!role"
+    mat-raised-button
+    [mat-dialog-close]="{ role: role, admin: admin }">Démarrer</button>
+  <button mat-button mat-dialog-close>Annuler</button>
+</mat-dialog-actions>
