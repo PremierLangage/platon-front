@@ -4,6 +4,8 @@ import { map } from 'rxjs/operators';
 import { AuthProvider } from '../models/auth-provider';
 import { InMemoryUserDb } from './in-memory-user-db';
 
+const LOCAL_STORAGE_KEY = 'IN-MEMORY_AUTH_UID';
+
 @Injectable()
 export class InMemoryAuthProvider extends AuthProvider {
     private userId?: string;
@@ -20,11 +22,13 @@ export class InMemoryAuthProvider extends AuthProvider {
     }
 
     uid(): Promise<string | undefined> {
-        return Promise.resolve(this.userId);
+        const id = this.userId || localStorage.getItem(LOCAL_STORAGE_KEY) || undefined;
+        return Promise.resolve(id);
     }
 
     signOut(): Promise<void> {
         this.userId = undefined;
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
         return Promise.resolve();
     }
 
@@ -44,6 +48,7 @@ export class InMemoryAuthProvider extends AuthProvider {
         }
 
         this.userId = user.id;
+        localStorage.setItem(LOCAL_STORAGE_KEY, user.id);
     }
 
 }
