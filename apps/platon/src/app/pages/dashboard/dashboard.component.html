@@ -1,0 +1,25 @@
+<app-container #app>
+  <app-drawer drawerTitle="PLaTon">
+    <app-nav></app-nav>
+  </app-drawer>
+  <app-content>
+    <app-banner
+      [searchBarId]="searchBarId"
+      [bannerTitle]="'Cours'"
+      [bannerImage]="'/assets/images/illustrations/laptop2.svg'"
+      [bannerHint]="'Essayez un nom de cours...'"
+      [bannerDescription]="''"
+      [bannerActions]="actions">
+      <ng-template #actions>
+        <button class="banner-action" mat-raised-button color="primary">
+          <mat-icon>add</mat-icon>
+          Créer
+        </button>
+        <button class="banner-action" mat-raised-button>
+          <mat-icon>info_outline</mat-icon>
+          En savoir plus
+        </button>
+      </ng-template>
+    </app-banner>
+  </app-content>
+</app-container>
