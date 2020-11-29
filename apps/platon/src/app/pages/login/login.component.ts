@@ -60,7 +60,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     signIn() {
         if (this.user && this.user.email === this.email) {
-            this.router.navigateByUrl('/workspace', { replaceUrl: true });
+            this.router.navigateByUrl('/dashboard', { replaceUrl: true });
             return;
         }
         this.signInWithEmailAndPassword();
@@ -101,7 +101,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.connecting = true;
         this.authService.signInWithEmailAndPassword(this.email, this.password).then(() => {
             this.connecting = false;
-            this.router.navigateByUrl('/workspace', { replaceUrl: true });
+            this.router.navigateByUrl('/dashboard', { replaceUrl: true });
         }).catch(() => {
             this.dialog.snack('Une erreur est survenue lors de la connexion !');
             this.connecting = false;
