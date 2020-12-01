@@ -3,14 +3,15 @@ import { Subject } from 'rxjs';
 
 export interface SearchBarAutoCompletionGroup<T> {
   title: string;
-  completions: Set<string>;
+  completions: string[];
 }
 
 export interface SearchBar<T> {
     trigger?: Subject<string>;
+    filterer: SearchBarFilterer<T>;
+    onEmpty?: () => void;
     onChange?: (response: SearchBarFiltererResult<T>) => void;
     placeholder?: string;
-    filterer: SearchBarFilterer<T>;
 }
 
 export interface SearchBarFilterer<T> {
@@ -26,9 +27,12 @@ export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
         private readonly options: {
             dataSource: () => T[] | Promise<T[]>
             fuseOptions: Fuse.IFuseOptions<T>,
-            completionGroups: Record<string, string>
+            completionGroups?: Record<string, string>
+            defaultCompletionGroup?: string;
         }
-    ) {}
+    ) {
+        options.defaultCompletionGroup = options.defaultCompletionGroup || ''
+    }
 
     async filter(query: string): Promise<SearchBarFiltererResult<T>> {
         const dataSource = await this.options.dataSource();
@@ -39,11 +43,16 @@ export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
             };
         }
 
-        const groups: SearchBarAutoCompletionGroup<any>[] = [];
-        Object.entries(this.options.completionGroups).forEach(([_, v]) => {
+        const groups: SearchBarAutoCompletionGroup<any>[] = [{
+            title: this.options.defaultCompletionGroup || '',
+            completions: []
+        }];
+
+        const completionGroups = this.options.completionGroups || {};
+        Object.entries(completionGroups).forEach(([_, title]) => {
             groups.push({
-                title: v,
-                completions: new Set()
+                title,
+                completions: []
             });
         });
 
@@ -53,20 +62,22 @@ export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
             const { item, matches } = r;
             items.push(item);
             (matches || []).forEach(match => {
-                const title = this.options.completionGroups[match.key as string];
+                const title = completionGroups[match.key as string]
+                    || this.options.defaultCompletionGroup
+                    || '';
                 const group = groups.find(g => {
                     return g.title === title;
                 });
-                if (group && match.value) {
-                    if (!group.completions.has(match.value)) {
-                        group.completions.add(match.value);
+                if (group != null && match.value) {
+                    if (!group.completions.includes(match.value)) {
+                        group.completions.push(match.value);
                     }
                 }
             });
         });
 
         return {
-            completions: groups.filter(g => !!g.completions.size),
+            completions: groups.filter(g => !!g.completions.length),
             queryMatches: items
         };
     }

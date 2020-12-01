@@ -60,8 +60,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 })
             );
         }
-
-        this.filter(this.control.value);
     }
 
     ngOnDestroy() {
@@ -73,12 +71,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.completions = [];
         this.cdr.detectChanges();
 
-        if (this.searchBar?.filterer) {
-            const response = await this.searchBar?.filterer.filter(query || '');
-            this.completions = response.completions;
-            if (this.searchBar?.onChange) {
-                this.searchBar.onChange(response);
+        if (query) {
+            if (this.searchBar?.filterer) {
+                const response = await this.searchBar?.filterer.filter(query || '');
+                this.completions = response.completions;
+                if (this.searchBar?.onChange) {
+                    this.searchBar.onChange(response);
+                }
             }
+        } else if (this.searchBar?.onEmpty){
+            this.searchBar.onEmpty();
         }
 
         this.completing = false;
