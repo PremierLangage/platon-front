@@ -26,16 +26,7 @@ Lancez le script d'installation pour générer le dossier `node_modules`
 
 ### 🔨 Architecture
 
-Le projet est basé sur une architecture mono-repo utilisant l'outil [Nx](https://nx.dev/angular). Il est découpé en 2 applications Angular placées dans le dossier `apps`:
-
-* `apps/doc`
-
-  Application du site de la documentation développeurs et des composants qui est déployée à l'adresse <https://premierlangage.github.io/platon-front>.
-  Cette application se lance à l'aide du script
-
-  ```shell
-  ./scripts/serve doc
-  ```
+Le projet est basé sur une architecture mono-repo utilisant l'outil [Nx](https://nx.dev/angular). Il est découpé en une application Angular placées dans le dossier `apps`:
 
 * `apps/platon`
 
@@ -43,15 +34,13 @@ Le projet est basé sur une architecture mono-repo utilisant l'outil [Nx](https:
   Cette application se lance à l'aide du script
 
   ```shell
-  ./scripts/serve platon
+  ./scripts/serve
   ```
 
-Le code en commun entre ces 2 applications (web-components, styles, assets, services...) est placé dans les libraries du dossier `libs`.
+Le code en commun entre les différentes pages de cette application (web-components, styles, assets, services...) est placé dans les libraries du dossier `libs`.
 
 Une fois les applications lancées, ouvrez votre navigateur
 à l'adresse <http://localhost:4200/>
-
-> Pour lancer les 2 applications en même temps vous pouvez fournir un argument --port 4201 à l'une des 2 applications pour la lancer sur un port différent.
 
 ## 🚀 Documentation
 
