@@ -1,0 +1,23 @@
+main {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  column-gap: 32px;
+  padding: 32px 0;
+  box-sizing: border-box;
+}
+
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0;
+}
+
+mat-checkbox,
+mat-radio-button {
+  margin: 8px;
+}
+
+mat-expansion-panel {
+  margin-bottom: 8px;
+}

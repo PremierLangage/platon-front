@@ -1,0 +1,62 @@
+<ng-container *ngIf="circle != null">
+  <section>
+    <h1 class="circle-title">{{circle!.name}}</h1>
+    <p class="circle-description">{{circle!.description}}</p>
+    <div class="circle-actions">
+      <button mat-raised-button>
+        <mat-icon>share</mat-icon>
+        Partager
+      </button>
+      <button mat-raised-button>
+        <mat-icon>article</mat-icon>
+        Créer un exercice
+      </button>
+      <button mat-raised-button>
+        <mat-icon>assessment</mat-icon>
+        Créer une activité
+      </button>
+    </div>
+  </section>
+  <br/>
+  <section>
+    <mat-tab-group dynamicHeight>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">apps</mat-icon>
+          Accueil
+        </ng-template>
+        <ng-template matTabContent>
+          <app-circle-detail-home></app-circle-detail-home>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">chat</mat-icon>
+          Forum
+        </ng-template>
+        <ng-template matTabContent>
+          <app-circle-detail-forum></app-circle-detail-forum>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">book</mat-icon>
+          Documentation
+        </ng-template>
+        <ng-template matTabContent>
+          <app-circle-detail-doc></app-circle-detail-doc>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">settings</mat-icon>
+          Paramètres
+        </ng-template>
+        <ng-template matTabContent>
+          <app-circle-detail-settings></app-circle-detail-settings>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</ng-container>
+

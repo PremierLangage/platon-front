@@ -1,12 +1,10 @@
 <ng-container *ngIf="user != null">
   <app-header
-    #header
-    [user]="user"
-    [showLogo]="!drawer.opened"
-    (menu)="drawer.toggle()">
+    [showLogo]="!drawerOpened"
+    (menu)="drawerOpened = !drawerOpened">
   </app-header>
   <mat-drawer-container>
-    <mat-drawer #drawer mode="side" [opened]="true">
+    <mat-drawer #drawer mode="side" [opened]="drawerOpened">
       <ng-content select="app-drawer"></ng-content>
     </mat-drawer>
     <mat-drawer-content>

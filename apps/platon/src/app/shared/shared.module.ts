@@ -11,11 +11,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -55,10 +56,11 @@ const MATERIAL_MODULES = [
     MatSidenavModule,
     MatStepperModule,
     MatToolbarModule,
-    MatFormFieldModule,
     MatTableModule,
     MatRadioModule,
     MatCheckboxModule,
+    MatExpansionModule,
+    MatFormFieldModule,
 ];
 
 const NZ_ZORRO_MODULES = [

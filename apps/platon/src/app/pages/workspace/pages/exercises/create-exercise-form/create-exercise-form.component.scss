@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  padding: 24px;
+}
+
+:host::ng-deep {
+  .mat-tab-label {
+    padding: 0;
+    justify-content: start;
+  }
+  .mat-tab-body-content {
+    padding: 12px 0;
+  }
+}
+
+header {
+  display: flex;
+  align-items: center;
+}
+
+
+.spacer {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat( auto-fill, minmax( 200px, 1fr ) ); /* [2] Make columns adjust according to the available viewport */
+  // grid-auto-rows: 200px; /* Set the height for implicitly-created row track */
+  row-gap: 24px;
+  column-gap: 24px;
+  padding: 0 8px;
+  &::ng-deep {
+    .mat-card-header-text {
+      margin: 0;
+    }
+  }
+  .tags {
+    margin-top: 16px;
+  }
+  nz-tag {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  mat-card-actions {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+}
+

@@ -1,6 +1,6 @@
 <div class="banner-image" [style.--banner]="bannerImageUrl"></div>
 <h1>{{bannerTitle}}</h1>
-<ui-search-bar [searchBarId]="searchBarId" [placeholder]="bannerHint">
+<ui-search-bar [searchBar]="bannerSearchBar">
   <ng-template let-context>
     <ng-container *ngIf="bannerCompletion; else: nocompletion">
       <ng-container *ngTemplateOutlet="

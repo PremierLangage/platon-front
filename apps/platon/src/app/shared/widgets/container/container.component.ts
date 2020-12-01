@@ -8,6 +8,7 @@ import { AuthService, AuthUser } from '@platon/core/auth';
 })
 export class ContainerComponent implements OnInit {
     user?: AuthUser;
+    drawerOpened = true;
 
     constructor(
         private readonly authService: AuthService

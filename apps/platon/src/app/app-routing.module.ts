@@ -1,16 +1,41 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { WebComponentDocumentationRoute } from '@platon/feature/web-component';
+import { AuthGuard } from '@platon/core/auth';
 
 const routes: Routes = [
-    WebComponentDocumentationRoute,
+    // PUBLIC PAGES
     {
         path: 'login',
         loadChildren: () => import(
             /* webpackChunkName: "login" */
             './pages/login/login.module'
         ).then(m => m.LoginModule)
+    },
+    {
+        path: 'doc',
+        loadChildren: () => import(
+            /* webpackChunkName: "doc" */
+            './pages/doc/doc.module'
+        ).then(m => m.DocModule)
+    },
+
+    // PROTECTED PAGES
+    {
+        path: 'dashboard',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "doc" */
+            './pages/dashboard/dashboard.module'
+        ).then(m => m.DashboardModule)
+    },
+    {
+        path: 'workspace',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "workspace" */
+            './pages/workspace/workspace.module'
+        ).then(m => m.WorkspaceModule)
     },
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];

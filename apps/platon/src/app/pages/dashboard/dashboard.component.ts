@@ -10,7 +10,7 @@ export class DashboardComponent implements OnInit {
 
     user?: AuthUser;
     searchBarId = 'dashboard.searchBar';
-
+    // 'Essayez un nom de cours...'
     constructor(
         private readonly authService: AuthService
     ) { }

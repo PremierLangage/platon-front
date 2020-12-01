@@ -1,0 +1,43 @@
+<app-ws-search-view
+  #searchView
+  [type]="'EXERCISE'"
+  [bannerTitle]="'Exercises'"
+  [bannerImage]="'/assets/images/illustrations/desk.svg'"
+  [bannerActionsTemplate]="bannerActionsTemplate"
+  [bannerDescription]="'Créez des exercices à partir de templates ou de A à Z'"
+  [searchBarPlaceholder]="'Essayez une matière, une notion, un titre, un auteur...'"
+  [listRowTemplate]="listRowTemplate"
+  [listEmptyTemplate]="listEmptyTemplate">
+  <ng-template #bannerActionsTemplate>
+      <button class="banner-action" mat-raised-button color="primary" (click)="create()">
+        <mat-icon>add</mat-icon>
+        Créer
+      </button>
+      <button class="banner-action" mat-raised-button>
+        <mat-icon>info_outline</mat-icon>
+        En savoir plus
+      </button>
+    </ng-template>
+
+    <ng-template #listRowTemplate let-item>
+       <ws-exercise-list-item
+          [item]="item"
+          (didFilterByTag)="searchView.triggerSearch($event)">
+        </ws-exercise-list-item>
+    </ng-template>
+
+     <ng-template #listEmptyTemplate>
+      <nz-empty [nzNotFoundContent]="content" [nzNotFoundFooter]="footer">
+        <ng-template #content>
+          <h2>Créez votre premier exercice</h2>
+          <p>
+            Vous avez la possibilité de créer un exercice à partir
+            d'un template ou bien de A à Z.
+          </p>
+        </ng-template>
+        <ng-template #footer>
+          <button mat-raised-button color="primary">Créer</button>
+        </ng-template>
+      </nz-empty>
+    </ng-template>
+</app-ws-search-view>

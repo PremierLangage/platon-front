@@ -1,0 +1,27 @@
+.circle-title,
+.circle-description {
+  width: 50%;
+}
+
+.tab-icon {
+  margin-right: 4px;
+}
+
+.circle-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  row-gap: 8px;
+  column-gap: 8px;
+
+  button {
+    background-color: #15181f;
+    color: white;
+  }
+
+  img,
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+  }
+}
