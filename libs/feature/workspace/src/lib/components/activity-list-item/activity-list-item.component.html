@@ -1,0 +1,37 @@
+<nz-ribbon [nzText]="item.status">
+  <ui-list-item-article
+    [articleTitle]="item.name"
+    [articleTags]="item.tags"
+    [articleIconTemplate]="image"
+    [articleDescription]="item.description"
+    [articleUrl]="['/workspace/activities', item.id]"
+    (didClickTag)="didFilterByTag.emit($event)">
+    <ng-template #image>
+      <mat-icon>assessment</mat-icon>
+    </ng-template>
+   <!--
+    <ui-list-item-article-action
+      [actionTitle]="item.contributors.length"
+      [matTooltip]="item.contributors.length + ' Contributeur(s)'"
+      [routerLink]="['/workspace/circles', item.id, 'contributors']"
+      [queryParams]="{}">
+      <mat-icon>supervisor_account</mat-icon>
+    </ui-list-item-article-action>
+    <ui-list-item-article-action
+      [actionTitle]="10"
+      matTooltip="Abonné(s)">
+      <mat-icon>visibility</mat-icon>
+    </ui-list-item-article-action>
+    <ui-list-item-article-action
+      [actionTitle]="10"
+      matTooltip="Vote(s)">
+      <mat-icon>star</mat-icon>
+    </ui-list-item-article-action>
+    <div style="flex: 1;"></div>
+    <ui-list-item-article-action
+      [actionTitle]="$any(item.date * 1000|date:'dd/MM/yyyy')"
+      matTooltip="Date de mise à jour">
+      <mat-icon>update</mat-icon>
+    </ui-list-item-article-action> -->
+  </ui-list-item-article>
+</nz-ribbon>

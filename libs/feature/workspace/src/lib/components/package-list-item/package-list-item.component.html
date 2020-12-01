@@ -1,0 +1,21 @@
+<nz-ribbon [nzText]="item.status">
+  <ui-list-item-article
+    [articleTitle]="item.name"
+    [articleTags]="item.tags"
+    [articleIconTemplate]="image"
+    [articleDescription]="item.description"
+    (didClickTag)="didFilterByTag.emit($event)">
+    <ng-template #image>
+      <mat-icon>extension</mat-icon>
+    </ng-template>
+    <ui-list-item-article-action actionTitle="PLaTon" matTooltip="Auteur">
+      <mat-icon>person</mat-icon>
+    </ui-list-item-article-action>
+      <ui-list-item-article-action actionTitle="23/10/2020" matTooltip="Date de mise à jour">
+      <mat-icon>update</mat-icon>
+    </ui-list-item-article-action>
+    <ui-list-item-article-action actionTitle="10" matTooltip="Téléchargements">
+      <mat-icon>get_app</mat-icon>
+    </ui-list-item-article-action>
+  </ui-list-item-article>
+</nz-ribbon>

@@ -1,3 +1,17 @@
+export const ResourceSearchIndexes: ReadonlyArray<string> = [
+    'name',
+    'tags',
+    'contributors.userName',
+    'contributors.lastName',
+    'contributors.firstName',
+];
+export interface Member {
+    id: number;
+    userName: string;
+    lastName: string;
+    firstName: string;
+}
+
 /**
  * Representation of a resource in a workspace.
  */
@@ -16,28 +30,30 @@ export interface Resource {
     date: number;
     /** Brief description of the resource. */
     description: string;
-    /** Users with write access to the resource informations. */
-    admins: string[];
+    /** Users with write access to the resource and it's data. */
+    admins: Member[];
     /** Users with read access to the resource data.  */
-    watchers: string[];
+    watchers: Member[];
     /** Users with write access to the resource data.  */
-    contributors: string[];
+    contributors: Member[];
 }
 
-export enum ResourceTypes {
-    CIRCLE = 'CIRCLE',
-    PACKAGE = 'PACKAGE',
-    EXERCISE = 'EXERCISE',
-    ACTIVITY = 'ACTIVITY',
-}
 
-export enum ResourceStatus {
-    DRAFT = "DRAFT",
-    READY = "READY",
-    BUGGED = "BUGGED",
-    DEPRECATED = "DEPRECATED",
-    NOT_TESTED = "NOT_TESTED",
-}
+export declare type ResourceTypes =
+    'CIRCLE' |
+    'PACKAGE' |
+    'EXERCISE' |
+    'ACTIVITY'
+    ;
+
+export declare type ResourceStatus =
+    'DRAFT' |
+    'READY' |
+    'BUGGED' |
+    'DEPRECATED' |
+    'NOT_TESTED'
+    ;
+
 
 export interface Circle extends Resource {
     activityCount: number;
