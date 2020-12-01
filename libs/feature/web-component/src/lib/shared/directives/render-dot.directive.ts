@@ -21,7 +21,7 @@ export class RenderDotDirective implements OnInit, OnChanges {
 
     ngOnInit() {
         this.assets.loadAllAsync([
-            ['script', '/assets/vendors/viz/viz.js']
+            ['script', 'assets/vendors/viz/viz.js']
         ]).toPromise().then(() => {
             this.ready = true;
             this.render();
