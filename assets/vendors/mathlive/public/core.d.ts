@@ -1,4 +1,4 @@
-/* 0.58.0 *//**
+/* 0.59.0 *//**
  * The mode that indicates how a portion of content is interpreted
  *
  */
@@ -114,7 +114,7 @@ export declare type MacroDefinition = {
  * A dictionary of LaTeX macros to be used to interpret and render the content.
  *
  * For example:
-```typescript
+```javascript
 mf.setOptions({
     macros: {
         smallfrac: '^{#1}\\!\\!/\\!_{#2}',

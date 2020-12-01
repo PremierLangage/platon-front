@@ -1,0 +1,205 @@
+---
+levels:
+- 6e
+- 5e
+- 4e
+- 3e
+- 2nd
+- 1ere
+- Terminale
+- L1
+- L2
+- L3
+- M1
+- M2
+domains:
+- name: Informatique
+  subdomains:
+  - name: Algo
+    concepts:
+    - Recherche
+    - Insertion
+    - Deletion
+    - Comptage
+    - Longueur
+    - Parcours
+    - Vérification
+    - Liste chaînée
+    - Pile
+    - File
+    - Arbre
+    - Arbre binaire
+    - Arbre lexical
+    - Arbre binaire de recherche
+    - Arbre fils gauche frère droit
+    - Arbre complet
+    - Racine
+    - Feuille
+    - Noeud
+    - Hauteur
+    - Arité
+    - Tas
+    - Union-find
+    - Rotation d'arbre
+    - AVL
+    - Graphe
+    - DAG
+    - Étiquette
+    - Graphe orienté
+    - Graphe étiqueté
+    - Cycle
+    - Connexité
+    - Chemin
+    - Hachage
+    - Sommet
+    - Arrête
+    - Distance
+    - Tri
+    - Tri rapide
+    - Tri fusion
+    - Tri par tas
+    - Tri à bulles
+    - Tri quadratique
+    - Complexité
+    - Quadratique
+    - Linéaire
+    - Cubique
+    - Quasi-linéaire
+    - Constante
+    - Polynomial
+    - Exponentielle
+  - name: Système
+    concepts:
+    - Commandes
+    - Unix
+    - Shell
+    - Bash
+    - Processus
+    - Programme
+    - Architecture
+    - Matériel
+    - Périphérique
+    - Partage
+    - Hardware
+    - Transistor
+    - Registre
+    - Cache
+    - Software
+    - Intégrité
+    - Sécurité
+    - POSIX
+    - Assembleur
+    - C
+    - Ascii
+    - Binaire
+    - Héxadécimal
+    - Encodage
+    - Interface
+    - Fichier
+    - Système de fichiers
+    - Répertoire
+    - Droit
+    - Utilisateur
+    - Super utilisateur
+    - root
+    - Arborescence
+    - Mémoire
+    - Mémoire vive
+    - Mémoire morte
+    - Mémoire tampon
+    - Entrées/Sorties
+    - stdin
+    - stdout
+    - Flux
+    - Bufferisation
+    - Arguments
+    - Paramètre
+    - Pipe
+    - Redirection
+    - grep
+    - cut
+    - find
+    - sed
+    - sort
+    - uniq
+    - Événements
+    - Interruption
+    - Interruption synchrone
+    - Interruption assynchronne
+    - Signaux
+    - Thread
+    - Coeur
+    - fork
+    - Appel
+    - Appel système
+    - Primitive
+    - Primitive système
+    - Primitive CPU
+    - Multiprocessing
+    - Multithreading
+    - Ordonancement
+    - Scheduler
+    - Famine
+    - Préemption
+    - Segmentation
+    - Virtualisation
+    - Pagination
+    - Indirection
+    - Double indexation
+    - Triple indexation
+  - name: C
+    concepts:
+    - Source
+    - Main
+    - Fonction
+    - Variable
+    - Variable locale
+    - Variable globale
+    - Type
+    - int
+    - float
+    - char
+    - double
+    - short
+    - Type entier
+    - Type flottant
+    - Pointeur
+    - Adresse
+    - Déréférencement
+    - Tableau
+    - Chaîne de caractère
+    - Valeur
+    - Affectation
+    - Mémoire
+    - Éntrées
+    - Sorties
+    - Éntrée standard
+    - Sortie standard
+    - Lecture
+    - Écriture
+    - Affichage
+    - Clavier
+    - Fichier
+    - Effets de bord
+    - Priorité
+    - Pile d'exécution
+    - Allocation dynamique
+    - Préprocesseur
+    - Macro
+    - Macro constante
+    - Macro à paramètre
+    - Module
+    - Entête
+    - Compilation
+    - Édition de liens
+    - Bibliothèque
+    - Dépendance
+    - Makefile
+- name: Mathématiques
+- name: Histoire
+- name: Géographie
+- name: Électronique
+- name: Physique
+- name: Chimie
+- name: Langues
+- name: SVT

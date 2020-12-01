@@ -1744,8 +1744,9 @@
             scroll = this.params.scroll,
             _multipleDrop = params.multipleDrop !== false,
             isConstrained = false,
-            useGhostProxy = params.ghostProxy === true ? TRUE : params.ghostProxy && typeof params.ghostProxy === "function" ? params.ghostProxy : FALSE,
-            ghostProxy = function(el) { return el.cloneNode(true); },
+            //useGhostProxy = params.ghostProxy === true ? TRUE : params.ghostProxy && typeof params.ghostProxy === "function" ? params.ghostProxy : FALSE,
+            useGhostProxy,
+            ghostProxy,// = function(el) { return el.cloneNode(true); },
             elementToDrag = null,
             availableSelectors = [],
             activeSelectorParams = null, // which, if any, selector config is currently active.
@@ -1754,6 +1755,36 @@
             ghostParentPosition,
             ghostDx,
             ghostDy;
+
+        if (params.ghostProxy === true) {
+            useGhostProxy = TRUE;
+        } else {
+            if (params.ghostProxy && typeof params.ghostProxy === "function") {
+                useGhostProxy = params.ghostProxy;
+            } else {
+                useGhostProxy = function(container, dragEl) {
+                    if (activeSelectorParams && activeSelectorParams.useGhostProxy) {
+                        return activeSelectorParams.useGhostProxy(container, dragEl);
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        if (params.makeGhostProxy) {
+            ghostProxy = params.makeGhostProxy;
+        } else {
+
+            ghostProxy = function(el) {
+                if (activeSelectorParams && activeSelectorParams.makeGhostProxy) {
+                    return activeSelectorParams.makeGhostProxy(el);
+                } else {
+                    return el.cloneNode(true);
+                }
+            };
+
+        }
 
         // if an initial selector was provided, push the entire set of params as a selector config.
         if (params.selector) {
@@ -1837,6 +1868,14 @@
          */
         this.setConstrain = function(value) {
             _setConstrain(value);
+        };
+
+        /* private */ var _doConstrain = function(pos, dragEl, _constrainRect, _size) {
+            if (activeSelectorParams != null && activeSelectorParams.constrain && typeof activeSelectorParams.constrain === "function") {
+                return activeSelectorParams.constrain(pos, dragEl, _constrainRect, _size);
+            } else {
+                return constrain(pos, dragEl, _constrainRect, _size);
+            }
         };
 
         var revertFunction;
@@ -2199,7 +2238,7 @@
             intersectingDroppables.length = 0;
 
             var desiredLoc = this.toGrid([posAtDown[0] + dx, posAtDown[1] + dy]),
-                cPos = constrain(desiredLoc, dragEl, constrainRect, this.size);
+                cPos = _doConstrain(desiredLoc, dragEl, constrainRect, this.size);
 
             // if we should use a ghost proxy...
             if (useGhostProxy(this.el, dragEl)) {
@@ -2692,8 +2731,12 @@
         };
 
         this.elementRemoved = function(el) {
-            this.destroyDraggable(el);
-            this.destroyDroppable(el);
+            if (el["_katavorioDrag"]) {
+                this.destroyDraggable(el);
+            }
+            if (el["_katavorioDrop"]) {
+                this.destroyDroppable(el);
+            }
         };
 
         /**
@@ -2883,16 +2926,7 @@
 
 }).call(typeof window !== 'undefined' ? window : this);
 
-/*
- * Utility functions.
- *
- * Copyright (c) 2010 - 2020 jsPlumb (hello@jsplumbtoolkit.com)
- *
- * https://jsplumbtoolkit.com
- * https://github.com/jsplumb/jsplumb
- *
- * Dual licensed under the MIT and GPL2 licenses.
- */
+
 (function() {
 
     var root = this;
@@ -3305,15 +3339,6 @@
         return child;
     }
     jsPlumbUtil.extend = extend;
-    /**
-     * Generate a UUID.
-     */
-        // export function uuid(): string {
-        //     return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        //         let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        //         return v.toString(16);
-        //     }));
-        // }
     var lut = [];
     for (var i = 0; i < 256; i++) {
         lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
@@ -3577,6 +3602,24 @@
         return EventGenerator;
     }());
     jsPlumbUtil.EventGenerator = EventGenerator;
+    function rotatePoint(point, center, rotation) {
+        var radial = [point[0] - center[0], point[1] - center[1]], cr = Math.cos(rotation / 360 * Math.PI * 2), sr = Math.sin(rotation / 360 * Math.PI * 2);
+        return [
+            (radial[0] * cr) - (radial[1] * sr) + center[0],
+            (radial[1] * cr) + (radial[0] * sr) + center[1],
+            cr,
+            sr
+        ];
+    }
+    jsPlumbUtil.rotatePoint = rotatePoint;
+    function rotateAnchorOrientation(orientation, rotation) {
+        var r = rotatePoint(orientation, [0, 0], rotation);
+        return [
+            Math.round(r[0]),
+            Math.round(r[1])
+        ];
+    }
+    jsPlumbUtil.rotateAnchorOrientation = rotateAnchorOrientation;
 
 }).call(typeof window !== 'undefined' ? window : this);
 
@@ -3900,13 +3943,6 @@
     var root = this;
 
     var _ju = root.jsPlumbUtil,
-
-        /**
-         * creates a timestamp, using milliseconds since 1970, but as a string.
-         */
-        _timestamp = function () {
-            return "" + (new Date()).getTime();
-        },
 
         // helper method to update the hover style whenever it, or paintStyle, changes.
         // we use paintStyle as the foundation and merge hoverPaintStyle over the
@@ -4335,14 +4371,14 @@
                 if (this._jsPlumb.hoverPaintStyle != null) {
                     this._jsPlumb.paintStyleInUse = hover ? this._jsPlumb.hoverPaintStyle : this._jsPlumb.paintStyle;
                     if (!this._jsPlumb.instance.isSuspendDrawing()) {
-                        timestamp = timestamp || _timestamp();
+                        timestamp = timestamp || jsPlumbUtil.uuid();
                         this.repaint({timestamp: timestamp, recalc: false});
                     }
                 }
                 // get the list of other affected elements, if supported by this component.
                 // for a connection, its the endpoints.  for an endpoint, its the connections! surprise.
                 if (this.getAttachedElements && !ignoreAttachedElements) {
-                    _updateAttachedElements(this, hover, _timestamp(), this);
+                    _updateAttachedElements(this, hover, jsPlumbUtil.uuid(), this);
                 }
             }
         }
@@ -4359,7 +4395,7 @@
 
     var jsPlumbInstance = root.jsPlumbInstance = function (_defaults) {
 
-        this.version = "2.14.6";
+        this.version = "2.15.0";
 
         this.Defaults = {
             Anchor: "Bottom",
@@ -4603,6 +4639,8 @@
             ///
             _draw = function (element, ui, timestamp, clearEdits) {
 
+                var drawResult = { c:[], e:[] };
+
                 if (!_suspendDrawing) {
 
                     element = _currentInstance.getElement(element);
@@ -4613,7 +4651,7 @@
                             repaintEls = element.querySelectorAll(".jtk-managed");
 
                         if (timestamp == null) {
-                            timestamp = _timestamp();
+                            timestamp = jsPlumbUtil.uuid();
                         }
 
                         // update the offset of everything _before_ we try to draw anything.
@@ -4631,15 +4669,21 @@
                             });
                         }
 
-                        _currentInstance.router.redraw(id, ui, timestamp, null, clearEdits);
+                        var d2 = _currentInstance.router.redraw(id, ui, timestamp, null, clearEdits);
+                        Array.prototype.push.apply(drawResult.c, d2.c);
+                        Array.prototype.push.apply(drawResult.e, d2.e);
 
                         if (repaintEls) {
                             for (var j = 0; j < repaintEls.length; j++) {
-                                _currentInstance.router.redraw(repaintEls[j].getAttribute("id"), null, timestamp, null, clearEdits, true);
+                                d2 = _currentInstance.router.redraw(repaintEls[j].getAttribute("id"), null, timestamp, null, clearEdits, true);
+                                Array.prototype.push.apply(drawResult.c, d2.c);
+                                Array.prototype.push.apply(drawResult.e, d2.e);
                             }
                         }
                     }
                 }
+
+                return drawResult;
             },
 
             //
@@ -5108,7 +5152,13 @@
 
                 if (!_suspendDrawing) {
                     e.paint({
-                        anchorLoc: e.anchor.compute({ xy: [ myOffset.left, myOffset.top ], wh: sizes[id], element: e, timestamp: _suspendedAt }),
+                        anchorLoc: e.anchor.compute(
+                            { xy: [ myOffset.left, myOffset.top ],
+                                wh: sizes[id],
+                                element: e,
+                                timestamp: _suspendedAt,
+                                rotation:this.getRotation(id)
+                            }),
                         timestamp: _suspendedAt
                     });
                 }
@@ -5824,7 +5874,8 @@
                 managedElements[id] = {
                     el: element,
                     endpoints: [],
-                    connections: []
+                    connections: [],
+                    rotation: 0
                 };
 
                 managedElements[id].info = _updateOffset({ elId: id, timestamp: _suspendedAt });
@@ -5842,13 +5893,34 @@
             return managedElements[id];
         };
 
-        var _unmanage = _currentInstance.unmanage = function(id) {
+        this.unmanage = function(id) {
             if (managedElements[id]) {
                 var el = managedElements[id].el;
                _currentInstance.removeClass(el, "jtk-managed");
                 delete managedElements[id];
                 _currentInstance.fire("unmanageElement", {id:id, el:el});
             }
+        };
+
+        this.rotate = function(elId, amountInDegrees, doNotRedraw) {
+            if (managedElements[elId]) {
+                managedElements[elId].rotation = amountInDegrees;
+
+                managedElements[elId].el.style.transform="rotate(" + amountInDegrees + "deg)";
+                managedElements[elId].el.style.transformOrigin="center center";
+
+                if (doNotRedraw !== true) {
+                    return this.revalidate(elId);
+                }
+            }
+
+            return {
+                c:[], e:[]
+            };
+        };
+
+        this.getRotation = function(elementId) {
+            return managedElements[elementId] ? managedElements[elementId].rotation || 0 : 0;
         };
 
         /**
@@ -6061,7 +6133,7 @@
                 },
                 onDrop: function (jpc) {
                     var source = jpc.endpoints[0];
-                    source.anchor.unlock();
+                    source.anchor.locked = false;
                 },
                 isDropAllowed: function () {
                     return proxyComponent.isDropAllowed.apply(proxyComponent, arguments);
@@ -6577,11 +6649,12 @@
         }.bind(this);
 
         var _first = function (el, fn) {
-            if (_ju.isString(el) || !el.length) {
-                return fn.apply(this, [ el ]);
-            }
-            else if (el.length) {
-                return fn.apply(this, [ el[0] ]);
+            if (el != null) {
+                if (_ju.isString(el) || !el.length) {
+                    return fn.apply(this, [el]);
+                } else if (el.length) {
+                    return fn.apply(this, [el[0]]);
+                }
             }
 
         }.bind(this);
@@ -6660,15 +6733,13 @@
         };
 
         this.revalidate = function (el, timestamp, isIdAlready) {
-            return _elEach(el, function(_el) {
-                var elId = isIdAlready ? _el : _currentInstance.getId(_el);
-                _currentInstance.updateOffset({ elId: elId, recalc: true, timestamp:timestamp });
-                var dm = _currentInstance.getDragManager();
-                if (dm) {
-                    dm.updateOffsets(elId);
-                }
-                _currentInstance.repaint(_el);
-            });
+            var elId = isIdAlready ? el : _currentInstance.getId(el);
+            _currentInstance.updateOffset({ elId: elId, recalc: true, timestamp:timestamp });
+            var dm = _currentInstance.getDragManager();
+            if (dm) {
+                dm.updateOffsets(elId);
+            }
+            return _draw(el, null, timestamp);
         };
 
         // repaint every endpoint and connection.
@@ -6676,7 +6747,7 @@
             // TODO this timestamp causes continuous anchors to not repaint properly.
             // fix this. do not just take out the timestamp. it runs a lot faster with
             // the timestamp included.
-            var timestamp = _timestamp(), elId;
+            var timestamp = jsPlumbUtil.uuid(), elId;
 
             for (elId in endpointsByElement) {
                 _currentInstance.updateOffset({ elId: elId, recalc: true, timestamp: timestamp });
@@ -6812,6 +6883,12 @@
                     this.doReset();
                 }
             }.bind(this));
+        };
+
+        this.destroy = function() {
+            this.reset();
+            _container = null;
+            _containerDelegations = null;
         };
 
         var _clearObject = function (obj) {
@@ -6964,7 +7041,6 @@
         this.doWhileSuspended = this.batch;
 
         this.getCachedData = _getCachedData;
-        this.timestamp = _timestamp;
         this.show = function (el, changeEndpoints) {
             _setVisible(el, "block", changeEndpoints);
             return _currentInstance;
@@ -7928,9 +8004,11 @@
                             anchorParams.txy = [ oOffset.left, oOffset.top ];
                             anchorParams.twh = oWH;
                             anchorParams.tElement = c.endpoints[oIdx];
+                            anchorParams.tRotation = _jsPlumb.getRotation(oId);
                         } else if (this.connections.length > 0) {
                             anchorParams.connection = this.connections[0];
                         }
+                        anchorParams.rotation = _jsPlumb.getRotation(this.elementId);
                         ap = this.anchor.compute(anchorParams);
                     }
 
@@ -8188,7 +8266,7 @@
                         var originalEvent = _jsPlumb.getDropEvent(arguments);
                         // unlock the other endpoint (if it is dynamic, it would have been locked at drag start)
                         var idx = _jsPlumb.getFloatingAnchorIndex(jpc);
-                        jpc.endpoints[idx === 0 ? 1 : 0].anchor.unlock();
+                        jpc.endpoints[idx === 0 ? 1 : 0].anchor.locked = false;
                         jpc.removeClass(_jsPlumb.draggingClass);
                         // if we have the floating endpoint then the connection has not been dropped
                         // on another endpoint.  If it is a new connection we throw it away. If it is an
@@ -8286,7 +8364,7 @@
                         // make our canvas visible (TODO: hand off to library; we should not know about DOM)
                         this.canvas.style.visibility = "visible";
                         // unlock our anchor
-                        this.anchor.unlock();
+                        this.anchor.locked = false;
                         // clear floating anchor.
                         this._jsPlumb.floatingEndpoint = null;
                     }
@@ -8973,12 +9051,13 @@
                 otherInfo = _jsPlumb.getCachedData(this.targetId),
                 otherOffset = otherInfo.o,
                 otherWH = otherInfo.s,
-                initialTimestamp = _suspendedAt || _jsPlumb.timestamp(),
+                initialTimestamp = _suspendedAt || jsPlumbUtil.uuid(),
                 anchorLoc = this.endpoints[0].anchor.compute({
                     xy: [ myOffset.left, myOffset.top ], wh: myWH, element: this.endpoints[0],
                     elementId: this.endpoints[0].elementId,
                     txy: [ otherOffset.left, otherOffset.top ], twh: otherWH, tElement: this.endpoints[1],
-                    timestamp: initialTimestamp
+                    timestamp: initialTimestamp,
+                    rotation:_jsPlumb.getRotation(this.endpoints[0].elementId)
                 });
 
             this.endpoints[0].paint({ anchorLoc: anchorLoc, timestamp: initialTimestamp });
@@ -8987,7 +9066,8 @@
                 xy: [ otherOffset.left, otherOffset.top ], wh: otherWH, element: this.endpoints[1],
                 elementId: this.endpoints[1].elementId,
                 txy: [ myOffset.left, myOffset.top ], twh: myWH, tElement: this.endpoints[0],
-                timestamp: initialTimestamp
+                timestamp: initialTimestamp,
+                rotation:_jsPlumb.getRotation(this.endpoints[1].elementId)
             });
             this.endpoints[1].paint({ anchorLoc: anchorLoc, timestamp: initialTimestamp });
         }
@@ -9284,8 +9364,21 @@
                         targetInfo = this._jsPlumb.instance.updateOffset({elId:tId}).o,
                         sE = this.endpoints[sIdx], tE = this.endpoints[tIdx];
 
-                    var sAnchorP = sE.anchor.getCurrentLocation({xy: [sourceInfo.left, sourceInfo.top], wh: [sourceInfo.width, sourceInfo.height], element: sE, timestamp: timestamp}),
-                        tAnchorP = tE.anchor.getCurrentLocation({xy: [targetInfo.left, targetInfo.top], wh: [targetInfo.width, targetInfo.height], element: tE, timestamp: timestamp});
+                    var sAnchorP = sE.anchor.getCurrentLocation(
+                        {
+                            xy: [sourceInfo.left, sourceInfo.top],
+                            wh: [sourceInfo.width, sourceInfo.height],
+                            element: sE,
+                            timestamp: timestamp,
+                            rotation:this._jsPlumb.instance.getRotation(this.sourceId)
+                        }),
+                        tAnchorP = tE.anchor.getCurrentLocation({
+                            xy: [targetInfo.left, targetInfo.top],
+                            wh: [targetInfo.width, targetInfo.height],
+                            element: tE,
+                            timestamp: timestamp,
+                            rotation:this._jsPlumb.instance.getRotation(this.targetId)
+                        });
 
                     this.connector.resetBounds();
 
@@ -9465,7 +9558,7 @@
             jsPlumbInstance = params.jsPlumbInstance,
             floatingConnections = {},
             // used by placeAnchors function
-            placeAnchorsOnLine = function (desc, elementDimensions, elementPosition, connections, horizontal, otherMultiplier, reverse) {
+            placeAnchorsOnLine = function (desc, elementDimensions, elementPosition, connections, horizontal, otherMultiplier, reverse, rotation) {
                 var a = [], step = elementDimensions[horizontal ? 0 : 1] / (connections.length + 1);
 
                 for (var i = 0; i < connections.length; i++) {
@@ -9474,8 +9567,14 @@
                         val = elementDimensions[horizontal ? 0 : 1] - val;
                     }
 
-                    var dx = (horizontal ? val : other), x = elementPosition[0] + dx, xp = dx / elementDimensions[0],
-                        dy = (horizontal ? other : val), y = elementPosition[1] + dy, yp = dy / elementDimensions[1];
+                    var dx = (horizontal ? val : other), x = elementPosition.left + dx, xp = dx / elementDimensions[0],
+                        dy = (horizontal ? other : val), y = elementPosition.top + dy, yp = dy / elementDimensions[1];
+
+                    if (rotation !== 0) {
+                        var rotated = jsPlumbUtil.rotatePoint([x, y], [elementPosition.centerx, elementPosition.centery], rotation);
+                        x = rotated[0];
+                        y = rotated[1];
+                    }
 
                     a.push([ x, y, xp, yp, connections[i][1], connections[i][2] ]);
                 }
@@ -9510,9 +9609,10 @@
                         if (unsortedConnections.length > 0) {
                             var sc = _sortHelper(unsortedConnections, edgeSortFunctions[desc]), // puts them in order based on the target element's pos on screen
                                 reverse = desc === "right" || desc === "top",
+                                rotation = jsPlumbInstance.getRotation(elementId),
                                 anchors = placeAnchorsOnLine(desc, elementDimensions,
                                     elementPosition, sc,
-                                    isHorizontal, otherMultiplier, reverse);
+                                    isHorizontal, otherMultiplier, reverse, rotation);
 
                             // takes a computed anchor position and adjusts it for parent offset and scroll, then stores it.
                             var _setAnchorLocation = function (endpoint, anchorPos) {
@@ -9532,10 +9632,10 @@
                         }
                     };
 
-                placeSomeAnchors("bottom", sS, [sO.left, sO.top], _anchorLists.bottom, true, 1, [0, 1]);
-                placeSomeAnchors("top", sS, [sO.left, sO.top], _anchorLists.top, true, 0, [0, -1]);
-                placeSomeAnchors("left", sS, [sO.left, sO.top], _anchorLists.left, false, 0, [-1, 0]);
-                placeSomeAnchors("right", sS, [sO.left, sO.top], _anchorLists.right, false, 1, [1, 0]);
+                placeSomeAnchors("bottom", sS, sO, _anchorLists.bottom, true, 1, [0, 1]);
+                placeSomeAnchors("top", sS, sO, _anchorLists.top, true, 0, [0, -1]);
+                placeSomeAnchors("left", sS, sO, _anchorLists.left, false, 0, [-1, 0]);
+                placeSomeAnchors("right", sS, sO, _anchorLists.right, false, 1, [1, 0]);
             };
 
         this.reset = function () {
@@ -9818,15 +9918,16 @@
 
         this.redraw = function (elementId, ui, timestamp, offsetToUI, clearEdits, doNotRecalcEndpoint) {
 
+            var connectionsToPaint = [],
+                endpointsToPaint = [],
+                anchorsToUpdate = [];
+
             if (!jsPlumbInstance.isSuspendDrawing()) {
                 // get all the endpoints for this element
                 var ep = _amEndpoints[elementId] || [],
-                    endpointConnections = connectionsByElementId[elementId] || [],
-                    connectionsToPaint = [],
-                    endpointsToPaint = [],
-                    anchorsToUpdate = [];
+                    endpointConnections = connectionsByElementId[elementId] || [];
 
-                timestamp = timestamp || jsPlumbInstance.timestamp();
+                timestamp = timestamp || jsPlumbUtil.uuid();
                 // offsetToUI are values that would have been calculated in the dragManager when registering
                 // an endpoint for an element that had a parent (somewhere in the hierarchy) that had been
                 // registered as draggable.
@@ -9856,7 +9957,9 @@
                     if (sourceContinuous || targetContinuous) {
                         var oKey = sourceId + "_" + targetId,
                             o = orientationCache[oKey],
-                            oIdx = conn.sourceId === elementId ? 1 : 0;
+                            oIdx = conn.sourceId === elementId ? 1 : 0,
+                            targetRotation = jsPlumbInstance.getRotation(targetId),
+                            sourceRotation = jsPlumbInstance.getRotation(sourceId);
 
                         if (sourceContinuous && !anchorLists[sourceId]) {
                             anchorLists[sourceId] = { top: [], right: [], bottom: [], left: [] };
@@ -9885,7 +9988,7 @@
                         }
                         else {
                             if (!o) {
-                                o = this.calculateOrientation(sourceId, targetId, sd.o, td.o, conn.endpoints[0].anchor, conn.endpoints[1].anchor, conn);
+                                o = this.calculateOrientation(sourceId, targetId, sd.o, td.o, conn.endpoints[0].anchor, conn.endpoints[1].anchor, conn, sourceRotation, targetRotation);
                                 orientationCache[oKey] = o;
                                 // this would be a performance enhancement, but the computed angles need to be clamped to
                                 //the (-PI/2 -> PI/2) range in order for the sorting to work properly.
@@ -9993,6 +10096,11 @@
                     connectionsToPaint[i].paint({elId: elementId, timestamp: null, recalc: false, clearEdits: clearEdits});
                 }
             }
+
+            return {
+                c:connectionsToPaint,
+                e:endpointsToPaint
+            };
         };
 
         var ContinuousAnchor = function (anchorParams) {
@@ -10113,7 +10221,15 @@
         };
     };
 
-    _jp.AnchorManager.prototype.calculateOrientation = function (sourceId, targetId, sd, td, sourceAnchor, targetAnchor) {
+    _jp.AnchorManager.prototype.calculateOrientation = function (sourceId,
+                                                                 targetId,
+                                                                 sd,
+                                                                 td,
+                                                                 sourceAnchor,
+                                                                 targetAnchor,
+                                                                 connection,
+                                                                 sourceRotation,
+                                                                 targetRotation) {
 
         var Orientation = { HORIZONTAL: "horizontal", VERTICAL: "vertical", DIAGONAL: "diagonal", IDENTITY: "identity" },
             axes = ["left", "top", "right", "bottom"];
@@ -10125,6 +10241,8 @@
             };
         }
 
+        // since we only support rotation around the center of an element these two lines don't have to take rotation
+        // into account.
         var theta = Math.atan2((td.centery - sd.centery), (td.centerx - sd.centerx)),
             theta2 = Math.atan2((sd.centery - td.centery), (sd.centerx - td.centerx));
 
@@ -10134,16 +10252,22 @@
         // source/target faces. sort this array by distance between midpoints. the entry at index 0 is our preferred option. we can
         // go through the array one by one until we find an entry in which each requested face is supported.
         var candidates = [], midpoints = { };
+
         (function (types, dim) {
             for (var i = 0; i < types.length; i++) {
                 midpoints[types[i]] = {
-                    "left": [ dim[i].left, dim[i].centery ],
-                    "right": [ dim[i].right, dim[i].centery ],
-                    "top": [ dim[i].centerx, dim[i].top ],
-                    "bottom": [ dim[i].centerx , dim[i].bottom]
+                    "left": [ dim[i][0].left, dim[i][0].centery ],
+                    "right": [ dim[i][0].right, dim[i][0].centery ],
+                    "top": [ dim[i][0].centerx, dim[i][0].top ],
+                    "bottom": [ dim[i][0].centerx , dim[i][0].bottom]
                 };
+                if (dim[i][1] !== 0) {
+                    for (var axis in midpoints[types[i]]) {
+                        midpoints[types[i]][axis] = jsPlumbUtil.rotatePoint(midpoints[types[i]][axis], [dim[i][0].centerx, dim[i][0].centery], dim[i][1]);
+                    }
+                }
             }
-        })([ "source", "target" ], [ sd, td ]);
+        })([ "source", "target" ], [ [sd, sourceRotation], [td, targetRotation] ]);
 
         for (var sf = 0; sf < axes.length; sf++) {
             for (var tf = 0; tf < axes.length; tf++) {
@@ -10164,14 +10288,20 @@
         var sourceEdge = candidates[0].source, targetEdge = candidates[0].target;
         for (var i = 0; i < candidates.length; i++) {
 
-            if (!sourceAnchor.isContinuous || sourceAnchor.isEdgeSupported(candidates[i].source)) {
+            if (sourceAnchor.isContinuous && sourceAnchor.locked) {
+                sourceEdge = sourceAnchor.getCurrentFace();
+            }
+            else if (!sourceAnchor.isContinuous || sourceAnchor.isEdgeSupported(candidates[i].source)) {
                 sourceEdge = candidates[i].source;
             }
             else {
                 sourceEdge = null;
             }
 
-            if (!targetAnchor.isContinuous || targetAnchor.isEdgeSupported(candidates[i].target)) {
+            if (targetAnchor.isContinuous && targetAnchor.locked) {
+                targetEdge = targetAnchor.getCurrentFace();
+            }
+            else if (!targetAnchor.isContinuous || targetAnchor.isEdgeSupported(candidates[i].target)) {
                 targetEdge = candidates[i].target;
             }
             else {
@@ -10211,22 +10341,20 @@
         this.y = params.y || 0;
         this.elementId = params.elementId;
         this.cssClass = params.cssClass || "";
-        this.userDefinedLocation = null;
         this.orientation = params.orientation || [ 0, 0 ];
         this.lastReturnValue = null;
         this.offsets = params.offsets || [ 0, 0 ];
         this.timestamp = null;
 
-        var relocatable = params.relocatable !== false;
-        this.isRelocatable = function() { return relocatable; };
-        this.setRelocatable = function(_relocatable) { relocatable = _relocatable; };
-        var snapOnRelocate = params.snapOnRelocate !== false;
-        this.isSnapOnRelocate = function() { return snapOnRelocate; };
+        this._unrotatedOrientation = [
+            this.orientation[0],
+            this.orientation[1]
+        ];
 
-        var locked = false;
-        this.lock = function() { locked = true; };
-        this.unlock = function() { locked = false; };
-        this.isLocked = function() { return locked; };
+        this.relocatable = params.relocatable !== false;
+        this.snapOnRelocate = params.snapOnRelocate !== false;
+
+        this.locked = false;
 
         _ju.EventGenerator.apply(this);
 
@@ -10234,19 +10362,30 @@
 
             var xy = params.xy, wh = params.wh, timestamp = params.timestamp;
 
-            if (params.clearUserDefinedLocation) {
-                this.userDefinedLocation = null;
-            }
-
             if (timestamp && timestamp === this.timestamp) {
                 return this.lastReturnValue;
             }
 
-            if (this.userDefinedLocation != null) {
-                this.lastReturnValue = this.userDefinedLocation;
-            }
-            else {
-                this.lastReturnValue = [ xy[0] + (this.x * wh[0]) + this.offsets[0], xy[1] + (this.y * wh[1]) + this.offsets[1], this.x, this.y ];
+            // unrotated position
+            var candidate = [ xy[0] + (this.x * wh[0]) + this.offsets[0], xy[1] + (this.y * wh[1]) + this.offsets[1], this.x, this.y ];
+
+            // if rotation set, adjust position.
+            var rotation = params.rotation;
+            if (rotation != null && rotation !== 0) {
+
+                var c2 = jsPlumbUtil.rotatePoint(candidate, [xy[0] + (wh[0] / 2), xy[1] + (wh[1] / 2) ], rotation);
+
+                // rotate the orientation values too. for rotations that are not multiples of 90 degrees, this will result in values that are not in the set
+                // [0, -1, 1 ], and in that case the connector paint may not be perfect. need some evidence from real world usage.
+                this.orientation[0] = Math.round((this._unrotatedOrientation[0] * c2[2]) - (this._unrotatedOrientation[1] * c2[3]));
+                this.orientation[1] = Math.round((this._unrotatedOrientation[1] * c2[2]) + (this._unrotatedOrientation[0] * c2[3]));
+
+                this.lastReturnValue = [c2[0], c2[1], this.x, this.y];
+            } else {
+                // if rotation not set (or 0), ensure orientation is original value
+                this.orientation[0] = this._unrotatedOrientation[0];
+                this.orientation[1] = this._unrotatedOrientation[1];
+                this.lastReturnValue = candidate;
             }
 
             this.timestamp = timestamp;
@@ -10259,7 +10398,7 @@
         };
 
         this.setPosition = function(x, y, ox, oy, overrideLock) {
-            if (!locked || overrideLock) {
+            if (!this.locked || overrideLock) {
                 this.x = x;
                 this.y = y;
                 this.orientation = [ ox, oy ];
@@ -10275,15 +10414,6 @@
             var ao = anchor.getOrientation(),
                 o = this.getOrientation();
             return this.x === anchor.x && this.y === anchor.y && this.offsets[0] === anchor.offsets[0] && this.offsets[1] === anchor.offsets[1] && o[0] === ao[0] && o[1] === ao[1];
-        },
-        getUserDefinedLocation: function () {
-            return this.userDefinedLocation;
-        },
-        setUserDefinedLocation: function (l) {
-            this.userDefinedLocation = l;
-        },
-        clearUserDefinedLocation: function () {
-            this.userDefinedLocation = null;
         },
         getOrientation: function () {
             return this.orientation;
@@ -10411,24 +10541,33 @@
             self = this,
 
             // helper method to calculate the distance between the centers of the two elements.
-            _distance = function (anchor, cx, cy, xy, wh) {
+            _distance = function (anchor, cx, cy, xy, wh, r, tr) {
                 var ax = xy[0] + (anchor.x * wh[0]), ay = xy[1] + (anchor.y * wh[1]),
                     acx = xy[0] + (wh[0] / 2), acy = xy[1] + (wh[1] / 2);
+
+                if(r != null && r !== 0) {
+                    var rotated = jsPlumbUtil.rotatePoint([ax,ay], [acx, acy], r);
+                    ax = rotated[0];
+                    ay = rotated[1];
+                }
+
                 return (Math.sqrt(Math.pow(cx - ax, 2) + Math.pow(cy - ay, 2)) +
-                Math.sqrt(Math.pow(acx - ax, 2) + Math.pow(acy - ay, 2)));
+                        Math.sqrt(Math.pow(acx - ax, 2) + Math.pow(acy - ay, 2)));
             },
             // default method uses distance between element centers.  you can provide your own method in the dynamic anchor
-            // constructor (and also to jsPlumb.makeDynamicAnchor). the arguments to it are four arrays:
+            // constructor (and also to jsPlumb.makeDynamicAnchor). the arguments to it are:
             // xy - xy loc of the anchor's element
             // wh - anchor's element's dimensions
             // txy - xy loc of the element of the other anchor in the connection
             // twh - dimensions of the element of the other anchor in the connection.
+            // r - the rotation of the anchor's element
+            // tr - the rotation of the target anchor's element. currently unused;  a placeholder for possible future refactoring.
             // anchors - the list of selectable anchors
-            _anchorSelector = params.selector || function (xy, wh, txy, twh, anchors) {
+            _anchorSelector = params.selector || function (xy, wh, txy, twh, r, tr, anchors) {
                     var cx = txy[0] + (twh[0] / 2), cy = txy[1] + (twh[1] / 2);
                     var minIdx = -1, minDist = Infinity;
                     for (var i = 0; i < anchors.length; i++) {
-                        var d = _distance(anchors[i], cx, cy, xy, wh);
+                        var d = _distance(anchors[i], cx, cy, xy, wh, r, tr);
                         if (d < minDist) {
                             minIdx = i + 0;
                             minDist = d;
@@ -10438,26 +10577,22 @@
                 };
 
         this.compute = function (params) {
-            var xy = params.xy, wh = params.wh, txy = params.txy, twh = params.twh;
+            var xy = params.xy, wh = params.wh, txy = params.txy, twh = params.twh, r = params.rotation, tr = params.tRotation;
 
             this.timestamp = params.timestamp;
-
-            var udl = self.getUserDefinedLocation();
-            if (udl != null) {
-                return udl;
-            }
 
             // if anchor is locked or an opposite element was not given, we
             // maintain our state. anchor will be locked
             // if it is the source of a drag and drop.
-            if (this.isLocked() || txy == null || twh == null) {
-                return _curAnchor.compute(params);
+            if (this.locked || txy == null || twh == null) {
+                this.lastReturnValue = _curAnchor.compute(params);
+                return this.lastReturnValue;
             }
             else {
                 params.timestamp = null; // otherwise clear this, i think. we want the anchor to compute.
             }
 
-            _curAnchor = _anchorSelector(xy, wh, txy, twh, this.anchors);
+            _curAnchor = _anchorSelector(xy, wh, txy, twh, r, tr, this.anchors);
             this.x = _curAnchor.x;
             this.y = _curAnchor.y;
 
@@ -10467,11 +10602,12 @@
 
             _lastAnchor = _curAnchor;
 
-            return _curAnchor.compute(params);
+            this.lastReturnValue = _curAnchor.compute(params);
+            return this.lastReturnValue;
         };
 
         this.getCurrentLocation = function (params) {
-            return this.getUserDefinedLocation() || (_curAnchor != null ? _curAnchor.getCurrentLocation(params) : null);
+            return _curAnchor != null ? _curAnchor.getCurrentLocation(params) : null;
         };
 
         this.getOrientation = function (_endpoint) {
@@ -10776,7 +10912,7 @@
         };
 
         this.redraw = function (elementId, ui, timestamp, offsetToUI, clearEdits, doNotRecalcEndpoint) {
-            this.anchorManager.redraw(elementId, ui, timestamp, offsetToUI, clearEdits, doNotRecalcEndpoint);
+            return this.anchorManager.redraw(elementId, ui, timestamp, offsetToUI, clearEdits, doNotRecalcEndpoint);
         };
 
         this.deleteEndpoint = function (endpoint) {
@@ -15038,6 +15174,7 @@
         var elements = params.selection, uip;
 
         var _one = function (_e) {
+            var drawResult;
             if (_e[1] != null) {
                 // run the reported offset through the code that takes parent containers
                 // into account, to adjust if necessary (issue 554)
@@ -15045,7 +15182,7 @@
                     el:_e[2].el,
                     pos:[_e[1].left, _e[1].top]
                 }]);
-                this.draw(_e[2].el, uip);
+                drawResult = this.draw(_e[2].el, uip);
             }
 
             if (_e[0]._jsPlumbDragOptions != null) {
@@ -15055,7 +15192,14 @@
             this.removeClass(_e[0], "jtk-dragged");
             this.select({source: _e[2].el}).removeClass(this.elementDraggingClass + " " + this.sourceElementDraggingClass, true);
             this.select({target: _e[2].el}).removeClass(this.elementDraggingClass + " " + this.targetElementDraggingClass, true);
+
+            params.e._drawResult = params.e._drawResult || {c:[],e:[], a:[]};
+            Array.prototype.push.apply(params.e._drawResult.c, drawResult.c);
+            Array.prototype.push.apply(params.e._drawResult.e, drawResult.e);
+            Array.prototype.push.apply(params.e._drawResult.a, drawResult.a);
+
             this.getDragManager().dragEnded(_e[2].el);
+
         }.bind(this);
 
         for (var i = 0; i < elements.length; i++) {
@@ -15267,7 +15411,7 @@
         this.elementRemoved = function (elementId) {
             var elId = _draggablesForElements[elementId];
             if (elId) {
-                delete _delements[elId][elementId];
+                _delements[elId] && delete _delements[elId][elementId];
                 delete _draggablesForElements[elementId];
             }
         };
