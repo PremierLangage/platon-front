@@ -26,13 +26,6 @@
       "tags": [],
       "implicitDependencies": ["platon"]
     },
-    "doc": {
-      "tags": ["scope:doc"]
-    },
-    "doc-e2e": {
-      "tags": [],
-      "implicitDependencies": ["doc"]
-    },
     "core-auth": {
       "tags": ["scope:core", "type:auth"]
     },
