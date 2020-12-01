@@ -10,7 +10,7 @@ import { AuthUserProvider } from '../models/auth-user-provider';
  */
 @Injectable({providedIn: 'root'})
 export class AuthUserService {
-    private users = new Map<string, AuthUser>();
+    private users = new Map<number, AuthUser>();
 
     private get provider() {
         return this.dynamicInjector.get<AuthUserProvider>(AuthUserProvider);
@@ -29,7 +29,7 @@ export class AuthUserService {
      * @param uid The identifier of the user to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findById(uid: string): Observable<AuthUser | undefined> {
+    findById(uid: number): Observable<AuthUser | undefined> {
         const cache = this.users.get(uid);
         if (cache != null) {
             return of(cache);
@@ -52,8 +52,8 @@ export class AuthUserService {
      * @param uid An array of user identifiers to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findAll(uids: string[]): Observable<AuthUser[]> {
-        const notCached: string[]  = [];
+    findAll(uids: number[]): Observable<AuthUser[]> {
+        const notCached: number[]  = [];
         const cacheElements = uids.map(uid => {
             const user =  this.users.get(uid);
             if (user == null) {

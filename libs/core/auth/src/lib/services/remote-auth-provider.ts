@@ -14,7 +14,7 @@ export class RemoteAuthProvider extends AuthProvider {
         return this.config.isServerRunning;
     }
 
-    uid(): Promise<string | undefined> {
+    uid(): Promise<number | undefined> {
         throw new Error('Method not implemented.');
     }
     signOut(): Promise<void> {

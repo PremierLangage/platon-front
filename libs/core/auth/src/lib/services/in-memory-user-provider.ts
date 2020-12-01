@@ -18,13 +18,13 @@ export class InMemoryUserProvider extends AuthUserProvider {
         return !this.config.isServerRunning;
     }
 
-    findById(uid: string): Observable<AuthUser | undefined> {
+    findById(uid: number): Observable<AuthUser | undefined> {
         return this.userDb.read().pipe(
             map(arr => arr.find(e => e.id === uid))
         );
     }
 
-    findAll(uid: string[]): Observable<AuthUser[]> {
+    findAll(uid: number[]): Observable<AuthUser[]> {
         return this.userDb.read().pipe(
             map(arr => arr.filter(e => uid.includes(e.id)))
         );

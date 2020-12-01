@@ -46,7 +46,7 @@ export class AuthService {
             return this.request.toPromise();
         }
 
-        let uid: string | undefined;
+        let uid: number | undefined;
         try {
             uid = await this.uid();
         } finally {
@@ -83,7 +83,7 @@ export class AuthService {
      * Gets the unique ID of the current user
      * or null if there is no logged user.
      */
-    uid(): Promise<string | undefined> {
+    uid(): Promise<number | undefined> {
         return this.provider.uid();
     }
 
@@ -127,7 +127,7 @@ export class AuthService {
         });
     }
 
-    private async connect(uid: string) {
+    private async connect(uid: number) {
         const user = this.user = await this.userService.findById(uid).toPromise();
         if (user == null) {
             throw new Error('There is no user record found for ' + uid);

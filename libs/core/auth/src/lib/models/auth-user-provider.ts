@@ -13,12 +13,12 @@ export abstract class AuthUserProvider implements IDynamicService {
      * @param uid The identifier of the user to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    abstract findById(uid: string): Observable<AuthUser | undefined>;
+    abstract findById(uid: number): Observable<AuthUser | undefined>;
 
     /**
      * Finds ALl the users listed in the `uids` array.
      * @param uid An array of user identifiers to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    abstract findAll(uids: string[]): Observable<AuthUser[]>;
+    abstract findAll(uids: number[]): Observable<AuthUser[]>;
 }

@@ -1,9 +1,10 @@
 export declare type UserRole = 'Teacher' | 'Student';
 
 export interface AuthUser {
-    id: string;
+    id: number;
     firstName: string;
     lastName: string;
+    userName: string;
     email: string;
     isAdmin: boolean;
     avatar: string;

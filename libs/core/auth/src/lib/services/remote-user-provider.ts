@@ -16,11 +16,11 @@ export class RemoteUserProvider extends AuthUserProvider {
         return this.config.isServerRunning;
     }
 
-    findById(uid: string): Observable<AuthUser | undefined> {
+    findById(uid: number): Observable<AuthUser | undefined> {
         throw new Error('Method not implemented.');
     }
 
-    findAll(uid: string[]): Observable<AuthUser[]> {
+    findAll(uid: number[]): Observable<AuthUser[]> {
         throw new Error('Method not implemented.');
     }
 }

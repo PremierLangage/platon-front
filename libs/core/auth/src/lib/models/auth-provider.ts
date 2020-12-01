@@ -7,7 +7,7 @@ export abstract class AuthProvider implements IDynamicService {
      * Gets the unique ID of the current user
      * or null if there is no logged user.
      */
-    abstract uid(): Promise<string | undefined>;
+    abstract uid(): Promise<number | undefined>;
 
     /** Sign out the current user */
     abstract signOut(): Promise<void>;

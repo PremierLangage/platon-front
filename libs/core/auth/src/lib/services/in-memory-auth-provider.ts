@@ -8,7 +8,7 @@ const LOCAL_STORAGE_KEY = 'IN-MEMORY_AUTH_UID';
 
 @Injectable()
 export class InMemoryAuthProvider extends AuthProvider {
-    private userId?: string;
+    private userId?: number;
 
     constructor(
         private readonly config: ConfigService,
@@ -21,9 +21,12 @@ export class InMemoryAuthProvider extends AuthProvider {
         return !this.config.isServerRunning;
     }
 
-    uid(): Promise<string | undefined> {
-        const id = this.userId || localStorage.getItem(LOCAL_STORAGE_KEY) || undefined;
-        return Promise.resolve(id);
+    uid(): Promise<number | undefined> {
+        if (this.userId) {
+            return Promise.resolve(this.userId);
+        }
+        const id = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return Promise.resolve(Number.parseInt(id || '', 10) || undefined);
     }
 
     signOut(): Promise<void> {
@@ -48,7 +51,7 @@ export class InMemoryAuthProvider extends AuthProvider {
         }
 
         this.userId = user.id;
-        localStorage.setItem(LOCAL_STORAGE_KEY, user.id);
+        localStorage.setItem(LOCAL_STORAGE_KEY, user.id.toString());
     }
 
 }
