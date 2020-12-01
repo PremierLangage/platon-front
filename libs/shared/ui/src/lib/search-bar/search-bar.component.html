@@ -1,7 +1,7 @@
 <mat-icon>search</mat-icon>
 <input
   type="search"
-  [placeholder]="placeholder"
+  [placeholder]="searchBar?.placeholder || ''"
   [formControl]="control"
   [nzAutocomplete]="auto">
 <nz-autocomplete #auto>

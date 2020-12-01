@@ -13,9 +13,9 @@ import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {
+    SearchBar,
     SearchBarAutoCompletionGroup
 } from './search-bar';
-import { SearchBarService } from './search-bar.service';
 
 @Component({
     selector: 'ui-search-bar',
@@ -29,9 +29,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     @HostBinding('class')
     readonly hostClass = 'mat-elevation-z2';
 
-    @Input() placeholder = '';
-    @Input() searchBarId = '';
-
+    @Input() searchBar?: SearchBar<any>;
     @ContentChild(TemplateRef) completionTemplate?: TemplateRef<any>;
 
     control = new FormControl();
@@ -40,7 +38,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly cdr: ChangeDetectorRef,
-        private readonly search: SearchBarService
     ) {}
 
     ngOnInit() {
@@ -54,22 +51,21 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 .subscribe()
         );
 
-        this.subscriptions.push(
-            this.search.onChangeQuery.subscribe(e => {
-                if (e.searchBarId && e.searchBarId === this.searchBarId) {
-                    if (e.query !== this.control.value) {
-                        this.control.patchValue(e.query);
+        if (this.searchBar?.trigger) {
+            this.subscriptions.push(
+                this.searchBar.trigger.subscribe(query => {
+                    if (query !== this.control.value) {
+                        this.control.patchValue(query || '');
                     }
-                }
-            })
-        );
+                })
+            );
+        }
 
         this.filter(this.control.value);
     }
 
     ngOnDestroy() {
         this.subscriptions.forEach((s) => s.unsubscribe());
-        this.search.unregister(this.searchBarId);
     }
 
     private async filter(query?: string) {
@@ -77,7 +73,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.completions = [];
         this.cdr.detectChanges();
 
-        this.completions = await this.search.search(this.searchBarId, query);
+        if (this.searchBar?.filterer) {
+            const response = await this.searchBar?.filterer.filter(query || '');
+            this.completions = response.completions;
+            if (this.searchBar?.onChange) {
+                this.searchBar.onChange(response);
+            }
+        }
+
         this.completing = false;
         this.cdr.detectChanges();
     }
