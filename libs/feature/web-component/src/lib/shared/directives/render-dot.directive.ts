@@ -20,7 +20,8 @@ export class RenderDotDirective implements OnInit, OnChanges {
     ) {}
 
     ngOnInit() {
-        this.assets.loadAllAsync([
+        this.assets.loadAllSync([
+            // http://www.xavierdupre.fr/js/vizjs/viz-lite.js
             ['script', 'assets/vendors/viz/viz.js']
         ]).toPromise().then(() => {
             this.ready = true;
@@ -39,7 +40,7 @@ export class RenderDotDirective implements OnInit, OnChanges {
             const viz = graphviz(this.el.nativeElement, {
                 zoom: false,
                 fit: true,
-                useWorker: true
+                useWorker: false
             });
             viz.renderDot(this.dot || '');
         }
