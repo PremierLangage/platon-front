@@ -13,16 +13,6 @@
     [matTooltip]="item.contributors.length + ' Contributeur(s)'">
     <mat-icon>supervisor_account</mat-icon>
   </ui-list-item-article-action>
-  <ui-list-item-article-action
-    [actionTitle]="item.exerciseCount"
-    matTooltip="Exercices(s)">
-    <mat-icon>article</mat-icon>
-  </ui-list-item-article-action>
-  <ui-list-item-article-action
-    [actionTitle]="item.activityCount"
-    matTooltip="Activité(s)">
-    <mat-icon>assessment</mat-icon>
-  </ui-list-item-article-action>
   <div style="flex: 1;"></div>
   <ui-list-item-article-action
     [actionTitle]="$any(item.date * 1000|date:'dd/MM/yyyy')"

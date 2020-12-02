@@ -6,9 +6,7 @@ import Fuse from 'fuse.js';
 
 import {
     Resource,
-    ResourceStatus,
     ResourceTypes,
-    Package,
     Circle,
     Exercise,
     Activity,
@@ -38,123 +36,121 @@ export class InMemoryResourceProvider extends ResourceProvider {
             new BehaviorSubject<Circle[]>([
                 {
                     id: '0',
-                    name: 'AP1',
+                    name: 'PLaTon',
                     type: 'CIRCLE',
                     status: 'READY',
-                    tags: ['Informatique', 'Python', 'L1', 'UPEM'],
+                    tags: [],
                     description: LOREM,
                     date: 1605469210,
-                    activityCount: 0,
-                    exerciseCount: 0,
                     admins: [],
                     watchers: [],
                     contributors: [],
+                    directoryId: '0',
                 },
                 {
                     id: '1',
-                    name: 'Calculus',
+                    name: 'Informatique',
                     type: 'CIRCLE',
                     status: 'READY',
-                    tags: ['Mathématique', 'L1', 'UPEM'],
+                    tags: ['informatique'],
                     description: LOREM,
                     date: 1605469210,
-                    activityCount: 0,
-                    exerciseCount: 0,
                     admins: [],
                     watchers: [],
                     contributors: [],
+                    directoryId: '0',
+                    parentId: '0',
                 },
                 {
                     id: '2',
-                    name: 'Automates',
+                    name: 'Python',
                     type: 'CIRCLE',
                     status: 'READY',
-                    tags: [
-                        'Informatique',
-                        'Automate',
-                        'Analyse syntaxique',
-                        'L2',
-                        'UPEM',
-                    ],
+                    tags: ['informatique', 'python'],
                     description: LOREM,
                     date: 1605469210,
-                    activityCount: 0,
-                    exerciseCount: 0,
                     admins: [],
                     watchers: [],
                     contributors: [],
+                    directoryId: '0',
+                    parentId: '1',
+                },
+                {
+                    id: '3',
+                    name: 'AP1',
+                    type: 'CIRCLE',
+                    status: 'READY',
+                    tags: ['informatique', 'python', 'ap1'],
+                    description: LOREM,
+                    date: 1605469210,
+                    admins: [],
+                    watchers: [],
+                    contributors: [],
+                    directoryId: '0',
+                    parentId: '2',
+                },
+                {
+                    id: '2',
+                    name: 'C',
+                    type: 'CIRCLE',
+                    status: 'READY',
+                    tags: ['informatique', 'c'],
+                    description: LOREM,
+                    date: 1605469210,
+                    admins: [],
+                    watchers: [],
+                    contributors: [],
+                    directoryId: '0',
+                    parentId: '1',
                 },
             ]),
         ],
         [
-            'PACKAGE',
-            new BehaviorSubject<Package[]>([
+            'EXERCISE',
+            new BehaviorSubject<Exercise[]>([
                 {
                     id: '0',
-                    name: 'PLaTon Core',
-                    type: 'PACKAGE',
+                    circleId: '0',
+                    name: 'Boucle for',
+                    type: 'EXERCISE',
                     status: 'READY',
-                    tags: [
-                        'PLaTon',
-                        'Grader',
-                        'Builder',
-                        'Template',
-                        'Component',
-                    ],
-                    description:
-                        'La librairie standard de la plateforme PLaTon.',
+                    tags: ['informatique', 'python', 'boucles', 'for'],
+                    description: LOREM,
                     date: 1605469210,
-                    admins: [],
-                    watchers: [],
-                    contributors: [],
                     version: 1,
+                    directoryId: '0',
                 },
-            ]),
+                {
+                    id: '0',
+                    circleId: '0',
+                    name: 'Boucle while',
+                    type: 'EXERCISE',
+                    status: 'READY',
+                    tags: ['informatique', 'python', 'boucles', 'while'],
+                    description: LOREM,
+                    date: 1605469210,
+                    version: 1,
+                    directoryId: '0',
+                },
+            ])
         ],
-        ['EXERCISE', new BehaviorSubject<Exercise[]>([
-            {
-                id: '0',
-                circleId: '0',
-                name: 'Exercice 1',
-                type: 'EXERCISE',
-                status: 'READY',
-                tags: [
-                    'PLaTon',
-                    'Grader',
-                    'Builder',
-                    'Template',
-                    'Component',
-                ],
-                description: LOREM,
-                date: 1605469210,
-                admins: [],
-                watchers: [],
-                contributors: [],
-                version: 1,
-            },
-        ])],
-        ['ACTIVITY', new BehaviorSubject<Activity[]>([
-            {
-                id: '0',
-                circleId: '0',
-                name: 'Activité 1',
-                type: 'ACTIVITY',
-                status: 'READY',
-                tags: [
-                    'PLaTon',
-                    'Grader',
-                    'Builder',
-                    'Template',
-                    'Component',
-                ],
-                description: LOREM,
-                date: 1605469210,
-                admins: [],
-                watchers: [],
-                contributors: [],
-                version: 1,
-            },
-        ])],
+        [
+            'ACTIVITY',
+            new BehaviorSubject<Activity[]>([
+                {
+                    id: '0',
+                    circleId: '0',
+                    name: 'Activité 1',
+                    type: 'ACTIVITY',
+                    status: 'READY',
+                    tags: ['informatique', 'python', 'boucles'],
+                    description: LOREM,
+                    date: 1605469210,
+                    version: 1,
+                    directoryId: '0',
+                },
+            ])
+        ],
     ]);
 
     constructor(
@@ -198,13 +194,13 @@ export class InMemoryResourceProvider extends ResourceProvider {
                     matches.push(r.item);
                     if (r.matches) {
                         r.matches.forEach(match => {
-                            if (match.value && !completions.includes(match.value)) {
-                                completions.push(match.value);
+                            const value = match.value?.toLowerCase();
+                            if (value && !completions.includes(value)) {
+                                completions.push(value);
                             }
                         });
                     }
                 });
-
                 return Promise.resolve({
                     matches: this.filter(matches, args.filters),
                     completions

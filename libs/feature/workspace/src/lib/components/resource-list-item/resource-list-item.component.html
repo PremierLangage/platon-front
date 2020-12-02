@@ -18,12 +18,6 @@
       (didFilterByTag)="didFilterByTag.emit($event)">
     </ws-exercise-list-item>
   </ng-container>
-  <ng-container *ngSwitchCase="'PACKAGE'">
-    <ws-package-list-item
-      [item]="$any(item)"
-      (didFilterByTag)="didFilterByTag.emit($event)">
-    </ws-package-list-item>
-  </ng-container>
   <ng-container *ngSwitchDefault>Unknown resource type</ng-container>
 </ng-container>
 </nz-ribbon>
