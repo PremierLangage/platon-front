@@ -30,6 +30,22 @@ const routes: Routes = [
         ).then(m => m.DashboardModule)
     },
     {
+        path: 'forum',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "forum" */
+            './pages/forum/forum.module'
+        ).then(m => m.ForumModule)
+    },
+    {
+        path: 'admin-panel',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "admin-panel" */
+            './pages/admin-panel/admin-panel.module'
+        ).then(m => m.AdminPanelModule)
+    },
+    {
         path: 'workspace',
         canActivate: [AuthGuard],
         loadChildren: () => import(

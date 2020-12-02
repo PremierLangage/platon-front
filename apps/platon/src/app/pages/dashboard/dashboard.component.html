@@ -6,18 +6,24 @@
     <app-banner
       [bannerTitle]="'Cours'"
       [bannerImage]="'assets/images/illustrations/laptop2.svg'"
-      [bannerDescription]="''"
+      [bannerSearchBar]="searchBar"
       [bannerActions]="actions">
       <ng-template #actions>
-        <button class="banner-action" mat-raised-button color="primary">
-          <mat-icon>add</mat-icon>
-          Créer
-        </button>
         <button class="banner-action" mat-raised-button>
           <mat-icon>info_outline</mat-icon>
           En savoir plus
         </button>
       </ng-template>
     </app-banner>
+    <main>
+      <nz-empty [nzNotFoundContent]="content">
+        <ng-template #content>
+          <h2>Aucun cours</h2>
+          <p>
+            Vous n'êtes inscrit à aucun cours pour le moment !
+          </p>
+        </ng-template>
+      </nz-empty>
+    </main>
   </app-content>
 </app-container>
