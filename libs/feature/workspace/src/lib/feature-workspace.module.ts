@@ -19,7 +19,9 @@ import { ActivityListItemComponent } from './components/activity-list-item/activ
 import { CircleListItemComponent } from './components/circle-list-item/circle-list-item.component';
 import { ExerciseListItemComponent } from './components/exercise-list-item/exercise-list-item.component';
 import { PackageListItemComponent } from './components/package-list-item/package-list-item.component';
+import { ResourceListItemComponent } from './components/resource-list-item/resource-list-item.component';
 
+import { ResourceStatusPipe } from './pipes/resource-status.pipe';
 @NgModule({
     imports: [
         CommonModule,
@@ -38,16 +40,17 @@ import { PackageListItemComponent } from './components/package-list-item/package
         SharedUiListModule,
     ],
     exports: [
-        ActivityListItemComponent,
-        CircleListItemComponent,
-        ExerciseListItemComponent,
-        PackageListItemComponent,
+        ResourceListItemComponent,
+        ResourceStatusPipe,
     ],
     declarations: [
         ActivityListItemComponent,
         CircleListItemComponent,
         ExerciseListItemComponent,
         PackageListItemComponent,
+        ResourceListItemComponent,
+
+        ResourceStatusPipe,
     ],
 })
 export class FeatureWorkspaceModule {}

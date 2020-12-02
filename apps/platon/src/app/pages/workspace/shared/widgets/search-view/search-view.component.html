@@ -10,12 +10,19 @@
     <ui-list [items]="dataSource" idField="id">
       <ui-list-template slot="row">
         <ng-template let-item="item">
-          <ng-container *ngTemplateOutlet="listRowTemplate; context: { $implicit: item }"></ng-container>
+          <ws-resource-list-item
+            [item]="item"
+            (didFilterByTag)="triggerSearch($event)">
+          </ws-resource-list-item>
         </ng-template>
       </ui-list-template>
       <ui-list-template slot="empty">
         <ng-template>
-          <ng-container *ngTemplateOutlet="listEmptyTemplate;"></ng-container>
+          <nz-empty [nzNotFoundContent]="content">
+            <ng-template #content>
+              <h2>Aucune ressource</h2>
+            </ng-template>
+          </nz-empty>
         </ng-template>
       </ui-list-template>
     </ui-list>

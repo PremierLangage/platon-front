@@ -5,9 +5,7 @@
   [bannerImage]="'assets/images/illustrations/desk.svg'"
   [bannerActionsTemplate]="bannerActionsTemplate"
   [bannerDescription]="'Créez des exercices à partir de templates ou de A à Z'"
-  [searchBarPlaceholder]="'Essayez une matière, une notion, un titre, un auteur...'"
-  [listRowTemplate]="listRowTemplate"
-  [listEmptyTemplate]="listEmptyTemplate">
+  [searchBarPlaceholder]="'Essayez une matière, une notion, un titre, un auteur...'">
   <ng-template #bannerActionsTemplate>
       <button class="banner-action" mat-raised-button color="primary" (click)="create()">
         <mat-icon>add</mat-icon>
@@ -18,14 +16,6 @@
         En savoir plus
       </button>
     </ng-template>
-
-    <ng-template #listRowTemplate let-item>
-       <ws-exercise-list-item
-          [item]="item"
-          (didFilterByTag)="searchView.triggerSearch($event)">
-        </ws-exercise-list-item>
-    </ng-template>
-
      <ng-template #listEmptyTemplate>
       <nz-empty [nzNotFoundContent]="content" [nzNotFoundFooter]="footer">
         <ng-template #content>

@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -51,6 +52,7 @@ const MATERIAL_MODULES = [
     MatCardModule,
     MatBadgeModule,
     MatTabsModule,
+    MatChipsModule,
     MatInputModule,
     MatButtonModule,
     MatSidenavModule,

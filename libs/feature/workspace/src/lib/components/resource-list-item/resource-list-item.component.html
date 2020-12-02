@@ -1,0 +1,29 @@
+<nz-ribbon [nzText]="item.status|resourceStatus:'label'" [nzColor]="item.status|resourceStatus:'color'">
+<ng-container [ngSwitch]="item.type">
+  <ng-container *ngSwitchCase="'CIRCLE'">
+    <ws-circle-list-item
+      [item]="$any(item)"
+      (didFilterByTag)="didFilterByTag.emit($event)">
+    </ws-circle-list-item>
+  </ng-container>
+  <ng-container *ngSwitchCase="'ACTIVITY'">
+    <ws-activity-list-item
+      [item]="$any(item)"
+      (didFilterByTag)="didFilterByTag.emit($event)">
+    </ws-activity-list-item>
+  </ng-container>
+  <ng-container *ngSwitchCase="'EXERCISE'">
+    <ws-exercise-list-item
+      [item]="$any(item)"
+      (didFilterByTag)="didFilterByTag.emit($event)">
+    </ws-exercise-list-item>
+  </ng-container>
+  <ng-container *ngSwitchCase="'PACKAGE'">
+    <ws-package-list-item
+      [item]="$any(item)"
+      (didFilterByTag)="didFilterByTag.emit($event)">
+    </ws-package-list-item>
+  </ng-container>
+  <ng-container *ngSwitchDefault>Unknown resource type</ng-container>
+</ng-container>
+</nz-ribbon>

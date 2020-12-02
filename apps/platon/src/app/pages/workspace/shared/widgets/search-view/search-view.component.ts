@@ -38,8 +38,6 @@ export class SearchViewComponent implements OnInit, OnDestroy {
     @Input() bannerCompletion?: TemplateRef<any>;
     @Input() bannerSearchBar?: SearchBar<any>;
 
-    @Input() listRowTemplate!: TemplateRef<any>;
-    @Input() listEmptyTemplate!: TemplateRef<any>;
     @Input() bannerActionsTemplate!: TemplateRef<any>;
 
     searchBar!: SearchBar<Resource>;

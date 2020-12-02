@@ -5,9 +5,7 @@
   [bannerImage]="'assets/images/illustrations/gears.svg'"
   [bannerActionsTemplate]="bannerActionsTemplate"
   [bannerDescription]="'Améliorez la plateforme en mettant à disposition des enseignants éditeurs des outils de conception d\'exercices'"
-  [searchBarPlaceholder]="'Essayez un tag, un auteur, un nom de package...'"
-  [listRowTemplate]="listRowTemplate"
-  [listEmptyTemplate]="listEmptyTemplate">
+  [searchBarPlaceholder]="'Essayez un tag, un auteur, un nom de package...'">
   <ng-template #bannerActionsTemplate>
       <button class="banner-action" mat-raised-button color="primary">
         <mat-icon>add</mat-icon>
@@ -17,27 +15,5 @@
         <mat-icon>info_outline</mat-icon>
         En savoir plus
       </button>
-    </ng-template>
-
-    <ng-template #listRowTemplate let-item>
-       <ws-package-list-item
-          [item]="item"
-          (didFilterByTag)="searchView.triggerSearch($event)">
-        </ws-package-list-item>
-    </ng-template>
-
-     <ng-template #listEmptyTemplate>
-      <nz-empty [nzNotFoundContent]="content" [nzNotFoundFooter]="footer">
-        <ng-template #content>
-          <h2>Créez votre premier exercice</h2>
-          <p>
-            Vous avez la possibilité de créer un exercice à partir
-            d'un template ou bien de A à Z.
-          </p>
-        </ng-template>
-        <ng-template #footer>
-          <button mat-raised-button color="primary">Créer</button>
-        </ng-template>
-      </nz-empty>
     </ng-template>
 </app-ws-search-view>

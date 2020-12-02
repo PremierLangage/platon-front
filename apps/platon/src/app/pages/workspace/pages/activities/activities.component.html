@@ -5,9 +5,7 @@
   [bannerImage]="'assets/images/illustrations/laptop1.svg'"
   [bannerActionsTemplate]="bannerActionsTemplate"
   [bannerDescription]="'Regroupez vos exercices dans des activités à afficher devant vos élèves'"
-  [searchBarPlaceholder]="'Essayez une matière, une notion, un titre, un auteur...'"
-  [listRowTemplate]="listRowTemplate"
-  [listEmptyTemplate]="listEmptyTemplate">
+  [searchBarPlaceholder]="'Essayez une matière, une notion, un titre, un auteur...'">
     <ng-template #bannerActionsTemplate>
       <button class="banner-action" mat-raised-button color="primary">
         <mat-icon>add</mat-icon>
@@ -17,21 +15,5 @@
         <mat-icon>info_outline</mat-icon>
         En savoir plus
       </button>
-    </ng-template>
-    <ng-template #listRowTemplate let-item>
-       <ws-activity-list-item
-          [item]="item"
-          (didFilterByTag)="searchView.triggerSearch($event)">
-        </ws-activity-list-item>
-    </ng-template>
-    <ng-template #listEmptyTemplate>
-      <nz-empty [nzNotFoundContent]="content" [nzNotFoundFooter]="footer">
-        <ng-template #content>
-          <h2>Créez votre première activité</h2>
-        </ng-template>
-        <ng-template #footer>
-          <button mat-raised-button color="primary">Créer</button>
-        </ng-template>
-      </nz-empty>
     </ng-template>
 </app-ws-search-view>
