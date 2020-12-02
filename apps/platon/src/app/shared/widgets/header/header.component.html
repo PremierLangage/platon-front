@@ -15,7 +15,7 @@
   <mat-menu #profileMenu="matMenu">
     <ng-template matMenuContent>
       <button mat-menu-item [routerLink]="'/profile'">Mon profil</button>
-      <button mat-menu-item>Se déconnecter</button>
+      <button mat-menu-item (click)="signOut()">Se déconnecter</button>
     </ng-template>
   </mat-menu>
 </mat-toolbar>

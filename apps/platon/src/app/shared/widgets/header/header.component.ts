@@ -21,4 +21,8 @@ export class HeaderComponent implements OnInit {
         this.user = await this.authService.ready();
     }
 
+    signOut() {
+        this.authService.signOut();
+    }
+
 }

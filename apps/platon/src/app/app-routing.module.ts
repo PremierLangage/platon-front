@@ -38,6 +38,14 @@ const routes: Routes = [
         ).then(m => m.ForumModule)
     },
     {
+        path: 'profile',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "profile" */
+            './pages/profile/profile.module'
+        ).then(m => m.ProfileModule)
+    },
+    {
         path: 'admin-panel',
         canActivate: [AuthGuard],
         loadChildren: () => import(
