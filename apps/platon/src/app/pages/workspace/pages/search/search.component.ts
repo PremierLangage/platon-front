@@ -8,12 +8,24 @@ import {
     ResourceTypes,
 } from '@platon/feature/workspace';
 import { SearchBar, SearchBarFuseFilterer } from '@platon/shared/ui';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import {
+    lightSpeedInOnEnterAnimation,
+    lightSpeedOutOnLeaveAnimation,
+    zoomInOnEnterAnimation,
+    zoomOutOnLeaveAnimation,
+} from 'angular-animations';
+
 @Component({
     selector: 'app-workspace-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.scss'],
-    animations: []
+    animations: [
+        lightSpeedInOnEnterAnimation({ duration: 300 }),
+        lightSpeedOutOnLeaveAnimation({ duration: 300 }),
+        zoomInOnEnterAnimation({ duration: 300 }),
+        zoomOutOnLeaveAnimation({ duration: 300 }),
+    ],
 })
 export class SearchComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
@@ -52,22 +64,11 @@ export class SearchComponent implements OnInit, OnDestroy {
 
     readonly searchBar: SearchBar<string> = {
         placeholder: 'Essayez une matière, une notion...',
-        filterer: {
-            filter: (query) => {
-                this.query = query;
-                return this.filterer.filter(query);
-            },
-        },
-        trigger: new Subject<string>(),
-        onTrigger: (query) => {
-            this.query = query || '';
-            this.paginate();
-        },
-        onEmpty: () => (this.query = ''),
+        filterer: this.filterer,
+        onTrigger: this.paginate.bind(this),
         onReady: this.addRouterParamChangeListener.bind(this),
     };
 
-    query = '';
     searching = false;
     dataSource: Resource[] = [];
 
@@ -85,7 +86,6 @@ export class SearchComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.paginate();
         this.createSuggestions();
     }
 
@@ -96,8 +96,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
     trigger(query?: string) {
         const filters = this.createFilters();
-
-        const params: Params = {
+        const queryParams: Params = {
             term: (query ?? filters.query) || null,
             circle: filters.circleId || null,
             types: filters.types.join('|'),
@@ -105,10 +104,9 @@ export class SearchComponent implements OnInit, OnDestroy {
             sortBy: filters.sortBy,
             date: filters.date,
         };
-
         this.router.navigate([], {
+            queryParams,
             relativeTo: this.activatedRoute,
-            queryParams: params,
             queryParamsHandling: 'merge',
         });
     }
@@ -119,7 +117,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.pagination = this.resourceService
             .paginate({
                 page: 0,
-                pageSize: 50,
+                pageSize: 100,
                 filters: this.createFilters(),
             })
             .subscribe({
@@ -155,7 +153,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
         return {
             types,
-            query: this.query,
+            query: this.searchBar.value,
             sortBy: value.sortBy,
             status: value.status,
             date: value.date,
@@ -174,10 +172,9 @@ export class SearchComponent implements OnInit, OnDestroy {
     private addRouterParamChangeListener() {
         this.subscriptions.push(
             this.activatedRoute.queryParams.subscribe((e) => {
-                const term = e.term || '';
                 if (e.types) {
                     this.form.patchValue({
-                        circles: false,
+                        circles: e.types.includes('CIRCLE'),
                         exercises: e.types.includes('EXERCISE'),
                         activities: e.types.includes('ACTIVITY'),
                     });
@@ -195,7 +192,7 @@ export class SearchComponent implements OnInit, OnDestroy {
                     });
                 }
 
-                this.searchBar.trigger?.next(term);
+                this.searchBar.value = e.term ?? this.searchBar.value;
             })
         );
     }

@@ -51,16 +51,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 .subscribe()
         );
 
-        if (this.searchBar?.trigger) {
-            this.subscriptions.push(
-                this.searchBar.trigger.subscribe(query => {
-                    if (query !== this.control.value) {
-                        this.control.patchValue(query || '');
-                    }
-                    this.trigger();
-                })
-            );
-        }
+        this.control.patchValue(this.searchBar?.value || '');
+        Object.defineProperty(this.searchBar, 'value', {
+            get: () => {
+                return this.control.value;
+            },
+            set: (value: string) => {
+                this.control.patchValue(value || '');
+                this.trigger();
+            }
+        });
 
         setTimeout(() => {
             if (this.searchBar?.onReady) {
@@ -86,8 +86,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
         if (query) {
             if (this.searchBar?.filterer) {
-                const response = await this.searchBar?.filterer.filter(query || '');
-                this.completions = response.completions;
+                const response = await this.searchBar?.filterer.run(query || '');
+                this.completions = response.suggestions;
                 if (this.searchBar?.onSuggest) {
                     this.searchBar.onSuggest(response);
                 }

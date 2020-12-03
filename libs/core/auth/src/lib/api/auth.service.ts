@@ -121,7 +121,7 @@ export class AuthService {
     }
 
     private redirect(url: string) {
-        this.router.navigateByUrl(url, {
+        this.router.navigate([url], {
             replaceUrl: true,
             queryParams: { next: this.router.url }
         });

@@ -21,6 +21,8 @@
       <ui-list-template slot="row">
         <ng-template let-item="item">
           <ws-resource-list-item
+            [@zoomInOnEnter]
+            [@zoomOutOnLeave]
             [item]="item"
             (didFilterByTag)="trigger($event)">
           </ws-resource-list-item>
@@ -28,9 +30,9 @@
       </ui-list-template>
       <ui-list-template slot="empty">
         <ng-template>
-          <nz-empty [nzNotFoundContent]="content">
+          <nz-empty [nzNotFoundContent]="content" *ngIf="!searching">
             <ng-template #content>
-              <h2>Aucune ressource</h2>
+              <h2>Aucun résulat</h2>
             </ng-template>
           </nz-empty>
         </ng-template>
@@ -65,7 +67,7 @@
 
         <ng-container *ngIf="shouldShowStatusForm">
           <!-- CIRCLE ID -->
-          <div class="form-group">
+          <div class="form-group" [@lightSpeedInOnEnter] [@lightSpeedOutOnLeave]>
             <mat-label id="circle-id-label">Rechercher les exercices et activités dans un cercle en particulier ?</mat-label>
             <mat-form-field appearance="fill" aria-labelledby="circle-id-label">
               <mat-label>Identifiant cercle</mat-label>
@@ -75,7 +77,7 @@
           </div>
 
           <!-- STATUS -->
-          <div class="form-group">
+          <div class="form-group" [@fadeInOnEnter] [@fadeOutOnLeave]>
             <mat-label id="status-label">Quel est le status des exercices et activités que vous recherchez ?</mat-label>
             <mat-radio-group formControlName="status" class="radio-group" aria-labelledby="status-label">
               <mat-radio-button value="ALL">Tout</mat-radio-button>

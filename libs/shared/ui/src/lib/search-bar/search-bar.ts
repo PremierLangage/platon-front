@@ -7,21 +7,44 @@ export interface SearchBarAutoCompletionGroup<T> {
 }
 
 export interface SearchBar<T> {
-    trigger?: Subject<string>;
+    /**
+     * Current value of the search bar.
+     *
+     * Notes:
+     * - updating the value will call `onTrigger`
+     * - `onTrigger` is called after ngOnInit with the initial value.
+     */
+    value?: string;
+    /** Filterer object. */
     filterer: SearchBarFilterer<T>;
-    onEmpty?: () => void;
-    onReady?: () => void;
-    onTrigger?: (query?: string) => void;
-    onSuggest?: (response: SearchBarFiltererResult<T>) => void;
+    /** Search bar placeholder value. */
     placeholder?: string;
+    /**
+     * A callback function to call when the search bar is empty.
+     */
+    onEmpty?: () => void;
+    /** A callback function to call when the sear */
+    onReady?: () => void;
+    /**
+     * A callback function to call when the search bar query is submitted.
+     * @param query the query to run.
+     */
+    onTrigger?: (query: string) => void;
+    /**
+     * A callback function to call when suggestions change.
+     */
+    onSuggest?: (response: SearchBarSuggestions<T>) => void;
 }
 
 export interface SearchBarFilterer<T> {
-    filter(query: string): Promise<SearchBarFiltererResult<T>>;
+    run(query: string): Promise<SearchBarSuggestions<T>>;
 }
-export interface SearchBarFiltererResult<T> {
-    completions: SearchBarAutoCompletionGroup<T>[],
-    queryMatches: T[];
+
+export interface SearchBarSuggestions<T> {
+    /** Items that match the query. */
+    matches: T[];
+    /** Suggestion list */
+    suggestions: SearchBarAutoCompletionGroup<T>[],
 }
 export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
 
@@ -36,12 +59,12 @@ export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
         options.defaultCompletionGroup = options.defaultCompletionGroup || ''
     }
 
-    async filter(query: string): Promise<SearchBarFiltererResult<T>> {
+    async run(query: string): Promise<SearchBarSuggestions<T>> {
         const dataSource = await this.options.dataSource();
         if (!query) {
             return {
-                completions: [],
-                queryMatches: dataSource
+                suggestions: [],
+                matches: dataSource
             };
         }
 
@@ -79,8 +102,8 @@ export class SearchBarFuseFilterer<T> implements SearchBarFilterer<T> {
         });
 
         return {
-            completions: groups.filter(g => !!g.completions.length),
-            queryMatches: items
+            matches: items,
+            suggestions: groups.filter(g => !!g.completions.length),
         };
     }
 }

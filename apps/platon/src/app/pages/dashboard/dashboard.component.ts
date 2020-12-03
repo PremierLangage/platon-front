@@ -16,12 +16,11 @@ export class DashboardComponent implements OnInit {
     searchBar: SearchBar<any> =  {
         placeholder: 'Essayez un nom de cours...',
         filterer: {
-            filter: (_) => Promise.resolve({
-                completions: [],
-                queryMatches: []
+            run: (_) => Promise.resolve({
+                matches: [],
+                suggestions: [],
             }),
         },
-        trigger: new Subject<string>(),
         onSuggest: (response) =>  {},
         onEmpty: () => {
         },
