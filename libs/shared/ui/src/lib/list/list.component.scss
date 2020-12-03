@@ -4,7 +4,7 @@
   height: auto;
   width: 100%;
   position: relative;
-  --inner-margin-bottom: 12px 0;
+  --inner-margin-bottom: 12px;
 }
 
 ul,
@@ -25,7 +25,7 @@ li {
 }
 
 .list-item {
-  margin: var(--inner-margin-bottom);
+  margin-bottom: var(--inner-margin-bottom);
 }
 
 .spacer {
