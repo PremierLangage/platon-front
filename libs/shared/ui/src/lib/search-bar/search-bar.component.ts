@@ -56,6 +56,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 this.searchBar.trigger.subscribe(query => {
                     if (query !== this.control.value) {
                         this.control.patchValue(query || '');
+                        this.trigger();
                     }
                 })
             );
