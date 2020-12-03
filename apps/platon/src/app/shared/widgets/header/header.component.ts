@@ -7,7 +7,7 @@ import { AuthService, AuthUser } from '@platon/core/auth';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-    @Input() showLogo = true;
+    @Input() small = true;
     @Output() menu = new EventEmitter();
     @ViewChild('navigation') navigationTemplate!: TemplateRef<any>;
 

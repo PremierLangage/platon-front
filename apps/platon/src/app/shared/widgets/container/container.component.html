@@ -1,11 +1,18 @@
 <ng-container *ngIf="user != null">
   <app-header
-    [showLogo]="!drawerOpened"
+    [small]="drawerOpened"
     (menu)="drawerOpened = !drawerOpened">
   </app-header>
   <mat-drawer-container>
-    <mat-drawer #drawer mode="side" [opened]="drawerOpened">
-      <ng-content select="app-drawer"></ng-content>
+    <mat-drawer mode="side" [opened]="drawerOpened">
+      <ng-container *ngIf="drawer; else: nodrawer">
+        <ng-content select="app-drawer"></ng-content>
+      </ng-container>
+      <ng-template #nodrawer>
+        <app-drawer drawerTitle="PLaTon">
+          <app-nav></app-nav>
+        </app-drawer>
+      </ng-template>
     </mat-drawer>
     <mat-drawer-content>
       <ng-content select="app-content"></ng-content>

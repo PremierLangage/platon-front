@@ -4,3 +4,10 @@
   width: 100%;
   height: calc(100vh - 64px);
 }
+
+@media (max-width: 720px) {
+  :host {
+    display: block;
+    padding: 2rem 16px;
+  }
+}

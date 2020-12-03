@@ -1,9 +1,9 @@
 <mat-toolbar>
-  <app-logo *ngIf="showLogo"></app-logo>
+  <app-logo *ngIf="!small"></app-logo>
   <button mat-icon-button (click)="menu.emit()">
     <mat-icon>menu</mat-icon>
   </button>
-  <app-nav></app-nav>
+  <app-nav *ngIf="!small"></app-nav>
   <div class="spacer"></div>
   <a mat-icon-button href="#">
     <mat-icon matBadge="0">notifications</mat-icon>
