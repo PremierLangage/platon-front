@@ -17,18 +17,18 @@ const routes: Routes = [
             },
 
             {
-                path: 'activities',
+                path: 'activity',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-activities" */
-                    './pages/activities/activities.module'
-                ).then(m => m.ActivitiesModule)
+                    /* webpackChunkName: "workspace-activity" */
+                    './pages/activity/activity.module'
+                ).then(m => m.ActivityModule)
             },
             {
-                path: 'exercises',
+                path: 'exercise',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-exercises" */
-                    './pages/exercises/exercises.module'
-                ).then(m => m.ExercisesModule)
+                    /* webpackChunkName: "workspace-exercise" */
+                    './pages/exercise/exercise.module'
+                ).then(m => m.ExerciseModule)
             },
             {
                 path: 'circle',

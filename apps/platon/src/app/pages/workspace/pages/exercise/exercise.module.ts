@@ -3,16 +3,16 @@ import { RouterModule } from '@angular/router';
 
 import { WorkspaceSharedModule } from '../../shared/workspace-shared.module';
 
-import { ExercisesComponent } from './exercises.component';
+import { ExerciseComponent } from './exercise.component';
 import { CreateExerciseFormComponent } from './create-exercise-form/create-exercise-form.component';
 
 @NgModule({
     imports: [
         WorkspaceSharedModule,
         RouterModule.forChild([
-            { path: '', component: ExercisesComponent }
+            { path: ':id', component: ExerciseComponent }
         ]),
     ],
-    declarations: [ExercisesComponent, CreateExerciseFormComponent],
+    declarations: [ExerciseComponent, CreateExerciseFormComponent],
 })
-export class ExercisesModule {}
+export class ExerciseModule {}

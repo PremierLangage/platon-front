@@ -3,15 +3,15 @@ import { RouterModule } from '@angular/router';
 
 import { WorkspaceSharedModule } from '../../shared/workspace-shared.module';
 
-import { ActivitiesComponent } from './activities.component';
+import { ActivityComponent } from './activity.component';
 
 @NgModule({
     imports: [
         WorkspaceSharedModule,
         RouterModule.forChild([
-            { path: '', component: ActivitiesComponent }
+            { path: ':id', component: ActivityComponent }
         ]),
     ],
-    declarations: [ActivitiesComponent],
+    declarations: [ActivityComponent],
 })
-export class ActivitiesModule {}
+export class ActivityModule {}

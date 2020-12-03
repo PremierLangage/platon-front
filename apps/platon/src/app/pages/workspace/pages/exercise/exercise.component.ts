@@ -3,11 +3,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateExerciseFormComponent } from './create-exercise-form/create-exercise-form.component';
 
 @Component({
-  selector: 'app-workspace-exercises',
-  templateUrl: './exercises.component.html',
-  styleUrls: ['./exercises.component.scss']
+  selector: 'app-ws-exercise',
+  templateUrl: './exercise.component.html',
+  styleUrls: ['./exercise.component.scss']
 })
-export class ExercisesComponent implements OnInit {
+export class ExerciseComponent implements OnInit {
     constructor(
         private readonly dialog: MatDialog
     ) { }

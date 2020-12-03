@@ -8,7 +8,7 @@ import {
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-circle',
+  selector: 'app-ws-circle',
   templateUrl: './circle.component.html',
   styleUrls: ['./circle.component.scss'],
   animations: []
