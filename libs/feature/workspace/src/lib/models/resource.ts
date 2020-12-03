@@ -24,10 +24,6 @@ export interface Member {
     firstName: string;
 }
 
-export interface Directory {
-    id: string;
-}
-
 /**
  * Representation of a resource in a workspace.
  */
@@ -42,27 +38,29 @@ export interface Resource {
     tags: string[];
     /** Unix timestamp value representinng the last update date of the resource. */
     date: number;
-    /** Status of the resource. */
-    status: ResourceStatus;
     /** Brief description of the resource. */
     description: string;
+    /** Identifier of the directory containing the resource files */
     directoryId: string;
 }
 
 export interface Circle extends Resource {
     parentId?: string;
     admins: Member[];
+    requests: Member[];
     watchers: Member[];
     contributors: Member[];
 }
 
 export interface Exercise extends Resource {
     version: number;
+    status: ResourceStatus;
     circleId: string;
 }
 
 export interface Activity extends Resource {
     version: number;
+    status: ResourceStatus;
     circleId: string;
 }
 

@@ -2,18 +2,13 @@
   [articleTitle]="item.name"
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
+  [articleBannerUrl]="'assets/images/illustrations/network.png'"
   [articleDescription]="item.description"
   [articleUrl]="['/workspace/circles', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>group_work</mat-icon>
   </ng-template>
-  <ui-list-item-article-action
-    [actionTitle]="item.contributors.length"
-    [matTooltip]="item.contributors.length + ' Contributeur(s)'">
-    <mat-icon>supervisor_account</mat-icon>
-  </ui-list-item-article-action>
-  <div style="flex: 1;"></div>
   <ui-list-item-article-action
     [actionTitle]="$any(item.date * 1000|date:'dd/MM/yyyy')"
     matTooltip="Date de mise à jour">

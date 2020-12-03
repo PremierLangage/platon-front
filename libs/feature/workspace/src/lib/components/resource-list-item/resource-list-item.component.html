@@ -1,4 +1,3 @@
-<nz-ribbon [nzText]="item.status|resourceStatus:'label'" [nzColor]="item.status|resourceStatus:'color'">
 <ng-container [ngSwitch]="item.type">
   <ng-container *ngSwitchCase="'CIRCLE'">
     <ws-circle-list-item
@@ -20,4 +19,3 @@
   </ng-container>
   <ng-container *ngSwitchDefault>Unknown resource type</ng-container>
 </ng-container>
-</nz-ribbon>

@@ -1,18 +1,15 @@
+<nz-ribbon [nzText]="item.status|resourceStatus:'label'" [nzColor]="item.status|resourceStatus:'color'">
 <ui-list-item-article
   [articleTitle]="item.name"
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
   [articleDescription]="item.description"
+  [articleBannerUrl]="'assets/images/illustrations/laptop1.svg'"
   [articleUrl]="['/workspace/activities', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>assessment</mat-icon>
   </ng-template>
-<!--   <ui-list-item-article-action
-    [actionTitle]="item.contributors.length"
-    [matTooltip]="item.contributors.length + ' Contributeur(s)'">
-    <mat-icon>supervisor_account</mat-icon>
-  </ui-list-item-article-action> -->
   <ui-list-item-article-action
     [actionTitle]="item.circleId"
     matTooltip="Identifiant du cercle associé"
@@ -27,3 +24,4 @@
     <mat-icon>update</mat-icon>
   </ui-list-item-article-action>
 </ui-list-item-article>
+</nz-ribbon>
