@@ -31,11 +31,11 @@ const routes: Routes = [
                 ).then(m => m.ExercisesModule)
             },
             {
-                path: 'circles',
+                path: 'circle',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-circles" */
-                    './pages/circles/circles.module'
-                ).then(m => m.CirclesModule)
+                    /* webpackChunkName: "workspace-circle" */
+                    './pages/circle/circle.module'
+                ).then(m => m.CircleModule)
             },
 
             { path: '**', redirectTo: 'search', pathMatch: 'full' }

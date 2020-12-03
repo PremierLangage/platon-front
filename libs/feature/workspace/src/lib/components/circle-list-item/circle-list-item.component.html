@@ -3,7 +3,7 @@
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
   [articleDescription]="item.description"
-  [articleUrl]="['/workspace/circles', item.id]"
+  [articleUrl]="['/workspace/circle', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>group_work</mat-icon>

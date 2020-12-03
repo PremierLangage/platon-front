@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { NzFormatEmitEvent } from 'ng-zorro-antd/tree';
 
 @Component({
-    selector: 'app-circle-detail-home',
-    templateUrl: './circle-detail-home.component.html',
-    styleUrls: ['./circle-detail-home.component.scss'],
+    selector: 'app-circle-home',
+    templateUrl: './circle-home.component.html',
+    styleUrls: ['./circle-home.component.scss'],
 })
-export class CircleDetailHomeComponent implements OnInit {
+export class CircleHomeComponent implements OnInit {
     tags = [
         {
             title: 'Informatique',

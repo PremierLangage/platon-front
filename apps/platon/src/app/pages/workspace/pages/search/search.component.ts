@@ -39,8 +39,6 @@ export class SearchComponent implements OnInit, OnDestroy {
     form = new FormGroup({
         types: new FormArray([
             new FormControl('CIRCLE'),
-            new FormControl('EXERCISE'),
-            new FormControl('ACTIVITY'),
         ]),
         sortBy: new FormControl('date'),
         status: new FormControl('ALL'),

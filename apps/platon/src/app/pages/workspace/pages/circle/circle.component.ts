@@ -8,11 +8,12 @@ import {
 import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-circle-detail',
-    templateUrl: './circle-detail.component.html',
-    styleUrls: ['./circle-detail.component.scss'],
+  selector: 'app-circle',
+  templateUrl: './circle.component.html',
+  styleUrls: ['./circle.component.scss'],
+  animations: []
 })
-export class CircleDetailComponent implements OnInit, OnDestroy {
+export class CircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     circle?: Circle;
@@ -43,3 +44,4 @@ export class CircleDetailComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach((s) => s.unsubscribe());
     }
 }
+

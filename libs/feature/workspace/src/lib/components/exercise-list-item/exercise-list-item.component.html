@@ -4,7 +4,7 @@
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
   [articleDescription]="item.description"
-  [articleUrl]="['/workspace/exercises', item.id]"
+  [articleUrl]="['/workspace/exercise', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>article</mat-icon>
