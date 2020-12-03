@@ -1,3 +1,5 @@
+// tslint:disable: no-empty-interface
+
 export const ResourceSearchIndexes: ReadonlyArray<string> = [
     'name',
     'tags',
@@ -52,15 +54,16 @@ export interface Circle extends Resource {
     contributors: Member[];
 }
 
-export interface Exercise extends Resource {
+export interface SharedResource extends Resource {
     version: number;
     status: ResourceStatus;
     circleId: string;
 }
 
-export interface Activity extends Resource {
-    version: number;
-    status: ResourceStatus;
-    circleId: string;
+export interface Exercise extends SharedResource {
+    // TODO maybe add more fields later
+}
+export interface Activity extends SharedResource {
+    // TODO maybe add more fields later
 }
 

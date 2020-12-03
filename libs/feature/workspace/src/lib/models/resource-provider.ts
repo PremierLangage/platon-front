@@ -38,6 +38,8 @@ export interface ResourceFilters {
     date: 0 | 1 | 7 | 31 | 180 | 365;
     /** Resource status to match */
     status: 'ALL' | ResourceStatus;
+    /** Search exercises and activities in a specific circle. */
+    circleId?: string;
 }
 
 

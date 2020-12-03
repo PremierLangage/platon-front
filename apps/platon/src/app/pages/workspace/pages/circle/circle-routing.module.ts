@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { CircleComponent } from './circle.component';
 import { CircleForumComponent } from './circle-forum/circle-forum.component';
 import { CircleSettingsComponent } from './circle-settings/circle-settings.component';
-import { CircleHomeComponent } from './circle-home/circle-home.component';
+import { CircleDashboardComponent } from './circle-dashboard/circle-dashboard.component';
 import { CircleDocComponent } from './circle-doc/circle-doc.component';
 
 
@@ -14,7 +14,7 @@ const routes: Routes = [
         path: ':id',
         component: CircleComponent,
         children: [
-            { path: '', component: CircleHomeComponent },
+            { path: '', component: CircleDashboardComponent },
             { path: 'doc', component: CircleDocComponent },
             { path: 'forum', component: CircleForumComponent },
             { path: 'settings', component: CircleSettingsComponent },

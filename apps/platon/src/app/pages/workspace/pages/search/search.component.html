@@ -2,18 +2,19 @@
   [bannerTitle]="'Espace de travail'"
   [bannerImage]="'assets/images/illustrations/network.png'"
   [bannerActions]="bannerActionsTemplate"
-  [bannerSearchBar]="searchBar"
-  bannerDescription="
-  Choisissez vos critères de recherche, écrivez vos mots-clés dans la barre de recherche
-  et appuyez sur la touche entrer pour lancer une recherche
-  ">
+  [bannerSearchBar]="searchBar">
   <ng-template #bannerActionsTemplate>
+    <button class="banner-action" mat-raised-button color="primary" (click)="trigger()">
+      <mat-icon>search</mat-icon>
+      Rechercher
+    </button>
     <button class="banner-action" mat-raised-button>
       <mat-icon>info_outline</mat-icon>
       En savoir plus
     </button>
   </ng-template>
 </app-banner>
+<nz-spin *ngIf="searching" nzSimple nzSize="large"></nz-spin>
 <main>
   <section>
     <ui-list [items]="dataSource" idField="id">
@@ -21,7 +22,7 @@
         <ng-template let-item="item">
           <ws-resource-list-item
             [item]="item"
-            (didFilterByTag)="triggerSearch($event)">
+            (didFilterByTag)="trigger($event)">
           </ws-resource-list-item>
         </ng-template>
       </ui-list-template>
@@ -47,49 +48,52 @@
         <div class="form-group">
           <mat-label id="search-type-label">Qu'est-ce que vous recherchez ?</mat-label>
           <mat-radio-group formControlName="sortBy" class="radio-group" aria-labelledby="search-type-label">
-            <mat-checkbox
-              value="CIRCLE"
-              [checked]="form.value.types.includes('CIRCLE')"
-              (change)="onCheckType($event)">
+            <mat-checkbox formControlName="circles">
               <mat-icon>group_work</mat-icon>
               Cercle
             </mat-checkbox>
-            <mat-checkbox
-              value="EXERCISE"
-              [checked]="form.value.types.includes('EXERCISE')"
-              (change)="onCheckType($event)">
+            <mat-checkbox formControlName="exercises">
               <mat-icon>article</mat-icon>
               Exercice
             </mat-checkbox>
-            <mat-checkbox
-              value="ACTIVITY"
-              [checked]="form.value.types.includes('ACTIVITY')"
-              (change)="onCheckType($event)">
+            <mat-checkbox formControlName="activities">
               <mat-icon>assessment</mat-icon>
               Activité
             </mat-checkbox>
           </mat-radio-group>
         </div>
 
+        <ng-container *ngIf="shouldShowStatusForm">
+          <!-- CIRCLE ID -->
+          <div class="form-group">
+            <mat-label id="circle-id-label">Rechercher les exercices et activités dans un cercle en particulier ?</mat-label>
+            <mat-form-field appearance="fill" aria-labelledby="circle-id-label">
+              <mat-label>Identifiant cercle</mat-label>
+              <input matInput formControlName="circleId">
+            </mat-form-field>
+            <mat-hint>Ce champ est automatiquement remplie lorsque vous faites une recherche depuis la page d'un cercle</mat-hint>
+          </div>
+
+          <!-- STATUS -->
+          <div class="form-group">
+            <mat-label id="status-label">Quel est le status des exercices et activités que vous recherchez ?</mat-label>
+            <mat-radio-group formControlName="status" class="radio-group" aria-labelledby="status-label">
+              <mat-radio-button value="ALL">Tout</mat-radio-button>
+              <mat-radio-button value="READY">Prêt</mat-radio-button>
+              <mat-radio-button value="DRAFT">Brouillon</mat-radio-button>
+              <mat-radio-button value="NOT_TESTED">Non tester</mat-radio-button>
+              <mat-radio-button value="BUGGED">Contient des bugs</mat-radio-button>
+              <mat-radio-button value="DEPRECATED">À ne plus utiliser</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </ng-container>
+
         <!-- SORTBY -->
         <div class="form-group">
-          <span id="sortby-label">Comment voulez-vous trier les résultats ?</span>
+          <mat-label id="sortby-label">Comment voulez-vous trier les résultats ?</mat-label>
           <mat-radio-group formControlName="sortBy" class="radio-group" aria-labelledby="sortby-label">
             <mat-radio-button value="name">Nom</mat-radio-button>
             <mat-radio-button value="date">Date de mise à jour</mat-radio-button>
-          </mat-radio-group>
-        </div>
-
-        <!-- STATUS -->
-        <div class="form-group">
-          <mat-label id="status-label">Quel est le status de ce que vous recherchez ?</mat-label>
-          <mat-radio-group formControlName="status" class="radio-group" aria-labelledby="status-label">
-            <mat-radio-button value="ALL">Je ne sais pas</mat-radio-button>
-            <mat-radio-button value="READY">Prêt</mat-radio-button>
-            <mat-radio-button value="DRAFT">Brouillon</mat-radio-button>
-            <mat-radio-button value="NOT_TESTED">Non tester</mat-radio-button>
-            <mat-radio-button value="BUGGED">Contient des bugs</mat-radio-button>
-            <mat-radio-button value="DEPRECATED">À ne plus utiliser</mat-radio-button>
           </mat-radio-group>
         </div>
 

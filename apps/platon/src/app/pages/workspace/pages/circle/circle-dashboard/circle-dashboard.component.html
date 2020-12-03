@@ -11,11 +11,20 @@
 <div>
   <div class="container-status">
     <h4>Status</h4>
-    <nz-tag [nzColor]="'DRAFT'|resourceStatus:'color'">{{'DRAFT'|resourceStatus:'label'}} 0</nz-tag>
-    <nz-tag [nzColor]="'READY'|resourceStatus:'color'">{{'READY'|resourceStatus:'label'}} 0</nz-tag>
-    <nz-tag [nzColor]="'BUGGED'|resourceStatus:'color'">{{'BUGGED'|resourceStatus:'label'}} 0</nz-tag>
-    <nz-tag [nzColor]="'NOT_TESTED'|resourceStatus:'color'">{{'NOT_TESTED'|resourceStatus:'label'}} 0</nz-tag>
-    <nz-tag [nzColor]="'DEPRECATED'|resourceStatus:'color'">{{'DEPRECATED'|resourceStatus:'label'}} 0</nz-tag>
+    <ng-container *ngFor="let status of status">
+      <a routerLink="['/workspace/search']"
+        [queryParams]="{
+          circle: circle.id,
+          status: status,
+          types: 'EXERCISE|ACTIVITY'
+        }"
+        [queryParamsHandling]="'merge'">
+        <nz-tag
+          [nzColor]="status|resourceStatus:'color'">
+          {{status|resourceStatus:'label'}} 0
+        </nz-tag>
+      </a>
+    </ng-container>
   </div>
   <div class="container-contributors">
     <h4>Contributeurs</h4>

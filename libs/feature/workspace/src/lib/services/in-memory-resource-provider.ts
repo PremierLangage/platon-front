@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ConfigService } from '@platon/shared/utils';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { delay, map, take } from 'rxjs/operators';
 import Fuse from 'fuse.js';
 
 import {
@@ -11,6 +11,7 @@ import {
     Exercise,
     Activity,
     ResourceSearchIndexes,
+    SharedResource,
 } from '../models/resource';
 import {
     ResourceFilters,
@@ -206,7 +207,8 @@ export class InMemoryResourceProvider extends ResourceProvider {
                     page: resources.slice(start, end),
                     total: size,
                 } as ResourcePaginateResult;
-            })
+            }),
+            delay(500) // simulate latency
         )
     }
 
@@ -223,11 +225,11 @@ export class InMemoryResourceProvider extends ResourceProvider {
             const past = new Date(item.date * 1000);
             const matches: boolean[] = [];
             matches.push(filters.types.includes(item.type));
-            matches.push((
-                item.type === 'CIRCLE' ||
-                filters.status === 'ALL' ||
-                filters.status === (item as any).status
-            ));
+            if (item.type !== 'CIRCLE') {
+                const { status, circleId } = (item as SharedResource);
+                matches.push(filters.status === 'ALL' || filters.status === status);
+                matches.push(!filters.circleId || filters.circleId === circleId);
+            }
             matches.push(filters.date === 0 || this.days(past, now) < filters.date);
             return matches.every(match => !!match);
         });

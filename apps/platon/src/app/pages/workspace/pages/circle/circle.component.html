@@ -31,10 +31,10 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">apps</mat-icon>
-          Accueil
+          Dashboard
         </ng-template>
         <ng-template matTabContent>
-          <app-circle-home></app-circle-home>
+          <app-circle-dashboard [circle]="circle"></app-circle-dashboard>
         </ng-template>
       </mat-tab>
       <mat-tab>

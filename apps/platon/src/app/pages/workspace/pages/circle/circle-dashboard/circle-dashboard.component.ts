@@ -1,12 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Circle, ResourceStatus } from '@platon/feature/workspace';
 import { NzFormatEmitEvent } from 'ng-zorro-antd/tree';
 
 @Component({
-    selector: 'app-circle-home',
-    templateUrl: './circle-home.component.html',
-    styleUrls: ['./circle-home.component.scss'],
+    selector: 'app-circle-dashboard',
+    templateUrl: './circle-dashboard.component.html',
+    styleUrls: ['./circle-dashboard.component.scss'],
 })
-export class CircleHomeComponent implements OnInit {
+export class CircleDashboardComponent implements OnInit {
+    @Input() circle!: Circle;
+
+    readonly status: ResourceStatus[] = [
+        'DRAFT', 'READY', 'BUGGED', 'NOT_TESTED', 'DEPRECATED'
+    ];
+
     tags = [
         {
             title: 'Informatique',

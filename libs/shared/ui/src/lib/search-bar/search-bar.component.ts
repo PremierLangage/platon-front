@@ -56,11 +56,17 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 this.searchBar.trigger.subscribe(query => {
                     if (query !== this.control.value) {
                         this.control.patchValue(query || '');
-                        this.trigger();
                     }
+                    this.trigger();
                 })
             );
         }
+
+        setTimeout(() => {
+            if (this.searchBar?.onReady) {
+                this.searchBar.onReady();
+            }
+        }); // avoid ExpressionChangedAfterItHasBeenCheckedError
     }
 
     ngOnDestroy() {

@@ -7,7 +7,7 @@ import { CircleRoutingModule } from './circle-routing.module';
 import { CircleComponent } from './circle.component';
 import { CircleForumComponent } from './circle-forum/circle-forum.component';
 import { CircleSettingsComponent } from './circle-settings/circle-settings.component';
-import { CircleHomeComponent } from './circle-home/circle-home.component';
+import { CircleDashboardComponent } from './circle-dashboard/circle-dashboard.component';
 import { CircleDocComponent } from './circle-doc/circle-doc.component';
 
 @NgModule({
@@ -18,7 +18,7 @@ import { CircleDocComponent } from './circle-doc/circle-doc.component';
     declarations: [
         CircleComponent,
         CircleDocComponent,
-        CircleHomeComponent,
+        CircleDashboardComponent,
         CircleForumComponent,
         CircleSettingsComponent,
     ],

@@ -10,6 +10,10 @@ mat-expansion-panel {
   margin-bottom: 8px;
 }
 
+mat-form-field {
+  width: 100%;
+}
+
 mat-checkbox,
 mat-radio-button {
   margin: 8px;
@@ -25,8 +29,16 @@ mat-radio-button {
   margin: 8px 0;
 }
 
-mat-slider {
-  width: 100%;
+mat-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+nz-spin {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
 }
 
 :host::ng-deep {

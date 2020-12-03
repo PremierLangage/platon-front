@@ -19,7 +19,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
+
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
@@ -66,6 +68,7 @@ const MATERIAL_MODULES = [
 
 const NZ_ZORRO_MODULES = [
     NzTagModule,
+    NzSpinModule,
     NzTreeModule,
     NzEmptyModule,
     NzBadgeModule,
