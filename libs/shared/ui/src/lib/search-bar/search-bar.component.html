@@ -3,6 +3,7 @@
   type="search"
   [placeholder]="searchBar?.placeholder || ''"
   [formControl]="control"
+  (keydown.enter)="trigger()"
   [nzAutocomplete]="auto">
 <nz-autocomplete #auto>
   <ng-container *ngIf="completing; else: result;">
@@ -14,10 +15,11 @@
   </ng-container>
   <ng-template #result>
     <nz-auto-optgroup
+      (click)="trigger()"
       *ngFor="let group of completions"
       [nzLabel]="group.title">
       <nz-auto-option
-        *ngFor="let completion of group.completions"
+        *ngFor="let completion of group.completions|slice:0:8"
         [nzValue]="completion">
         <ng-container *ngIf="completionTemplate; else: defaultTemplate">
           <ng-container *ngTemplateOutlet="

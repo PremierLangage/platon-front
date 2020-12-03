@@ -9,6 +9,14 @@ const routes: Routes = [
         component: WorkspaceComponent,
         children: [
             {
+                path: 'search',
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-search" */
+                    './pages/search/search.module'
+                ).then(m => m.SearchModule)
+            },
+
+            {
                 path: 'activities',
                 loadChildren: () => import(
                     /* webpackChunkName: "workspace-activities" */
@@ -29,14 +37,8 @@ const routes: Routes = [
                     './pages/circles/circles.module'
                 ).then(m => m.CirclesModule)
             },
-            {
-                path: 'packages',
-                loadChildren: () => import(
-                    /* webpackChunkName: "workspace-packages" */
-                    './pages/packages/packages.module'
-                ).then(m => m.PackagesModule)
-            },
-            { path: '**', redirectTo: 'circles', pathMatch: 'full' }
+
+            { path: '**', redirectTo: 'search', pathMatch: 'full' }
         ]
     },
     { path: '**', redirectTo: '', pathMatch: 'full' }

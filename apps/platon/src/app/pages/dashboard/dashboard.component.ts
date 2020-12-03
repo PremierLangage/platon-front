@@ -22,7 +22,7 @@ export class DashboardComponent implements OnInit {
             }),
         },
         trigger: new Subject<string>(),
-        onChange: (response) =>  {},
+        onSuggest: (response) =>  {},
         onEmpty: () => {
         },
     }

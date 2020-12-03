@@ -66,6 +66,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
+    trigger() {
+        if (this.searchBar?.onTrigger) {
+            this.searchBar.onTrigger(this.control.value);
+        }
+    }
+
     private async filter(query?: string) {
         this.completing = true;
         this.completions = [];
@@ -75,8 +81,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
             if (this.searchBar?.filterer) {
                 const response = await this.searchBar?.filterer.filter(query || '');
                 this.completions = response.completions;
-                if (this.searchBar?.onChange) {
-                    this.searchBar.onChange(response);
+                if (this.searchBar?.onSuggest) {
+                    this.searchBar.onSuggest(response);
                 }
             }
         } else if (this.searchBar?.onEmpty){

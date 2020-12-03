@@ -4,20 +4,11 @@
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
   [articleDescription]="item.description"
-  [articleBannerUrl]="'assets/images/illustrations/laptop1.svg'"
   [articleUrl]="['/workspace/activities', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>assessment</mat-icon>
   </ng-template>
-  <ui-list-item-article-action
-    [actionTitle]="item.circleId"
-    matTooltip="Identifiant du cercle associé"
-    [routerLink]="['/workspace/circles', item.id]"
-    [queryParams]="{}">
-    <mat-icon>group_work</mat-icon>
-  </ui-list-item-article-action>
-  <div style="flex: 1;"></div>
   <ui-list-item-article-action
     [actionTitle]="$any(item.date * 1000|date:'dd/MM/yyyy')"
     matTooltip="Date de mise à jour">

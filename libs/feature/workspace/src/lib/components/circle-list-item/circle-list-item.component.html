@@ -2,7 +2,6 @@
   [articleTitle]="item.name"
   [articleTags]="item.tags"
   [articleIconTemplate]="image"
-  [articleBannerUrl]="'assets/images/illustrations/network.png'"
   [articleDescription]="item.description"
   [articleUrl]="['/workspace/circles', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">

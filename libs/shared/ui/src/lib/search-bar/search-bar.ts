@@ -10,7 +10,8 @@ export interface SearchBar<T> {
     trigger?: Subject<string>;
     filterer: SearchBarFilterer<T>;
     onEmpty?: () => void;
-    onChange?: (response: SearchBarFiltererResult<T>) => void;
+    onTrigger?: (query?: string) => void;
+    onSuggest?: (response: SearchBarFiltererResult<T>) => void;
     placeholder?: string;
 }
 

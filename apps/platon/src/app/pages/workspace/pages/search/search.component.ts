@@ -5,7 +5,8 @@ import {
     OnInit,
     TemplateRef,
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     Circle,
@@ -14,39 +15,34 @@ import {
     ResourceService,
     ResourceTypes,
 } from '@platon/feature/workspace';
-import { SearchBar, SearchBarFiltererResult } from '@platon/shared/ui';
+import { SearchBar, SearchBarFiltererResult, SearchBarFuseFilterer } from '@platon/shared/ui';
 import { Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-ws-search-view',
-    templateUrl: './search-view.component.html',
-    styleUrls: ['./search-view.component.scss'],
+    selector: 'app-workspace-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.scss'],
 })
-export class SearchViewComponent implements OnInit, OnDestroy {
+export class SearchComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
-    private readonly resourceFilterer = this.resourceService.filterer<
-        Resource
-    >();
+    private suggestions: Record<ResourceTypes, string[]> = {
+        CIRCLE: [],
+        ACTIVITY: [],
+        EXERCISE: []
+    };
 
-    @Input() type!: string;
-    @Input() searchBarPlaceholder = '';
-
-    @Input() bannerTitle!: string;
-    @Input() bannerImage!: string;
-    @Input() bannerDescription!: string;
-    @Input() bannerCompletion?: TemplateRef<any>;
-    @Input() bannerSearchBar?: SearchBar<any>;
-
-    @Input() bannerActionsTemplate!: TemplateRef<any>;
-
-    searchBar!: SearchBar<Resource>;
-    searchBarQuery = '';
+    searchBar!: SearchBar<string>;
+    query = '';
     dataSource: Resource[] = [];
-    paginationSource: Resource[] = [];
 
     form = new FormGroup({
-        sortBy: new FormControl('name'),
+        types: new FormArray([
+            new FormControl('CIRCLE'),
+            new FormControl('EXERCISE'),
+            new FormControl('ACTIVITY'),
+        ]),
+        sortBy: new FormControl('date'),
         status: new FormControl('ALL'),
         date: new FormControl(0),
     });
@@ -55,11 +51,13 @@ export class SearchViewComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         private readonly activatedRoute: ActivatedRoute,
         private readonly resourceService: ResourceService
-    ) {}
+    ) {
+    }
 
     ngOnInit() {
         this.paginate();
         this.createSearchBar();
+        this.createSuggestions();
         this.addFilterFormChangeListener();
         this.addRouterParamChangeListener();
     }
@@ -78,18 +76,33 @@ export class SearchViewComponent implements OnInit, OnDestroy {
         });
     }
 
+    onCheckType(e: MatCheckboxChange) {
+        const types = this.form.get('types') as FormArray;
+        if (e.checked) {
+            types.push(new FormControl(e.source.value));
+        } else {
+            let i = 0;
+            types.controls.forEach((item) => {
+                if (item.value === e.source.value) {
+                    types.removeAt(i);
+                    return;
+                }
+                i++;
+            });
+        }
+    }
+
     private paginate() {
         let subs: Subscription;
         subs = this.resourceService
-            .paginate<Circle>({
+            .paginate({
                 page: 0,
-                pageSize: 30,
+                pageSize: 50,
                 filters: this.createFilters(),
             })
             .subscribe({
                 next: (response) => {
                     this.dataSource = response.page;
-                    this.paginationSource = response.page;
                     subs?.unsubscribe();
                 },
                 error: (err) => {
@@ -102,46 +115,62 @@ export class SearchViewComponent implements OnInit, OnDestroy {
     private createFilters(): ResourceFilters {
         const value = this.form.value;
         return {
-            type: this.type as ResourceTypes,
+            query: this.query,
+            types: value.types as ResourceTypes[],
             sortBy: value.sortBy,
             status: value.status,
-            updateDate: value.date,
+            date: value.date,
         };
     }
 
     private createSearchBar() {
         this.searchBar = {
-            placeholder: this.searchBarPlaceholder || '',
-            filterer: {
-                filter: this.filter.bind(this),
-            },
+            placeholder: 'Essayez une matière, une notion...',
+            filterer: new SearchBarFuseFilterer<string>({
+                dataSource: () => {
+                    let suggestions: string[] = [];
+                    this.form.value.types.forEach((type: ResourceTypes) => {
+                        suggestions = suggestions.concat(this.suggestions[type]);
+                    });
+                    return suggestions;
+                },
+                fuseOptions: {
+                    includeMatches: true,
+                    findAllMatches: false,
+                    threshold: 0.2,
+                },
+                defaultCompletionGroup: 'SUGGESTIONS',
+            }),
             trigger: new Subject<string>(),
-            onChange: (response) => (this.dataSource = response.queryMatches),
+            onTrigger: (query) => {
+                this.query = query || '';
+                this.paginate();
+            },
             onEmpty: () => {
-                this.searchBarQuery = '';
-                this.dataSource = this.paginationSource;
+                this.query = '';
             },
         };
     }
 
-    private addFilterFormChangeListener() {
+    private createSuggestions() {
         this.subscriptions.push(
+            this.resourceService.suggestions().subscribe(suggestions => {
+                this.suggestions = suggestions;
+            })
+        );
+    }
+
+    private addFilterFormChangeListener() {
+        /* this.subscriptions.push(
             this.form.valueChanges
                 .pipe(
                     distinctUntilChanged(),
                     switchMap(async () => {
-                        if (this.searchBarQuery) {
-                            const response = await this.filter(
-                                this.searchBarQuery
-                            );
-                            this.dataSource = response.queryMatches;
-                        } else {
-                            this.paginate();
-                        }
+                        this.paginate();
                     })
                 )
                 .subscribe()
-        );
+        ); */
     }
 
     private addRouterParamChangeListener() {
@@ -154,22 +183,4 @@ export class SearchViewComponent implements OnInit, OnDestroy {
         );
     }
 
-    private async filter(
-        query: string
-    ): Promise<SearchBarFiltererResult<Resource>> {
-        this.searchBarQuery = query;
-        const response = await this.resourceFilterer.filter({
-            query,
-            filters: this.createFilters(),
-        });
-        return {
-            completions: [
-                {
-                    title: 'Résultat',
-                    completions: response.completions,
-                },
-            ],
-            queryMatches: response.matches,
-        };
-    }
 }

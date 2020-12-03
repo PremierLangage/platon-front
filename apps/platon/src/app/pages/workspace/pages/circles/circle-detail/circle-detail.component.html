@@ -3,17 +3,25 @@
     <h1 class="circle-title">{{circle!.name}}</h1>
     <p class="circle-description">{{circle!.description}}</p>
     <div class="circle-actions">
-      <button mat-raised-button>
+      <button id="action-share" mat-raised-button>
         <mat-icon>share</mat-icon>
         Partager
       </button>
-      <button mat-raised-button>
+      <button id="action-edit" mat-raised-button>
+        <mat-icon>edit</mat-icon>
+        Éditer l'atelier
+      </button>
+      <button id="action-create-exercise" mat-raised-button>
         <mat-icon>article</mat-icon>
         Créer un exercice
       </button>
-      <button mat-raised-button>
+      <button id="action-create-activity" mat-raised-button>
         <mat-icon>assessment</mat-icon>
         Créer une activité
+      </button>
+      <button id="action-create-sub-circle" mat-raised-button>
+        <mat-icon>call_split</mat-icon>
+        Créer un sous cercle
       </button>
     </div>
   </section>

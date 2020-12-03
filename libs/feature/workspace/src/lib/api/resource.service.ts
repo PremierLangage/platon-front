@@ -20,8 +20,8 @@ export class ResourceService {
     /**
      *  Builds a new resource filterer.
      */
-    filterer<T extends Resource>() {
-        return this.provider.filterer<T>();
+    suggestions() {
+        return this.provider.suggestions();
     }
 
     /**
@@ -39,9 +39,9 @@ export class ResourceService {
      * Paginates resources of the given type from the server.
      * @param args Arguments of the method.
      */
-    paginate<T extends Resource>(
+    paginate(
         args: ResourcePaginateArgs
-    ): Observable<ResourcePaginateResult<T>> {
+    ): Observable<ResourcePaginateResult> {
         return this.provider.paginate(args);
     }
 }
