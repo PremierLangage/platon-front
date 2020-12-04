@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -27,6 +28,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzAutocompleteModule } from 'ng-zorro-antd/auto-complete';
 
 import { SharedUiListModule } from '@platon/shared/ui';
@@ -56,6 +58,7 @@ const MATERIAL_MODULES = [
     MatChipsModule,
     MatInputModule,
     MatButtonModule,
+    MatTooltipModule,
     MatSidenavModule,
     MatStepperModule,
     MatToolbarModule,
@@ -74,6 +77,7 @@ const NZ_ZORRO_MODULES = [
     NzBadgeModule,
     NzAvatarModule,
     NzTimelineModule,
+    NzBreadCrumbModule,
     NzAutocompleteModule,
 ];
 

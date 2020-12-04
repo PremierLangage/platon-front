@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { AuthUser } from '@platon/core/auth';
+import { Circle } from '@platon/feature/workspace';
 
 @Component({
   selector: 'app-circle-settings',
@@ -7,9 +10,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CircleSettingsComponent implements OnInit {
 
-  constructor() { }
+    form = new FormGroup({
+        name: new FormControl(''),
+        description: new FormControl('')
+    });
 
-  ngOnInit() {
-  }
+    @Input() user!: AuthUser;
+    @Input() circle!: Circle;
+
+    constructor() { }
+
+    ngOnInit() {
+        this.form.patchValue({
+            name: this.circle.name,
+            description: this.circle.description
+        });
+    }
 
 }

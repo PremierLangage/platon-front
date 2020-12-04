@@ -1,40 +1,62 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Circle, ResourceStatus } from '@platon/feature/workspace';
-import { NzFormatEmitEvent } from 'ng-zorro-antd/tree';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AuthUser } from '@platon/core/auth';
+import {
+    Circle,
+    CircleEvent,
+    Contributor,
+    ResourceService,
+    ResourceStatus
+} from '@platon/feature/workspace';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-circle-dashboard',
     templateUrl: './circle-dashboard.component.html',
     styleUrls: ['./circle-dashboard.component.scss'],
 })
-export class CircleDashboardComponent implements OnInit {
+export class CircleDashboardComponent implements OnInit, OnDestroy {
+    private readonly subscriptions: Subscription[] = [];
+    readonly status: ResourceStatus[] = [
+        'DRAFT',
+        'READY',
+        'BUGGED',
+        'NOT_TESTED',
+        'DEPRECATED',
+    ];
+
+    events: CircleEvent[] = [];
+    contributors: Contributor[] = [];
+
+    @Input() user!: AuthUser;
     @Input() circle!: Circle;
 
-    readonly status: ResourceStatus[] = [
-        'DRAFT', 'READY', 'BUGGED', 'NOT_TESTED', 'DEPRECATED'
-    ];
+    get admins() {
+        return this.contributors.filter(e => e.isAdmin);
+    }
 
-    tags = [
-        {
-            title: 'Informatique',
-            key: '00',
-            expanded: true,
-            children: [
-                {
-                    title: 'Automate',
-                    key: '001',
-                    children: [{ title: 'L2', key: '0001' }],
-                },
-            ],
-        },
-    ];
-    constructor() {}
+    get members() {
+        return this.contributors.filter(e => !e.isAdmin);
+    }
 
-    ngOnInit() {}
+    constructor(
+        private readonly resourceService: ResourceService
+    ) {}
 
-    nzEvent(event: NzFormatEmitEvent): void {
-        console.log(event);
-        event.event?.preventDefault();
-        event.event?.stopPropagation();
+    ngOnInit() {
+        this.subscriptions.push(
+            this.resourceService
+                .listContributors(this.circle.id)
+                .subscribe((contributors) => {
+                    this.contributors = contributors;
+                })
+        );
+    }
+
+    ngOnDestroy() {
+        this.subscriptions.forEach((s) => s.unsubscribe());
+    }
+
+    trackById(_: number, item: any) {
+        return item.id;
     }
 }

@@ -1,15 +1,18 @@
-<ng-container *ngIf="circle != null">
+<ng-container *ngIf="circle != null && user != null">
   <section>
-    <h1 class="circle-title">{{circle!.name}}</h1>
+    <nz-breadcrumb>
+      <nz-breadcrumb-item *ngIf="parent">
+        <a [routerLink]="['/workspace', 'circle', parent!.id]">{{parent!.name}}</a>
+      </nz-breadcrumb-item>
+      <nz-breadcrumb-item>
+        <a>{{circle!.name}}</a>
+      </nz-breadcrumb-item>
+    </nz-breadcrumb>
     <p class="circle-description">{{circle!.description}}</p>
     <div class="circle-actions">
-      <button id="action-share" mat-raised-button>
-        <mat-icon>share</mat-icon>
-        Partager
-      </button>
       <button id="action-edit" mat-raised-button>
         <mat-icon>edit</mat-icon>
-        Éditer l'atelier
+        Éditer le répertoire
       </button>
       <button id="action-create-exercise" mat-raised-button>
         <mat-icon>article</mat-icon>
@@ -25,7 +28,6 @@
       </button>
     </div>
   </section>
-  <br/>
   <section>
     <mat-tab-group dynamicHeight>
       <mat-tab>
@@ -34,7 +36,7 @@
           Dashboard
         </ng-template>
         <ng-template matTabContent>
-          <app-circle-dashboard [circle]="circle"></app-circle-dashboard>
+          <app-circle-dashboard [user]="user" [circle]="circle"></app-circle-dashboard>
         </ng-template>
       </mat-tab>
       <mat-tab>
@@ -61,7 +63,7 @@
           Paramètres
         </ng-template>
         <ng-template matTabContent>
-          <app-circle-settings></app-circle-settings>
+          <app-circle-settings [user]="user" [circle]="circle"></app-circle-settings>
         </ng-template>
       </mat-tab>
     </mat-tab-group>

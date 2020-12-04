@@ -12,8 +12,6 @@ import { Subscription } from 'rxjs';
 import {
     lightSpeedInOnEnterAnimation,
     lightSpeedOutOnLeaveAnimation,
-    zoomInOnEnterAnimation,
-    zoomOutOnLeaveAnimation,
 } from 'angular-animations';
 
 @Component({
@@ -23,8 +21,6 @@ import {
     animations: [
         lightSpeedInOnEnterAnimation({ duration: 300 }),
         lightSpeedOutOnLeaveAnimation({ duration: 300 }),
-        zoomInOnEnterAnimation({ duration: 300 }),
-        zoomOutOnLeaveAnimation({ duration: 300 }),
     ],
 })
 export class SearchComponent implements OnInit, OnDestroy {
@@ -61,7 +57,6 @@ export class SearchComponent implements OnInit, OnDestroy {
         circleId: new FormControl(''),
         date: new FormControl(0),
     });
-
     readonly searchBar: SearchBar<string> = {
         placeholder: 'Essayez une matière, une notion...',
         filterer: this.filterer,
@@ -170,6 +165,12 @@ export class SearchComponent implements OnInit, OnDestroy {
     }
 
     private addRouterParamChangeListener() {
+        if (!this.activatedRoute.snapshot.queryParamMap.keys.length) {
+            this.form.patchValue({
+                circles: true
+            });
+            this.trigger();
+        }
         this.subscriptions.push(
             this.activatedRoute.queryParams.subscribe((e) => {
                 if (e.types) {

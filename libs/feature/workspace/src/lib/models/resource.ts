@@ -18,12 +18,32 @@ export declare type ResourceStatus =
     'DEPRECATED' |
     'NOT_TESTED'
     ;
+export interface CircleStatus {
+    DRAFT: number;
+    READY: number;
+    BUGGED: number;
+    DEPRECATED: number;
+    NOT_TESTED: number;
+};
 
-export interface Member {
+export interface CircleEvent {
     id: number;
+    date: number;
+    text: string;
+}
+
+export interface Contributor {
+    id: number;
+    isAdmin: boolean;
     userName: string;
     lastName: string;
     firstName: string;
+}
+
+export interface ContributorRequest {
+    id: number;
+    date: number;
+    contributor: Contributor;
 }
 
 /**
@@ -48,10 +68,6 @@ export interface Resource {
 
 export interface Circle extends Resource {
     parentId?: string;
-    admins: Member[];
-    requests: Member[];
-    watchers: Member[];
-    contributors: Member[];
 }
 
 export interface SharedResource extends Resource {
@@ -63,6 +79,7 @@ export interface SharedResource extends Resource {
 export interface Exercise extends SharedResource {
     // TODO maybe add more fields later
 }
+
 export interface Activity extends SharedResource {
     // TODO maybe add more fields later
 }

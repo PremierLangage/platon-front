@@ -1,9 +1,11 @@
+import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { Resource, ResourceStatus, ResourceTypes } from './resource';
+import { CircleEvent, Contributor, ContributorRequest, Resource, ResourceStatus, ResourceTypes } from './resource';
 
-export abstract class ResourceProvider implements IDynamicService {
+export abstract class ResourceProvider implements AuthObserver, IDynamicService {
     abstract injectable(): boolean;
+    abstract onChangeAuth(change: AuthChange): void | Promise<void>;
 
     abstract suggestions(): Observable<Record<ResourceTypes, string[]>>;
 
@@ -22,6 +24,26 @@ export abstract class ResourceProvider implements IDynamicService {
     abstract paginate(
         args: ResourcePaginateArgs
     ): Observable<ResourcePaginateResult>;
+
+
+    abstract listEvents(
+        circleId: string
+    ): Observable<CircleEvent[]>;
+    abstract addEvent(circleId: string, event: CircleEvent): Promise<void>;
+    abstract removeEvent(circleId: string, event: CircleEvent): Promise<void>;
+
+    abstract listContributors(
+        circleId: string
+    ): Observable<Contributor[]>;
+    abstract addContributor(circleId: string, contributor: Contributor): Promise<void>;
+    abstract removeContributor(circleId: string, contributor: Contributor): Promise<void>;
+
+    abstract listRequests(
+        circleId: string
+    ): Observable<ContributorRequest[]>;
+    abstract addRequest(circleId: string, request: ContributorRequest): Promise<void>;
+    abstract removeRequest(circleId: string, request: ContributorRequest): Promise<void>;
+
 }
 
 /**
@@ -74,3 +96,4 @@ export interface ResourcePaginateResult {
     /** Total number of pages. */
     total: number;
 }
+
