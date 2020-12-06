@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ConfigService } from '@platon/shared/utils';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { delay, map, take} from 'rxjs/operators';
 import Fuse from 'fuse.js';
 import { AuthChange, AuthObserver, InMemoryUserDb } from '@platon/core/auth';
@@ -11,14 +11,15 @@ import {
     Exercise,
     Activity,
     ResourceSearchIndexes,
-    SharedResource,
+    PublishableResource,
     Contributor,
-    CircleEvent,
+    ResourceEvent,
     ContributorRequest,
 } from '../models/resource';
 import {
     ResourceFilters,
     ResourceFindByIdArgs,
+    ResourceListEventsArgs,
     ResourcePaginateArgs,
     ResourcePaginateResult,
     ResourceProvider,
@@ -32,6 +33,11 @@ officia excepturi ducimus aliquid adipisci sunt numquam.
 
 @Injectable()
 export class InMemoryResourceProvider extends ResourceProvider implements AuthObserver {
+    private readonly events = new Map<ResourceTypes, BehaviorSubject<ResourceEvent[]>>([
+        ['CIRCLE', new BehaviorSubject<ResourceEvent[]>([])],
+        ['EXERCISE', new BehaviorSubject<ResourceEvent[]>([])],
+        ['ACTIVITY', new BehaviorSubject<ResourceEvent[]>([])],
+    ]);
     private readonly resources = new Map<ResourceTypes, BehaviorSubject<any[]>>([
         [
             'CIRCLE',
@@ -135,9 +141,8 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         ],
     ]);
 
-    private readonly events = new Map<string, BehaviorSubject<CircleEvent[]>>([]);
-    private readonly requests = new Map<string, BehaviorSubject<ContributorRequest[]>>([]);
     private readonly contributors = new Map<string, BehaviorSubject<Contributor[]>>([]);
+    private readonly contributorsRequests = new Map<string, BehaviorSubject<ContributorRequest[]>>([]);
 
     constructor(
         private readonly config: ConfigService,
@@ -226,6 +231,18 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             ) as Observable<T | undefined>;
     }
 
+    update(resource: Resource): Promise<void> {
+        const subject = this.resources.get(resource.type) as BehaviorSubject<Resource[]>;
+        subject.value.forEach((r, i) => {
+            if (r.id === resource.id) {
+                subject.value[i] = resource;
+                subject.next(subject.value);
+                return true;
+            }
+        });
+        return Promise.resolve();
+    }
+
     paginate(
         args: Required<ResourcePaginateArgs>
     ): Observable<ResourcePaginateResult> {
@@ -245,10 +262,29 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
     }
 
 
-    listContributors(
-        circleId: string
-    ): Observable<Contributor[]> {
-        return this.getContributors(circleId).asObservable();
+    addEvent(event: ResourceEvent): Promise<void> {
+        const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
+        events.value.push(event);
+        events.next(events.value);
+        return Promise.resolve();
+    }
+    removeEvent(event: ResourceEvent): Promise<void> {
+        const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
+        events.next(events.value.filter(e => e.id !== event.id));
+        return Promise.resolve();
+    }
+    listEvents(
+        args: ResourceListEventsArgs
+    ): Observable<ResourceEvent[]> {
+        return this.getEvents().pipe(
+            map((events) =>
+                events.filter(
+                    (event) =>
+                        event.resourceType === args.resourceType &&
+                        event.resourceId === args.resourceId
+                )
+            )
+        );
     }
 
     addContributor(circleId: string, contributor: Contributor): Promise<void> {
@@ -257,50 +293,34 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         contributors.next(contributors.value);
         return Promise.resolve();
     }
-
     removeContributor(circleId: string, contributor: Contributor): Promise<void> {
         const contributors = this.getContributors(circleId);
         contributors.next(contributors.value.filter(e => e.id !== contributor.id));
         return Promise.resolve();
     }
-
-    listEvents(
+    listContributors(
         circleId: string
-    ): Observable<CircleEvent[]> {
-        return this.getEvents(circleId).asObservable();
+    ): Observable<Contributor[]> {
+        return this.getContributors(circleId).asObservable();
     }
 
-    addEvent(circleId: string, event: CircleEvent): Promise<void> {
-        const events = this.getEvents(circleId);
-        events.value.push(event);
-        events.next(events.value);
-        return Promise.resolve();
-    }
-
-    removeEvent(circleId: string, event: CircleEvent): Promise<void> {
-        const events = this.getEvents(circleId);
-        events.next(events.value.filter(e => e.id !== event.id));
-        return Promise.resolve();
-    }
-
-    listRequests(
-        circleId: string
-    ): Observable<ContributorRequest[]> {
-        return this.getRequests(circleId).asObservable();
-    }
-
-    addRequest(circleId: string, request: ContributorRequest): Promise<void> {
-        const requests = this.getRequests(circleId);
+    addContributorRequest(request: ContributorRequest): Promise<void> {
+        const requests = this.getContributorRequests(request.circleId);
         requests.value.push(request);
         requests.next(requests.value);
         return Promise.resolve();
     }
-
-    removeRequest(circleId: string, request: ContributorRequest): Promise<void> {
-        const requests = this.getRequests(circleId);
+    removeContributorRequest(request: ContributorRequest): Promise<void> {
+        const requests = this.getContributorRequests(request.circleId);
         requests.next(requests.value.filter(e => e.id !== request.id));
         return Promise.resolve();
     }
+    listContributorRequests(
+        circleId: string
+    ): Observable<ContributorRequest[]> {
+        return this.getContributorRequests(circleId).asObservable();
+    }
+
 
     private days(a: Date, b: Date) {
         // To calculate the time difference of two dates
@@ -316,7 +336,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             const matches: boolean[] = [];
             matches.push(filters.types.includes(item.type));
             if (item.type !== 'CIRCLE') {
-                const { status, circleId } = (item as SharedResource);
+                const { status, circleId } = (item as PublishableResource);
                 matches.push(filters.status === 'ALL' || filters.status === status);
                 matches.push(!filters.circleId || filters.circleId === circleId);
             }
@@ -345,22 +365,37 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         });
     }
 
-    private getEvents(circleId: string) {
-        let events = this.events.get(circleId);
-        if (!events) {
-            events = new BehaviorSubject<CircleEvent[]>([]);
-            this.events.set(circleId, events);
-        }
-        return events;
+
+    private getEvents() {
+        const queries: Observable<ResourceEvent[]>[] = [];
+        this.events.forEach((subject) => {
+            queries.push(subject.asObservable());
+        });
+        return combineLatest(queries).pipe(
+            map(events => {
+                let response: ResourceEvent[] = [];
+                events.forEach(array => {
+                    response = response.concat(array);
+                });
+                return response;
+            })
+        );
     }
 
-    private getRequests(circleId: string) {
-        let requests = this.requests.get(circleId);
-        if (!requests) {
-            requests = new BehaviorSubject<ContributorRequest[]>([]);
-            this.requests.set(circleId, requests);
-        }
-        return requests;
+    private getResources() {
+        const queries: Observable<Resource[]>[] = [];
+        this.resources.forEach((subject) => {
+            queries.push(subject.asObservable());
+        });
+        return combineLatest(queries).pipe(
+            map(resources => {
+                let response: Resource[] = [];
+                resources.forEach(array => {
+                    response = response.concat(array);
+                });
+                return response;
+            })
+        );
     }
 
     private getContributors(circleId: string) {
@@ -372,21 +407,13 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         return contributors;
     }
 
-    private getResources() {
-        const queries: Observable<Resource[]>[] = [];
-        this.resources.forEach((subject) => {
-            queries.push(subject.asObservable());
-        });
-
-        return combineLatest(queries).pipe(
-            map(combinedResources => {
-                let resources: Resource[] = [];
-                combinedResources.forEach(array => {
-                    resources = resources.concat(array);
-                });
-                return resources;
-            })
-        );
+    private getContributorRequests(circleId: string) {
+        let requests = this.contributorsRequests.get(circleId);
+        if (!requests) {
+            requests = new BehaviorSubject<ContributorRequest[]>([]);
+            this.contributorsRequests.set(circleId, requests);
+        }
+        return requests;
     }
 
 }

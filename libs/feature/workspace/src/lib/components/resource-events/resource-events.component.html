@@ -1,0 +1,16 @@
+<ng-container *ngIf="events.length; else: noevent;">
+  <h3>Événements récents</h3>
+  <nz-timeline>
+    <ng-container *ngFor="let event of events">
+      <nz-timeline-item>{{event.text}} - {{event.date * 1000|date}}</nz-timeline-item>
+    </ng-container>
+  </nz-timeline>
+</ng-container>
+<ng-template #noevent>
+  <nz-empty [nzNotFoundContent]="content">
+    <ng-template #content>
+      <h2>Aucun événement important n'est à signaler !</h2>
+      <p></p>
+    </ng-template>
+  </nz-empty>
+</ng-template>

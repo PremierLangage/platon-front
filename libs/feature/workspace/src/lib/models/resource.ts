@@ -26,10 +26,12 @@ export interface CircleStatus {
     NOT_TESTED: number;
 };
 
-export interface CircleEvent {
-    id: number;
+export interface ResourceEvent {
+    id: string;
     date: number;
     text: string;
+    resourceId: string;
+    resourceType: ResourceTypes;
 }
 
 export interface Contributor {
@@ -43,6 +45,7 @@ export interface Contributor {
 export interface ContributorRequest {
     id: number;
     date: number;
+    circleId: string;
     contributor: Contributor;
 }
 
@@ -70,17 +73,17 @@ export interface Circle extends Resource {
     parentId?: string;
 }
 
-export interface SharedResource extends Resource {
-    version: number;
+export interface PublishableResource extends Resource {
     status: ResourceStatus;
+    version: number;
     circleId: string;
 }
 
-export interface Exercise extends SharedResource {
+export interface Exercise extends PublishableResource {
     // TODO maybe add more fields later
 }
 
-export interface Activity extends SharedResource {
+export interface Activity extends PublishableResource {
     // TODO maybe add more fields later
 }
 

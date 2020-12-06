@@ -1,7 +1,7 @@
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { CircleEvent, Contributor, ContributorRequest, Resource, ResourceStatus, ResourceTypes } from './resource';
+import { ResourceEvent, Contributor, ContributorRequest, Resource, ResourceStatus, ResourceTypes } from './resource';
 
 export abstract class ResourceProvider implements AuthObserver, IDynamicService {
     abstract injectable(): boolean;
@@ -17,6 +17,8 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
         args: ResourceFindByIdArgs
     ): Observable<T | undefined>;
 
+    abstract update(resource: Resource): Promise<void>;
+
     /**
      * Paginates resources of the given type from the server.
      * @param args Arguments of the method.
@@ -26,23 +28,25 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
     ): Observable<ResourcePaginateResult>;
 
 
+    abstract addEvent(event: ResourceEvent): Promise<void>;
+    abstract removeEvent(event: ResourceEvent): Promise<void>;
     abstract listEvents(
-        circleId: string
-    ): Observable<CircleEvent[]>;
-    abstract addEvent(circleId: string, event: CircleEvent): Promise<void>;
-    abstract removeEvent(circleId: string, event: CircleEvent): Promise<void>;
+        args: ResourceListEventsArgs
+    ): Observable<ResourceEvent[]>;
 
+
+    abstract addContributor(circleId: string, contributor: Contributor): Promise<void>;
+    abstract removeContributor(circleId: string, contributor: Contributor): Promise<void>;
     abstract listContributors(
         circleId: string
     ): Observable<Contributor[]>;
-    abstract addContributor(circleId: string, contributor: Contributor): Promise<void>;
-    abstract removeContributor(circleId: string, contributor: Contributor): Promise<void>;
 
-    abstract listRequests(
+
+    abstract addContributorRequest(request: ContributorRequest): Promise<void>;
+    abstract removeContributorRequest(request: ContributorRequest): Promise<void>;
+    abstract listContributorRequests(
         circleId: string
     ): Observable<ContributorRequest[]>;
-    abstract addRequest(circleId: string, request: ContributorRequest): Promise<void>;
-    abstract removeRequest(circleId: string, request: ContributorRequest): Promise<void>;
 
 }
 
@@ -97,3 +101,7 @@ export interface ResourcePaginateResult {
     total: number;
 }
 
+export interface ResourceListEventsArgs {
+    resourceId: string;
+    resourceType: ResourceTypes;
+}

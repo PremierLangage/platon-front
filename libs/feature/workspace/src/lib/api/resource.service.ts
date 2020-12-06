@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { DynamicInjectorService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { CircleEvent, Contributor, ContributorRequest, Resource } from '../models/resource';
+import { ResourceEvent, Contributor, ContributorRequest, Resource } from '../models/resource';
 import {
     ResourceFindByIdArgs,
+    ResourceListEventsArgs,
     ResourcePaginateArgs,
     ResourcePaginateResult,
     ResourceProvider
@@ -36,6 +37,10 @@ export class ResourceService implements AuthObserver {
         return this.provider.findById(args);
     }
 
+    update(resource: Resource): Promise<void> {
+        return this.provider.update(resource);
+    }
+
     /**
      * Paginates resources of the given type from the server.
      * @param args Arguments of the method.
@@ -46,40 +51,40 @@ export class ResourceService implements AuthObserver {
         return this.provider.paginate(args);
     }
 
+    addEvent(event: ResourceEvent): Promise<void> {
+        return this.provider.addEvent(event);
+    }
+    removeEvent(event: ResourceEvent): Promise<void> {
+        return this.provider.removeEvent(event);
+    }
     listEvents(
-        circleId: string
-    ): Observable<CircleEvent[]> {
-        return this.provider.listEvents(circleId);
-    }
-    addEvent(circleId: string, event: CircleEvent): Promise<void> {
-        return this.provider.addEvent(circleId, event);
-    }
-    removeEvent(circleId: string, event: CircleEvent): Promise<void> {
-        return this.provider.removeEvent(circleId, event);
+        args: ResourceListEventsArgs
+    ): Observable<ResourceEvent[]> {
+        return this.provider.listEvents(args);
     }
 
-    listContributors(
-        circleId: string
-    ): Observable<Contributor[]> {
-        return this.provider.listContributors(circleId);
-    }
     addContributor(circleId: string, contributor: Contributor): Promise<void> {
         return this.provider.addContributor(circleId, contributor);
     }
     removeContributor(circleId: string, contributor: Contributor): Promise<void> {
         return this.provider.removeContributor(circleId, contributor);
     }
+    listContributors(
+        circleId: string
+    ): Observable<Contributor[]> {
+        return this.provider.listContributors(circleId);
+    }
 
-    listRequests(
+    addContributorRequest(request: ContributorRequest): Promise<void> {
+        return this.provider.addContributorRequest(request);
+    }
+    removeContributorRequest(request: ContributorRequest): Promise<void> {
+        return this.provider.removeContributorRequest(request);
+    }
+    listContributorRequests(
         circleId: string
     ): Observable<ContributorRequest[]> {
-        return this.provider.listRequests(circleId);
-    }
-    addRequest(circleId: string, request: ContributorRequest): Promise<void> {
-        return this.provider.addRequest(circleId, request);
-    }
-    removeRequest(circleId: string, request: ContributorRequest): Promise<void> {
-        return this.provider.removeRequest(circleId, request);
+        return this.provider.listContributorRequests(circleId);
     }
 
     onChangeAuth(change: AuthChange) {
