@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { DynamicInjectorService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { ResourceEvent, Contributor, ContributorRequest, Resource } from '../models/resource';
+import { ResourceEvent, ResourceContributor, Resource } from '../models/resource';
 import {
     ResourceFindByIdArgs,
     ResourceListEventsArgs,
@@ -63,28 +63,19 @@ export class ResourceService implements AuthObserver {
         return this.provider.listEvents(args);
     }
 
-    addContributor(circleId: string, contributor: Contributor): Promise<void> {
-        return this.provider.addContributor(circleId, contributor);
+    addContributor(contributor: ResourceContributor): Promise<void> {
+        return this.provider.addContributor(contributor);
     }
-    removeContributor(circleId: string, contributor: Contributor): Promise<void> {
-        return this.provider.removeContributor(circleId, contributor);
+    updateContributor(contributor: ResourceContributor): Promise<void> {
+        return this.provider.updateContributor(contributor);
+    }
+    removeContributor(contributor: ResourceContributor): Promise<void> {
+        return this.provider.removeContributor(contributor);
     }
     listContributors(
-        circleId: string
-    ): Observable<Contributor[]> {
+        circleId: number
+    ): Observable<ResourceContributor[]> {
         return this.provider.listContributors(circleId);
-    }
-
-    addContributorRequest(request: ContributorRequest): Promise<void> {
-        return this.provider.addContributorRequest(request);
-    }
-    removeContributorRequest(request: ContributorRequest): Promise<void> {
-        return this.provider.removeContributorRequest(request);
-    }
-    listContributorRequests(
-        circleId: string
-    ): Observable<ContributorRequest[]> {
-        return this.provider.listContributorRequests(circleId);
     }
 
     onChangeAuth(change: AuthChange) {

@@ -12,7 +12,7 @@ import { ResourceEvent, ResourceTypes } from '../../models/resource';
 export class ResourceEventsComponent implements OnChanges, OnDestroy {
     private subscription?: Subscription;
 
-    @Input() resourceId?: string;
+    @Input() resourceId?: number;
     @Input() resourceType?: ResourceTypes;
 
     events: ResourceEvent[] = [];

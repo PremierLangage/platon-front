@@ -12,9 +12,8 @@ import {
     Activity,
     ResourceSearchIndexes,
     PublishableResource,
-    Contributor,
+    ResourceContributor,
     ResourceEvent,
-    ContributorRequest,
 } from '../models/resource';
 import {
     ResourceFilters,
@@ -43,7 +42,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             'CIRCLE',
             new BehaviorSubject<Circle[]>([
                 {
-                    id: '0',
+                    id: 0,
                     name: 'PLaTon',
                     type: 'CIRCLE',
                     tags: [],
@@ -52,44 +51,44 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                     directoryId: '0',
                 },
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Informatique',
                     type: 'CIRCLE',
                     tags: ['informatique'],
                     description: LOREM,
                     date: 1599138760,
                     directoryId: '1',
-                    parentId: '0',
+                    parentId: 0,
                 },
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Python',
                     type: 'CIRCLE',
                     tags: ['informatique', 'python'],
                     description: LOREM,
                     date: 1599397960,
                     directoryId: '2',
-                    parentId: '1',
+                    parentId: 1,
                 },
                 {
-                    id: '3',
+                    id: 3,
                     name: 'AP1',
                     type: 'CIRCLE',
                     tags: ['informatique', 'python', 'ap1'],
                     description: LOREM,
                     date: 1604469210,
                     directoryId: '3',
-                    parentId: '2',
+                    parentId: 2,
                 },
                 {
-                    id: '2',
+                    id: 4,
                     name: 'C',
                     type: 'CIRCLE',
                     tags: ['informatique', 'c'],
                     description: LOREM,
                     date: 1599397960,
                     directoryId: '4',
-                    parentId: '1',
+                    parentId: 1,
                 },
             ]),
         ],
@@ -97,8 +96,8 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             'EXERCISE',
             new BehaviorSubject<Exercise[]>([
                 {
-                    id: '0',
-                    circleId: '0',
+                    id: 0,
+                    circleId: 0,
                     name: 'Boucle for',
                     type: 'EXERCISE',
                     status: 'READY',
@@ -109,16 +108,16 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                     directoryId: '5',
                 },
                 {
-                    id: '0',
-                    circleId: '0',
+                    id: 0,
+                    version: 1,
+                    circleId: 0,
+                    directoryId: '6',
                     name: 'Boucle while',
                     type: 'EXERCISE',
                     status: 'READY',
                     tags: ['informatique', 'python', 'boucles'],
                     description: LOREM,
                     date: 1605469210,
-                    version: 1,
-                    directoryId: '6',
                 },
             ])
         ],
@@ -126,23 +125,22 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             'ACTIVITY',
             new BehaviorSubject<Activity[]>([
                 {
-                    id: '0',
-                    circleId: '0',
+                    id: 0,
+                    version: 1,
+                    circleId: 0,
+                    directoryId: '7',
                     name: 'Activité 1',
                     type: 'ACTIVITY',
                     status: 'READY',
                     tags: ['informatique', 'python', 'boucles'],
                     description: LOREM,
                     date: 1605469210,
-                    version: 1,
-                    directoryId: '7',
                 },
             ])
         ],
     ]);
 
-    private readonly contributors = new Map<string, BehaviorSubject<Contributor[]>>([]);
-    private readonly contributorsRequests = new Map<string, BehaviorSubject<ContributorRequest[]>>([]);
+    private readonly contributors = new Map<number, BehaviorSubject<ResourceContributor[]>>([]);
 
     constructor(
         private readonly config: ConfigService,
@@ -168,15 +166,17 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                 map(resources => {
                     const circles = resources.filter(e => e.type === 'CIRCLE');
                     circles.forEach(circle => {
-                        const contributors: Contributor[] = [];
+                        const contributors: ResourceContributor[] = [];
                         array_sample(teachers, 3).forEach(teacher => {
                             if (!teacher.isAdmin) {
                                 contributors.push({
                                     id: teacher.id,
+                                    circleId: circle.id,
                                     isAdmin: teacher.isAdmin,
                                     firstName: teacher.firstName,
                                     lastName: teacher.lastName,
-                                    userName: teacher.userName
+                                    userName: teacher.userName,
+                                    isPending: false,
                                 });
                             }
                         });
@@ -184,10 +184,12 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                             if (u.isAdmin) {
                                 contributors.push({
                                     id: u.id,
+                                    circleId: circle.id,
                                     isAdmin: u.isAdmin,
                                     firstName: u.firstName,
                                     lastName: u.lastName,
-                                    userName: u.userName
+                                    userName: u.userName,
+                                    isPending: false
                                 });
                             }
                         });
@@ -287,38 +289,32 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         );
     }
 
-    addContributor(circleId: string, contributor: Contributor): Promise<void> {
-        const contributors = this.getContributors(circleId);
+    addContributor(contributor: ResourceContributor): Promise<void> {
+        const contributors = this.getContributors(contributor.circleId);
         contributors.value.push(contributor);
         contributors.next(contributors.value);
         return Promise.resolve();
     }
-    removeContributor(circleId: string, contributor: Contributor): Promise<void> {
-        const contributors = this.getContributors(circleId);
+    updateContributor(contributor: ResourceContributor): Promise<void> {
+        const contributors = this.getContributors(contributor.circleId);
+        contributors.value.forEach((e, i) => {
+            if (e.id === contributor.id) {
+                contributors.value[i] = contributor;
+                return true;
+            }
+        });
+        contributors.next(contributors.value);
+        return Promise.resolve();
+    }
+    removeContributor(contributor: ResourceContributor): Promise<void> {
+        const contributors = this.getContributors(contributor.circleId);
         contributors.next(contributors.value.filter(e => e.id !== contributor.id));
         return Promise.resolve();
     }
     listContributors(
-        circleId: string
-    ): Observable<Contributor[]> {
+        circleId: number
+    ): Observable<ResourceContributor[]> {
         return this.getContributors(circleId).asObservable();
-    }
-
-    addContributorRequest(request: ContributorRequest): Promise<void> {
-        const requests = this.getContributorRequests(request.circleId);
-        requests.value.push(request);
-        requests.next(requests.value);
-        return Promise.resolve();
-    }
-    removeContributorRequest(request: ContributorRequest): Promise<void> {
-        const requests = this.getContributorRequests(request.circleId);
-        requests.next(requests.value.filter(e => e.id !== request.id));
-        return Promise.resolve();
-    }
-    listContributorRequests(
-        circleId: string
-    ): Observable<ContributorRequest[]> {
-        return this.getContributorRequests(circleId).asObservable();
     }
 
 
@@ -398,22 +394,13 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         );
     }
 
-    private getContributors(circleId: string) {
+    private getContributors(circleId: number) {
         let contributors = this.contributors.get(circleId);
         if (!contributors) {
-            contributors = new BehaviorSubject<Contributor[]>([]);
+            contributors = new BehaviorSubject<ResourceContributor[]>([]);
             this.contributors.set(circleId, contributors);
         }
         return contributors;
-    }
-
-    private getContributorRequests(circleId: string) {
-        let requests = this.contributorsRequests.get(circleId);
-        if (!requests) {
-            requests = new BehaviorSubject<ContributorRequest[]>([]);
-            this.contributorsRequests.set(circleId, requests);
-        }
-        return requests;
     }
 
 }

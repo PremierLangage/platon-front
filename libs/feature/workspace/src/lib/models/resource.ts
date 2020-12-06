@@ -27,26 +27,21 @@ export interface CircleStatus {
 };
 
 export interface ResourceEvent {
-    id: string;
+    id: number;
     date: number;
     text: string;
-    resourceId: string;
+    resourceId: number;
     resourceType: ResourceTypes;
 }
 
-export interface Contributor {
+export interface ResourceContributor {
     id: number;
+    circleId: number;
     isAdmin: boolean;
     userName: string;
     lastName: string;
     firstName: string;
-}
-
-export interface ContributorRequest {
-    id: number;
-    date: number;
-    circleId: string;
-    contributor: Contributor;
+    isPending: boolean;
 }
 
 /**
@@ -54,7 +49,7 @@ export interface ContributorRequest {
  */
 export interface Resource {
     /** Unique identifier of the resource. */
-    id: string;
+    id: number;
     /** Type of the resource. */
     type: ResourceTypes;
     /** Name of the resource. */
@@ -70,13 +65,13 @@ export interface Resource {
 }
 
 export interface Circle extends Resource {
-    parentId?: string;
+    parentId?: number;
 }
 
 export interface PublishableResource extends Resource {
     status: ResourceStatus;
     version: number;
-    circleId: string;
+    circleId: number;
 }
 
 export interface Exercise extends PublishableResource {

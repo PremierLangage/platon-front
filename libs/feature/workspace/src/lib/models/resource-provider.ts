@@ -1,7 +1,7 @@
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { ResourceEvent, Contributor, ContributorRequest, Resource, ResourceStatus, ResourceTypes } from './resource';
+import { ResourceEvent, ResourceContributor, Resource, ResourceStatus, ResourceTypes } from './resource';
 
 export abstract class ResourceProvider implements AuthObserver, IDynamicService {
     abstract injectable(): boolean;
@@ -13,9 +13,7 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
      * Finds the resource of the given type identified by the given identifier.
      * @param args Arguments of the method.
      */
-    abstract findById<T extends Resource>(
-        args: ResourceFindByIdArgs
-    ): Observable<T | undefined>;
+    abstract findById<T extends Resource>(args: ResourceFindByIdArgs): Observable<T | undefined>;
 
     abstract update(resource: Resource): Promise<void>;
 
@@ -23,30 +21,18 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
      * Paginates resources of the given type from the server.
      * @param args Arguments of the method.
      */
-    abstract paginate(
-        args: ResourcePaginateArgs
-    ): Observable<ResourcePaginateResult>;
+    abstract paginate(args: ResourcePaginateArgs): Observable<ResourcePaginateResult>;
 
 
     abstract addEvent(event: ResourceEvent): Promise<void>;
     abstract removeEvent(event: ResourceEvent): Promise<void>;
-    abstract listEvents(
-        args: ResourceListEventsArgs
-    ): Observable<ResourceEvent[]>;
+    abstract listEvents(args: ResourceListEventsArgs): Observable<ResourceEvent[]>;
 
 
-    abstract addContributor(circleId: string, contributor: Contributor): Promise<void>;
-    abstract removeContributor(circleId: string, contributor: Contributor): Promise<void>;
-    abstract listContributors(
-        circleId: string
-    ): Observable<Contributor[]>;
-
-
-    abstract addContributorRequest(request: ContributorRequest): Promise<void>;
-    abstract removeContributorRequest(request: ContributorRequest): Promise<void>;
-    abstract listContributorRequests(
-        circleId: string
-    ): Observable<ContributorRequest[]>;
+    abstract addContributor(contributor: ResourceContributor): Promise<void>;
+    abstract removeContributor(contributor: ResourceContributor): Promise<void>;
+    abstract updateContributor(contributor: ResourceContributor): Promise<void>;
+    abstract listContributors(circleId: number): Observable<ResourceContributor[]>;
 
 }
 
@@ -65,7 +51,7 @@ export interface ResourceFilters {
     /** Resource status to match */
     status: 'ALL' | ResourceStatus;
     /** Search exercises and activities in a specific circle. */
-    circleId?: string;
+    circleId?: number;
 }
 
 
@@ -74,7 +60,7 @@ export interface ResourceFilters {
  */
 export interface ResourceFindByIdArgs {
     /** Identifier of the resource to search. */
-    id: string;
+    id: number;
     /** Type of the resource to search. */
     type: ResourceTypes;
 }
@@ -102,6 +88,6 @@ export interface ResourcePaginateResult {
 }
 
 export interface ResourceListEventsArgs {
-    resourceId: string;
+    resourceId: number;
     resourceType: ResourceTypes;
 }
