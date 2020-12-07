@@ -178,7 +178,6 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                                     lastName: teacher.lastName,
                                     firstName: teacher.firstName,
                                     isAdmin: teacher.isAdmin,
-                                    isPending: false,
                                 });
                             }
                         });
@@ -192,7 +191,6 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                                     lastName: u.lastName,
                                     firstName: u.firstName,
                                     isAdmin: u.isAdmin,
-                                    isPending: false
                                 });
                             }
                         });

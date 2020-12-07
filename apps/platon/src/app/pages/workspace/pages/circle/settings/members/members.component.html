@@ -11,7 +11,7 @@
       (click)="search.open()"
       mat-raised-button
       color="primary">
-      Inviter un membre
+      Inscrire un membre
     </button>
   </div>
   <ui-list
@@ -23,9 +23,8 @@
       <ng-template let-item="item">
         <div class="list-item">
           <a mat-button [routerLink]="['/profile', item.id]">
-              <auth-avatar [user]="item"></auth-avatar>
+            <auth-avatar [user]="item"></auth-avatar>
           </a>
-          <i nz-icon nzType="inbox" nzTheme="outline" matTooltip="En attente de réponse" *ngIf="item.isPending"></i>
           <div class="spacer"></div>
           <button
             *ngIf="context.user!.isAdmin && !item.isAdmin"
@@ -46,10 +45,10 @@
 </nz-skeleton>
 <auth-search-modal
   #search
-  searchTitle="Inviter un membre"
-  searchOkTitle="Envoyer"
+  searchTitle="Inscrire un membre"
+  searchOkTitle="Inscrire"
   searchNoTitle="Annuler"
   searchRole="Teacher"
   [searchExcludes]="contributors"
-  (didSelect)="invite($event)">
+  (didSelect)="add($event)">
 </auth-search-modal>

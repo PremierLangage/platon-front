@@ -52,11 +52,7 @@ export class MembersComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
-    remove(contributor: Member) {
-        this.circleService.removeMembers(contributor);
-    }
-
-    invite(users: AuthUser[]) {
+    add(users: AuthUser[]) {
         this.circleService.addMembers(
             ...users.map((e) => {
                 return {
@@ -65,12 +61,15 @@ export class MembersComponent implements OnInit, OnDestroy {
                     userName: e.userName,
                     lastName: e.lastName,
                     firstName: e.firstName,
-                    isPending: true,
                     isAdmin: e.isAdmin,
                     circleId: this.context.circle!.id,
-                };
+                } as Member;
             })
         );
+    }
+
+    remove(member: Member) {
+        this.circleService.removeMembers(member);
     }
 
     private unsubscribe() {

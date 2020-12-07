@@ -70,16 +70,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private loadMembers() {
         this.subscriptions.push(
-            this.circleService.listMembers().subscribe((contributors) => {
+            this.circleService.listMembers().subscribe((response) => {
                 this.admins = [];
                 this.members = [];
-                contributors.forEach((contributor) => {
-                    if (!contributor.isPending) {
-                        if (contributor.isAdmin) {
-                            this.admins.push(contributor);
-                        } else {
-                            this.members.push(contributor);
-                        }
+                response.forEach((member) => {
+                    if (member.isAdmin) {
+                        this.admins.push(member);
+                    } else {
+                        this.members.push(member);
                     }
                 });
                 this.changeDetector.markForCheck();

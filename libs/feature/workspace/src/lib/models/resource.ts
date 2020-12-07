@@ -42,7 +42,6 @@ export interface Member {
     lastName: string;
     firstName: string;
     isAdmin: boolean;
-    isPending: boolean;
 }
 
 /**
