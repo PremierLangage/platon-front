@@ -71,7 +71,9 @@ export interface Resource {
     /** Brief description of the resource. */
     description: string;
     /** Identifier of the directory containing the files of the resource */
-    directoryId: string;
+    directoryId: number;
+      /** Identifier of the forum associated to the resource */
+    forumId: number;
     /** Optional documentation in markdown format. */
     documentation?: string;
 }
