@@ -1,0 +1,29 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+nz-badge {
+  position: relative;
+  margin-right: 12px;
+}
+
+nz-avatar {
+  background-color: #ccc;
+}
+
+i {
+  position: absolute;
+  right: 0px;
+  top: -4px;
+}
+
+div {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 20px;
+  align-items: baseline;
+  :last-child {
+    color: #586069;
+  }
+}

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ConfigService } from '@platon/shared/utils';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { AuthUser } from '../models/auth-user';
-import { AuthUserProvider } from '../models/auth-user-provider';
+import { AuthUserProvider, AuthUserFilters } from '../models/auth-user-provider';
 
 @Injectable()
 export class RemoteUserProvider extends AuthUserProvider {
@@ -14,6 +14,10 @@ export class RemoteUserProvider extends AuthUserProvider {
 
     injectable(): boolean {
         return this.config.isServerRunning;
+    }
+
+    search(filters: AuthUserFilters): Observable<AuthUser[]> {
+        return of([]);
     }
 
     findById(uid: number): Observable<AuthUser | undefined> {

@@ -3,7 +3,7 @@ import { DynamicInjectorService } from '@platon/shared/utils';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AuthUser } from '../models/auth-user';
-import { AuthUserProvider } from '../models/auth-user-provider';
+import { AuthUserFilters, AuthUserProvider } from '../models/auth-user-provider';
 
 /**
  * Facade class that will provide access to the user api of the platform.
@@ -19,6 +19,10 @@ export class AuthUserService {
     constructor(
         private readonly dynamicInjector: DynamicInjectorService
     ) { }
+
+    search(filters: AuthUserFilters): Observable<AuthUser[]> {
+        return this.provider.search(filters);
+    }
 
     /**
      * Finds the user identified by `uid`.

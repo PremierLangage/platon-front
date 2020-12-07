@@ -1,0 +1,10 @@
+<nz-badge [nzCount]="user?.isAdmin ? nzCount : undefined" [nzOffset]="[0, -6]">
+  <nz-avatar [nzSize]="avatarSize" [nzSrc]="user?.picture" nzIcon="user"></nz-avatar>
+</nz-badge>
+<div>
+  <span>{{user?.firstName}} {{user?.lastName}}</span>
+  <span>{{user?.userName}}</span>
+</div>
+<ng-template #nzCount>
+ <i matTooltip="Administrateur" nz-icon [nzType]="'safety-certificate'" [nzTheme]="'twotone'" ></i>
+</ng-template>

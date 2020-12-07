@@ -1,12 +1,14 @@
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { AuthUser } from './auth-user';
+import { AuthUser, UserRole } from './auth-user';
 
 /**
  * Provides an api to query user objects.
  */
 export abstract class AuthUserProvider implements IDynamicService {
     abstract injectable(): boolean;
+
+    abstract search(filters: AuthUserFilters): Observable<AuthUser[]>;
 
     /**
      * Finds the user identified by `uid`.
@@ -21,4 +23,10 @@ export abstract class AuthUserProvider implements IDynamicService {
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
     abstract findAll(uids: number[]): Observable<AuthUser[]>;
+}
+
+
+export interface AuthUserFilters {
+    role: 'ALL' | UserRole;
+    query?: string;
 }

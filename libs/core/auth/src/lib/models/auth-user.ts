@@ -1,13 +1,17 @@
+export const AuthUserSearchIndexes = [
+    'email', 'lastName', 'firstName', 'userName'
+];
+
 export declare type UserRole = 'Teacher' | 'Student';
 
 export interface AuthUser {
     id: number;
-    firstName: string;
-    lastName: string;
-    userName: string;
-    email: string;
-    isAdmin: boolean;
-    avatar: string;
     role: UserRole;
+    email: string;
+    userName: string;
+    lastName: string;
+    firstName: string;
+    isAdmin: boolean;
+    picture: string;
 }
 
