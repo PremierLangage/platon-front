@@ -12,7 +12,7 @@ import {
     Activity,
     ResourceSearchIndexes,
     PublishableResource,
-    ResourceContributor,
+    Member,
     ResourceEvent,
 } from '../models/resource';
 import {
@@ -24,6 +24,7 @@ import {
     ResourceProvider,
 } from '../models/resource-provider';
 import { array_sample } from '@platon/shared/utils';
+
 const LOREM = `
 Lorem ipsum dolor sit amet consectetur adipisicing elit.
 Quam eveniet quo quia iusto dolores voluptatem esse qui officiis minima animi alias consequatur consectetur,
@@ -140,7 +141,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         ],
     ]);
 
-    private readonly contributors = new Map<number, BehaviorSubject<ResourceContributor[]>>([]);
+    private readonly members = new Map<number, BehaviorSubject<Member[]>>([]);
 
     constructor(
         private readonly config: ConfigService,
@@ -166,16 +167,17 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                 map(resources => {
                     const circles = resources.filter(e => e.type === 'CIRCLE');
                     circles.forEach(circle => {
-                        const contributors: ResourceContributor[] = [];
+                        const contributors: Member[] = [];
                         array_sample(teachers, 3).forEach(teacher => {
                             if (!teacher.isAdmin) {
                                 contributors.push({
                                     id: teacher.id,
                                     circleId: circle.id,
-                                    isAdmin: teacher.isAdmin,
-                                    firstName: teacher.firstName,
-                                    lastName: teacher.lastName,
+                                    picture: teacher.picture,
                                     userName: teacher.userName,
+                                    lastName: teacher.lastName,
+                                    firstName: teacher.firstName,
+                                    isAdmin: teacher.isAdmin,
                                     isPending: false,
                                 });
                             }
@@ -185,15 +187,16 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                                 contributors.push({
                                     id: u.id,
                                     circleId: circle.id,
-                                    isAdmin: u.isAdmin,
-                                    firstName: u.firstName,
-                                    lastName: u.lastName,
+                                    picture: u.picture,
                                     userName: u.userName,
+                                    lastName: u.lastName,
+                                    firstName: u.firstName,
+                                    isAdmin: u.isAdmin,
                                     isPending: false
                                 });
                             }
                         });
-                        this.contributors.set(circle.id, new BehaviorSubject(contributors));
+                        this.members.set(circle.id, new BehaviorSubject(contributors));
                     });
                 })
             ).toPromise();
@@ -263,18 +266,19 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         )
     }
 
-
     addEvent(event: ResourceEvent): Promise<void> {
         const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
         events.value.push(event);
         events.next(events.value);
         return Promise.resolve();
     }
+
     removeEvent(event: ResourceEvent): Promise<void> {
         const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
         events.next(events.value.filter(e => e.id !== event.id));
         return Promise.resolve();
     }
+
     listEvents(
         args: ResourceListEventsArgs
     ): Observable<ResourceEvent[]> {
@@ -289,32 +293,35 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         );
     }
 
-    addContributor(contributor: ResourceContributor): Promise<void> {
-        const contributors = this.getContributors(contributor.circleId);
-        contributors.value.push(contributor);
+    addMember(member: Member): Promise<void> {
+        const contributors = this.getMembers(member.circleId);
+        contributors.value.push(member);
         contributors.next(contributors.value);
         return Promise.resolve();
     }
-    updateContributor(contributor: ResourceContributor): Promise<void> {
-        const contributors = this.getContributors(contributor.circleId);
+
+    updateMember(member: Member): Promise<void> {
+        const contributors = this.getMembers(member.circleId);
         contributors.value.forEach((e, i) => {
-            if (e.id === contributor.id) {
-                contributors.value[i] = contributor;
+            if (e.id === member.id) {
+                contributors.value[i] = member;
                 return true;
             }
         });
         contributors.next(contributors.value);
         return Promise.resolve();
     }
-    removeContributor(contributor: ResourceContributor): Promise<void> {
-        const contributors = this.getContributors(contributor.circleId);
-        contributors.next(contributors.value.filter(e => e.id !== contributor.id));
+
+    removeMember(member: Member): Promise<void> {
+        const contributors = this.getMembers(member.circleId);
+        contributors.next(contributors.value.filter(e => e.id !== member.id));
         return Promise.resolve();
     }
-    listContributors(
+
+    listMembers(
         circleId: number
-    ): Observable<ResourceContributor[]> {
-        return this.getContributors(circleId).asObservable();
+    ): Observable<Member[]> {
+        return this.getMembers(circleId).asObservable();
     }
 
 
@@ -361,7 +368,6 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         });
     }
 
-
     private getEvents() {
         const queries: Observable<ResourceEvent[]>[] = [];
         this.events.forEach((subject) => {
@@ -378,6 +384,15 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         );
     }
 
+    private getMembers(circleId: number) {
+        let members = this.members.get(circleId);
+        if (!members) {
+            members = new BehaviorSubject<Member[]>([]);
+            this.members.set(circleId, members);
+        }
+        return members;
+    }
+
     private getResources() {
         const queries: Observable<Resource[]>[] = [];
         this.resources.forEach((subject) => {
@@ -392,15 +407,6 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                 return response;
             })
         );
-    }
-
-    private getContributors(circleId: number) {
-        let contributors = this.contributors.get(circleId);
-        if (!contributors) {
-            contributors = new BehaviorSubject<ResourceContributor[]>([]);
-            this.contributors.set(circleId, contributors);
-        }
-        return contributors;
     }
 
 }

@@ -34,13 +34,14 @@ export interface ResourceEvent {
     resourceType: ResourceTypes;
 }
 
-export interface ResourceContributor {
+export interface Member {
     id: number;
     circleId: number;
-    isAdmin: boolean;
+    picture: string;
     userName: string;
     lastName: string;
     firstName: string;
+    isAdmin: boolean;
     isPending: boolean;
 }
 

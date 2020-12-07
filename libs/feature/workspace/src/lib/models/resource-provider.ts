@@ -1,7 +1,7 @@
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { ResourceEvent, ResourceContributor, Resource, ResourceStatus, ResourceTypes } from './resource';
+import { ResourceEvent, Member, Resource, ResourceStatus, ResourceTypes } from './resource';
 
 export abstract class ResourceProvider implements AuthObserver, IDynamicService {
     abstract injectable(): boolean;
@@ -29,10 +29,10 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
     abstract listEvents(args: ResourceListEventsArgs): Observable<ResourceEvent[]>;
 
 
-    abstract addContributor(contributor: ResourceContributor): Promise<void>;
-    abstract removeContributor(contributor: ResourceContributor): Promise<void>;
-    abstract updateContributor(contributor: ResourceContributor): Promise<void>;
-    abstract listContributors(circleId: number): Observable<ResourceContributor[]>;
+    abstract addMember(member: Member): Promise<void>;
+    abstract removeMember(member: Member): Promise<void>;
+    abstract updateMember(member: Member): Promise<void>;
+    abstract listMembers(circleId: number): Observable<Member[]>;
 
 }
 

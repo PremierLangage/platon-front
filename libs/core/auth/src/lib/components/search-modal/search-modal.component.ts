@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { SearchBar } from '@platon/shared/ui';
 import Fuse from 'fuse.js';
 import { map } from 'rxjs/operators';
@@ -6,7 +6,7 @@ import { AuthUserService } from '../../api/auth-user.service';
 import {
     AuthUser,
     AuthUserSearchIndexes,
-    UserRole,
+    UserRole
 } from '../../models/auth-user';
 
 @Component({
@@ -15,7 +15,7 @@ import {
     styleUrls: ['./search-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchModalComponent implements OnInit {
+export class SearchModalComponent {
     isVisible = false;
 
     @Input() searchTitle = '';
@@ -52,22 +52,20 @@ export class SearchModalComponent implements OnInit {
         private readonly changeDetector: ChangeDetectorRef
     ) {}
 
-    ngOnInit() {}
-
     open() {
         this.isVisible = true;
         this.changeDetector.markForCheck();
     }
 
-    handleOk() {
-        this.didSelect.emit(this.selections);
+    close() {
+        this.searchBar.value = '',
         this.isVisible = false;
         this.changeDetector.markForCheck();
     }
 
-    handleCancel() {
-        this.isVisible = false;
-        this.changeDetector.markForCheck();
+    submit() {
+        this.close();
+        this.didSelect.emit(this.selections);
     }
 
     search(query: string) {
