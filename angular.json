@@ -30,6 +30,11 @@
                 "output": "./assets"
               },
               {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/@ant-design/assets/"
+              },
+              {
                 "glob": "**/*.md",
                 "input": "libs/feature/web-component/src/lib",
                 "output": "./assets/docs/components"
