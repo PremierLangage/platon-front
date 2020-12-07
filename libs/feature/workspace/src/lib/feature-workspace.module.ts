@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgeMonacoModule } from 'nge-monaco';
 import { NgeMarkdownModule } from 'nge-markdown';
 import { SharedUiListModule } from '@platon/shared/ui';
+import { SafePipeModule } from '@platon/shared/utils';
 
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
@@ -47,6 +48,7 @@ import { ResourceStatusPipe } from './pipes/resource-status.pipe';
 
         NgeMonacoModule,
         NgeMarkdownModule,
+        SafePipeModule,
         SharedUiListModule,
     ],
     exports: [

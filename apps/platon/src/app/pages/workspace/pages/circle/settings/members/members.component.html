@@ -15,7 +15,7 @@
     </button>
   </div>
   <ui-list
-    [items]="contributors"
+    [items]="context.members"
     [idField]="'id'"
     [filterBy]="['userName', 'lastName', 'firstName']"
     [filter]="input.value">
@@ -49,6 +49,6 @@
   searchOkTitle="Inscrire"
   searchNoTitle="Annuler"
   searchRole="Teacher"
-  [searchExcludes]="contributors"
+  [searchExcludes]="context.members"
   (didSelect)="add($event)">
 </auth-search-modal>

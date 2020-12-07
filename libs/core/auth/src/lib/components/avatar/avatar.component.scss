@@ -1,6 +1,7 @@
 :host {
   display: inline-flex;
   align-items: center;
+  --color-username: #586069;
 }
 
 nz-badge {
@@ -24,6 +25,6 @@ div {
   line-height: 20px;
   align-items: baseline;
   :last-child {
-    color: #586069;
+    color: var(--color-username);
   }
 }

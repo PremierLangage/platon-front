@@ -18,6 +18,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     context: CirclePageContext = {
         state: 'LOADING',
+        members: [],
     };
 
     constructor(

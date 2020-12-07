@@ -10,24 +10,46 @@
       <p class="circle-description">
         {{context.circle!.description}}
       </p>
-      <div class="circle-actions">
-        <button id="action-edit" mat-raised-button>
-          <mat-icon>edit</mat-icon>
-          Editer le package
-        </button>
-        <button id="action-create-exercise" mat-raised-button>
+      <button class="fab" mat-fab [matMenuTriggerFor]="menu">
+        <mat-icon>add</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button
+          mat-menu-item
+          [disabled]="!isMember"
+          id="menu-create-exercise">
           <mat-icon>article</mat-icon>
-          Créer un exercice
+          <span>Créer un exercice</span>
         </button>
-        <button id="action-create-activity" mat-raised-button>
+        <button
+          mat-menu-item
+          [disabled]="!isMember"
+          id="menu-create-activity">
           <mat-icon>assessment</mat-icon>
-          Créer une activité
+          <span>Créer une activité</span>
         </button>
-        <button id="action-create-sub-circle" mat-raised-button>
+        <button
+          mat-menu-item
+          [disabled]="!isAdmin"
+          id="menu-create-sub-circle">
           <mat-icon>call_split</mat-icon>
-          Créer un sous cercle
+          <span>Créer un sous cercle</span>
         </button>
-      </div>
+        <a
+          mat-menu-item
+          id="menu-open-in-editor"
+          [routerLink]="['/editor', context.circle!.directoryId]">
+          <mat-icon>edit</mat-icon>
+          <span>Ouvrir dans l'éditeur</span>
+        </a>
+        <a
+          mat-menu-item
+          id="menu-open-in-forum"
+          [routerLink]="['/forum', context.circle!.forumId]">
+          <mat-icon>chat</mat-icon>
+          <span>Ouvrir dans l'espace de discussion</span>
+        </a>
+    </mat-menu>
     </ng-container>
   </nz-skeleton>
 </section>

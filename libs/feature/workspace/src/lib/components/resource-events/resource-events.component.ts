@@ -30,7 +30,7 @@ export class ResourceEventsComponent implements OnChanges, OnDestroy {
                 resourceType: this.resourceType
             }).subscribe({
                 next: e => {
-                    this.events = e;
+                    this.events = e.sort((a, b) => b.date - a.date);
                 },
                 error: error => {
                     this.events = [];
@@ -42,5 +42,9 @@ export class ResourceEventsComponent implements OnChanges, OnDestroy {
 
     ngOnDestroy() {
         this.subscription?.unsubscribe();
+    }
+
+    trackById(_: number, item: ResourceEvent) {
+        return item.id;
     }
 }

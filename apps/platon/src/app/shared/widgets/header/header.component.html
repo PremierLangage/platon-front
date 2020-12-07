@@ -9,8 +9,7 @@
     <mat-icon matBadge="0">notifications</mat-icon>
   </a>
   <button mat-button [matMenuTriggerFor]="profileMenu">
-    <mat-icon>account_circle</mat-icon>
-    {{user?.firstName}}
+    <auth-avatar style="--color-username: white;" [user]="user"></auth-avatar>
   </button>
   <mat-menu #profileMenu="matMenu">
     <ng-template matMenuContent>

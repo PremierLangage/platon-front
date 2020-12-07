@@ -26,9 +26,9 @@ export class MembersComponent implements OnInit, OnDestroy {
 
     context: CirclePageContext = {
         state: 'LOADING',
+        members: [],
     };
 
-    contributors: Member[] = [];
     loading = false;
 
     constructor(
@@ -41,9 +41,6 @@ export class MembersComponent implements OnInit, OnDestroy {
             this.circleService.context.subscribe((context) => {
                 this.context = context;
                 this.changeDetector.markForCheck();
-                if (context.state === 'READY') {
-                    this.onReady();
-                }
             })
         );
     }
@@ -71,37 +68,4 @@ export class MembersComponent implements OnInit, OnDestroy {
     remove(member: Member) {
         this.circleService.removeMembers(member);
     }
-
-    private unsubscribe() {
-        this.subscriptions.forEach((s, i) => {
-            if (i > 0) {
-                s.unsubscribe();
-            }
-        });
-        this.subscriptions.splice(1, this.subscriptions.length);
-    }
-
-    private onReady() {
-        this.loading = true;
-        this.changeDetector.markForCheck();
-        this.unsubscribe();
-        this.subscriptions.push(
-            this.circleService
-                .listMembers()
-                .subscribe({
-                    next: response => {
-                        this.loading = false;
-                        this.contributors = response;
-                        this.changeDetector.markForCheck();
-                    },
-                    error: error => {
-                        console.error(error);
-                        this.loading = false;
-                        this.contributors = [];
-                        this.changeDetector.markForCheck();
-                    }
-                })
-        );
-    }
-
 }

@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     context: CirclePageContext = {
         state: 'LOADING',
+        members: []
     };
 
     admins: Member[] = [];
@@ -42,10 +43,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.circleService.context.subscribe((context) => {
                 this.context = context;
-                if (context.state === 'READY') {
-                    this.unsubscribe();
-                    this.loadMembers();
-                }
+                this.admins = [];
+                this.members = [];
+                context.members.forEach((member) => {
+                    if (member.isAdmin) {
+                        this.admins.push(member);
+                    } else {
+                        this.members.push(member);
+                    }
+                });
                 this.changeDetector.markForCheck();
             })
         );
@@ -59,29 +65,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return item.id;
     }
 
-    private unsubscribe() {
-        this.subscriptions.forEach((s, i) => {
-            if (i > 0) {
-                s.unsubscribe();
-            }
-        });
-        this.subscriptions.splice(1, this.subscriptions.length);
-    }
-
-    private loadMembers() {
-        this.subscriptions.push(
-            this.circleService.listMembers().subscribe((response) => {
-                this.admins = [];
-                this.members = [];
-                response.forEach((member) => {
-                    if (member.isAdmin) {
-                        this.admins.push(member);
-                    } else {
-                        this.members.push(member);
-                    }
-                });
-                this.changeDetector.markForCheck();
-            })
-        );
-    }
 }

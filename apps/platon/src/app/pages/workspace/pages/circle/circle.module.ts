@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
@@ -18,6 +19,7 @@ import { CircleRoutingModule } from './circle-routing.module';
 
         MatIconModule,
         MatTabsModule,
+        MatMenuModule,
         MatButtonModule,
 
         NzSkeletonModule,

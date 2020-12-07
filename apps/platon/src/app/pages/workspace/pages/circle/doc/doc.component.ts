@@ -18,6 +18,7 @@ export class DocComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
     context: CirclePageContext = {
         state: 'LOADING',
+        members: []
     };
 
     constructor(

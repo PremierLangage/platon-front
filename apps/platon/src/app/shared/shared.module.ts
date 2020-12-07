@@ -21,6 +21,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
+import { CoreAuthModule } from '@platon/core/auth';
 import { SharedUiListModule } from '@platon/shared/ui';
 import { SharedUiDialogModule } from '@platon/shared/ui';
 import { SharedUiSearchBarModule } from '@platon/shared/ui';
@@ -61,6 +62,7 @@ const MATERIAL_MODULES = [
 
 
 const LIBS_MODULES = [
+    CoreAuthModule,
     SharedUiListModule,
     SharedUiDialogModule,
     SharedUiSearchBarModule,

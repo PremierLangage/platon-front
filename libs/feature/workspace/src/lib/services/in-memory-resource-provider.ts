@@ -3,7 +3,7 @@ import { ConfigService } from '@platon/shared/utils';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { delay, map, take} from 'rxjs/operators';
 import Fuse from 'fuse.js';
-import { AuthChange, AuthObserver, InMemoryUserDb } from '@platon/core/auth';
+import { AuthChange, AuthObserver, AuthUser, InMemoryUserDb } from '@platon/core/auth';
 import {
     Resource,
     ResourceTypes,
@@ -33,6 +33,7 @@ officia excepturi ducimus aliquid adipisci sunt numquam.
 
 @Injectable()
 export class InMemoryResourceProvider extends ResourceProvider implements AuthObserver {
+
     private readonly events = new Map<ResourceTypes, BehaviorSubject<ResourceEvent[]>>([
         ['CIRCLE', new BehaviorSubject<ResourceEvent[]>([])],
         ['EXERCISE', new BehaviorSubject<ResourceEvent[]>([])],
@@ -148,8 +149,9 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             ])
         ],
     ]);
-
     private readonly members = new Map<number, BehaviorSubject<Member[]>>([]);
+
+    private loggedUser?: AuthUser;
 
     constructor(
         private readonly config: ConfigService,
@@ -166,8 +168,9 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         if (!this.injectable()) {
             return; // perf does not create cache in production mode
         }
-
+        this.loggedUser = undefined;
         if (change.type === 'connection') {
+            this.loggedUser = change.user;
             const teachers = await this.inMemoryUserDb.read().pipe(
                 map(arr => arr.filter(e => e.role === 'Teacher'))
             ).toPromise();
@@ -246,7 +249,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         const subject = this.resources.get(resource.type) as BehaviorSubject<Resource[]>;
         subject.value.forEach((r, i) => {
             if (r.id === resource.id) {
-                resource.date = Date.now();
+                resource.date = new Date().getTime() / 1000;
                 subject.value[i] = resource;
                 subject.next(subject.value);
                 return true;
@@ -304,6 +307,13 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         const contributors = this.getMembers(member.circleId);
         contributors.value.push(member);
         contributors.next(contributors.value);
+        this.addEvent({
+            date: new Date().getTime() / 1000,
+            id: Date.now(),
+            resourceId: member.circleId,
+            resourceType: 'CIRCLE',
+            text: `<a href="profile/${member.id}">${member.userName}</a> vient de rejoindre le cercle`
+        });
         return Promise.resolve();
     }
 
@@ -322,13 +332,24 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
     removeMember(member: Member): Promise<void> {
         const contributors = this.getMembers(member.circleId);
         contributors.next(contributors.value.filter(e => e.id !== member.id));
+        this.addEvent({
+            date: new Date().getTime() / 1000,
+            id: Date.now(),
+            resourceId: member.circleId,
+            resourceType: 'CIRCLE',
+            text: `
+            <a href="profile/${member.id}">${member.userName}</a>
+            a été retirer du cercle par
+            <a href="profile/${this.loggedUser?.id}">${this.loggedUser?.userName}</a>
+            `
+        });
         return Promise.resolve();
     }
 
     listMembers(
         circleId: number
     ): Observable<Member[]> {
-        return this.getMembers(circleId).asObservable();
+        return this.getMembers(circleId).pipe(take(1));
     }
 
 

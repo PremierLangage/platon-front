@@ -1,8 +1,12 @@
 <ng-container *ngIf="events.length; else: noevent;">
   <h3>Événements récents</h3>
   <nz-timeline>
-    <ng-container *ngFor="let event of events">
-      <nz-timeline-item>{{event.text}} - {{event.date * 1000|date}}</nz-timeline-item>
+    <ng-container *ngFor="let event of events; trackBy:trackById">
+      <nz-timeline-item>
+        <div style="display: inline-block;" [innerHTML]="event.text|safe:'html'"></div>
+        -
+        {{event.date * 1000|date:'dd/MM/yyyy à HH:mm'}}
+      </nz-timeline-item>
     </ng-container>
   </nz-timeline>
 </ng-container>

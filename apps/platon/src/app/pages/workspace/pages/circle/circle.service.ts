@@ -10,6 +10,7 @@ export class CircleService implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
     private readonly contextEvent = new BehaviorSubject<CirclePageContext>({
         state: 'LOADING',
+        members: [],
     });
 
     get context() {
@@ -52,17 +53,19 @@ export class CircleService implements OnDestroy {
         });
     }
 
-    addMembers(...contributors: Member[]) {
-        const promises = contributors.map(e => {
+    addMembers(...members: Member[]) {
+        const promises = members.map(e => {
             return this.resourceService.addMember(e)
         });
         Promise.all(promises).then(() => {
             this.notificationService.success(
-                contributors.length + ' membre(s) ont bien été ajoutés au cercle !',
+                members.length + ' membre(s) ont bien été ajoutés au cercle !',
                 ''
             );
+            const { value } = this.contextEvent;
+            value.members.push(...members);
             this.contextEvent.next({
-                ...this.contextEvent.value,
+                ...value,
             });
         }).catch(error => {
             console.error(error);
@@ -73,13 +76,13 @@ export class CircleService implements OnDestroy {
         });
     }
 
-    updateMembers(...contributors: Member[]) {
-        const promises = contributors.map(e => {
+    updateMembers(...members: Member[]) {
+        const promises = members.map(e => {
             return this.resourceService.updateMember(e)
         });
         Promise.all(promises).then(() => {
             this.notificationService.success(
-                contributors.length + ' membre(s) ont bien été retiré du cercle !',
+                members.length + ' membre(s) ont bien été retiré du cercle !',
                 ''
             );
             this.contextEvent.next({
@@ -94,17 +97,19 @@ export class CircleService implements OnDestroy {
         });
     }
 
-    removeMembers(...contributors: Member[]) {
-        const promises = contributors.map(e => {
+    removeMembers(...members: Member[]) {
+        const promises = members.map(e => {
             return this.resourceService.removeMember(e)
         });
         Promise.all(promises).then(() => {
             this.notificationService.success(
-                contributors.length + ' membre(s) ont bien été retirés du cercle !',
+                members.length + ' membre(s) ont bien été retirés du cercle !',
                 ''
             );
+            const { value } = this.contextEvent;
             this.contextEvent.next({
-                ...this.contextEvent.value,
+                ...value,
+                members: value.members.filter(e => !this.contains(members, e))
             });
         }).catch(error => {
             console.error(error);
@@ -115,17 +120,14 @@ export class CircleService implements OnDestroy {
         });
     }
 
-    listMembers() {
-        const { circle } = this.contextEvent.value;
-        if (!circle) {
-            throw new Error('Failed to load contributors');
-        }
-        return this.resourceService.listMembers(circle.id);
+    private contains(members: Member[], member: Member) {
+        return !!members.find(e => e.id === member.id);
     }
 
     private async onChangeRoute(id: number) {
         this.contextEvent.next({
-            state: 'LOADING'
+            state: 'LOADING',
+            members: [],
         });
 
         try {
@@ -138,29 +140,40 @@ export class CircleService implements OnDestroy {
                 .findById<Circle>({ id, type: 'CIRCLE' })
                 .toPromise();
 
+            if (!circle) {
+                throw new Error(`permission denied, circle "${id}" not found: `);
+            }
+
             let parent: Circle | undefined;
             if (circle?.parentId) {
                 parent = await this.resourceService
                     .findById<Circle>({ id: circle.parentId, type: 'CIRCLE' })
                     .toPromise();
                 if (!parent) {
-                    throw new Error(`Cannot resolve "${circle.parentId}" as a Circle object !`);
+                throw new Error(`permission denied, circle "${circle.parentId}" not found: `);
                 }
             }
+
+            const members = await this.resourceService
+                .listMembers(circle.id)
+                .toPromise();
 
             this.contextEvent.next({
                 state: 'READY',
                 user: user,
                 circle: circle,
-                parent: parent
+                parent: parent,
+                members,
             });
         } catch (error) {
             console.error(error);
             this.contextEvent.next({
-                state: 'ERROR'
+                state: 'ERROR',
+                members: [],
             });
         }
     }
+
 }
 
 export interface CirclePageContext {
@@ -168,4 +181,5 @@ export interface CirclePageContext {
     user?: AuthUser;
     circle?: Circle;
     parent?: Circle;
+    members: Member[];
 }

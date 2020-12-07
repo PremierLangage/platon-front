@@ -38,6 +38,14 @@ const routes: Routes = [
         ).then(m => m.ForumModule)
     },
     {
+        path: 'editor',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "editor" */
+            './pages/editor/editor.module'
+        ).then(m => m.EditorModule)
+    },
+    {
         path: 'profile',
         canActivate: [AuthGuard],
         loadChildren: () => import(

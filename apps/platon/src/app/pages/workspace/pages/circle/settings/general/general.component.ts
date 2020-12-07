@@ -16,7 +16,8 @@ export class GeneralComponent implements OnInit, OnDestroy {
     private readonly subscription: Subscription[] = [];
 
     context: CirclePageContext = {
-        state: 'LOADING'
+        state: 'LOADING',
+        members: [],
     };
 
     form = new FormGroup({
