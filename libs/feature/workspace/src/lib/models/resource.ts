@@ -34,6 +34,16 @@ export interface ResourceEvent {
     resourceType: ResourceTypes;
 }
 
+
+/**
+ * Reprensentation of a Circle member.
+ *
+ * Notes:
+ *
+ * - Admin users are members of all the circles.
+ * - Only admin users can edit the properties of a circle (date, description, documentation...)
+ * - Only admin and member users can edit the publishable resources (exercise, activity) of the circle
+ */
 export interface Member {
     id: number;
     circleId: number;
@@ -60,17 +70,26 @@ export interface Resource {
     date: number;
     /** Brief description of the resource. */
     description: string;
-    /** Identifier of the directory containing the resource files */
+    /** Identifier of the directory containing the files of the resource */
     directoryId: string;
+    /** Optional documentation in markdown format. */
+    documentation?: string;
 }
 
 export interface Circle extends Resource {
+    /** Identifier of the parent circle. */
     parentId?: number;
 }
 
+/**
+ * A resource publishabled to the asset server.
+ */
 export interface PublishableResource extends Resource {
+    /** Status of the resource. */
     status: ResourceStatus;
+    /** Current version of the resource. */
     version: number;
+    /** Identifier of the circle associated to the resource. */
     circleId: number;
 }
 

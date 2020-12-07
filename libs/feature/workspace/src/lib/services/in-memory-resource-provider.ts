@@ -238,6 +238,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         const subject = this.resources.get(resource.type) as BehaviorSubject<Resource[]>;
         subject.value.forEach((r, i) => {
             if (r.id === resource.id) {
+                resource.date = Date.now();
                 subject.value[i] = resource;
                 subject.next(subject.value);
                 return true;

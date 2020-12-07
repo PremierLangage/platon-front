@@ -1,3 +1,5 @@
-<p>
-  circle-detail-doc works!
-</p>
+<ws-resource-doc
+  [documentation]="context.circle!.documentation || ''"
+  (didSave)="saveChanges($event)"
+  [editable]="context.user!.isAdmin">
+</ws-resource-doc>
