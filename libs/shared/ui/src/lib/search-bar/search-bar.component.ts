@@ -7,15 +7,12 @@ import {
     Input,
     OnDestroy,
     OnInit,
-    TemplateRef
+    TemplateRef,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import {
-    SearchBar,
-    SearchBarAutoCompletionGroup
-} from './search-bar';
+import { SearchBar } from './search-bar';
 
 @Component({
     selector: 'ui-search-bar',
@@ -29,16 +26,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     @HostBinding('class')
     readonly hostClass = 'mat-elevation-z2';
 
-    @Input() searchBar?: SearchBar<any>;
-    @ContentChild(TemplateRef) completionTemplate?: TemplateRef<any>;
+    @Input() searchBar!: SearchBar<any>;
+    @ContentChild(TemplateRef) suggestionTemplate?: TemplateRef<any>;
 
     control = new FormControl();
-    completing = false;
-    completions: SearchBarAutoCompletionGroup<string>[] = [];
 
-    constructor(
-        private readonly cdr: ChangeDetectorRef,
-    ) {}
+    suggesting = false;
+    suggestions: any[] = [];
+
+    constructor(private readonly changeDetector: ChangeDetectorRef) {}
 
     ngOnInit() {
         this.subscriptions.push(
@@ -46,24 +42,20 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 .pipe(
                     debounceTime(500), // Wait for the user to stop typing (1/2 second in this case)
                     distinctUntilChanged(), // Wait until the search text changes.
-                    switchMap(this.filter.bind(this)) // https://angular.io/guide/http#using-the-switchmap-operator
+                    switchMap((query) => {
+                        this.startFiltering(query);
+                        return [];
+                    }) // https://angular.io/guide/http#using-the-switchmap-operator
                 )
                 .subscribe()
         );
 
-        this.control.patchValue(this.searchBar?.value || '');
-        Object.defineProperty(this.searchBar, 'value', {
-            get: () => {
-                return this.control.value;
-            },
-            set: (value: string) => {
-                this.control.patchValue(value || '');
-                this.trigger();
-            }
-        });
+        this.control.patchValue(this.searchBar.value || '');
+
+        this.defineSetterForValueProperty();
 
         setTimeout(() => {
-            if (this.searchBar?.onReady) {
+            if (this.searchBar.onReady) {
                 this.searchBar.onReady();
             }
         }); // avoid ExpressionChangedAfterItHasBeenCheckedError
@@ -73,31 +65,61 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
-    trigger() {
-        if (this.searchBar?.onTrigger) {
-            this.searchBar.onTrigger(this.control.value);
+    onSearch() {
+        if (this.searchBar?.onSearch) {
+            this.searchBar.onSearch(this.control.value);
         }
     }
 
-    private async filter(query?: string) {
-        this.completing = true;
-        this.completions = [];
-        this.cdr.detectChanges();
+    onSelect(event: any, item: any) {
+        if (event.isUserInput && this.searchBar.onSelect) {
+            this.searchBar.onSelect(item);
+        }
+    }
 
-        if (query) {
-            if (this.searchBar?.filterer) {
-                const response = await this.searchBar?.filterer.run(query || '');
-                this.completions = response.suggestions;
-                if (this.searchBar?.onSuggest) {
-                    this.searchBar.onSuggest(response);
-                }
+    private stopFiltering() {
+        this.subscriptions.forEach((s, i) => {
+            if (i > 0) {
+                s.unsubscribe();
             }
-        } else if (this.searchBar?.onEmpty){
-            this.searchBar.onEmpty();
-        }
-
-        this.completing = false;
-        this.cdr.detectChanges();
+        });
+        this.subscriptions.splice(1, this.subscriptions.length);
     }
 
+    private startFiltering(query?: string) {
+        this.suggesting = true;
+        this.suggestions = [];
+        this.changeDetector.markForCheck();
+
+        this.stopFiltering();
+
+        this.subscriptions.push(
+            this.searchBar?.filterer.run(query || '').subscribe({
+                next: (response) => {
+                    this.suggestions = response;
+                    this.suggesting = false;
+                    this.changeDetector.markForCheck();
+                    this.stopFiltering();
+                },
+                error: (error) => {
+                    console.error(error);
+                    this.stopFiltering();
+                },
+            })
+        );
+    }
+
+    private defineSetterForValueProperty() {
+        if (!Object.getOwnPropertyDescriptor(this.searchBar, 'value')?.set) {
+            Object.defineProperty(this.searchBar, 'value', {
+                get: () => {
+                    return this.control.value;
+                },
+                set: (value: string) => {
+                    this.control.patchValue(value || '');
+                    this.onSearch();
+                },
+            });
+        }
+    }
 }

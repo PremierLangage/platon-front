@@ -3,10 +3,10 @@
   type="search"
   [placeholder]="searchBar?.placeholder || ''"
   [formControl]="control"
-  (keydown.enter)="trigger()"
+  (keydown.enter)="onSearch()"
   [nzAutocomplete]="auto">
 <nz-autocomplete #auto>
-  <ng-container *ngIf="completing; else: result;">
+  <ng-container *ngIf="suggesting; else: result;">
     <nz-auto-option>
       <div style="display: flex; justify-content: center;">
         <nz-spin nzSimple></nz-spin>
@@ -14,24 +14,15 @@
     </nz-auto-option>
   </ng-container>
   <ng-template #result>
-    <nz-auto-optgroup
-      (click)="trigger()"
-      *ngFor="let group of completions"
-      [nzLabel]="group.title">
+    <nz-auto-optgroup [nzLabel]="'SUGGESTIONS'">
       <nz-auto-option
-        *ngFor="let completion of group.completions|slice:0:8"
-        [nzValue]="completion">
-        <ng-container *ngIf="completionTemplate; else: defaultTemplate">
-          <ng-container *ngTemplateOutlet="
-            completionTemplate;
-            context: {
-              $implicit: completion,
-              group: group,
-              completion: completion
-            }">
-          </ng-container>
+        *ngFor="let suggestion of suggestions"
+        (selectionChange)="onSelect($event, suggestion)"
+        [nzValue]="searchBar.complete(suggestion)">
+        <ng-container *ngIf="suggestionTemplate; else: defaultTemplate">
+          <ng-container *ngTemplateOutlet="suggestionTemplate; context: { $implicit: suggestion }"></ng-container>
         </ng-container>
-        <ng-template #defaultTemplate>completion</ng-template>
+        <ng-template #defaultTemplate>{{suggestion}}</ng-template>
       </nz-auto-option>
     </nz-auto-optgroup>
   </ng-template>
