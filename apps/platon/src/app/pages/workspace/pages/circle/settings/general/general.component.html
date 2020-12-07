@@ -1,0 +1,21 @@
+<ng-container *ngIf="context.state === 'READY'">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="saveChanges()">
+    <mat-form-field appearance="fill" style="display: block;">
+      <mat-label>Nom</mat-label>
+      <input formControlName="name" matInput>
+    </mat-form-field>
+    <mat-form-field appearance="fill" style="display: block;">
+      <mat-label>Description</mat-label>
+      <textarea cdkTextareaAutosize formControlName="description" matInput></textarea>
+    </mat-form-field>
+    <button
+      type="submit"
+      mat-raised-button
+      color="primary"
+      [disabled]="!context.user!.isAdmin || !form.valid">
+      Sauvegarder
+    </button>
+  </form>
+</ng-container>

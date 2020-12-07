@@ -1,72 +1,55 @@
-<ng-container *ngIf="circle != null && user != null">
-  <section>
-    <nz-breadcrumb>
-      <nz-breadcrumb-item *ngIf="parent">
-        <a [routerLink]="['/workspace', 'circle', parent!.id]">{{parent!.name}}</a>
-      </nz-breadcrumb-item>
-      <nz-breadcrumb-item>
-        <a>{{circle!.name}}</a>
-      </nz-breadcrumb-item>
-    </nz-breadcrumb>
-    <p class="circle-description">{{circle!.description}}</p>
-    <div class="circle-actions">
-      <button id="action-edit" mat-raised-button>
-        <mat-icon>edit</mat-icon>
-        Éditer le répertoire
-      </button>
-      <button id="action-create-exercise" mat-raised-button>
-        <mat-icon>article</mat-icon>
-        Créer un exercice
-      </button>
-      <button id="action-create-activity" mat-raised-button>
-        <mat-icon>assessment</mat-icon>
-        Créer une activité
-      </button>
-      <button id="action-create-sub-circle" mat-raised-button>
-        <mat-icon>call_split</mat-icon>
-        Créer un sous cercle
-      </button>
-    </div>
-  </section>
-  <section>
-    <mat-tab-group dynamicHeight>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">apps</mat-icon>
-          Dashboard
-        </ng-template>
-        <ng-template matTabContent>
-          <app-circle-dashboard [user]="user" [circle]="circle"></app-circle-dashboard>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">chat</mat-icon>
-          Forum
-        </ng-template>
-        <ng-template matTabContent>
-          <app-circle-forum></app-circle-forum>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">book</mat-icon>
-          Documentation
-        </ng-template>
-        <ng-template matTabContent>
-          <app-circle-doc></app-circle-doc>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">settings</mat-icon>
-          Paramètres
-        </ng-template>
-        <ng-template matTabContent>
-          <app-circle-settings [user]="user" [circle]="circle"></app-circle-settings>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
-  </section>
-</ng-container>
-
+<section>
+  <nz-skeleton [nzActive]="true" [nzLoading]="context.state === 'LOADING'">
+    <ng-container *ngIf="context.state === 'READY'">
+      <nz-breadcrumb>
+        <nz-breadcrumb-item *ngIf="context.parent">
+          <a [routerLink]="['/workspace', 'circle', context.parent!.id]">{{context.parent!.name}}</a>
+        </nz-breadcrumb-item>
+        <nz-breadcrumb-item>{{context.circle!.name}}</nz-breadcrumb-item>
+      </nz-breadcrumb>
+      <p class="circle-description">
+        {{context.circle!.description}}
+      </p>
+      <div class="circle-actions">
+        <button id="action-edit" mat-raised-button>
+          <mat-icon>edit</mat-icon>
+          Editer le package
+        </button>
+        <button id="action-create-exercise" mat-raised-button>
+          <mat-icon>article</mat-icon>
+          Créer un exercice
+        </button>
+        <button id="action-create-activity" mat-raised-button>
+          <mat-icon>assessment</mat-icon>
+          Créer une activité
+        </button>
+        <button id="action-create-sub-circle" mat-raised-button>
+          <mat-icon>call_split</mat-icon>
+          Créer un sous cercle
+        </button>
+      </div>
+    </ng-container>
+  </nz-skeleton>
+</section>
+<section>
+  <nav mat-tab-nav-bar dynamicHeight>
+    <ng-container *ngFor="let tab of tabs">
+      <a
+        mat-tab-link
+        [routerLink]="tab.link"
+        routerLinkActive
+        #ral="routerLinkActive"
+        [active]="ral.isActive">
+        <mat-icon class="tab-icon">{{tab.icon}}</mat-icon>
+        {{tab.title}}
+      </a>
+    </ng-container>
+  </nav>
+</section>
+<section class="tab-content">
+  <nz-skeleton [nzActive]="true" [nzLoading]="context.state === 'LOADING'">
+    <ng-container *ngIf="context.state === 'READY'">
+      <router-outlet></router-outlet>
+    </ng-container>
+  </nz-skeleton>
+</section>

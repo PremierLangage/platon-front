@@ -5,8 +5,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // LIBS
 import { AUTH_PROVIDERS } from '@platon/core/auth';
-import { SharedVendorsModule } from '@platon/shared/vendors';
 import { WORKSPACE_PROVIDERS } from '@platon/feature/workspace';
+
+import { SharedVendorsModule } from '@platon/shared/vendors';
 import { FeatureWebComponentModule } from '@platon/feature/web-component';
 
 // MODULE

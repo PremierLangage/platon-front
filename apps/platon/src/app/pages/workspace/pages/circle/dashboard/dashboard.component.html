@@ -1,0 +1,47 @@
+<section>
+  <ws-resource-events
+    [resourceId]="context.circle!.id"
+    [resourceType]="context.circle!.type">
+  </ws-resource-events>
+</section>
+<aside>
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+      <span>Status des ressources</span>
+    </mat-expansion-panel-header>
+    <ng-container *ngFor="let status of status">
+      <a class="status-item" routerLink="['/workspace/search']"
+        [queryParams]="{
+          circle: context.circle!.id,
+          status: status,
+          types: 'EXERCISE|ACTIVITY'
+        }"
+        [queryParamsHandling]="'merge'">
+        <nz-tag
+          [nzColor]="status|resourceStatus:'color'">
+          {{status|resourceStatus:'label'}} 0
+        </nz-tag>
+      </a>
+    </ng-container>
+  </mat-expansion-panel>
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+    <span>Administrateurs</span>
+    </mat-expansion-panel-header>
+    <ng-container *ngFor="let contributor of admins; trackBy: trackById">
+      <a class="link-profile" mat-button [routerLink]="['/profile', contributor.id]">
+        <auth-avatar [user]="contributor"></auth-avatar>
+      </a>
+    </ng-container>
+  </mat-expansion-panel>
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+    <span>Membres</span>
+    </mat-expansion-panel-header>
+    <ng-container *ngFor="let contributor of members; trackBy: trackById">
+      <a class="link-profile" mat-button [routerLink]="['/profile', contributor.id]">
+        <auth-avatar [user]="contributor"></auth-avatar>
+      </a>
+    </ng-container>
+  </mat-expansion-panel>
+</aside>

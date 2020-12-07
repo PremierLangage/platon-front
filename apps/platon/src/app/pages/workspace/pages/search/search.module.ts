@@ -1,13 +1,22 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { WorkspaceSharedModule } from '../../shared/workspace-shared.module';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
+
+import { SharedModule } from '../../../../shared/shared.module';
+import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 import { SearchComponent } from './search.component';
 
 @NgModule({
     imports: [
-        WorkspaceSharedModule,
+        NzSpinModule,
+        NzEmptyModule,
+
+        SharedModule,
+        FeatureWorkspaceModule,
+
         RouterModule.forChild([
             { path: '', component: SearchComponent }
         ]),

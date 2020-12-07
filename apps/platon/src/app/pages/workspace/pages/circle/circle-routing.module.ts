@@ -3,27 +3,46 @@ import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { CircleComponent } from './circle.component';
-import { CircleForumComponent } from './circle-forum/circle-forum.component';
-import { CircleSettingsComponent } from './circle-settings/circle-settings.component';
-import { CircleDashboardComponent } from './circle-dashboard/circle-dashboard.component';
-import { CircleDocComponent } from './circle-doc/circle-doc.component';
-
 
 const routes: Routes = [
     {
         path: ':id',
         component: CircleComponent,
         children: [
-            { path: '', component: CircleDashboardComponent },
-            { path: 'doc', component: CircleDocComponent },
-            { path: 'forum', component: CircleForumComponent },
-            { path: 'settings', component: CircleSettingsComponent },
-        ]
+            {
+                path: 'doc',
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-circle-doc" */
+                    './doc/doc.module'
+                ).then(m => m.DocModule)
+            },            {
+                path: 'forum',
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-circle-forum" */
+                    './forum/forum.module'
+                ).then(m => m.ForumModule)
+            },
+            {
+                path: 'settings',
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-circle-settings" */
+                    './settings/settings.module'
+                ).then(m => m.SettingsModule)
+            },
+            {
+                path: 'dashboard',
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-circle-dashboard" */
+                    './dashboard/dashboard.module'
+                ).then(m => m.DashboardModule)
+            },
+            { path: '', redirectTo: 'dashboard' },
+        ],
     },
 ];
 
 @NgModule({
     imports: [CommonModule, RouterModule.forChild(routes)],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
 export class CircleRoutingModule {}

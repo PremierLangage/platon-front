@@ -1,5 +1,4 @@
 <app-banner
-
   [bannerTitle]="'Espace de travail'"
   [bannerImage]="'assets/images/illustrations/network.png'"
   [bannerActions]="bannerActionsTemplate"
@@ -51,7 +50,6 @@
         <mat-expansion-panel-header>
           Recherche avancée
         </mat-expansion-panel-header>
-
         <!-- TYPE -->
         <div class="form-group">
           <mat-label id="search-type-label">Qu'est-ce que vous recherchez ?</mat-label>
@@ -70,7 +68,6 @@
             </mat-checkbox>
           </mat-radio-group>
         </div>
-
         <ng-container *ngIf="shouldShowStatusForm">
           <!-- CIRCLE ID -->
           <div class="form-group" [@lightSpeedInOnEnter] [@lightSpeedOutOnLeave]>
@@ -81,7 +78,6 @@
             </mat-form-field>
             <mat-hint>Ce champ est automatiquement remplie lorsque vous faites une recherche depuis la page d'un cercle</mat-hint>
           </div>
-
           <!-- STATUS -->
           <div class="form-group" [@lightSpeedInOnEnter] [@lightSpeedOutOnLeave]>
             <mat-label id="status-label">Quel est le status des exercices et activités que vous recherchez ?</mat-label>
@@ -95,7 +91,6 @@
             </mat-radio-group>
           </div>
         </ng-container>
-
         <!-- SORTBY -->
         <div class="form-group">
           <mat-label id="sortby-label">Comment voulez-vous trier les résultats ?</mat-label>
@@ -104,7 +99,6 @@
             <mat-radio-button value="date">Date de mise à jour</mat-radio-button>
           </mat-radio-group>
         </div>
-
         <!-- DATE -->
         <div class="form-group">
           <mat-label id="update-date-label">Souhaitez-vous limiter les résultats à une certaine période ?</mat-label>

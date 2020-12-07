@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import { SearchBar } from '@platon/shared/ui';
 import { IntroService } from '@platon/shared/utils';
-import { Subject } from 'rxjs';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,14 +15,9 @@ export class DashboardComponent implements OnInit {
 
     searchBar: SearchBar<any> =  {
         placeholder: 'Essayez un nom de cours...',
+        complete: item => item,
         filterer: {
-            run: (_) => Promise.resolve({
-                matches: [],
-                suggestions: [],
-            }),
-        },
-        onSuggest: (response) =>  {},
-        onEmpty: () => {
+            run: (_) => of([]),
         },
     }
 

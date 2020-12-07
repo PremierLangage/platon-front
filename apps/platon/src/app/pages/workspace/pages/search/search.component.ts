@@ -7,12 +7,13 @@ import {
     ResourceService,
     ResourceTypes,
 } from '@platon/feature/workspace';
-import { SearchBar, SearchBarFuseFilterer } from '@platon/shared/ui';
-import { Subscription } from 'rxjs';
+import { SearchBar } from '@platon/shared/ui';
 import {
     lightSpeedInOnEnterAnimation,
     lightSpeedOutOnLeaveAnimation,
 } from 'angular-animations';
+import Fuse from 'fuse.js';
+import { of, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-workspace-search',
@@ -25,21 +26,6 @@ import {
 })
 export class SearchComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
-    private readonly filterer = new SearchBarFuseFilterer<string>({
-        dataSource: () => {
-            let suggestions: string[] = [];
-            this.createFilters().types.forEach((type: ResourceTypes) => {
-                suggestions = suggestions.concat(this.suggestions[type]);
-            });
-            return suggestions;
-        },
-        fuseOptions: {
-            includeMatches: true,
-            findAllMatches: false,
-            threshold: 0.2,
-        },
-        defaultCompletionGroup: 'SUGGESTIONS',
-    });
 
     private pagination?: Subscription;
     private suggestions: Record<ResourceTypes, string[]> = {
@@ -59,8 +45,25 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
     readonly searchBar: SearchBar<string> = {
         placeholder: 'Essayez une matière, une notion...',
-        filterer: this.filterer,
-        onTrigger: this.paginate.bind(this),
+        filterer: {
+            run: (query) => {
+                let suggestions: string[] = [];
+                this.createFilters().types.forEach((type: ResourceTypes) => {
+                    suggestions = suggestions.concat(this.suggestions[type]);
+                });
+                return of(
+                    new Fuse(suggestions, {
+                        includeMatches: true,
+                        findAllMatches: false,
+                        threshold: 0.2,
+                    })
+                        .search(query)
+                        .map((r) => r.item)
+                );
+            },
+        },
+        onSearch: this.paginate.bind(this),
+        complete: (item) => item,
         onReady: this.addRouterParamChangeListener.bind(this),
     };
 
@@ -167,7 +170,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     private addRouterParamChangeListener() {
         if (!this.activatedRoute.snapshot.queryParamMap.keys.length) {
             this.form.patchValue({
-                circles: true
+                circles: true,
             });
             this.trigger();
         }

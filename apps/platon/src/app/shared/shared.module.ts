@@ -21,16 +21,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTreeModule } from 'ng-zorro-antd/tree';
-import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzBadgeModule } from 'ng-zorro-antd/badge';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzTimelineModule } from 'ng-zorro-antd/timeline';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzAutocompleteModule } from 'ng-zorro-antd/auto-complete';
-
 import { SharedUiListModule } from '@platon/shared/ui';
 import { SharedUiDialogModule } from '@platon/shared/ui';
 import { SharedUiSearchBarModule } from '@platon/shared/ui';
@@ -69,17 +59,6 @@ const MATERIAL_MODULES = [
     MatFormFieldModule,
 ];
 
-const NZ_ZORRO_MODULES = [
-    NzTagModule,
-    NzSpinModule,
-    NzTreeModule,
-    NzEmptyModule,
-    NzBadgeModule,
-    NzAvatarModule,
-    NzTimelineModule,
-    NzBreadCrumbModule,
-    NzAutocompleteModule,
-];
 
 const LIBS_MODULES = [
     SharedUiListModule,
@@ -102,13 +81,11 @@ const MODULES = [
         RouterModule,
         ...ANGULAR_MODULES,
         ...MATERIAL_MODULES,
-        ...NZ_ZORRO_MODULES,
         ...LIBS_MODULES,
     ],
     exports: [
         ...ANGULAR_MODULES,
         ...MATERIAL_MODULES,
-        ...NZ_ZORRO_MODULES,
         ...LIBS_MODULES,
         ...MODULES,
     ],

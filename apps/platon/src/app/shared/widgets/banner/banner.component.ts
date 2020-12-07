@@ -12,7 +12,7 @@ export class BannerComponent {
     @Input() bannerDescription!: string;
     @Input() bannerActions?: TemplateRef<any>;
     @Input() bannerCompletion?: TemplateRef<any>;
-    @Input() bannerSearchBar?: SearchBar<any>;
+    @Input() bannerSearchBar!: SearchBar<any>;
 
     get bannerImageUrl() {
         return `url(${this.bannerImage})`;

@@ -1,8 +1,7 @@
 :host {
   display: grid;
   grid-template-columns: 6fr 2fr;
-  column-gap: 16px;
-  padding: 16px 0;
+  column-gap: 12px;
 }
 
 mat-expansion-panel {
@@ -19,10 +18,13 @@ mat-expansion-panel {
   }
 }
 
-.contributor-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
+.link-profile {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 24px 12px;
 }
 
 .spacer {
