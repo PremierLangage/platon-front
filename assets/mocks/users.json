@@ -6,7 +6,7 @@
     "userName": "mrhubottom",
     "email": "mrhubottom0@prlog.org",
     "isAdmin": false,
-    "avatar": "https://robohash.org/undeiustosint.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/undeiustosint.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -16,7 +16,7 @@
     "userName": "ypicker",
     "email": "ypicker1@redcross.org",
     "isAdmin": true,
-    "avatar": "https://robohash.org/sequiillumconsequatur.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/sequiillumconsequatur.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -26,7 +26,7 @@
     "userName": "rraison",
     "email": "rraison2@soup.io",
     "isAdmin": true,
-    "avatar": "https://robohash.org/doloremquetotameveniet.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/doloremquetotameveniet.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -36,7 +36,7 @@
     "userName": "glias",
     "email": "glias3@dion.ne.jp",
     "isAdmin": false,
-    "avatar": "https://robohash.org/nobisofficiisaperiam.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/nobisofficiisaperiam.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -46,7 +46,7 @@
     "userName": "jingman",
     "email": "jingman4@plala.or.jp",
     "isAdmin": false,
-    "avatar": "https://robohash.org/quiamagnamquia.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/quiamagnamquia.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -56,7 +56,7 @@
     "userName": "bcacManus",
     "email": "bmacmanus5@chicagotribune.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/voluptatumeaquequia.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/voluptatumeaquequia.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -66,7 +66,7 @@
     "userName": "ncawse",
     "email": "ncawse6@cdbaby.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/beataetemporibusinventore.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/beataetemporibusinventore.jpg?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -76,7 +76,7 @@
     "userName": "tpalliser",
     "email": "tpalliser7@51.la",
     "isAdmin": false,
-    "avatar": "https://robohash.org/doloribusdoloremculpa.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/doloribusdoloremculpa.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -86,7 +86,7 @@
     "userName": "nloding",
     "email": "nloding8@irs.gov",
     "isAdmin": false,
-    "avatar": "https://robohash.org/cumdictaaccusantium.png?size=50x50&set=set1",
+    "picture": "https://robohash.org/cumdictaaccusantium.png?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -96,7 +96,7 @@
     "userName": "cdzenisenka",
     "email": "cdzenisenka9@google.ru",
     "isAdmin": false,
-    "avatar": "https://robohash.org/nisiquisquamerror.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/nisiquisquamerror.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -106,7 +106,7 @@
     "userName": "cbrickhill",
     "email": "cbrickhilla@sakura.ne.jp",
     "isAdmin": false,
-    "avatar": "https://robohash.org/expeditautvitae.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/expeditautvitae.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -116,7 +116,7 @@
     "userName": "osutherden",
     "email": "osutherdenb@timesonline.co.uk",
     "isAdmin": false,
-    "avatar": "https://robohash.org/remillumet.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/remillumet.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -126,7 +126,7 @@
     "userName": "lscotfurth",
     "email": "lscotfurthc@istockphoto.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/laboriosamteneturperferendis.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/laboriosamteneturperferendis.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -136,7 +136,7 @@
     "userName": "ctevelov",
     "email": "ctevelovd@blogger.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/voluptatemomnismolestias.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/voluptatemomnismolestias.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -146,7 +146,7 @@
     "userName": "gmccloughlin",
     "email": "gmccloughline@washington.edu",
     "isAdmin": false,
-    "avatar": "https://robohash.org/voluptatemaliquideum.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/voluptatemaliquideum.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -156,7 +156,7 @@
     "userName": "aruston",
     "email": "arustonf@mediafire.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/dolorexpeditafacilis.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/dolorexpeditafacilis.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -166,7 +166,7 @@
     "userName": "gfinding",
     "email": "gfindingg@a8.net",
     "isAdmin": false,
-    "avatar": "https://robohash.org/eadeseruntvoluptatum.png?size=50x50&set=set1",
+    "picture": "https://robohash.org/eadeseruntvoluptatum.png?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -176,7 +176,7 @@
     "userName": "cdabernott",
     "email": "cdabernotth@tiny.cc",
     "isAdmin": false,
-    "avatar": "https://robohash.org/quaeratvoluptatumdolorum.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/quaeratvoluptatumdolorum.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -186,7 +186,7 @@
     "userName": "mbeisley",
     "email": "mbeisleyi@icio.us",
     "isAdmin": false,
-    "avatar": "https://robohash.org/maximeiurerecusandae.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/maximeiurerecusandae.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -196,7 +196,7 @@
     "userName": "nleach",
     "email": "nleachj@cloudflare.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/numquamreiciendisin.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/numquamreiciendisin.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -206,7 +206,7 @@
     "userName": "ktwining",
     "email": "ktwiningk@un.org",
     "isAdmin": false,
-    "avatar": "https://robohash.org/doloreodiolabore.png?size=50x50&set=set1",
+    "picture": "https://robohash.org/doloreodiolabore.png?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -216,7 +216,7 @@
     "userName": "ymacgillavery",
     "email": "ymacgillaveryl@de.vu",
     "isAdmin": false,
-    "avatar": "https://robohash.org/praesentiumsaepeut.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/praesentiumsaepeut.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -226,7 +226,7 @@
     "userName": "cjaffrey",
     "email": "cjaffreym@blog.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/quosminimasaepe.png?size=50x50&set=set1",
+    "picture": "https://robohash.org/quosminimasaepe.png?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -236,7 +236,7 @@
     "userName": "krobathon",
     "email": "krobathonn@huffingtonpost.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/adipiscivoluptatemad.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/adipiscivoluptatemad.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -246,7 +246,7 @@
     "userName": "edarrington",
     "email": "edarringtono@cocolog-nifty.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/voluptatenemoassumenda.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/voluptatenemoassumenda.bmp?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -256,7 +256,7 @@
     "userName": "jpenvarden",
     "email": "jpenvardenp@huffingtonpost.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/consequaturrerumnecessitatibus.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/consequaturrerumnecessitatibus.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -266,7 +266,7 @@
     "userName": "tpethybridge",
     "email": "tpethybridgeq@pbs.org",
     "isAdmin": false,
-    "avatar": "https://robohash.org/autlaboriosamin.jpg?size=50x50&set=set1",
+    "picture": "https://robohash.org/autlaboriosamin.jpg?size=50x50&set=set1",
     "role": "Teacher"
   },
   {
@@ -276,7 +276,7 @@
     "userName": "bsmitherham",
     "email": "bsmitherhamr@constantcontact.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/sedrerumin.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/sedrerumin.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -286,7 +286,7 @@
     "userName": "ltalkington",
     "email": "ltalkingtons@zimbio.com",
     "isAdmin": false,
-    "avatar": "https://robohash.org/utvitaedolores.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/utvitaedolores.bmp?size=50x50&set=set1",
     "role": "Student"
   },
   {
@@ -296,7 +296,7 @@
     "userName": "ssawer",
     "email": "ssawert@illinois.edu",
     "isAdmin": false,
-    "avatar": "https://robohash.org/sequiiustoest.bmp?size=50x50&set=set1",
+    "picture": "https://robohash.org/sequiiustoest.bmp?size=50x50&set=set1",
     "role": "Teacher"
   }
 ]
