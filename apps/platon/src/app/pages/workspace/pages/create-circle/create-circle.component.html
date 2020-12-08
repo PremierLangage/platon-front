@@ -1,0 +1,119 @@
+<header>
+  <h1>Nouveau cercle</h1>
+  <div class="spacer"></div>
+  <button mat-icon-button (click)="dismiss()">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+<nz-steps #steps nzType="navigation" [nzCurrent]="step">
+  <nz-step nzTitle="Informations générales" [nzStatus]="status[0]" nzIcon="info-circle"></nz-step>
+  <nz-step nzTitle="Membres" [nzStatus]="status[1]" nzIcon="user"></nz-step>
+  <nz-step nzTitle="Tags" [nzStatus]="status[2]" nzIcon="tags"></nz-step>
+</nz-steps>
+<main>
+  <ng-container [ngSwitch]="steps.nzCurrent">
+    <ng-container *ngSwitchCase="0">
+      <ng-container *ngTemplateOutlet="step1"></ng-container>
+    </ng-container>
+    <ng-container *ngSwitchCase="1">
+      <ng-container *ngTemplateOutlet="step2"></ng-container>
+    </ng-container>
+    <ng-container *ngSwitchCase="2">
+      <ng-container *ngTemplateOutlet="step3"></ng-container>
+    </ng-container>
+  </ng-container>
+</main>
+<footer>
+  <button mat-button [disabled]="steps.nzCurrent == 0" (click)="step = step - 1">Précedent</button>
+  <button mat-button [disabled]="!canContinue" (click)="nextStep()" color="primary">Suivant</button>
+</footer>
+
+<auth-search-modal
+  #search
+  searchTitle="Ajouter un membre"
+  searchOkTitle="Ajouter"
+  searchNoTitle="Annuler"
+  searchRole="Teacher"
+  [searchExcludes]="members"
+  (didSelect)="addMembers($event)">
+</auth-search-modal>
+
+<!-- STEP1 -->
+<ng-template #step1>
+  <h2>Veuillez saisir les informations importantes de votre cercle</h2>
+  <form [formGroup]="formStep1">
+    <mat-form-field appearance="fill">
+      <mat-label>Parent</mat-label>
+      <input matInput formControlName="parent" >
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Description</mat-label>
+      <textarea cdkTextareaAutosize  matInput formControlName="description"></textarea>
+    </mat-form-field>
+  </form>
+</ng-template>
+<!-- STEP2 -->
+<ng-template #step2>
+  <h2>Ajoutez des membres au cercle</h2>
+  <div class="members mat-elevation-z1">
+    <div class="members-list-header">
+      <mat-form-field appearance="fill">
+        <i matPrefix nz-icon nzType="search" nzTheme="outline"></i>
+        <mat-label>Rechercher des membres</mat-label>
+        <input matInput #input>
+      </mat-form-field>
+      <div class="spacer"></div>
+    <button mat-raised-button color="primary" (click)="search.open()">Inscrire un membre</button>
+    </div>
+    <ui-list
+      [items]="members"
+      [idField]="'id'"
+      [filterBy]="['userName', 'lastName', 'firstName']"
+      [filter]="input.value">
+      <ui-list-template slot="row">
+        <ng-template let-item="item">
+          <div class="members-list-item">
+            <a mat-button [routerLink]="['/profile', item.id]" target="_blank">
+              <auth-avatar [user]="item"></auth-avatar>
+            </a>
+            <div class="spacer"></div>
+            <button
+              nz-popconfirm
+              nzOkText="Retirer"
+              nzCancelText="Annuler"
+              nzOkType="danger"
+              [nzPopconfirmTitle]=" 'Voulez-vous vraiment retirer “' + item.userName + '” des membres du cercle?'"
+              nzPopconfirmPlacement="top"
+              (nzOnConfirm)="removeMember(item)"
+              mat-icon-button>
+              <i nz-icon nzType="delete" nzTheme="outline"></i>
+            </button>
+          </div>
+        </ng-template>
+      </ui-list-template>
+    </ui-list>
+  </div>
+</ng-template>
+<!-- STEP3 -->
+<ng-template #step3>
+  <h2>Définissez la liste des tags associés à votre cercle</h2>
+  <form [formGroup]="formStep3">
+    <nz-cascader
+      formControlName="tags"
+      [nzOptions]="tags"
+      [nzNotFoundContent]="'Aucun tag ne correspond à votre recherche'"
+      [nzPlaceHolder]="'Choisissez une liste de tags...'"
+      [nzSize]="'large'"
+      [nzShowSearch]="true">
+    </nz-cascader>
+    <p>Vous ne trouvez pas de tag prédéfini? Entrez vos propres tags !</p>
+      <mat-form-field appearance="fill">
+        <mat-label>Entrez votre liste de tags en séparant les éléments par des virgules</mat-label>
+        <input matInput #input>
+      </mat-form-field>
+  </form>
+</ng-template>

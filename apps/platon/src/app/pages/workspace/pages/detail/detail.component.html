@@ -46,13 +46,16 @@
             <mat-icon>assessment</mat-icon>
             <span>Créer une activité</span>
           </button>
-          <button
+          <a
             mat-menu-item
             [disabled]="!context.isAdmin"
-            id="menu-create-sub-circle">
+            id="menu-create-sub-circle"
+            [routerLink]="['/workspace', 'create-circle']"
+            [queryParams]="{ parent: context.resource!.id }"
+            [queryParamsHandling]="'merge'">
             <mat-icon>call_split</mat-icon>
             <span>Créer un sous cercle</span>
-          </button>
+          </a>
         </ng-container>
         <a
           mat-menu-item

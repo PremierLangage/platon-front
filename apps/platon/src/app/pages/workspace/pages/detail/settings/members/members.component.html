@@ -1,5 +1,5 @@
 <nz-skeleton [nzActive]="true" [nzLoading]="loading">
-  <div class="list-header">
+  <div class="members-list-header">
     <mat-form-field appearance="fill">
       <i matPrefix nz-icon nzType="search" nzTheme="outline"></i>
       <mat-label>Rechercher des membres</mat-label>
@@ -21,7 +21,7 @@
     [filter]="input.value">
     <ui-list-template slot="row">
       <ng-template let-item="item">
-        <div class="list-item">
+        <div class="members-list-item">
           <a mat-button [routerLink]="['/profile', item.id]">
             <auth-avatar [user]="item"></auth-avatar>
           </a>

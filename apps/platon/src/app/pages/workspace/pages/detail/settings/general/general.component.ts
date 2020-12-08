@@ -35,7 +35,7 @@ export class GeneralComponent implements OnInit, OnDestroy {
         private readonly changeDetector: ChangeDetectorRef,
     ) {}
 
-    ngOnInit() {
+    async ngOnInit() {
         this.subscription.push(
             this.detailService.context.subscribe(context => {
                 this.context = context;
@@ -52,12 +52,8 @@ export class GeneralComponent implements OnInit, OnDestroy {
             })
         );
 
-        this.subscription.push(
-            this.tagsService.cascader().subscribe(data => {
-                this.tags = data;
-                this.changeDetector.markForCheck();
-            })
-        );
+        this.tags = await this.tagsService.cascader().toPromise();
+        this.changeDetector.markForCheck();
     }
 
     ngOnDestroy() {

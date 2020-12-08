@@ -30,18 +30,6 @@ import { MembersComponent} from './members/members.component';
         FormsModule,
         ReactiveFormsModule,
 
-        RouterModule.forChild([
-            {
-                path: '',
-                component: SettingsComponent,
-                children: [
-                    { path: 'general', component: GeneralComponent },
-                    { path: 'members', component: MembersComponent },
-                    { path: '', redirectTo: 'general' }
-                ]
-            },
-        ]),
-
         MatInputModule,
         MatButtonModule,
         MatTooltipModule,
@@ -56,6 +44,19 @@ import { MembersComponent} from './members/members.component';
         CoreAuthModule,
         SharedUiListModule,
         FeatureWorkspaceModule,
+
+
+        RouterModule.forChild([
+            {
+                path: '',
+                component: SettingsComponent,
+                children: [
+                    { path: 'general', component: GeneralComponent },
+                    { path: 'members', component: MembersComponent },
+                    { path: '', redirectTo: 'general' }
+                ]
+            },
+        ]),
     ],
     exports: [],
     declarations: [GeneralComponent, SettingsComponent, MembersComponent],

@@ -6,6 +6,13 @@ import { DetailPageData } from './pages/detail/detail.service';
 
 const routes: Routes = [
     {
+        path: 'create-circle',
+        loadChildren: () => import(
+            /* webpackChunkName: "workspace-create-circle" */
+            './pages/create-circle/create-circle.module'
+        ).then(m => m.CreateCircleModule)
+    },
+    {
         path: '',
         component: WorkspaceComponent,
         children: [
@@ -49,6 +56,7 @@ const routes: Routes = [
             { path: '**', redirectTo: 'search', pathMatch: 'full' }
         ]
     },
+
     { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
 

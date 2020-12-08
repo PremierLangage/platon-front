@@ -1,7 +1,7 @@
 import { AuthChange, AuthObserver } from '@platon/core/auth';
 import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { ResourceEvent, Member, Resource, ResourceStatus, ResourceTypes } from './resource';
+import { ResourceEvent, Member, Resource, ResourceStatus, ResourceTypes, Circle } from './resource';
 
 export abstract class ResourceProvider implements AuthObserver, IDynamicService {
     abstract injectable(): boolean;
@@ -16,6 +16,8 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
     abstract findById<T extends Resource>(args: ResourceFindByIdArgs): Observable<T | undefined>;
 
     abstract update(resource: Resource): Promise<void>;
+
+    abstract createCircle(form: ResourceFormCreateCircle): Promise<Circle>;
 
     /**
      * Paginates resources of the given type from the server.
@@ -33,7 +35,14 @@ export abstract class ResourceProvider implements AuthObserver, IDynamicService 
     abstract removeMember(member: Member): Promise<void>;
     abstract updateMember(member: Member): Promise<void>;
     abstract listMembers(circleId: number): Observable<Member[]>;
+}
 
+export interface ResourceFormCreateCircle {
+    name: string;
+    parent: number;
+    tags: string[];
+    description: string;
+    members: Member[];
 }
 
 /**

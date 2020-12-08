@@ -24,6 +24,7 @@ import {
 import {
     ResourceFilters,
     ResourceFindByIdArgs,
+    ResourceFormCreateCircle,
     ResourceListEventsArgs,
     ResourcePaginateArgs,
     ResourcePaginateResult,
@@ -214,10 +215,10 @@ export class InMemoryResourceProvider extends ResourceProvider
                             (e) => e.type === 'CIRCLE'
                         );
                         circles.forEach((circle) => {
-                            const contributors: Member[] = [];
+                            const members: Member[] = [];
                             array_sample(teachers, 3).forEach((teacher) => {
                                 if (!teacher.isAdmin) {
-                                    contributors.push({
+                                    members.push({
                                         id: teacher.id,
                                         circleId: circle.id,
                                         picture: teacher.picture,
@@ -230,7 +231,7 @@ export class InMemoryResourceProvider extends ResourceProvider
                             });
                             teachers.forEach((u) => {
                                 if (u.isAdmin) {
-                                    contributors.push({
+                                    members.push({
                                         id: u.id,
                                         circleId: circle.id,
                                         picture: u.picture,
@@ -243,7 +244,7 @@ export class InMemoryResourceProvider extends ResourceProvider
                             });
                             this.members.set(
                                 circle.id,
-                                new BehaviorSubject(contributors)
+                                new BehaviorSubject(members)
                             );
                         });
                     })
@@ -281,6 +282,52 @@ export class InMemoryResourceProvider extends ResourceProvider
             map((arr) => arr.find((e) => e.id === args.id)),
             take(1)
         ) as Observable<T | undefined>;
+    }
+
+    async createCircle(form: ResourceFormCreateCircle): Promise<Circle> {
+        const all = this.resources.get('CIRCLE') as BehaviorSubject<Circle[]>;
+        const last = all.value[all.value.length - 1];
+        const circle: Circle = {
+            id: all.value.length,
+            name: form.name,
+            type: 'CIRCLE',
+            tags: form.tags,
+            description: form.description,
+            date: new Date().getTime() / 1000,
+            directoryId: last.directoryId + 1,
+            forumId: last.forumId + 1,
+        };
+
+        all.value.push(circle);
+
+        all.next(all.value);
+        const teachers = await this.inMemoryUserDb
+            .read()
+            .pipe(map((arr) => arr.filter((e) => e.role === 'Teacher')))
+            .toPromise();
+
+        const members: Member[] = [];
+        form.members.forEach(m => {
+            m.circleId = circle.id;
+            if (!m.isAdmin) {
+                members.push(m);
+            }
+        });
+        teachers.forEach((u) => {
+            if (u.isAdmin) {
+                members.push({
+                    id: u.id,
+                    circleId: circle.id,
+                    picture: u.picture,
+                    userName: u.userName,
+                    lastName: u.lastName,
+                    firstName: u.firstName,
+                    isAdmin: u.isAdmin,
+                });
+            }
+        });
+        this.getMembers(circle.id).value.push(...members);
+        return Promise.resolve(circle);
     }
 
     update(resource: Resource): Promise<void> {
