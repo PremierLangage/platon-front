@@ -1,0 +1,57 @@
+<section>
+  <ws-resource-events [events]="context.events"></ws-resource-events>
+</section>
+<aside>
+  <ng-container *ngIf="context.resource!.type !== 'CIRCLE'">
+    <mat-form-field appearance="fill">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="statusControl">
+        <mat-option *ngFor="let item of status" [value]="item">
+          {{item|resourceStatus:'label'}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
+  <ng-container *ngIf="context.resource!.type === 'CIRCLE'">
+    <mat-expansion-panel expanded="true">
+      <mat-expansion-panel-header>
+        <span>Status des ressources</span>
+      </mat-expansion-panel-header>
+      <ng-container *ngFor="let status of status">
+        <a class="status-item" routerLink="['/workspace/search']"
+          [queryParams]="{
+            circle: context.resource!.id,
+            status: status,
+            types: 'EXERCISE|ACTIVITY'
+          }"
+          [queryParamsHandling]="'merge'">
+          <nz-tag
+            [nzColor]="status|resourceStatus:'color'">
+            {{status|resourceStatus:'label'}} 0
+          </nz-tag>
+        </a>
+      </ng-container>
+    </mat-expansion-panel>
+  </ng-container>
+
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+    <span>Administrateurs</span>
+    </mat-expansion-panel-header>
+    <ng-container *ngFor="let contributor of admins; trackBy: trackById">
+      <a class="link-profile" mat-button [routerLink]="['/profile', contributor.id]">
+        <auth-avatar [user]="contributor"></auth-avatar>
+      </a>
+    </ng-container>
+  </mat-expansion-panel>
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+    <span>Membres</span>
+    </mat-expansion-panel-header>
+    <ng-container *ngFor="let contributor of members; trackBy: trackById">
+      <a class="link-profile" mat-button [routerLink]="['/profile', contributor.id]">
+        <auth-avatar [user]="contributor"></auth-avatar>
+      </a>
+    </ng-container>
+  </mat-expansion-panel>
+</aside>

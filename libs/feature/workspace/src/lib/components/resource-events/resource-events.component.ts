@@ -1,47 +1,24 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ResourceService } from '../../api/resource.service';
-import { ResourceEvent, ResourceTypes } from '../../models/resource';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    Input,
+    OnChanges,
+} from '@angular/core';
+import { ResourceEvent } from '../../models/resource';
 
 @Component({
-  selector: 'ws-resource-events',
-  templateUrl: './resource-events.component.html',
-  styleUrls: ['./resource-events.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'ws-resource-events',
+    templateUrl: './resource-events.component.html',
+    styleUrls: ['./resource-events.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResourceEventsComponent implements OnChanges, OnDestroy {
-    private subscription?: Subscription;
-
-    @Input() resourceId?: number;
-    @Input() resourceType?: ResourceTypes;
-
-    events: ResourceEvent[] = [];
-
-    constructor(
-        private readonly resourceService: ResourceService
-    ) { }
+export class ResourceEventsComponent implements OnChanges {
+    @Input() events: ResourceEvent[] = [];
 
     ngOnChanges() {
-        this.events = [];
-        if (this.resourceId && this.resourceType) {
-            this.subscription?.unsubscribe();
-            this.subscription = this.resourceService.listEvents({
-                resourceId: this.resourceId,
-                resourceType: this.resourceType
-            }).subscribe({
-                next: e => {
-                    this.events = e.sort((a, b) => b.date - a.date);
-                },
-                error: error => {
-                    this.events = [];
-                    console.error(error);
-                }
-            });
+        if (this.events) {
+            this.events = this.events.sort((a, b) => b.date - a.date);
         }
-    }
-
-    ngOnDestroy() {
-        this.subscription?.unsubscribe();
     }
 
     trackById(_: number, item: ResourceEvent) {

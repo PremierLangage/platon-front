@@ -1,0 +1,36 @@
+:host {
+  display: grid;
+  grid-template-columns: 6fr 2fr;
+  column-gap: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-expansion-panel {
+  margin-bottom: 8px;
+}
+
+.status-item {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  nz-tag {
+    width: 100%;
+  }
+}
+
+.link-profile {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 24px 12px;
+}
+
+.spacer {
+  flex: 1;
+}

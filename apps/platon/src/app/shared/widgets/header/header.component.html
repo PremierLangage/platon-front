@@ -5,9 +5,18 @@
   </button>
   <app-nav></app-nav>
   <div class="spacer"></div>
-  <a mat-icon-button href="#">
+  <button mat-icon-button [matMenuTriggerFor]="notifMenu">
     <mat-icon matBadge="0">notifications</mat-icon>
-  </a>
+  </button>
+  <mat-menu #notifMenu="matMenu">
+    <ng-template matMenuContent>
+      <nz-empty [nzNotFoundContent]="content">
+        <ng-template #content>
+          <h2>Aucune notification</h2>
+        </ng-template>
+      </nz-empty>
+    </ng-template>
+  </mat-menu>
   <button mat-button [matMenuTriggerFor]="profileMenu">
     <auth-avatar style="--color-username: white;" [user]="user"></auth-avatar>
   </button>

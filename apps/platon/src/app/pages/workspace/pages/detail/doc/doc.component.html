@@ -1,0 +1,5 @@
+<ws-resource-doc
+  [documentation]="context.resource!.documentation || ''"
+  (didSave)="saveChanges($event)"
+  [editable]="!!context.isAdmin">
+</ws-resource-doc>

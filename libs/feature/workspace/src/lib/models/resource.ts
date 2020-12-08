@@ -1,6 +1,29 @@
 // tslint:disable: no-empty-interface
 
-export const ResourceSearchIndexes: ReadonlyArray<string> = [
+export const RESOURCE_ICONS: Record<ResourceTypes, string> = {
+    CIRCLE: 'group_work',
+    EXERCISE: 'article',
+    ACTIVITY: 'assessment',
+};
+
+
+export const RESOURCE_COLORS: Record<ResourceStatus, string> = {
+    DRAFT: 'blue',
+    READY: 'green',
+    BUGGED: 'magenta',
+    NOT_TESTED: 'gold',
+    DEPRECATED: 'red'
+};
+
+export const RESOURCE_LABELS: Record<ResourceStatus, string> = {
+    DRAFT: 'Brouillon',
+    READY: 'Prêt à l\'utilisation',
+    BUGGED: 'Contient des bugs',
+    NOT_TESTED: 'Besoin d\'être tester',
+    DEPRECATED: 'Ne pas utiliser'
+};
+
+export const RESOURCE_SEARCH_INDEXES: ReadonlyArray<string> = [
     'name',
     'tags',
 ];
@@ -79,8 +102,11 @@ export interface Resource {
 }
 
 export interface Circle extends Resource {
-    /** Identifier of the parent circle. */
-    parentId?: number;
+    /** Useful informations about the parent of the circle. */
+    parent?: {
+        id: number;
+        name: string;
+    }
 }
 
 /**
@@ -91,8 +117,11 @@ export interface PublishableResource extends Resource {
     status: ResourceStatus;
     /** Current version of the resource. */
     version: number;
-    /** Identifier of the circle associated to the resource. */
-    circleId: number;
+    /** Useful informations about the circle associated to the resource. */
+    circle: {
+        id: number;
+        name: string;
+    };
 }
 
 export interface Exercise extends PublishableResource {

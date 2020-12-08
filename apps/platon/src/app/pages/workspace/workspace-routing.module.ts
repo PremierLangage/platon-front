@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WorkspaceComponent } from './workspace.component';
+import { DetailPageData } from './pages/detail/detail.service';
 
 const routes: Routes = [
     {
@@ -15,29 +16,36 @@ const routes: Routes = [
                     './pages/search/search.module'
                 ).then(m => m.SearchModule)
             },
-
             {
                 path: 'activity',
+                data: {
+                    resourceType: 'ACTIVITY'
+                } as DetailPageData,
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-activity" */
-                    './pages/activity/activity.module'
-                ).then(m => m.ActivityModule)
-            },
-            {
-                path: 'exercise',
-                loadChildren: () => import(
-                    /* webpackChunkName: "workspace-exercise" */
-                    './pages/exercise/exercise.module'
-                ).then(m => m.ExerciseModule)
+                    /* webpackChunkName: "workspace-detail" */
+                './pages/detail/detail.module'
+                ).then(m => m.DetailModule)
             },
             {
                 path: 'circle',
+                data: {
+                    resourceType: 'CIRCLE'
+                } as DetailPageData,
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-circle" */
-                    './pages/circle/circle.module'
-                ).then(m => m.CircleModule)
+                    /* webpackChunkName: "workspace-detail" */
+                    './pages/detail/detail.module'
+                ).then(m => m.DetailModule)
             },
-
+            {
+                path: 'exercise',
+                data: {
+                    resourceType: 'EXERCISE'
+                } as DetailPageData,
+                loadChildren: () => import(
+                    /* webpackChunkName: "workspace-detail" */
+                    './pages/detail/detail.module'
+                ).then(m => m.DetailModule)
+            },
             { path: '**', redirectTo: 'search', pathMatch: 'full' }
         ]
     },

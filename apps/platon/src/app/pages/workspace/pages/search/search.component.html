@@ -20,12 +20,12 @@
     <ui-list [items]="dataSource" idField="id">
       <ui-list-template slot="row">
         <ng-template let-item="item">
-          <ws-resource-list-item
+          <ws-resource-item
             [@lightSpeedInOnEnter]
             [@lightSpeedOutOnLeave]
             [item]="item"
             (didFilterByTag)="trigger($event)">
-          </ws-resource-list-item>
+          </ws-resource-item>
         </ng-template>
       </ui-list-template>
       <ui-list-template slot="empty">

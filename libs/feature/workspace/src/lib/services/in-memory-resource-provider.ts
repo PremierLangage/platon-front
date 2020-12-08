@@ -1,19 +1,25 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/shared/utils';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, map, take} from 'rxjs/operators';
-import Fuse from 'fuse.js';
-import { AuthChange, AuthObserver, AuthUser, InMemoryUserDb } from '@platon/core/auth';
 import {
-    Resource,
-    ResourceTypes,
+    AuthChange,
+    AuthObserver,
+    AuthUser,
+    InMemoryUserDb,
+} from '@platon/core/auth';
+import { array_sample, ConfigService } from '@platon/shared/utils';
+import Fuse from 'fuse.js';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { delay, map, take } from 'rxjs/operators';
+import {
+    Activity,
     Circle,
     Exercise,
-    Activity,
-    ResourceSearchIndexes,
-    PublishableResource,
     Member,
+    PublishableResource,
+    Resource,
     ResourceEvent,
+    RESOURCE_SEARCH_INDEXES,
+    ResourceTypes,
+    RESOURCE_LABELS,
 } from '../models/resource';
 import {
     ResourceFilters,
@@ -23,7 +29,6 @@ import {
     ResourcePaginateResult,
     ResourceProvider,
 } from '../models/resource-provider';
-import { array_sample } from '@platon/shared/utils';
 
 const LOREM = `
 Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -32,130 +37,157 @@ officia excepturi ducimus aliquid adipisci sunt numquam.
 `;
 
 @Injectable()
-export class InMemoryResourceProvider extends ResourceProvider implements AuthObserver {
-
-    private readonly events = new Map<ResourceTypes, BehaviorSubject<ResourceEvent[]>>([
+export class InMemoryResourceProvider extends ResourceProvider
+    implements AuthObserver {
+    private readonly events = new Map<
+        ResourceTypes,
+        BehaviorSubject<ResourceEvent[]>
+    >([
         ['CIRCLE', new BehaviorSubject<ResourceEvent[]>([])],
         ['EXERCISE', new BehaviorSubject<ResourceEvent[]>([])],
         ['ACTIVITY', new BehaviorSubject<ResourceEvent[]>([])],
     ]);
-    private readonly resources = new Map<ResourceTypes, BehaviorSubject<any[]>>([
-        [
-            'CIRCLE',
-            new BehaviorSubject<Circle[]>([
-                {
-                    id: 0,
-                    name: 'PLaTon',
-                    type: 'CIRCLE',
-                    tags: [],
-                    description: LOREM,
-                    date: 1599138760,
-                    directoryId: 0,
-                    forumId: 1,
-                },
-                {
-                    id: 1,
-                    name: 'Informatique',
-                    type: 'CIRCLE',
-                    tags: ['informatique'],
-                    description: LOREM,
-                    date: 1599138760,
-                    directoryId: 0,
-                    forumId: 2,
-                    parentId: 0,
-                },
-                {
-                    id: 2,
-                    name: 'Python',
-                    type: 'CIRCLE',
-                    tags: ['informatique', 'python'],
-                    description: LOREM,
-                    date: 1599397960,
-                    directoryId: 2,
-                    forumId: 3,
-                    parentId: 1,
-                },
-                {
-                    id: 3,
-                    name: 'AP1',
-                    type: 'CIRCLE',
-                    tags: ['informatique', 'python', 'ap1'],
-                    description: LOREM,
-                    date: 1604469210,
-                    directoryId: 3,
-                    forumId: 4,
-                    parentId: 2,
-                },
-                {
-                    id: 4,
-                    name: 'C',
-                    type: 'CIRCLE',
-                    tags: ['informatique', 'c'],
-                    description: LOREM,
-                    date: 1599397960,
-                    directoryId: 4,
-                    forumId: 5,
-                    parentId: 1,
-                },
-            ]),
-        ],
-        [
-            'EXERCISE',
-            new BehaviorSubject<Exercise[]>([
-                {
-                    id: 0,
-                    circleId: 0,
-                    directoryId: 5,
-                    version: 1,
-                    forumId: 6,
-                    date: 1602469210,
-                    name: 'Boucle for',
-                    type: 'EXERCISE',
-                    status: 'READY',
-                    tags: ['informatique', 'python', 'boucles'],
-                    description: LOREM,
-                },
-                {
-                    id: 0,
-                    version: 1,
-                    circleId: 0,
-                    directoryId: 6,
-                    forumId: 7,
-                    date: 1605469210,
-                    name: 'Boucle while',
-                    type: 'EXERCISE',
-                    status: 'READY',
-                    tags: ['informatique', 'python', 'boucles'],
-                    description: LOREM,
-                },
-            ])
-        ],
-        [
-            'ACTIVITY',
-            new BehaviorSubject<Activity[]>([
-                {
-                    id: 0,
-                    version: 1,
-                    circleId: 0,
-                    directoryId: 7,
-                    forumId: 8,
-                    name: 'Activité 1',
-                    type: 'ACTIVITY',
-                    status: 'READY',
-                    tags: ['informatique', 'python', 'boucles'],
-                    description: LOREM,
-                    date: 1605469210,
-                },
-            ])
-        ],
-    ]);
     private readonly members = new Map<number, BehaviorSubject<Member[]>>([]);
+
+    private readonly resources = new Map<ResourceTypes, BehaviorSubject<any[]>>(
+        [
+            [
+                'CIRCLE',
+                new BehaviorSubject<Circle[]>([
+                    {
+                        id: 0,
+                        name: 'PLaTon',
+                        type: 'CIRCLE',
+                        tags: [],
+                        description: LOREM,
+                        date: 1599138760,
+                        directoryId: 0,
+                        forumId: 1,
+                    },
+                    {
+                        id: 1,
+                        name: 'Informatique',
+                        type: 'CIRCLE',
+                        tags: ['informatique'],
+                        description: LOREM,
+                        date: 1599138760,
+                        directoryId: 0,
+                        forumId: 2,
+                        parent: {
+                            id: 0,
+                            name: 'PLaTon',
+                        },
+                    },
+                    {
+                        id: 2,
+                        name: 'Python',
+                        type: 'CIRCLE',
+                        tags: ['informatique', 'python'],
+                        description: LOREM,
+                        date: 1599397960,
+                        directoryId: 2,
+                        forumId: 3,
+                        parent: {
+                            id: 1,
+                            name: 'Informatique',
+                        },
+                    },
+                    {
+                        id: 3,
+                        name: 'AP1',
+                        type: 'CIRCLE',
+                        tags: ['informatique', 'python', 'ap1'],
+                        description: LOREM,
+                        date: 1604469210,
+                        directoryId: 3,
+                        forumId: 4,
+                        parent: {
+                            id: 2,
+                            name: 'Python',
+                        },
+                    },
+                    {
+                        id: 4,
+                        name: 'C',
+                        type: 'CIRCLE',
+                        tags: ['informatique', 'c'],
+                        description: LOREM,
+                        date: 1599397960,
+                        directoryId: 4,
+                        forumId: 5,
+                        parent: {
+                            id: 1,
+                            name: 'Informatique',
+                        },
+                    },
+                ]),
+            ],
+            [
+                'EXERCISE',
+                new BehaviorSubject<Exercise[]>([
+                    {
+                        id: 0,
+                        circle: {
+                            id: 2,
+                            name: 'Python',
+                        },
+                        directoryId: 5,
+                        version: 1,
+                        forumId: 6,
+                        date: 1602469210,
+                        name: 'Boucle for',
+                        type: 'EXERCISE',
+                        status: 'READY',
+                        tags: ['informatique', 'python', 'boucles'],
+                        description: LOREM,
+                    },
+                    {
+                        id: 1,
+                        version: 1,
+                        circle: {
+                            id: 2,
+                            name: 'Python',
+                        },
+                        directoryId: 6,
+                        forumId: 7,
+                        date: 1605469210,
+                        name: 'Boucle while',
+                        type: 'EXERCISE',
+                        status: 'READY',
+                        tags: ['informatique', 'python', 'boucles'],
+                        description: LOREM,
+                    },
+                ]),
+            ],
+            [
+                'ACTIVITY',
+                new BehaviorSubject<Activity[]>([
+                    {
+                        id: 0,
+                        version: 1,
+                        circle: {
+                            id: 2,
+                            name: 'Python',
+                        },
+                        directoryId: 7,
+                        forumId: 8,
+                        name: 'Activité 1',
+                        type: 'ACTIVITY',
+                        status: 'READY',
+                        tags: ['informatique', 'python', 'boucles'],
+                        description: LOREM,
+                        date: 1605469210,
+                    },
+                ]),
+            ],
+        ]
+    );
 
     private loggedUser?: AuthUser;
 
     constructor(
         private readonly config: ConfigService,
-        private readonly inMemoryUserDb: InMemoryUserDb,
+        private readonly inMemoryUserDb: InMemoryUserDb
     ) {
         super();
     }
@@ -171,58 +203,66 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         this.loggedUser = undefined;
         if (change.type === 'connection') {
             this.loggedUser = change.user;
-            const teachers = await this.inMemoryUserDb.read().pipe(
-                map(arr => arr.filter(e => e.role === 'Teacher'))
-            ).toPromise();
-            return this.getResources().pipe(
-                map(resources => {
-                    const circles = resources.filter(e => e.type === 'CIRCLE');
-                    circles.forEach(circle => {
-                        const contributors: Member[] = [];
-                        array_sample(teachers, 3).forEach(teacher => {
-                            if (!teacher.isAdmin) {
-                                contributors.push({
-                                    id: teacher.id,
-                                    circleId: circle.id,
-                                    picture: teacher.picture,
-                                    userName: teacher.userName,
-                                    lastName: teacher.lastName,
-                                    firstName: teacher.firstName,
-                                    isAdmin: teacher.isAdmin,
-                                });
-                            }
+            const teachers = await this.inMemoryUserDb
+                .read()
+                .pipe(map((arr) => arr.filter((e) => e.role === 'Teacher')))
+                .toPromise();
+            return this.getResources()
+                .pipe(
+                    map((resources) => {
+                        const circles = resources.filter(
+                            (e) => e.type === 'CIRCLE'
+                        );
+                        circles.forEach((circle) => {
+                            const contributors: Member[] = [];
+                            array_sample(teachers, 3).forEach((teacher) => {
+                                if (!teacher.isAdmin) {
+                                    contributors.push({
+                                        id: teacher.id,
+                                        circleId: circle.id,
+                                        picture: teacher.picture,
+                                        userName: teacher.userName,
+                                        lastName: teacher.lastName,
+                                        firstName: teacher.firstName,
+                                        isAdmin: teacher.isAdmin,
+                                    });
+                                }
+                            });
+                            teachers.forEach((u) => {
+                                if (u.isAdmin) {
+                                    contributors.push({
+                                        id: u.id,
+                                        circleId: circle.id,
+                                        picture: u.picture,
+                                        userName: u.userName,
+                                        lastName: u.lastName,
+                                        firstName: u.firstName,
+                                        isAdmin: u.isAdmin,
+                                    });
+                                }
+                            });
+                            this.members.set(
+                                circle.id,
+                                new BehaviorSubject(contributors)
+                            );
                         });
-                        teachers.forEach(u => {
-                            if (u.isAdmin) {
-                                contributors.push({
-                                    id: u.id,
-                                    circleId: circle.id,
-                                    picture: u.picture,
-                                    userName: u.userName,
-                                    lastName: u.lastName,
-                                    firstName: u.firstName,
-                                    isAdmin: u.isAdmin,
-                                });
-                            }
-                        });
-                        this.members.set(circle.id, new BehaviorSubject(contributors));
-                    });
-                })
-            ).toPromise();
+                    })
+                )
+                .toPromise();
         }
     }
 
     suggestions(): Observable<Record<ResourceTypes, string[]>> {
         return this.getResources().pipe(
-            map(resources => {
+            map((resources) => {
                 const suggestions: Record<ResourceTypes, string[]> = {
                     CIRCLE: [],
                     EXERCISE: [],
-                    ACTIVITY: []
+                    ACTIVITY: [],
                 };
-                resources.forEach(resource => {
+                resources.forEach((resource) => {
                     const array = suggestions[resource.type];
-                    resource.tags.forEach(tag => {
+                    resource.tags.forEach((tag) => {
                         if (!array.includes(tag)) {
                             array.push(tag);
                         }
@@ -237,32 +277,72 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         args: ResourceFindByIdArgs
     ): Observable<T | undefined> {
         // tslint:disable-next-line: no-non-null-assertion
-        return this.resources
-            .get(args.type)!
-            .pipe(
-                map((arr) => arr.find((e) => e.id === args.id)),
-                take(1)
-            ) as Observable<T | undefined>;
+        return this.resources.get(args.type)!.pipe(
+            map((arr) => arr.find((e) => e.id === args.id)),
+            take(1)
+        ) as Observable<T | undefined>;
     }
 
     update(resource: Resource): Promise<void> {
-        const subject = this.resources.get(resource.type) as BehaviorSubject<Resource[]>;
-        subject.value.forEach((r, i) => {
-            if (r.id === resource.id) {
-                resource.date = new Date().getTime() / 1000;
-                subject.value[i] = resource;
-                subject.next(subject.value);
-                return true;
+        const subject = this.resources.get(resource.type) as BehaviorSubject<
+            Resource[]
+        >;
+
+        const index = subject.value.findIndex((e) => e.id === resource.id);
+        if (index !== -1) {
+            resource.date = new Date().getTime() / 1000;
+            switch (resource.type) {
+                case 'CIRCLE':
+                    this.onChangeCircle(resource);
+                    break;
+                default:
+                    const curr = subject.value[index] as PublishableResource;
+                    const next = resource as PublishableResource;
+                    if (curr.status !== next.status) {
+                        const status = RESOURCE_LABELS[next.status];
+                        this.addEvent({
+                            date: resource.date,
+                            id: resource.date,
+                            resourceId: resource.id,
+                            resourceType: resource.type,
+                            text: `${this.loggedUserProfileURL()} a changé le status de la ressource à “${status}”`,
+                        });
+                    }
+
+                    if (curr.name !== next.name) {
+                        this.addEvent({
+                            date: resource.date,
+                            id: resource.date,
+                            resourceId: resource.id,
+                            resourceType: resource.type,
+                            text: ` ${this.loggedUserProfileURL()} a changé le nom de la ressource à “${next.name}”`,
+                        });
+                    }
+
+                    if (curr.description !== next.description) {
+                        this.addEvent({
+                            date: resource.date,
+                            id: resource.date,
+                            resourceId: resource.id,
+                            resourceType: resource.type,
+                            text: ` ${this.loggedUserProfileURL()} a modifié la description de la ressource`,
+                        });
+                    }
+                    break;
             }
-        });
-        return Promise.resolve();
+
+            subject.value[index] = resource;
+            subject.next(subject.value);
+            return Promise.resolve();
+        }
+        throw new Error(`Resource not found: ${resource.type} ${resource.id}`);
     }
 
     paginate(
         args: Required<ResourcePaginateArgs>
     ): Observable<ResourcePaginateResult> {
         return this.getResources().pipe(
-            map(resources => {
+            map((resources) => {
                 resources = this.filter(resources, args.filters);
                 const size = resources.length;
                 const start = (args.page - 0) * args.pageSize;
@@ -273,25 +353,27 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                 } as ResourcePaginateResult;
             }),
             delay(500) // simulate latency
-        )
+        );
     }
 
     addEvent(event: ResourceEvent): Promise<void> {
-        const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
+        const events = this.events.get(event.resourceType) as BehaviorSubject<
+            ResourceEvent[]
+        >;
         events.value.push(event);
         events.next(events.value);
         return Promise.resolve();
     }
 
     removeEvent(event: ResourceEvent): Promise<void> {
-        const events = this.events.get(event.resourceType) as BehaviorSubject<ResourceEvent[]>;
-        events.next(events.value.filter(e => e.id !== event.id));
+        const events = this.events.get(event.resourceType) as BehaviorSubject<
+            ResourceEvent[]
+        >;
+        events.next(events.value.filter((e) => e.id !== event.id));
         return Promise.resolve();
     }
 
-    listEvents(
-        args: ResourceListEventsArgs
-    ): Observable<ResourceEvent[]> {
+    listEvents(args: ResourceListEventsArgs): Observable<ResourceEvent[]> {
         return this.getEvents().pipe(
             map((events) =>
                 events.filter(
@@ -312,7 +394,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             id: Date.now(),
             resourceId: member.circleId,
             resourceType: 'CIRCLE',
-            text: `<a href="profile/${member.id}">${member.userName}</a> vient de rejoindre le cercle`
+            text: `<a href="profile/${member.id}">${member.userName}</a> vient de rejoindre le cercle`,
         });
         return Promise.resolve();
     }
@@ -331,7 +413,7 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
 
     removeMember(member: Member): Promise<void> {
         const contributors = this.getMembers(member.circleId);
-        contributors.next(contributors.value.filter(e => e.id !== member.id));
+        contributors.next(contributors.value.filter((e) => e.id !== member.id));
         this.addEvent({
             date: new Date().getTime() / 1000,
             id: Date.now(),
@@ -339,40 +421,43 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             resourceType: 'CIRCLE',
             text: `
             <a href="profile/${member.id}">${member.userName}</a>
-            a été retirer du cercle par
+            a été retiré du cercle par
             <a href="profile/${this.loggedUser?.id}">${this.loggedUser?.userName}</a>
-            `
+            `,
         });
         return Promise.resolve();
     }
 
-    listMembers(
-        circleId: number
-    ): Observable<Member[]> {
+    listMembers(circleId: number): Observable<Member[]> {
         return this.getMembers(circleId).pipe(take(1));
     }
-
 
     private days(a: Date, b: Date) {
         // To calculate the time difference of two dates
         const diffInTime = b.getTime() - a.getTime();
         // To calculate the no. of days between two dates
-        return  diffInTime / (1000 * 3600 * 24);
+        return diffInTime / (1000 * 3600 * 24);
     }
 
     private filter(items: Resource[], filters: ResourceFilters) {
         const now = new Date();
-        items = items.filter(item => {
+        items = items.filter((item) => {
             const past = new Date(item.date * 1000);
             const matches: boolean[] = [];
             matches.push(filters.types.includes(item.type));
             if (item.type !== 'CIRCLE') {
-                const { status, circleId } = (item as PublishableResource);
-                matches.push(filters.status === 'ALL' || filters.status === status);
-                matches.push(!filters.circleId || filters.circleId === circleId);
+                const { status, circle } = item as PublishableResource;
+                matches.push(
+                    filters.status === 'ALL' || filters.status === status
+                );
+                matches.push(
+                    !filters.circleId || filters.circleId === circle.id
+                );
             }
-            matches.push(filters.date === 0 || this.days(past, now) < filters.date);
-            return matches.every(match => !!match);
+            matches.push(
+                filters.date === 0 || this.days(past, now) < filters.date
+            );
+            return matches.every((match) => !!match);
         });
 
         if (filters.query) {
@@ -380,10 +465,10 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
                 includeMatches: true,
                 findAllMatches: false,
                 threshold: 0.2,
-                keys: [...ResourceSearchIndexes]
+                keys: [...RESOURCE_SEARCH_INDEXES],
             });
             items = [];
-            fuse.search(filters.query).forEach(match => {
+            fuse.search(filters.query).forEach((match) => {
                 items.push(match.item);
             });
         }
@@ -402,9 +487,9 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             queries.push(subject.asObservable());
         });
         return combineLatest(queries).pipe(
-            map(events => {
+            map((events) => {
                 let response: ResourceEvent[] = [];
-                events.forEach(array => {
+                events.forEach((array) => {
                     response = response.concat(array);
                 });
                 return response;
@@ -427,9 +512,9 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
             queries.push(subject.asObservable());
         });
         return combineLatest(queries).pipe(
-            map(resources => {
+            map((resources) => {
                 let response: Resource[] = [];
-                resources.forEach(array => {
+                resources.forEach((array) => {
                     response = response.concat(array);
                 });
                 return response;
@@ -437,4 +522,42 @@ export class InMemoryResourceProvider extends ResourceProvider implements AuthOb
         );
     }
 
+    private onChangeCircle(circle: Circle) {
+        const circles = this.resources.get('CIRCLE') as BehaviorSubject<
+            Circle[]
+        >;
+        const exercices = this.resources.get('EXERCISE') as BehaviorSubject<
+            Exercise[]
+        >;
+        const activities = this.resources.get('ACTIVITY') as BehaviorSubject<
+            Activity[]
+        >;
+
+        circles.value.forEach((v) => {
+            const parent = (v as Circle).parent;
+            if (parent?.id === circle.id) {
+                parent.name = circle.name;
+            }
+        });
+
+        exercices.value.forEach((v) => {
+            if (v.circle.id === circle.id) {
+                v.circle.name = circle.name;
+            }
+        });
+
+        activities.value.forEach((v) => {
+            if (v.circle.id === circle.id) {
+                v.circle.name = circle.name;
+            }
+        });
+
+        circles.next(circles.value);
+        exercices.next(exercices.value);
+        activities.next(activities.value);
+    }
+
+    private loggedUserProfileURL() {
+        return `<a href="profile/${this.loggedUser?.id}">${this.loggedUser?.userName}</a>`;
+    }
 }
