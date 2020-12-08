@@ -1,7 +1,7 @@
 // tslint:disable: no-non-null-assertion
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Resource } from '@platon/feature/workspace';
+import { Resource, TagsService } from '@platon/feature/workspace';
 import { deepCopy } from '@platon/shared/utils';
 import { Subscription } from 'rxjs';
 import { DetailContext, DetailService } from '../../detail.service';
@@ -23,10 +23,14 @@ export class GeneralComponent implements OnInit, OnDestroy {
 
     form = new FormGroup({
         name: new FormControl('', [Validators.required]),
+        tags: new FormControl('', Validators.required),
         description: new FormControl('', [Validators.required]),
     });
 
+    tags: any[] = [];
+
     constructor(
+        private readonly tagsService: TagsService,
         private readonly detailService: DetailService,
         private readonly changeDetector: ChangeDetectorRef,
     ) {}
@@ -38,12 +42,20 @@ export class GeneralComponent implements OnInit, OnDestroy {
                 if (context.state === 'READY') {
                     this.form.setValue({
                         name: context.resource!.name,
+                        tags: context.resource!.tags.slice(),
                         description: context.resource!.description,
                     });
                     setTimeout(() => {
                         this.changeDetector.markForCheck();
                     });
                 }
+            })
+        );
+
+        this.subscription.push(
+            this.tagsService.cascader().subscribe(data => {
+                this.tags = data;
+                this.changeDetector.markForCheck();
             })
         );
     }
@@ -54,10 +66,10 @@ export class GeneralComponent implements OnInit, OnDestroy {
 
     saveChanges() {
         const copy = deepCopy(this.context.resource) as Resource;
-        const { name, description } = this.form.value;
+        const { name, description, tags } = this.form.value;
         copy.name = name;
         copy.description = description;
-
+        copy.tags = tags;
         this.detailService.update(copy);
     }
 

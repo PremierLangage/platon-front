@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzCascaderModule } from 'ng-zorro-antd/cascader';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
@@ -48,6 +49,7 @@ import { MembersComponent} from './members/members.component';
 
         NzIconModule,
         NzTabsModule,
+        NzCascaderModule,
         NzSkeletonModule,
         NzPopconfirmModule,
 
