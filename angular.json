@@ -434,6 +434,37 @@
           "style": "scss"
         }
       }
+    },
+    "feature-ide": {
+      "projectType": "library",
+      "root": "libs/feature/ide",
+      "sourceRoot": "libs/feature/ide/src",
+      "prefix": "ide",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/feature/ide/tsconfig.lib.json",
+              "libs/feature/ide/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/feature/ide/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/feature/ide/src/test.ts",
+            "tsConfig": "libs/feature/ide/tsconfig.spec.json",
+            "karmaConfig": "libs/feature/ide/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      }
     }
   },
   "cli": {

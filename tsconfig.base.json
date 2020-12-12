@@ -29,7 +29,8 @@
       "@platon/feature/web-component": [
         "libs/feature/web-component/src/index.ts"
       ],
-      "@platon/feature/workspace": ["libs/feature/workspace/src/index.ts"]
+      "@platon/feature/workspace": ["libs/feature/workspace/src/index.ts"],
+      "@platon/feature/ide": ["libs/feature/ide/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

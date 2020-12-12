@@ -46,6 +46,9 @@
     },
     "feature-workspace": {
       "tags": ["scope:feature", "type:workspace"]
+    },
+    "feature-ide": {
+      "tags": ["scope:feature", "type:ide"]
     }
   },
   "affected": {
