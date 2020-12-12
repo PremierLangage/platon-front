@@ -49,6 +49,7 @@
     "@webcomponents/webcomponentsjs": "^2.4.3",
     "ang-jsoneditor": "^1.10.2",
     "angular-animations": "^0.11.0",
+    "angular-split": "^4.0.0",
     "animate.css": "^4.1.1",
     "common-tags": "^1.8.0",
     "d3-graphviz": "^2.6.1",
