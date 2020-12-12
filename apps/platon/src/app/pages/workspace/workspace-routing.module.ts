@@ -13,6 +13,13 @@ const routes: Routes = [
         ).then(m => m.CreateCircleModule)
     },
     {
+        path: 'editor',
+        loadChildren: () => import(
+            /* webpackChunkName: "workspace-editor" */
+            './pages/editor/editor.module'
+        ).then(m => m.EditorModule)
+    },
+    {
         path: '',
         component: WorkspaceComponent,
         children: [
@@ -56,7 +63,6 @@ const routes: Routes = [
             { path: '**', redirectTo: 'search', pathMatch: 'full' }
         ]
     },
-
     { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
 

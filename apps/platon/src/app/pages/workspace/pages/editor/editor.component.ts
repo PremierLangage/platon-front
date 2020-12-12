@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-editor',
+  selector: 'ws-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
 })
