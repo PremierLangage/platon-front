@@ -7,5 +7,5 @@ import { Icon } from './icons';
     styleUrls: ['./icon.component.scss'],
 })
 export class IconComponent {
-    @Input() icon!: Icon;
+    @Input() icon?: Icon;
 }

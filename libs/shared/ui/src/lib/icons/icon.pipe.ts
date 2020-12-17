@@ -11,8 +11,8 @@ import { ImgIconComponent } from './img-icon/img-icon.component';
 })
 export class IconPipe implements PipeTransform {
     constructor(private readonly injector: Injector) {}
-    transform(icon: Icon): ComponentPortal<any> {
-        switch (icon.type) {
+    transform(icon?: Icon): ComponentPortal<any> {
+        switch (icon?.type) {
             case 'codicon':
                 return new ComponentPortal(CodIconComponent, null, this.createInjector(icon));
             case 'fa':
@@ -22,7 +22,7 @@ export class IconPipe implements PipeTransform {
             case 'img':
                 return new ComponentPortal(ImgIconComponent, null, this.createInjector(icon));
             default:
-                throw new TypeError('unknown icon type "' + icon.type + '"');
+                throw new TypeError('unknown icon type "' + icon?.type + '"');
         }
     }
 

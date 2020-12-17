@@ -15,7 +15,7 @@ export function requireNonNull<T>(obj: T, message?: string): T {
 
 export function requireNonNullArray<T>(array: T[], message?: string): T[] {
     requireNonNull(array, message);
-    array.forEach(item => requireNonNull(item), message);
+    array.forEach((item) => requireNonNull(item), message);
     return array;
 }
 
@@ -25,4 +25,16 @@ export function requireNonNullString(input: string, message?: string): string {
         throw new ReferenceError(message);
     }
     return input;
+}
+
+/**
+ * Throws an exception if condition if false.
+ * @param condition - the condition
+ * @param message - an optional error message
+ * @throws {Error} if condition is false
+ */
+export function requireTrue(condition: boolean, message?: string) {
+    if (!condition) {
+        throw new Error(message);
+    }
 }
