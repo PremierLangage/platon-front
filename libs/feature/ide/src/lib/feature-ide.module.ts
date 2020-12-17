@@ -2,38 +2,40 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { AngularSplitModule } from 'angular-split';
+import { NgeMonacoModule } from 'nge-monaco';
 
+import { SharedUiDialogModule } from '@platon/shared/ui';
+
+import { EditorCoreModule } from './core/core.module';
 import { IdeComponent } from './ide.component';
-import { InfobarComponent } from './components/infobar/infobar.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { StatusbarComponent } from './components/statusbar/statusbar.component';
-import { ToolbarComponent } from './components/toolbar/toolbar.component';
-import { WorkbenchComponent } from './components/workbench/workbench.component';
-import { CodeEditorComponent } from './components/workbench/code-editor/code-editor.component';
-import { MediaEditorComponent } from './components/workbench/media-editor/media-editor.component';
-import { PreviewEditorComponent } from './components/workbench/preview-editor/preview-editor.component';
-
+import { InfobarModule } from './widgets/infobar/infobar.module';
+import { SidebarModule } from './widgets/sidebar/sidebar.module';
+import { StatusbarModule } from './widgets/statusbar/statusbar.module';
+import { ToolbarModule } from './widgets/toolbar/toolbar.module';
+import { WorkbenchModule } from './widgets/workbench/workbench.module';
 @NgModule({
     imports: [
         CommonModule,
         RouterModule,
 
-        MatToolbarModule,
+        AngularSplitModule,
+        NgeMonacoModule,
+
+        SharedUiDialogModule,
+
+        EditorCoreModule,
+        InfobarModule,
+        SidebarModule,
+        ToolbarModule,
+        StatusbarModule,
+        WorkbenchModule,
     ],
     exports: [
         IdeComponent,
     ],
     declarations: [
         IdeComponent,
-        InfobarComponent,
-        SidebarComponent,
-        StatusbarComponent,
-        ToolbarComponent,
-        WorkbenchComponent,
-        CodeEditorComponent,
-        MediaEditorComponent,
-        PreviewEditorComponent
     ]
 })
 export class FeatureIdeModule {}

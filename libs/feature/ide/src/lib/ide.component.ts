@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { CodIcon, FileIcon } from '@platon/shared/ui';
 
 @Component({
     selector: 'ide-root',
@@ -7,6 +8,11 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IdeComponent implements OnInit {
+    sideBarVisible = true;
+    sideLeftVisible = true;
+    sideRightVisible = true;
+
+    statusBarVisible = true;
 
     constructor() { }
 
