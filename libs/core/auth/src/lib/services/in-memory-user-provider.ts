@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/shared/utils';
+import { ConfigService } from '@platon/core/config';
 import Fuse from 'fuse.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

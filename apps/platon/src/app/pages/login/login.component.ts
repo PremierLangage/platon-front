@@ -1,11 +1,11 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser, InMemoryUserDb } from '@platon/core/auth';
+import { ConfigService } from '@platon/core/config';
 import { DialogService } from '@platon/shared/ui';
-import { ConfigService, IntroService } from '@platon/shared/utils';
+import { IntroService } from '@platon/shared/utils';
 import { map } from 'rxjs/operators';
 import { FormDemo, FormDemoComponent } from './form-demo/form-demo.component';
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',

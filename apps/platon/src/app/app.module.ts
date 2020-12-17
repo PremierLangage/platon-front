@@ -7,19 +7,19 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AUTH_PROVIDERS } from '@platon/core/auth';
 import { WORKSPACE_PROVIDERS } from '@platon/feature/workspace';
 
+import { CoreConfigModule } from '@platon/core/config';
 import { SharedVendorsModule } from '@platon/shared/vendors';
 import { FeatureWebComponentModule } from '@platon/feature/web-component';
 
 // MODULE
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     declarations: [AppComponent],
     imports: [
         BrowserModule,
-        HttpClientModule,
+        CoreConfigModule,
         BrowserAnimationsModule,
         AppRoutingModule,
         SharedVendorsModule,

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/shared/utils';
+import { ConfigService } from '@platon/core/config';
 import { map } from 'rxjs/operators';
 import { AuthProvider } from '../models/auth-provider';
 import { InMemoryUserDb } from './in-memory-user-db';

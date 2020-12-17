@@ -1,4 +1,3 @@
-export * from './lib/pipes/index';
-export * from './lib/services/index';
-export * from './lib/utils/arrays';
-export * from './lib/utils/objects';
+export * from './lib/pipes/_';
+export * from './lib/services/_';
+export * from './lib/utils/_';

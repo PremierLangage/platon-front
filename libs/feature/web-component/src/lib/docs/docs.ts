@@ -9,7 +9,7 @@ export const WebComponentDocumentationRoute =  {
         meta: {
             name: 'Composants PLaTon',
             root: '/doc/components/',
-            logo: 'assets/logo/platon.svg',
+            logo: 'assets/images/logo/platon.svg',
             url: 'https://premierlangage.github.io/platon-front/',
             backUrl: '/doc',
             repo: {

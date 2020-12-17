@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/shared/utils';
+import { ConfigService } from '@platon/core/config';
 import { Observable, of } from 'rxjs';
 import { AuthUser } from '../models/auth-user';
 import { AuthUserProvider, AuthUserFilters } from '../models/auth-user-provider';

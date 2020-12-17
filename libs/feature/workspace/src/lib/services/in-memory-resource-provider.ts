@@ -3,9 +3,10 @@ import {
     AuthChange,
     AuthObserver,
     AuthUser,
-    InMemoryUserDb,
+    InMemoryUserDb
 } from '@platon/core/auth';
-import { array_sample, ConfigService } from '@platon/shared/utils';
+import { ConfigService } from '@platon/core/config';
+import { array_sample } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { delay, map, take } from 'rxjs/operators';
@@ -17,9 +18,9 @@ import {
     PublishableResource,
     Resource,
     ResourceEvent,
-    RESOURCE_SEARCH_INDEXES,
+
     ResourceTypes,
-    RESOURCE_LABELS,
+    RESOURCE_LABELS, RESOURCE_SEARCH_INDEXES
 } from '../models/resource';
 import {
     ResourceFilters,
@@ -28,7 +29,7 @@ import {
     ResourceListEventsArgs,
     ResourcePaginateArgs,
     ResourcePaginateResult,
-    ResourceProvider,
+    ResourceProvider
 } from '../models/resource-provider';
 
 const LOREM = `

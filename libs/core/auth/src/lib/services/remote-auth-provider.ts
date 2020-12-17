@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthProvider } from '../models/auth-provider';
-import { ConfigService } from '@platon/shared/utils';
+import { ConfigService } from '@platon/core/config';
 
 @Injectable()
 export class RemoteAuthProvider extends AuthProvider {
