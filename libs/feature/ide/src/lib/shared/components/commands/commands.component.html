@@ -1,0 +1,9 @@
+<ng-container *ngFor="let command of commands; trackBy: _trackCommand">
+    <div
+        class="command{{ className ? ' ' + className : '' }}"
+        [attr.command-id]="command.id + (idSuffix ? '#' + idSuffix : '')"
+        [matTooltip]="command.label"
+        (click)="_run(command, $event)">
+        <ui-icon [icon]="command.icon"></ui-icon>
+    </div>
+</ng-container>
