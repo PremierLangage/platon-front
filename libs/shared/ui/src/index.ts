@@ -1,3 +1,5 @@
-export * from './lib/dialog/index';
-export * from './lib/list/index';
-export * from './lib/search-bar/index';
+export * from './lib/dialog/_';
+export * from './lib/icons/_';
+export * from './lib/list/_';
+export * from './lib/search-bar/_';
+

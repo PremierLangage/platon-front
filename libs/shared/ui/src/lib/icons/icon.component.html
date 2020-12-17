@@ -1,0 +1,7 @@
+<ng-container [ngSwitch]="icon.type">
+  <ng-template [cdkPortalOutlet]="icon|icon"></ng-template>
+  <!-- <ui-fa-icon *ngSwitchCase="'fa'" [icon]="icon"></ui-fa-icon>
+  <ui-img-icon  *ngSwitchCase="'img'" [icon]="icon"></ui-img-icon>
+  <ui-file-icon  *ngSwitchCase="'file'" [icon]="icon"></ui-file-icon>
+  <ui-codicon  *ngSwitchCase="'codicon'" [icon]="icon"></ui-codicon> -->
+</ng-container>

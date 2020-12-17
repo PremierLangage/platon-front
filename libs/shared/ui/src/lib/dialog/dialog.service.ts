@@ -35,7 +35,7 @@ export class DialogService {
                 let subscription: Subscription;
                 subscription = ref.afterClosed().subscribe(value => {
                     subscription.unsubscribe();
-                    resolve(value);
+                    resolve(value as PrompOptions);
                 });
             });
         });

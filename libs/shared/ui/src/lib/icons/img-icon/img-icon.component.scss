@@ -1,0 +1,10 @@
+.img-icon {
+    position: relative;
+    width: var(--icon-size, 16px);
+    height: var(--icon-size, 16px);
+
+    img {
+        width: var(--icon-size, 16px);
+        height: var(--icon-size, 16px);
+    }
+}
