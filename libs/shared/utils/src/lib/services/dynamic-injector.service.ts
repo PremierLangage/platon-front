@@ -9,10 +9,8 @@ import {
 export interface IDynamicService {
     injectable(): boolean;
 }
-
 @Injectable({ providedIn: 'root' })
 export class DynamicInjectorService {
-
     constructor(private readonly injector: Injector) {}
 
     get<T extends IDynamicService>(

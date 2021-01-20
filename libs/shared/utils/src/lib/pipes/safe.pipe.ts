@@ -8,7 +8,9 @@ export class SafePipe implements PipeTransform {
         private readonly sanitiner: DomSanitizer,
     ) {}
 
-    transform(input: string, type: 'url' | 'html' | 'style' | 'script' | 'resource'): any {
+    transform(input: string | null, type: 'url' | 'html' | 'style' | 'script' | 'resource'): any {
+        if (!input)
+            return input;
         switch (type) {
             case 'url':
                 return this.sanitiner.bypassSecurityTrustUrl(input);

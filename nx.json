@@ -32,9 +32,6 @@
     "core-config": {
       "tags": ["scope:core", "type:config"]
     },
-    "shared-ui": {
-      "tags": ["scope:shared", "type:ui"]
-    },
     "shared-utils": {
       "tags": ["scope:shared", "type:utils"]
     },
@@ -49,6 +46,24 @@
     },
     "feature-ide": {
       "tags": ["scope:feature", "type:ide"]
+    },
+    "feature-ide-core": {
+      "tags": ["scope:feature", "type:ide"]
+    },
+    "shared-ui-tree": {
+      "tags": ["scope:shared", "type:ui"]
+    },
+    "shared-ui-icon": {
+      "tags": ["scope:shared", "type:ui"]
+    },
+    "shared-ui-list": {
+      "tags": ["scope:shared", "type:ui"]
+    },
+    "shared-ui-dialog": {
+      "tags": ["scope:shared", "type:ui"]
+    },
+    "shared-ui-search": {
+      "tags": ["scope:shared", "type:ui"]
     }
   },
   "affected": {
