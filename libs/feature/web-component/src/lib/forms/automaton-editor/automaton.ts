@@ -163,7 +163,7 @@ export function automatonToDotFormat(automaton: Automaton) {
 
     automaton.transitions.forEach(transition => {
         let initTransition = false;
-        automaton.initialStates.forEach(init => {
+        for (const init of automaton.initialStates) {
             if (init === transition.toState) {
                 trans = [' '];
                 trans.push(transition.toState);
@@ -174,10 +174,9 @@ export function automatonToDotFormat(automaton: Automaton) {
                 trans.push('"' + transition.symbols.join(',') + '"');
                 trans.push(' dir = back];');
                 result.push(trans.join(' '));
-                initTransition = true;
-                return true;
+                break;
             }
-        });
+        }
 
         if (!initTransition) {
             trans = [' '];

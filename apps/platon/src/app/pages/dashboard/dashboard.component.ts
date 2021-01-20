@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { SearchBar } from '@platon/shared/ui';
+import { SearchBar } from '@platon/shared/ui/search';
 import { IntroService } from '@platon/shared/utils';
 import { of } from 'rxjs';
 

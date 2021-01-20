@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DialogService } from '@platon/shared/ui';
+import { DialogService } from '@platon/shared/ui/dialog';
 import { ClipboardService } from '@platon/shared/utils';
 
 @Component({

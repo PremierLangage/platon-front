@@ -15,7 +15,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 import { SharedModule } from '../../../../shared/shared.module';
-import { SharedUiListModule } from '@platon/shared/ui';
+import { SharedUiListModule } from '@platon/shared/ui/list';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 import { SearchComponent } from './search.component';

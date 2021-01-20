@@ -1,6 +1,7 @@
 import { Directive, ElementRef, Input, NgModule, OnChanges, OnInit } from '@angular/core';
 import { AssetLoaderService } from '@platon/shared/utils';
 import { graphviz } from 'd3-graphviz';
+import { take } from 'rxjs/operators';
 
 // https://github.com/magjac/d3-graphviz/tree/v2.6.1
 
@@ -23,7 +24,7 @@ export class RenderDotDirective implements OnInit, OnChanges {
         this.assets.loadAllSync([
             // http://www.xavierdupre.fr/js/vizjs/viz-lite.js
             ['script', 'assets/vendors/viz/viz.js']
-        ]).toPromise().then(() => {
+        ]).pipe(take(1)).subscribe(() => {
             this.ready = true;
             this.render();
         });

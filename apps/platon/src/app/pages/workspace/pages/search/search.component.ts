@@ -7,7 +7,7 @@ import {
     ResourceService,
     ResourceTypes,
 } from '@platon/feature/workspace';
-import { SearchBar } from '@platon/shared/ui';
+import { SearchBar } from '@platon/shared/ui/search';
 import {
     lightSpeedInOnEnterAnimation,
     lightSpeedOutOnLeaveAnimation,

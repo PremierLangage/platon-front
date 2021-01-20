@@ -18,7 +18,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 
 import { CoreAuthModule } from '@platon/core/auth';
-import { SharedUiListModule } from '@platon/shared/ui';
+import { SharedUiListModule } from '@platon/shared/ui/list';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 

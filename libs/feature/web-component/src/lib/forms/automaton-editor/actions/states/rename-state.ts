@@ -1,5 +1,5 @@
 import { Injectable, Provider } from '@angular/core';
-import { DialogService } from '@platon/shared/ui';
+import { DialogService } from '@platon/shared/ui/dialog';
 import { AutomatonEditorService } from '../../automaton-editor.service';
 import { AutomatonEditorAction, AutomatonEditorActionContext, AUTOMATON_EDITOR_ACTIONS } from '../action';
 

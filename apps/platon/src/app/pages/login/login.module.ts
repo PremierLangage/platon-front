@@ -15,7 +15,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 // LIBS
 import { NgeMarkdownModule } from 'nge-markdown';
-import { SharedUiDialogModule } from '@platon/shared/ui';
+import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
 
 // MODULE
 import { LoginComponent } from './login.component';

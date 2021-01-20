@@ -1,6 +1,5 @@
 import { Component, Input, TemplateRef } from '@angular/core';
-import { SearchBar } from '@platon/shared/ui';
-
+import { SearchBar } from '@platon/shared/ui/search';
 @Component({
   selector: 'app-banner',
   templateUrl: './banner.component.html',

@@ -16,7 +16,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
 import { CoreAuthModule } from '@platon/core/auth';
-import { SharedUiListModule } from '@platon/shared/ui';
+import { SharedUiListModule } from '@platon/shared/ui/list';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 import { GeneralComponent } from './general/general.component';

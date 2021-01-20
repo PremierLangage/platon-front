@@ -41,7 +41,8 @@ export class InputBoxComponent implements OnInit, OnDestroy, WebComponentHooks<I
                 .subscribe(value => {
                     value = value || '';
                     if (this.state.type === 'number') {
-                        value = Number.parseFloat(('' + value).replace(',', '.')) || 0;
+                        value = ('' + value).replace(/,/g, '.');
+                        value = Number.parseFloat(value) || 0;
                     }
 
                     if (this.state.value !== value) {

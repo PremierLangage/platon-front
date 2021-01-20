@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser, InMemoryUserDb } from '@platon/core/auth';
 import { ConfigService } from '@platon/core/config';
-import { DialogService } from '@platon/shared/ui';
+import { DialogService } from '@platon/shared/ui/dialog';
 import { IntroService } from '@platon/shared/utils';
 import { map } from 'rxjs/operators';
 import { FormDemo, FormDemoComponent } from './form-demo/form-demo.component';
@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.authService.ready().then(user => {
             this.setUser(user);
-        });
+        }).catch(console.error);
     }
 
     async ngAfterViewInit() {

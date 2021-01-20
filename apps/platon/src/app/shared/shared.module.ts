@@ -12,7 +12,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 import { CoreAuthModule } from '@platon/core/auth';
-import { SharedUiSearchBarModule } from '@platon/shared/ui';
+import { SharedUiSearchModule } from '@platon/shared/ui/search';
 
 import { NavComponent } from './widgets/nav/nav.component';
 import { LogoComponent } from './widgets/logo/logo.component';
@@ -49,7 +49,7 @@ const DECLARATIONS = [
         NzEmptyModule,
 
         CoreAuthModule,
-        SharedUiSearchBarModule,
+        SharedUiSearchModule,
     ],
     exports: [
         ...DECLARATIONS,
