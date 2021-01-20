@@ -11,7 +11,8 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 
-import { SharedUiListModule, SharedUiSearchBarModule } from '@platon/shared/ui';
+import { SharedUiListModule } from '@platon/shared/ui/list';
+import { SharedUiSearchModule } from '@platon/shared/ui/search';
 
 import { AvatarComponent } from './components/avatar/avatar.component';
 import { SearchModalComponent } from './components/search-modal/search-modal.component';
@@ -31,7 +32,7 @@ import { SearchModalComponent } from './components/search-modal/search-modal.com
         NzButtonModule,
 
         SharedUiListModule,
-        SharedUiSearchBarModule,
+        SharedUiSearchModule,
     ],
     exports: [AvatarComponent, SearchModalComponent],
     declarations: [AvatarComponent, SearchModalComponent],

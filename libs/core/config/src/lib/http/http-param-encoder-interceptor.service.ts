@@ -33,6 +33,7 @@ export class HttpParamEncoderInterceptor implements HttpInterceptor {
     ): Observable<HttpEvent<any>> {
         const params = new HttpParams({
             encoder: new HttpParamEncoder(),
+            // deepcode ignore HTTPSourceWithUncheckedType: <please specify a reason of ignoring this>
             fromString: req.params.toString(),
         });
         const httpUrlEncoding = new HttpUrlEncodingCodec();

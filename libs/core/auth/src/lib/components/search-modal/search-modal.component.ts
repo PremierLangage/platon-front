@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { SearchBar } from '@platon/shared/ui';
+import { SearchBar } from '@platon/shared/ui/search';
 import Fuse from 'fuse.js';
 import { map } from 'rxjs/operators';
 import { AuthUserService } from '../../api/auth-user.service';
