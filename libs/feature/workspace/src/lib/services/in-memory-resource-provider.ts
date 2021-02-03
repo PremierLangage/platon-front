@@ -452,7 +452,6 @@ export class InMemoryResourceProvider extends ResourceProvider
         contributors.value.forEach((e, i) => {
             if (e.id === member.id) {
                 contributors.value[i] = member;
-                return true;
             }
         });
         contributors.next(contributors.value);
