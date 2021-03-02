@@ -44,12 +44,6 @@
     "feature-workspace": {
       "tags": ["scope:feature", "type:workspace"]
     },
-    "feature-ide": {
-      "tags": ["scope:feature", "type:ide"]
-    },
-    "feature-ide-core": {
-      "tags": ["scope:feature", "type:ide"]
-    },
     "shared-ui-tree": {
       "tags": ["scope:shared", "type:ui"]
     },

@@ -36,7 +36,7 @@ const angularCLIInitPath = "node_modules/@angular/cli/lib/cli/index.js";
  * Patch index.js to warn you if you invoke the undecorated Angular CLI.
  */
 function patchAngularCLI(initPath) {
-  const angularCLIInit = fs.readFileSync(initPath, "utf-8").toString();
+  const angularCLIInit = fs.readFileSync(initPath, "utf8").toString();
 
   if (!angularCLIInit.includes("NX_CLI_SET")) {
     fs.writeFileSync(
