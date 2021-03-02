@@ -2,19 +2,22 @@
   text-align: left; }
 
 .introjs-skipbutton {
-  margin-left: 5px; }
+  margin-left: 5px;
+  float: left; }
+
+.introjs-tooltip-title {
+  float: right; }
 
 .introjs-tooltip {
   direction: rtl; }
 
 .introjs-prevbutton {
   border: 1px solid #d4d4d4;
-  border-left: none;
-  border-radius: 0 0.2em 0.2em 0; }
+  float: right; }
 
 .introjs-nextbutton {
   border: 1px solid #d4d4d4;
-  border-radius: 0.2em 0 0 0.2em; }
+  float: left; }
 
 .introjs-bullets ul li {
   float: right; }

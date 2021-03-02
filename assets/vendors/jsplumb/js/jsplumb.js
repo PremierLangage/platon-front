@@ -4395,7 +4395,7 @@
 
     var jsPlumbInstance = root.jsPlumbInstance = function (_defaults) {
 
-        this.version = "2.15.0";
+        this.version = "2.15.5";
 
         this.Defaults = {
             Anchor: "Bottom",
@@ -14718,6 +14718,7 @@
                 this.canvas = null;
                 this.path = null;
                 this.group = null;
+                this._jsPlumb = null;
             }
             else {
                 // if not a forced cleanup, just detach from DOM for now.
@@ -15840,7 +15841,8 @@
         },
         destroyDraggable: function (el, category) {
             _getDragManager(this, category).destroyDraggable(el);
-            delete el._jsPlumbDragOptions;
+            el._jsPlumbDragOptions = null;
+            el._jsPlumbRelatedElement = null;
         },
         unbindDraggable: function (el, evt, fn, category) {
             _getDragManager(this, category).destroyDraggable(el, evt, fn);
@@ -15915,6 +15917,7 @@
         },
         animationSupported:true,
         getElement: function (el) {
+
             if (el == null) {
                 return null;
             }
@@ -15922,7 +15925,7 @@
             // this is not my favourite thing to do, but previous versions of
             // jsplumb supported jquery selectors, and it is possible a selector
             // will be passed in here.
-            el = typeof el === "string" ? el : el.length != null && el.enctype == null ? el[0] : el;
+            el = typeof el === "string" ? el : (el.tagName == null && el.length != null && el.enctype == null) ? el[0] : el;
             return typeof el === "string" ? document.getElementById(el) : el;
         },
         removeElement: function (element) {

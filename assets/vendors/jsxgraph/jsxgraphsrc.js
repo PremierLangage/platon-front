@@ -445,12 +445,13 @@ var requirejs, require, define;
 define("../node_modules/almond/almond", function(){});
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph and JSXCompressor.
@@ -480,7 +481,6 @@ define("../node_modules/almond/almond", function(){});
 
  */
 
-
 /*global JXG: true, define: true, jQuery: true, window: true, document: true, navigator: true, require: true, module: true, console: true */
 /*jslint nomen:true, plusplus:true, forin:true*/
 
@@ -495,7 +495,7 @@ define("../node_modules/almond/almond", function(){});
 
 define('jxg',[], function () {
 
-    "use strict";
+    'use strict';
 
     /**
      * JXG is the top object of JSXGraph and defines the namespace
@@ -537,6 +537,48 @@ define('jxg',[], function () {
                 }
 
                 object[e2] = extension[e];
+            }
+        }
+    };
+
+    /**
+     * Set a constant <tt>name</tt> in <tt>object</tt> to <tt>value</tt>. The value can't be changed after declaration.
+     * @param {Object} object
+     * @param {String} name
+     * @param value
+     */
+    jxg.defineConstant = function (object, name, value) {
+        Object.defineProperty(object, name, {
+            value: value,
+            writable: false,
+            enumerable: true,
+            configurable: false,
+        });
+    };
+
+    /**
+     * Copy all properties of the <tt>constants</tt> object in <tt>object</tt> as a constant.
+     * @param {Object} object
+     * @param {Object} constants
+     * @param {Boolean} [onlyOwn=false] Only consider properties that belong to extension itself, not any inherited properties.
+     * @param {Boolean} [toUpper=false] If true the keys are convert to lower case. This is needed for visProp, see JXG#copyAttributes
+     */
+    jxg.extendConstants = function (object, constants, onlyOwn, toUpper) {
+        var e, e2;
+
+        onlyOwn = onlyOwn || false;
+        toUpper = toUpper || false;
+
+        // the purpose of this for...in loop is indeed to use hasOwnProperty only if the caller explicitly wishes so.
+        for (e in constants) {
+            if (!onlyOwn || (onlyOwn && extension.hasOwnProperty(e))) {
+                if (toUpper) {
+                    e2 = e.toUpperCase();
+                } else {
+                    e2 = e;
+                }
+
+                this.defineConstant(object, e2, constants[e]);
             }
         }
     };
@@ -635,12 +677,12 @@ define('jxg',[], function () {
          * @param  {String} s String of an HTML tag that hosts a JSXGraph board
          * @returns {Object} Reference to the board or null.
          */
-        getBoardByContainerId: function(s) {
+        getBoardByContainerId: function (s) {
             var b;
             for (b in JXG.boards) {
                 if (JXG.boards.hasOwnProperty(b) &&
                     JXG.boards[b].container === s) {
-                        return JXG.boards[b];
+                    return JXG.boards[b];
                 }
             }
 
@@ -691,7 +733,7 @@ define('jxg',[], function () {
                 if (typeof window === 'object' && window.console && console.log) {
                     console.log(p);
                 } else if (typeof document === 'object' && document.getElementById('debug')) {
-                    document.getElementById('debug').innerHTML += p + "<br/>";
+                    document.getElementById('debug').innerHTML += p + '<br/>';
                 }
             }
         },
@@ -749,12 +791,13 @@ define('jxg',[], function () {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph.
@@ -779,7 +822,6 @@ define('jxg',[], function () {
     and <http://opensource.org/licenses/MIT/>.
  */
 
-
 /*global JXG: true, define: true*/
 /*jslint nomen: true, plusplus: true*/
 
@@ -788,12 +830,12 @@ define('jxg',[], function () {
  */
 
 define('base/constants',['jxg'], function (JXG) {
-    "use strict";
+    'use strict';
 
     var major = 1,
-        minor = 1,
+        minor = 2,
         patch = 0,
-        add = false, // 'dev',
+        add = 'dev_a', // 'dev',
         version = major + '.' + minor + '.' + patch + (add ? '-' + add : ''),
         constants;
 
@@ -861,6 +903,12 @@ define('base/constants',['jxg'], function (JXG) {
         OBJECT_TYPE_BUTTON: 29,
         OBJECT_TYPE_TRANSFORMATION: 30,
 
+        // IMPORTANT:
+        // ----------
+        // For being able to differentiate between the (sketchometry specific) SPECIAL_OBJECT_TYPEs and
+        // (core specific) OBJECT_TYPEs, the non-sketchometry types MUST NOT be changed
+        // to values > 100.
+
         // object classes
         OBJECT_CLASS_POINT: 1,
         OBJECT_CLASS_LINE: 2,
@@ -874,8 +922,10 @@ define('base/constants',['jxg'], function (JXG) {
         GENTYPE_ABC: 1, // unused
         GENTYPE_AXIS: 2,
         GENTYPE_MID: 3,
-        GENTYPE_REFLECTION: 4,
-        GENTYPE_MIRRORELEMENT: 5,
+        /** @deprecated, now use {@link JXG.GENTYPE_REFLECTION_ON_LINE} */  GENTYPE_REFLECTION: 4,
+        /** @deprecated, now use {@link JXG.GENTYPE_REFLECTION_ON_POINT} */ GENTYPE_MIRRORELEMENT: 5,
+        GENTYPE_REFLECTION_ON_LINE: 4,
+        GENTYPE_REFLECTION_ON_POINT: 5,
         GENTYPE_TANGENT: 6,
         GENTYPE_PARALLEL: 7,
         GENTYPE_BISECTORLINES: 8,
@@ -886,7 +936,7 @@ define('base/constants',['jxg'], function (JXG) {
         GENTYPE_GLIDER: 13,
         GENTYPE_INTERSECTION: 14,
         GENTYPE_CIRCLE: 15,
-        GENTYPE_CIRCLE2POINTS: 16,
+        /** @deprecated NOT USED ANY MORE SINCE SKETCHOMETRY 2.0 (only for old constructions needed) */ GENTYPE_CIRCLE2POINTS: 16,
         GENTYPE_LINE: 17,
         GENTYPE_TRIANGLE: 18,
         GENTYPE_QUADRILATERAL: 19,
@@ -919,7 +969,7 @@ define('base/constants',['jxg'], function (JXG) {
         GENTYPE_MIGRATE: 46,
         GENTYPE_VECTORCOPY: 47,
         GENTYPE_POLYGONCOPY: 48,
-//        GENTYPE_TRANSFORM: 48, // unused
+        //        GENTYPE_TRANSFORM: 48, // unused
         // 49 ... 50 // unused ...
 
         // IMPORTANT:
@@ -962,18 +1012,19 @@ define('base/constants',['jxg'], function (JXG) {
         GENTYPE_CTX_SNAPTOGRID: 82
     };
 
-    JXG.extend(JXG, constants);
+    JXG.extendConstants(JXG, constants);
 
     return constants;
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph.
@@ -998,7 +1049,6 @@ define('base/constants',['jxg'], function (JXG) {
     and <http://opensource.org/licenses/MIT/>.
  */
 
-
 /*global JXG: true, define: true, html_sanitize: true*/
 /*jslint nomen: true, plusplus: true*/
 
@@ -1008,16 +1058,17 @@ define('base/constants',['jxg'], function (JXG) {
  */
 
 /**
- * @fileoverview type.js contains several functions to help deal with javascript's weak types. This file mainly consists
- * of detector functions which verify if a variable is or is not of a specific type and converter functions that convert
- * variables to another type or normalize the type of a variable.
+ * @fileoverview type.js contains several functions to help deal with javascript's weak types.
+ * This file mainly consists of detector functions which verify if a variable is or is not of
+ * a specific type and converter functions that convert variables to another type or normalize
+ * the type of a variable.
  */
 
 define('utils/type',[
     'jxg', 'base/constants'
 ], function (JXG, Const) {
 
-    "use strict";
+    'use strict';
 
     JXG.extend(JXG, /** @lends JXG */ {
         /**
@@ -1056,7 +1107,7 @@ define('utils/type',[
          * @returns {Boolean} True, if v is of type string.
          */
         isString: function (v) {
-            return typeof v === "string";
+            return typeof v === 'string';
         },
 
         /**
@@ -1065,7 +1116,7 @@ define('utils/type',[
          * @returns {Boolean} True, if v is of type number.
          */
         isNumber: function (v) {
-            return typeof v === "number" || Object.prototype.toString.call(v) === '[Object Number]';
+            return typeof v === 'number' || Object.prototype.toString.call(v) === '[Object Number]';
         },
 
         /**
@@ -1074,7 +1125,7 @@ define('utils/type',[
          * @returns {Boolean} True, if v is a function.
          */
         isFunction: function (v) {
-            return typeof v === "function";
+            return typeof v === 'function';
         },
 
         /**
@@ -1089,7 +1140,7 @@ define('utils/type',[
             if (Array.isArray) {
                 r = Array.isArray(v);
             } else {
-                r = (v !== null && typeof v === "object" && typeof v.splice === 'function' && typeof v.join === 'function');
+                r = (v !== null && typeof v === 'object' && typeof v.splice === 'function' && typeof v.join === 'function');
             }
 
             return r;
@@ -1145,11 +1196,12 @@ define('utils/type',[
          * @param v A variable of any type.
          * @returns {Boolean} True, if v is of type JXG.Transformation.
          */
-        isTransformationOrArray: function(v) {
+        isTransformationOrArray: function (v) {
             if (v !== null) {
                 if (this.isArray(v) && v.length > 0) {
                     return this.isTransformationOrArray(v[0]);
-                } else if (typeof v === 'object') {
+                }
+                if (typeof v === 'object') {
                     return (v.type === Const.OBJECT_TYPE_TRANSFORMATION);
                 }
             }
@@ -1160,13 +1212,30 @@ define('utils/type',[
          * Checks if a given variable is neither undefined nor null. You should not use this together with global
          * variables!
          * @param v A variable of any type.
+         * @param {Boolean} [checkEmptyString=false] If set to true, it is also checked whether v is not equal to ''.
          * @returns {Boolean} True, if v is neither undefined nor null.
          */
         exists: (function (undef) {
-            return function (v) {
-                return !(v === undef || v === null);
+            return function (v, checkEmptyString) {
+                var result = !(v === undef || v === null);
+
+                checkEmptyString = checkEmptyString || false;
+                
+                if (checkEmptyString) {
+                    return result && v !== '';
+                }
+                return result;
             };
         }()),
+
+        /**
+         * Checks if v is an empty object or empty.
+         * @param v {Object|Array}
+         * @returns {boolean} True, if v is an empty object or array.
+         */
+        isEmpty: function(v) {
+            return Object.keys(v).length === 0;
+        },
 
         /**
          * Handle default parameters.
@@ -1278,15 +1347,15 @@ define('utils/type',[
          * @param {Array} parents Array containing parent elements for a new object. This array may contain
          *    <ul>
          *      <li> {@link JXG.Point} objects
-         *      <li> {@link JXG.Element#name} of {@link JXG.Point} objects
-         *      <li> {@link JXG.Element#id} of {@link JXG.Point} objects
+         *      <li> {@link JXG.GeometryElement#name} of {@link JXG.Point} objects
+         *      <li> {@link JXG.GeometryElement#id} of {@link JXG.Point} objects
          *      <li> Coordinates of points given as array of numbers of length two or three, e.g. [2, 3].
          *      <li> Coordinates of points given as array of functions of length two or three. Each function returns one coordinate, e.g.
          *           [function(){ return 2; }, function(){ return 3; }]
          *      <li> Function returning coordinates, e.g. function() { return [2, 3]; }
          *    </ul>
          *  In the last three cases a new point will be created.
-         * @param {String} attrClass Main attribute class of newly created points, see {@link JXG@copyAttributes}
+         * @param {String} attrClass Main attribute class of newly created points, see {@link JXG#copyAttributes}
          * @param {Array} attrArray List of subtype attributes for the newly created points. The list of subtypes is mapped to the list of new points.
          * @returns {Array} List of newly created {@link JXG.Point} elements or false if not all returned elements are points.
          */
@@ -1529,8 +1598,7 @@ define('utils/type',[
                     if (!this.cmpArrays(a1[i], a2[i])) {
                         return false;
                     }
-                }
-                else if (a1[i] !== a2[i]) {
+                } else if (a1[i] !== a2[i]) {
                     return false;
                 }
             }
@@ -1570,37 +1638,37 @@ define('utils/type',[
         },
 
         /**
-    	 * Decimal adjustment of a number.
-    	 * From https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Math/round
-    	 *
-    	 * @param	{String}	type	The type of adjustment.
-    	 * @param	{Number}	value	The number.
-    	 * @param	{Number}	exp		The exponent (the 10 logarithm of the adjustment base).
-    	 * @returns	{Number}			The adjusted value.
-    	 *
-    	 * @private
-    	 */
-    	_decimalAdjust: function(type, value, exp) {
-    		// If the exp is undefined or zero...
-    		if (exp === undefined || +exp === 0) {
-    			return Math[type](value);
-    		}
+         * Decimal adjustment of a number.
+         * From https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+         *
+         * @param    {String}    type    The type of adjustment.
+         * @param    {Number}    value    The number.
+         * @param    {Number}    exp        The exponent (the 10 logarithm of the adjustment base).
+         * @returns    {Number}            The adjusted value.
+         *
+         * @private
+         */
+        _decimalAdjust: function (type, value, exp) {
+            // If the exp is undefined or zero...
+            if (exp === undefined || +exp === 0) {
+                return Math[type](value);
+            }
 
-    		value = +value;
-    		exp = +exp;
-    		// If the value is not a number or the exp is not an integer...
-    		if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
-    			return NaN;
-    		}
+            value = +value;
+            exp = +exp;
+            // If the value is not a number or the exp is not an integer...
+            if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+                return NaN;
+            }
 
             // Shift
-    		value = value.toString().split('e');
-    		value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+            value = value.toString().split('e');
+            value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
 
-    		// Shift back
-    		value = value.toString().split('e');
-    		return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
-    	},
+            // Shift back
+            value = value.toString().split('e');
+            return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+        },
 
         /**
          * Round a number to given number of decimal digits.
@@ -1612,9 +1680,9 @@ define('utils/type',[
          *
          * @private
          */
-    	_round10: function(value, exp) {
-    		return this._decimalAdjust('round', value, exp);
-		},
+        _round10: function (value, exp) {
+            return this._decimalAdjust('round', value, exp);
+        },
 
         /**
          * "Floor" a number to given number of decimal digits.
@@ -1626,9 +1694,9 @@ define('utils/type',[
          *
          * @private
          */
-        _floor10: function(value, exp) {
-    		return this._decimalAdjust('floor', value, exp);
-    	},
+        _floor10: function (value, exp) {
+            return this._decimalAdjust('floor', value, exp);
+        },
 
         /**
          * "Ceil" a number to given number of decimal digits.
@@ -1640,9 +1708,9 @@ define('utils/type',[
          *
          * @private
          */
-        _ceil10: function(value, exp) {
-    		return this._decimalAdjust('ceil', value, exp);
-    	},
+        _ceil10: function (value, exp) {
+            return this._decimalAdjust('ceil', value, exp);
+        },
 
         /**
          * Replacement of the default toFixed() method.
@@ -1650,16 +1718,18 @@ define('utils/type',[
          * returns "0.00" for toFixed(-0.000001, 2) instead of "-0.00" which
          * is returned by JavaScript's toFixed()
          *
+         * @memberOf JXG
          * @param  {Number} num       Number tp be rounded
          * @param  {Number} precision Decimal digits
          * @return {String}           Rounded number is returned as string
          */
-        toFixed: function(num, precision) {
+        toFixed: function (num, precision) {
             return this._round10(num, -precision).toFixed(precision);
         },
 
         /**
          * Truncate a number <tt>val</tt> automatically.
+         * @memberOf JXG
          * @param val
          * @returns {Number}
          */
@@ -1883,7 +1953,6 @@ define('utils/type',[
                     'integral': 1
                 };
 
-
             len = arguments.length;
             if (len < 3 || primitives[s]) {
                 // default options from Options.elements
@@ -1939,7 +2008,7 @@ define('utils/type',[
                 }
             }
             if (isAvail && this.exists(o.label)) {
-                a.label =  JXG.deepCopy(o.label, a.label);
+                a.label = JXG.deepCopy(o.label, a.label);
             }
             a.label = JXG.deepCopy(options.label, a.label);
 
@@ -1990,42 +2059,42 @@ define('utils/type',[
             }
 
             switch (typeof obj) {
-            case 'object':
-                if (obj) {
-                    list = [];
+                case 'object':
+                    if (obj) {
+                        list = [];
 
-                    if (this.isArray(obj)) {
-                        for (i = 0; i < obj.length; i++) {
-                            list.push(JXG.toJSON(obj[i], noquote));
-                        }
-
-                        return '[' + list.join(',') + ']';
-                    }
-
-                    for (prop in obj) {
-                        if (obj.hasOwnProperty(prop)) {
-                            try {
-                                val = JXG.toJSON(obj[prop], noquote);
-                            } catch (e2) {
-                                val = '';
+                        if (this.isArray(obj)) {
+                            for (i = 0; i < obj.length; i++) {
+                                list.push(JXG.toJSON(obj[i], noquote));
                             }
 
-                            if (noquote) {
-                                list.push(prop + ':' + val);
-                            } else {
-                                list.push('"' + prop + '":' + val);
+                            return '[' + list.join(',') + ']';
+                        }
+
+                        for (prop in obj) {
+                            if (obj.hasOwnProperty(prop)) {
+                                try {
+                                    val = JXG.toJSON(obj[prop], noquote);
+                                } catch (e2) {
+                                    val = '';
+                                }
+
+                                if (noquote) {
+                                    list.push(prop + ':' + val);
+                                } else {
+                                    list.push('"' + prop + '":' + val);
+                                }
                             }
                         }
-                    }
 
-                    return '{' + list.join(',') + '} ';
-                }
-                return 'null';
-            case 'string':
-                return '\'' + obj.replace(/(["'])/g, '\\$1') + '\'';
-            case 'number':
-            case 'boolean':
-                return obj.toString();
+                        return '{' + list.join(',') + '} ';
+                    }
+                    return 'null';
+                case 'string':
+                    return '\'' + obj.replace(/(["'])/g, '\\$1') + '\'';
+                case 'number':
+                case 'boolean':
+                    return obj.toString();
             }
 
             return '0';
@@ -2124,7 +2193,7 @@ define('utils/type',[
             }
 
             if (str[0] === '.' || str[0] === ',') {
-                str = "0" + str;
+                str = '0' + str;
             }
 
             return str;
@@ -2238,12 +2307,13 @@ define('utils/type',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph.
@@ -2268,7 +2338,6 @@ define('utils/type',[
     and <http://opensource.org/licenses/MIT/>.
  */
 
-
 /*global JXG: true, define: true, window: true, document: true, navigator: true, module: true, global: true, self: true, require: true*/
 /*jslint nomen: true, plusplus: true*/
 
@@ -2285,15 +2354,77 @@ define('utils/type',[
 
 define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
 
-    "use strict";
+    'use strict';
 
-    JXG.extend(JXG, /** @lends JXG */ {
+    JXG.extendConstants(JXG, /** @lends JXG */{
         /**
          * Determines the property that stores the relevant information in the event object.
          * @type {String}
          * @default 'touches'
          */
         touchProperty: 'touches',
+    });
+
+    JXG.extend(JXG, /** @lends JXG */ {
+        /**
+         * Determines whether evt is a touch event.
+         * @param evt {Event}
+         * @returns {Boolean}
+         */
+        isTouchEvent: function (evt) {
+            return JXG.exists(evt[JXG.touchProperty]);
+        },
+
+        /**
+         * Determines whether evt is a pointer event.
+         * @param evt {Event}
+         * @returns {Boolean}
+         */
+        isPointerEvent: function (evt) {
+            return JXG.exists(evt['pointerId']);
+        },
+
+        /**
+         * Determines whether evt is neither a touch event nor a pointer event.
+         * @param evt {Event}
+         * @returns {Boolean}
+         */
+        isMouseEvent: function (evt) {
+            return !JXG.isTouchEvent(evt)&&!JXG.isPointerEvent(evt);
+        },
+
+        /**
+         * Determines the number of touch points in a touch event.
+         * For other events, -1 is returned.
+         * @param evt {Event}
+         * @returns {Number}
+         */
+        getNumberOfTouchPoints: function (evt) {
+            var n = -1;
+
+            if (JXG.isTouchEvent(evt)) {
+                n = evt[JXG.touchProperty].length;
+            }
+
+            return n;
+        },
+
+        /**
+         * Checks whether an mouse, pointer or touch event evt is the first event of a multitouch event.
+         * Attention: When two or more pointer device types are being used concurrently,
+         *            it is only checked whether the passed event is the first one of its type!
+         * @param evt {Event}
+         * @returns {boolean}
+         */
+        isFirstTouch: function (evt) {
+            var touchPoints = JXG.getNumberOfTouchPoints(evt);
+
+            if (JXG.isPointerEvent(evt)) {
+                return evt.isPrimary;
+            }
+
+            return (touchPoints === 1);
+        },
 
         /**
          * A document/window environment is available.
@@ -2301,6 +2432,20 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
          * @default false
          */
         isBrowser: typeof window === 'object' && typeof document === 'object',
+
+        /**
+         * Features of ECMAScript 6+ are available.
+         * @type Boolean
+         * @default false
+         */
+        supportsES6: function () {
+            try {
+                new Function('(a = 0) => a');
+                return true;
+            } catch (err) {
+                return false;
+            }
+        },
 
         /**
          * Detect browser support for VML.
@@ -2330,7 +2475,8 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
                 try {
                     c = (typeof module === 'object' ? module.require('canvas') : require('canvas'));
                     hasCanvas = !!c;
-                } catch (err) { }
+                } catch (err) {
+                }
             }
 
             return hasCanvas || (this.isBrowser && !!document.createElement('canvas').getContext);
@@ -2343,7 +2489,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
         isNode: function () {
             // this is not a 100% sure but should be valid in most cases
 
-                // we are not inside a browser
+            // we are not inside a browser
             return !this.isBrowser && (
                 // there is a module object (plain node, no requirejs)
                 (typeof module === 'object' && !!module.exports) ||
@@ -2366,10 +2512,10 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
          */
         supportsPointerEvents: function () {
             return !!(this.isBrowser && window.navigator &&
-                     (  window.PointerEvent ||             // Chrome/Edge/IE11+
-                        window.navigator.pointerEnabled || // IE11+
-                        window.navigator.msPointerEnabled  // IE10-
-                     )
+                (window.PointerEvent ||             // Chrome/Edge/IE11+
+                    window.navigator.pointerEnabled || // IE11+
+                    window.navigator.msPointerEnabled  // IE10-
+                )
             );
         },
 
@@ -2487,7 +2633,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
             // Borrowed from prototype.js
             element = doc.getElementById(elementId);
             if (!Type.exists(element)) {
-                throw new Error("\nJSXGraph: HTML container element '" + elementId + "' not found.");
+                throw new Error('\nJSXGraph: HTML container element \'' + elementId + '\' not found.');
             }
 
             display = element.style.display;
@@ -2751,7 +2897,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
             // Non-IE
             if (doc.defaultView && doc.defaultView.getComputedStyle) {
                 r = doc.defaultView.getComputedStyle(obj, null).getPropertyValue(stylename);
-            // IE
+                // IE
             } else if (obj.currentStyle && JXG.ieVersion >= 9) {
                 r = obj.currentStyle[stylename];
             } else {
@@ -2861,11 +3007,11 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
             // This should work on all browsers except IE 6-8
             if (doc.defaultView && doc.defaultView.getComputedStyle) {
                 st = doc.defaultView.getComputedStyle(obj, null);
-                str = st.getPropertyValue("-webkit-transform") ||
-                     st.getPropertyValue("-moz-transform") ||
-                     st.getPropertyValue("-ms-transform") ||
-                     st.getPropertyValue("-o-transform") ||
-                     st.getPropertyValue("transform");
+                str = st.getPropertyValue('-webkit-transform') ||
+                    st.getPropertyValue('-moz-transform') ||
+                    st.getPropertyValue('-ms-transform') ||
+                    st.getPropertyValue('-o-transform') ||
+                    st.getPropertyValue('transform');
             } else {
                 // Take the first transformation matrix
                 len = t.length;
@@ -2964,7 +3110,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
          * @private
          * @see JXG#toFullscreen
          */
-        scaleJSXGraphDiv: function(wrap_id, inner_id, scale, vshift) {
+        scaleJSXGraphDiv: function (wrap_id, inner_id, scale, vshift) {
             var len = document.styleSheets.length, style,
 
                 pseudo_keys = [':-webkit-full-screen', ':-moz-full-screen', ':fullscreen', ':-ms-fullscreen'],
@@ -2973,21 +3119,21 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
                 rule_inner = '{margin:0 auto;transform:matrix(' + scale + ',0,0,' + scale + ',0,' + vshift + ');}',
                 // A previously installed CSS rule to center the JSXGraph div has to
                 // be searched and removed again.
-                regex = RegExp('.*' + wrap_id + ':.*full.*screen.*' + inner_id + '.*auto;.*transform:.*matrix');
+                regex = new RegExp('.*' + wrap_id + ':.*full.*screen.*' + inner_id + '.*auto;.*transform:.*matrix');
 
             if (len === 0) {
                 // In case there is not a single CSS rule defined.
-                style = document.createElement("style");
+                style = document.createElement('style');
                 // WebKit hack :(
-            	style.appendChild(document.createTextNode(""));
-            	// Add the <style> element to the page
-            	document.body.appendChild(style);
+                style.appendChild(document.createTextNode(''));
+                // Add the <style> element to the page
+                document.body.appendChild(style);
                 len = document.styleSheets.length;
             }
 
             // Remove a previously installed CSS rule.
-            if (document.styleSheets[len-1].cssRules.length > 0 &&
-                regex.test(document.styleSheets[len-1].cssRules[0].cssText) &&
+            if (document.styleSheets[len - 1].cssRules.length > 0 &&
+                regex.test(document.styleSheets[len - 1].cssRules[0].cssText) &&
                 document.styleSheets[len - 1].deleteRule) {
 
                 document.styleSheets[len - 1].deleteRule(0);
@@ -3000,8 +3146,8 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
                     document.styleSheets[len - 1].insertRule(wrap_id + pseudo_keys[i] + ' ' + inner_id + rule_inner, 0);
                     break;
                 } catch (err) {
-                     console.log('JXG.scaleJSXGraphDiv: Could not add CSS rule "' + pseudo_keys[i] + '".');
-                     console.log('One possible reason could be that the id of the JSXGraph container does not start with a letter.');
+                    console.log('JXG.scaleJSXGraphDiv: Could not add CSS rule "' + pseudo_keys[i] + '".');
+                    console.log('One possible reason could be that the id of the JSXGraph container does not start with a letter.');
                 }
             }
         },
@@ -3041,7 +3187,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
          * </script><pre>
          *
          */
-        toFullscreen: function(wrap_id, jsxgraph_id, scale) {
+        toFullscreen: function (wrap_id, jsxgraph_id, scale) {
             var elem = document.getElementById(wrap_id),
                 elem_inner = document.getElementById(jsxgraph_id),
 
@@ -3059,7 +3205,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
             scale = scale || Math.min(r_w, r_h);
 
             // Adapt vshift and scale for landscape on tablets
-            if (window.matchMedia && window.matchMedia("(orientation:landscape)").matches &&
+            if (window.matchMedia && window.matchMedia('(orientation:landscape)').matches &&
                 window.screen.width < window.screen.height) {
                 // Landscape on iOS: it returns 'landscape', but still width<height.
                 r_w = window.screen.height / parseInt(elem_inner.style.width, 10);
@@ -3074,9 +3220,9 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
 
             // Trigger the fullscreen mode
             elem.requestFullscreen = elem.requestFullscreen ||
-                        elem.webkitRequestFullscreen ||
-                        elem.mozRequestFullScreen ||
-                        elem.msRequestFullscreen;
+                elem.webkitRequestFullscreen ||
+                elem.mozRequestFullScreen ||
+                elem.msRequestFullscreen;
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             }
@@ -3087,7 +3233,7 @@ define('utils/env',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
- Copyright 2008-2020
+ Copyright 2008-2021
  Matthias Ehmann,
  Michael Gerhaeuser,
  Carsten Miller,
@@ -3191,7 +3337,7 @@ define('utils/xml',['jxg', 'utils/type'], function (JXG, Type) {
     return JXG.XML;
 });
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -3363,7 +3509,7 @@ define('utils/event',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -3980,17 +4126,42 @@ define('math/math',['jxg', 'utils/type'], function (JXG, Type) {
                 return 0;
             }
 
-            // a is an integer
+            // exponent is an integer
             if (Math.floor(exponent) === exponent) {
                 return Math.pow(base, exponent);
             }
 
-            // a is not an integer
+            // exponent is not an integer
             if (base > 0) {
                 return Math.exp(exponent * Math.log(base));
             }
 
             return NaN;
+        },
+
+        /**
+         * Compute base to the power of the rational exponent m / n.
+         * This function first reduces the fraction m/n and then computes
+         * JXG.Math.pow(base, m/n).
+         *
+         * This function is necessary to have the same results for e.g.
+         * (-8)^(1/3) = (-8)^(2/6) = -2
+         * @param {Number} base
+         * @param {Number} m numerator of exponent
+         * @param {Number} n denominator of exponent
+         * @returns {Number} base to the power of exponent.
+         */
+        ratpow: function(base, m, n) {
+            var g;
+            if (m === 0) {
+                return 1;
+            }
+            if (n === 0) {
+                return NaN;
+            }
+
+            g = this.gcd(m, n);
+            return this.nthroot(this.pow(base, m / g), n / g);
         },
 
         /**
@@ -4077,7 +4248,7 @@ define('math/math',['jxg', 'utils/type'], function (JXG, Type) {
 
         /**
          * Greatest common divisor (gcd) of two numbers.
-         * @see http://rosettacode.org/wiki/Greatest_common_divisor#JavaScript
+         * @see <a href="http://rosettacode.org/wiki/Greatest_common_divisor#JavaScript">rosettacode.org</a>
          *
          * @param  {Number} a First number
          * @param  {Number} b Second number
@@ -4200,7 +4371,7 @@ define('math/math',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -4299,7 +4470,7 @@ define('base/coords',[
         if (this.emitter) {
             EventEmitter.eventify(this);
         }
-        this.setCoordinates(method, coordinates, true, true);
+        this.setCoordinates(method, coordinates, false, true);
     };
 
     JXG.extend(JXG.Coords.prototype, /** @lends JXG.Coords.prototype */ {
@@ -4479,7 +4650,7 @@ define('base/coords',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -4611,7 +4782,1740 @@ define('utils/expect',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Alfred Wassermann
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+ */
+
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ jxg
+ math/math
+ utils/type
+ */
+
+define('math/ia',['jxg', 'math/math', 'utils/type'], function (JXG, Mat, Type) {
+
+    "use strict";
+
+    JXG.Math.DoubleBits = function() {
+        var hasTypedArrays = false,
+            DOUBLE_VIEW = new Float64Array(1),
+            UINT_VIEW   = new Uint32Array(DOUBLE_VIEW.buffer),
+            doubleBitsLE, toDoubleLE, lowUintLE, highUintLE,
+            doubleBitsBE, toDoubleBE, lowUintBE, highUintBE,
+            doubleBits, toDouble, lowUint, highUint;
+
+        if (Float64Array !== undefined) {
+
+            DOUBLE_VIEW[0] = 1.0;
+            hasTypedArrays = true;
+            if (UINT_VIEW[1] === 0x3ff00000) {
+                // Use little endian
+                doubleBitsLE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return [UINT_VIEW[0], UINT_VIEW[1]];
+                };
+                toDoubleLE = function(lo, hi) {
+                    UINT_VIEW[0] = lo;
+                    UINT_VIEW[1] = hi;
+                    return DOUBLE_VIEW[0];
+                };
+
+                lowUintLE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return UINT_VIEW[0];
+                };
+
+                highUintLE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return UINT_VIEW[1];
+                };
+
+                this.doubleBits = doubleBitsLE;
+                this.pack = toDoubleLE;
+                this.lo = lowUintLE;
+                this.hi = highUintLE;
+            } else if (UINT_VIEW[0] === 0x3ff00000) {
+                //Use big endian
+                doubleBitsBE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return [UINT_VIEW[1], UINT_VIEW[0]];
+                };
+
+                toDoubleBE = function(lo, hi) {
+                    UINT_VIEW[1] = lo;
+                    UINT_VIEW[0] = hi;
+                    return DOUBLE_VIEW[0];
+                };
+
+                lowUintBE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return UINT_VIEW[1];
+                };
+
+                highUintBE = function(n) {
+                    DOUBLE_VIEW[0] = n;
+                    return UINT_VIEW[0];
+                };
+
+                this.doubleBits = doubleBitsBE;
+                this.pack = toDoubleBE;
+                this.lo = lowUintBE;
+                this.hi = highUintBE;
+            } else {
+                hasTypedArrays = false;
+            }
+        }
+
+        // if (!hasTypedArrays) {
+        //     var buffer = new Buffer(8)
+        //     doubleBits = function(n) {
+        //         buffer.writeDoubleLE(n, 0, true);
+        //         return [buffer.readUInt32LE(0, true), buffer.readUInt32LE(4, true)];
+        //     };
+
+        //     toDouble = function(lo, hi) {
+        //         buffer.writeUInt32LE(lo, 0, true);
+        //         buffer.writeUInt32LE(hi, 4, true);
+        //         return buffer.readDoubleLE(0, true);
+        //     };
+        //     lowUint = function(n) {
+        //         buffer.writeDoubleLE(n, 0, true);
+        //         return buffer.readUInt32LE(0, true);
+        //     };
+
+        //     highUint = function(n) {
+        //         buffer.writeDoubleLE(n, 0, true);
+        //         return buffer.readUInt32LE(4, true);
+        //     };
+
+        //     this.doubleBits = doubleBits;
+        //     this.pack = toDouble;
+        //     this.lo = lowUint;
+        //     this.hi = highUint;
+        // }
+    };
+
+    JXG.extend(JXG.Math.DoubleBits.prototype, /** @lends JXG.Math.DoubleBits.prototype */ {
+
+        sign: function(n) {
+            return this.hi(n) >>> 31;
+        },
+
+        exponent: function(n) {
+            var b = this.hi(n);
+            return ((b<<1) >>> 21) - 1023;
+        },
+
+        fraction: function(n) {
+            var lo = this.lo(n),
+                hi = this.hi(n),
+                b = hi & ((1<<20) - 1);
+
+            if (hi & 0x7ff00000) {
+                b += (1<<20);
+            }
+            return [lo, b];
+        },
+
+        denormalized: function(n) {
+            var hi = this.hi(n);
+            return !(hi & 0x7ff00000);
+        }
+    });
+
+    var doubleBits = new JXG.Math.DoubleBits(),
+
+        /**
+         * Object for interval arithmetic
+         * @name JXG.Math.Interval
+         * @exports MatInterval as JXG.Math.Interval
+         * @namespace
+         */
+        MatInterval = function (lo, hi) {
+            if (lo !== undefined && hi !== undefined) {
+                // possible cases:
+                // - Interval(1, 2)
+                // - Interval(Interval(1, 1), Interval(2, 2))     // singletons are required
+                if (Mat.IntervalArithmetic.isInterval(lo)) {
+                    if (!Mat.IntervalArithmetic.isSingleton(lo)) {
+                        throw new TypeError('JXG.Math.IntervalArithmetic: interval `lo` must be a singleton');
+                    }
+                    this.lo = lo.lo;
+                } else {
+                    this.lo = lo;
+                }
+                if (Mat.IntervalArithmetic.isInterval(hi)) {
+                    if (!Mat.IntervalArithmetic.isSingleton(hi)) {
+                        throw new TypeError('JXG.Math.IntervalArithmetic: interval `hi` must be a singleton');
+                    }
+                    this.hi = hi.hi;
+                } else {
+                    this.hi = hi;
+                }
+            } else if (lo !== undefined) {
+                // possible cases:
+                // - Interval([1, 2])
+                // - Interval([Interval(1, 1), Interval(2, 2)])
+                if (Array.isArray(lo)) {
+                  return new MatInterval(lo[0], lo[1]);
+                }
+                // - Interval(1)
+                return new MatInterval(lo, lo);
+            }
+            // possible cases:
+            // - Interval()
+            this.lo = this.hi = 0;
+        };
+
+    JXG.extend(MatInterval.prototype, {
+        print: function() {
+            console.log('[',this.lo, this.hi,']');
+        },
+
+        set: function(lo, hi) {
+            this.lo = lo;
+            this.hi = hi;
+            return this;
+        },
+
+        bounded: function(lo, hi) {
+            return this.set(Mat.IntervalArithmetic.prev(lo), Mat.IntervalArithmetic.next(hi));
+        },
+
+        boundedSingleton: function(v) {
+            return this.bounded(v, v);
+        },
+
+        assign: function(lo, hi) {
+            if (typeof lo !== 'number' || typeof hi !== 'number') {
+                throw new TypeError('JXG.Math.Interval#assign: arguments must be numbers');
+            }
+            if (isNaN(lo) || isNaN(hi) || lo > hi) {
+                return this.setEmpty();
+            }
+            return this.set(lo, hi);
+        },
+
+        setEmpty: function() {
+            return this.set(Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY);
+        },
+
+        setWhole: function() {
+            return this.set(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+        },
+
+        open: function(lo, hi){
+            return this.assign(Mat.IntervalArithmetic.next(lo), Mat.IntervalArithmetic.prev(hi));
+        },
+
+        halfOpenLeft: function(lo, hi) {
+            return this.assign(Mat.IntervalArithmetic.next(lo), hi);
+        },
+
+        halfOpenRight: function(lo, hi) {
+            return this.assign(lo, Mat.IntervalArithmetic.prev(hi));
+        },
+
+        toArray: function() {
+            return [this.lo, this.hi];
+        },
+
+        clone: function() {
+            return new MatInterval().set(this.lo, this.hi);
+        }
+    });
+
+    /**
+     * Object for interval arithmetic
+     * @name JXG.Math.Interval
+     * @exports Mat.Interval as JXG.Math.Interval
+     * @namespace
+     */
+    JXG.Math.IntervalArithmetic =  {
+
+        Interval: function(lo, hi) {
+            return new MatInterval(lo, hi);
+        },
+
+        isInterval: function(i) {
+            return i !== null && typeof i === 'object' && typeof i.lo === 'number' && typeof i.hi === 'number';
+        },
+
+        isSingleton: function(i) {
+            return i.lo === i.hi;
+        },
+
+        /*
+         * Arithmetics
+         */
+        add: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            return new MatInterval(this.addLo(x.lo, y.lo), this.addHi(x.hi, y.hi));
+        },
+
+        sub: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            return new MatInterval(this.subLo(x.lo, y.hi), this.subHi(x.hi, y.lo));
+        },
+
+        mul: function(x, y) {
+            var xl, xh, yl, yh, out;
+
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+              return this.EMPTY.clone();
+            }
+            xl = x.lo;
+            xh = x.hi;
+            yl = y.lo;
+            yh = y.hi;
+            out = new MatInterval();
+
+            if (xl < 0) {
+                if (xh > 0) {
+                    if (yl < 0) {
+                        if (yh > 0) {
+                            // mixed * mixed
+                            out.lo = Math.min(this.mulLo(xl, yh), this.mulLo(xh, yl));
+                            out.hi = Math.max(this.mulHi(xl, yl), this.mulHi(xh, yh));
+                        } else {
+                            // mixed * negative
+                            out.lo = this.mulLo(xh, yl);
+                            out.hi = this.mulHi(xl, yl);
+                        }
+                    } else {
+                        if (yh > 0) {
+                            // mixed * positive
+                            out.lo = this.mulLo(xl, yh);
+                            out.hi = this.mulHi(xh, yh);
+                        } else {
+                            // mixed * zero
+                            out.lo = 0;
+                            out.hi = 0;
+                        }
+                    }
+                } else {
+                    if (yl < 0) {
+                        if (yh > 0) {
+                            // negative * mixed
+                            out.lo = this.mulLo(xl, yh);
+                            out.hi = this.mulHi(xl, yl);
+                        } else {
+                            // negative * negative
+                            out.lo = this.mulLo(xh, yh);
+                            out.hi = this.mulHi(xl, yl);
+                        }
+                    } else {
+                        if (yh > 0) {
+                            // negative * positive
+                            out.lo = this.mulLo(xl, yh);
+                            out.hi = this.mulHi(xh, yl);
+                        } else {
+                            // negative * zero
+                            out.lo = 0;
+                            out.hi = 0;
+                        }
+                    }
+                }
+            } else {
+                if (xh > 0) {
+                    if (yl < 0) {
+                        if (yh > 0) {
+                            // positive * mixed
+                            out.lo = this.mulLo(xh, yl);
+                            out.hi = this.mulHi(xh, yh);
+                        } else {
+                            // positive * negative
+                            out.lo = this.mulLo(xh, yl);
+                            out.hi = this.mulHi(xl, yh);
+                        }
+                    } else {
+                        if (yh > 0) {
+                            // positive * positive
+                            out.lo = this.mulLo(xl, yl);
+                            out.hi = this.mulHi(xh, yh);
+                        } else {
+                            // positive * zero
+                            out.lo = 0;
+                            out.hi = 0;
+                        }
+                    }
+                } else {
+                    // zero * any other value
+                    out.lo = 0;
+                    out.hi = 0;
+                }
+            }
+            return out;
+        },
+
+        div: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return this.EMPTY.clone();
+            }
+            if (this.zeroIn(y)) {
+                if (y.lo !== 0) {
+                    if (y.hi !== 0) {
+                        return this.divZero(x);
+                    }
+                    return this.divNegative(x, y.lo);
+                }
+                if (y.hi !== 0) {
+                    return this.divPositive(x, y.hi);
+                }
+                return this.EMPTY.clone();
+            }
+            return this.divNonZero(x, y);
+        },
+
+        positive: function(x) {
+            return new MatInterval(x.lo, x.hi);
+        },
+
+        negative: function(x) {
+            if (Type.isNumber(x)) {
+                return new MatInterval(-x);
+            }
+            return new MatInterval(-x.hi, -x.lo);
+        },
+
+        /*
+         * Utils
+         */
+        isEmpty: function(i) {
+            return i.lo > i.hi;
+        },
+
+        isWhole: function(i){
+            return i.lo === -Infinity && i.hi === Infinity;
+        },
+
+        zeroIn: function(i) {
+            return this.hasValue(i, 0);
+        },
+
+        hasValue: function(i, value) {
+            if (this.isEmpty(i)) {
+                return false;
+            }
+            return i.lo <= value && value <= i.hi;
+        },
+
+        hasInterval: function(x, y) {
+            if (this.isEmpty(x)) {
+                return true;
+            }
+            return !this.isEmpty(y) && y.lo <= x.lo && x.hi <= y.hi;
+        },
+
+        intervalsOverlap: function(x, y) {
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return false;
+            }
+            return (x.lo <= y.lo && y.lo <= x.hi) || (y.lo <= x.lo && x.lo <= y.hi);
+        },
+
+        /*
+         * Division
+         */
+        divNonZero: function(x, y) {
+            var xl = x.lo,
+                xh = x.hi,
+                yl = y.lo,
+                yh = y.hi,
+                out = new MatInterval();
+
+            if (xh < 0) {
+                if (yh < 0) {
+                    out.lo = this.divLo(xh, yl);
+                    out.hi = this.divHi(xl, yh);
+                } else {
+                    out.lo = this.divLo(xl, yl);
+                    out.hi = this.divHi(xh, yh);
+                }
+            } else if (xl < 0) {
+                if (yh < 0) {
+                    out.lo = this.divLo(xh, yh);
+                    out.hi = this.divHi(xl, yh);
+                } else {
+                    out.lo = this.divLo(xl, yl);
+                    out.hi = this.divHi(xh, yl);
+                }
+            } else {
+                if (yh < 0) {
+                    out.lo = this.divLo(xh, yh);
+                    out.hi = this.divHi(xl, yl);
+                } else {
+                    out.lo = this.divLo(xl, yh);
+                    out.hi = this.divHi(xh, yl);
+                }
+            }
+            return out;
+        },
+
+        divPositive: function(x, v) {
+            if (x.lo === 0 && x.hi === 0) {
+                return x;
+            }
+
+            if (this.zeroIn(x)) {
+                // mixed considering zero in both ends
+                return this.WHOLE;
+            }
+
+            if (x.hi < 0) {
+                // negative / v
+                return new MatInterval(Number.NEGATIVE_INFINITY, this.divHi(x.hi, v));
+            }
+            // positive / v
+            return new MatInterval(this.divLo(x.lo, v), Number.POSITIVE_INFINITY);
+        },
+
+        divNegative: function(x, v) {
+            if (x.lo === 0 && x.hi === 0) {
+                return x;
+            }
+
+            if (this.zeroIn(x)) {
+                // mixed considering zero in both ends
+                return this.WHOLE;
+            }
+
+            if (x.hi < 0) {
+                // negative / v
+                return new MatInterval(this.divLo(x.hi, v), Number.POSITIVE_INFINITY);
+            }
+            // positive / v
+            return new MatInterval(Number.NEGATIVE_INFINITY, this.divHi(x.lo, v));
+        },
+
+        divZero: function(x) {
+            if (x.lo === 0 && x.hi === 0) {
+                return x;
+            }
+            return this.WHOLE;
+        },
+
+        /*
+         * Algebra
+         */
+        fmod: function(x, y) {
+            var yb, n;
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return this.EMPTY.clone();
+            }
+            yb = x.lo < 0 ? y.lo : y.hi;
+            n = x.lo / yb;
+            if (n < 0) {
+                n = Math.ceil(n);
+            } else {
+                n = Math.floor(n);
+            }
+            // x mod y = x - n * y
+            return this.sub(x, this.mul(y, new MatInterval(n)));
+        },
+
+        multiplicativeInverse: function(x) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            if (this.zeroIn(x)) {
+                if (x.lo !== 0) {
+                    if (x.hi !== 0) {
+                        // [negative, positive]
+                        return this.WHOLE;
+                    }
+                    // [negative, zero]
+                    return new MatInterval(Number.NEGATIVE_INFINITY, this.divHi(1, x.lo));
+                }
+                if (x.hi !== 0) {
+                    // [zero, positive]
+                    return new MatInterval(this.divLo(1, x.hi), Number.POSITIVE_INFINITY);
+                }
+                // [zero, zero]
+                return this.EMPTY.clone();
+            }
+            // [positive, positive]
+            return new MatInterval(this.divLo(1, x.hi), this.divHi(1, x.lo));
+        },
+
+        pow: function(x, power) {
+            var yl, yh;
+
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            if (this.isInterval(power)) {
+                if (!this.isSingleton(power)) {
+                    return this.EMPTY.clone();
+                }
+                power = power.lo;
+            }
+
+            if (power === 0) {
+                if (x.lo === 0 && x.hi === 0) {
+                    // 0^0
+                    return this.EMPTY.clone();
+                }
+                // x^0
+                return this.ONE.clone();
+            }
+            if (power < 0) {
+                // compute [1 / x]^-power if power is negative
+                return this.pow(this.multiplicativeInverse(x), -power);
+            }
+
+            // power > 0
+            if (power % 1 === 0) { // isSafeInteger(power) as boolean) {
+                // power is integer
+                if (x.hi < 0) {
+                    // [negative, negative]
+                    // assume that power is even so the operation will yield a positive interval
+                    // if not then just switch the sign and order of the interval bounds
+                    yl = this.powLo(-x.hi, power);
+                    yh = this.powHi(-x.lo, power);
+                    if ((power & 1) === 1) {
+                        // odd power
+                        return new MatInterval(-yh, -yl);
+                    }
+                    // even power
+                    return new MatInterval(yl, yh);
+                }
+                if (x.lo < 0) {
+                    // [negative, positive]
+                    if ((power & 1) === 1) {
+                        return new MatInterval(-this.powLo(-x.lo, power), this.powHi(x.hi, power));
+                    }
+                    // even power means that any negative number will be zero (min value = 0)
+                    // and the max value will be the max of x.lo^power, x.hi^power
+                    return new MatInterval(0, this.powHi(Math.max(-x.lo, x.hi), power));
+                }
+                // [positive, positive]
+                return new MatInterval(this.powLo(x.lo, power), this.powHi(x.hi, power));
+            }
+            console.warn('power is not an integer, you should use nth-root instead, returning an empty interval');
+            return this.EMPTY.clone();
+        },
+
+        sqrt: function(x) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            return this.nthRoot(x, 2);
+        },
+
+        nthRoot: function(x, n) {
+            var power,yl, yh, yp, yn;
+
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x) || n < 0) {
+              // compute 1 / x^-power if power is negative
+              return this.EMPTY.clone();
+            }
+
+            // singleton interval check
+            if (this.isInterval(n)) {
+                if (!this.isSingleton(n)) {
+                    return this.EMPTY.clone();
+                }
+                n = n.lo;
+            }
+
+            power = 1 / n;
+            if (x.hi < 0) {
+                // [negative, negative]
+                //if ((isSafeInteger(n) as boolean) && (n & 1) === 1) {
+                if (n % 1 === 0 && (n & 1) === 1) {
+                    // when n is odd we can always take the nth root
+                    yl = this.powHi(-x.lo, power);
+                    yh = this.powLo(-x.hi, power);
+                    return new MatInterval(-yl, -yh);
+                }
+
+                // n is not odd therefore there's no nth root
+                return this.EMPTY.clone();
+            }
+            if (x.lo < 0) {
+                // [negative, positive]
+                yp = this.powHi(x.hi, power);
+                // if ((isSafeInteger(n) as boolean) && (n & 1) === 1) {
+                if (n % 1 === 0 && (n & 1) === 1) {
+                    // nth root of x.lo is possible (n is odd)
+                    yn = -this.powHi(-x.lo, power);
+                    return new MatInterval(yn, yp);
+                }
+                return new MatInterval(0, yp);
+            }
+            // [positive, positive]
+            return new MatInterval(this.powLo(x.lo, power), this.powHi(x.hi, power));
+        },
+
+        /*
+         * Misc
+         */
+        exp: function(x) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return new MatInterval(this.expLo(x.lo), this.expHi(x.hi));
+        },
+
+        log: function(x) {
+            var l;
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            l = x.lo <= 0 ? Number.NEGATIVE_INFINITY : this.logLo(x.lo);
+            return new MatInterval(l, this.logHi(x.hi));
+        },
+
+        ln: function(x) {
+            return this.log(x);
+        },
+
+        // export const LOG_EXP_10 = this.log(new MatInterval(10, 10))
+        // export const LOG_EXP_2 = log(new MatInterval(2, 2))
+        log10: function(x) {
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return this.div(this.log(x), this.log(new MatInterval(10, 10)));
+        },
+
+        log2: function(x) {
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return this.div(this.log(x), this.log(new MatInterval(2, 2)));
+        },
+
+        hull: function(x, y) {
+            var badX = this.isEmpty(x),
+                badY = this.isEmpty(y);
+            if (badX && badY) {
+                return this.EMPTY.clone();
+            }
+            if (badX) {
+                return y.clone();
+            }
+            if (badY) {
+                return x.clone();
+            }
+            return new MatInterval(Math.min(x.lo, y.lo), Math.max(x.hi, y.hi));
+        },
+
+        intersection: function(x, y) {
+            var lo, hi;
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return this.EMPTY.clone();
+            }
+            lo = Math.max(x.lo, y.lo);
+            hi = Math.min(x.hi, y.hi);
+            if (lo <= hi) {
+                return new MatInterval(lo, hi);
+            }
+            return this.EMPTY.clone();
+        },
+
+        union: function(x, y) {
+            if (!this.intervalsOverlap(x, y)) {
+                throw new Error('Interval#unions do not overlap');
+            }
+            return new MatInterval(Math.min(x.lo, y.lo), Math.max(x.hi, y.hi));
+        },
+
+        difference: function(x, y) {
+            if (this.isEmpty(x) || this.isWhole(y)) {
+              return this.EMPTY.clone();
+            }
+            if (this.intervalsOverlap(x, y)) {
+                if (x.lo < y.lo && y.hi < x.hi) {
+                    // difference creates multiple subsets
+                    throw new Error('Interval.difference: difference creates multiple intervals');
+                }
+
+                // handle corner cases first
+                if ((y.lo <= x.lo && y.hi === Infinity) || (y.hi >= x.hi && y.lo === -Infinity)) {
+                    return this.EMPTY.clone();
+                }
+
+                // NOTE: empty interval is handled automatically
+                // e.g.
+                //
+                //    n = difference([0,1], [0,1]) // n = Interval(next(1), 1) = EMPTY
+                //    isEmpty(n) === true
+                //
+                if (y.lo <= x.lo) {
+                    return new MatInterval().halfOpenLeft(y.hi, x.hi);
+                }
+
+                // y.hi >= x.hi
+                return new MatInterval().halfOpenRight(x.lo, y.lo);
+            }
+            return x.clone();
+        },
+
+        width: function(x) {
+            if (this.isEmpty(x)) {
+              return 0;
+            }
+            return this.subHi(x.hi, x.lo);
+        },
+
+        abs: function(x) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            if (x.lo >= 0) {
+                return x.clone();
+            }
+            if (x.hi <= 0) {
+                return this.negative(x);
+            }
+            return new MatInterval(0, Math.max(-x.lo, x.hi));
+        },
+
+        max: function(x, y) {
+            var badX = this.isEmpty(x),
+                badY = this.isEmpty(y);
+            if (badX && badY) {
+                return this.EMPTY.clone();
+            }
+            if (badX) {
+                return y.clone();
+            }
+            if (badY) {
+                return x.clone();
+            }
+            return new MatInterval(Math.max(x.lo, y.lo), Math.max(x.hi, y.hi));
+        },
+
+        min: function(x, y) {
+            var badX = this.isEmpty(x),
+                badY = this.isEmpty(y);
+            if (badX && badY) {
+                return this.EMPTY.clone();
+            }
+            if (badX) {
+                return y.clone();
+            }
+            if (badY) {
+                return x.clone();
+            }
+            return new MatInterval(Math.min(x.lo, y.lo), Math.min(x.hi, y.hi));
+        },
+
+        /*
+         * Trigonometric
+         */
+        onlyInfinity: function(x) {
+            return !isFinite(x.lo) && x.lo === x.hi;
+        },
+
+        _handleNegative: function(interval) {
+            var n;
+            if (interval.lo < 0) {
+                if (interval.lo === -Infinity) {
+                    interval.lo = 0;
+                    interval.hi = Infinity;
+                } else {
+                    n = Math.ceil(-interval.lo / this.piTwiceLow);
+                    interval.lo += this.piTwiceLow * n;
+                    interval.hi += this.piTwiceLow * n;
+                }
+            }
+            return interval;
+        },
+
+        cos: function(x) {
+            var cache, pi2, t, cosv,
+                lo, hi, rlo, rhi;
+
+            if (this.isEmpty(x) || this.onlyInfinity(x)) {
+                return this.EMPTY.clone();
+            }
+
+            // create a clone of `x` because the clone is going to be modified
+            cache = new MatInterval().set(x.lo, x.hi);
+            this._handleNegative(cache);
+
+            pi2 = this.PI_TWICE;
+            t = this.fmod(cache, pi2);
+            if (this.width(t) >= pi2.lo) {
+                return new MatInterval(-1, 1);
+            }
+
+            // when t.lo > pi it's the same as
+            // -cos(t - pi)
+            if (t.lo >= this.piHigh) {
+                cosv = this.cos(this.sub(t, this.PI));
+                return this.negative(cosv);
+            }
+
+            lo = t.lo;
+            hi = t.hi;
+            rlo = this.cosLo(hi);
+            rhi = this.cosHi(lo);
+            // it's ensured that t.lo < pi and that t.lo >= 0
+            if (hi <= this.piLow) {
+                // when t.hi < pi
+                // [cos(t.lo), cos(t.hi)]
+                return new MatInterval(rlo, rhi);
+            }
+            if (hi <= pi2.lo) {
+                // when t.hi < 2pi
+                // [-1, max(cos(t.lo), cos(t.hi))]
+                return new MatInterval(-1, Math.max(rlo, rhi));
+            }
+            // t.lo < pi and t.hi > 2pi
+            return new MatInterval(-1, 1);
+        },
+
+        sin: function(x) {
+            if (this.isEmpty(x) || this.onlyInfinity(x)) {
+                return this.EMPTY.clone();
+            }
+            return this.cos(this.sub(x, this.PI_HALF));
+        },
+
+        tan: function(x) {
+            var cache, t, pi;
+            if (this.isEmpty(x) || this.onlyInfinity(x)) {
+                return this.EMPTY.clone();
+            }
+
+            // create a clone of `x` because the clone is going to be modified
+            cache = new MatInterval().set(x.lo, x.hi);
+            this._handleNegative(cache);
+
+            pi = this.PI;
+            t = this.fmod(cache, pi);
+            if (t.lo >= this.piHalfLow) {
+                t = this.sub(t, pi);
+            }
+            if (t.lo <= -this.piHalfLow || t.hi >= this.piHalfLow) {
+                return this.WHOLE.clone();
+            }
+            return new MatInterval(this.tanLo(t.lo), this.tanHi(t.hi));
+        },
+
+        asin: function(x) {
+            var lo, hi;
+            if (this.isEmpty(x) || x.hi < -1 || x.lo > 1) {
+                return this.EMPTY.clone();
+            }
+            lo = x.lo <= -1 ? -this.piHalfHigh : this.asinLo(x.lo);
+            hi = x.hi >= 1 ? this.piHalfHigh : this.asinHi(x.hi);
+            return new MatInterval(lo, hi);
+        },
+
+        acos: function(x) {
+            var lo, hi;
+            if (this.isEmpty(x) || x.hi < -1 || x.lo > 1) {
+                  return this.EMPTY.clone();
+            }
+            lo = x.hi >= 1 ? 0 : this.acosLo(x.hi);
+            hi = x.lo <= -1 ? this.piHigh : this.acosHi(x.lo);
+            return new MatInterval(lo, hi);
+        },
+
+        atan: function(x) {
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return new MatInterval(this.atanLo(x.lo), this.atanHi(x.hi));
+        },
+
+        sinh: function(x) {
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return new MatInterval(this.sinhLo(x.lo), this.sinhHi(x.hi));
+        },
+
+        cosh: function(x) {
+            if (this.isEmpty(x)) {
+              return this.EMPTY.clone();
+            }
+            if (x.hi < 0) {
+                return new MatInterval(this.coshLo(x.hi), this.coshHi(x.lo));
+            }
+            if (x.lo >= 0) {
+                return new MatInterval(this.coshLo(x.lo), this.coshHi(x.hi));
+            }
+            return new MatInterval(1, this.coshHi(-x.lo > x.hi ? x.lo : x.hi));
+        },
+
+        tanh: function(x) {
+            if (this.isEmpty(x)) {
+                return this.EMPTY.clone();
+            }
+            return new MatInterval(this.tanhLo(x.lo), this.tanhHi(x.hi));
+        },
+
+        /*
+         * Relational
+         */
+
+        equal: function(x, y) {
+            if (this.isEmpty(x)) {
+                return this.isEmpty(y);
+            }
+            return !this.isEmpty(y) && x.lo === y.lo && x.hi === y.hi;
+        },
+
+        // almostEqual: function(x, y): void {
+        //     x = Array.isArray(x) ? x : x.toArray();
+        //     y = Array.isArray(y) ? y : y.toArray();
+        //     assertEps(x[0], y[0])
+        //     assertEps(x[1], y[1])
+        // },
+
+        notEqual: function(x, y) {
+            if (this.isEmpty(x)) {
+                return !this.isEmpty(y);
+            }
+            return this.isEmpty(y) || x.hi < y.lo || x.lo > y.hi;
+        },
+
+        lt: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return false;
+            }
+            return x.hi < y.lo;
+        },
+
+        gt: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return false;
+            }
+            return x.lo > y.hi;
+        },
+
+        leq: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return false;
+            }
+            return x.hi <= y.lo;
+        },
+
+        geq: function(x, y) {
+            if (Type.isNumber(x)) {
+                x = this.Interval(x);
+            }
+            if (Type.isNumber(y)) {
+                y = this.Interval(y);
+            }
+            if (this.isEmpty(x) || this.isEmpty(y)) {
+                return false;
+            }
+            return x.lo >= y.hi;
+        },
+
+        /*
+         * Constants
+         */
+        piLow: (3373259426.0 + 273688.0 / (1 << 21)) / (1 << 30),
+        piHigh: (3373259426.0 + 273689.0 / (1 << 21)) / (1 << 30),
+        piHalfLow: (3373259426.0 + 273688.0 / (1 << 21)) / (1 << 30) * 0.5,
+        piHalfHigh: (3373259426.0 + 273689.0 / (1 << 21)) / (1 << 30) * 0.5,
+        piTwiceLow: (3373259426.0 + 273688.0 / (1 << 21)) / (1 << 30) * 2,
+        piTwiceHigh: (3373259426.0 + 273689.0 / (1 << 21)) / (1 << 30) * 2,
+
+        /*
+         * Round
+         * Rounding functions for numbers
+         */
+        identity: function(v) {
+            return v;
+        },
+
+        _prev: function(v) {
+            if (v === Infinity) {
+              return v;
+            }
+            return this.nextafter(v, -Infinity);
+        },
+
+        _next: function(v) {
+            if (v === -Infinity) {
+              return v;
+            }
+            return this.nextafter(v, Infinity);
+        },
+
+        prev: function(v) {
+            return this._prev(v);
+        },
+
+        next: function(v) {
+            return this._next(v);
+        },
+
+        toInteger: function(x) {
+            return x < 0 ? Math.ceil(x) : Math.floor(x);
+        },
+
+        addLo: function(x, y) { return this.prev(x + y); },
+        addHi: function(x, y) { return this.next(x + y); },
+        subLo: function(x, y) { return this.prev(x - y); },
+        subHi: function(x, y) { return this.next(x - y); },
+        mulLo: function(x, y) { return this.prev(x * y); },
+        mulHi: function(x, y) { return this.next(x * y); },
+        divLo: function(x, y) { return this.prev(x / y); },
+        divHi: function(x, y) { return this.next(x / y); },
+        intLo: function(x) { return this.toInteger(this.prev(x)); },
+        intHi: function(x) { return this.toInteger(this.next(x)); },
+        logLo: function(x) { return this.prev(Math.log(x)); },
+        logHi: function(x) { return this.next(Math.log(x)); },
+        expLo: function(x) { return this.prev(Math.exp(x)); },
+        expHi: function(x) { return this.next(Math.exp(x)); },
+        sinLo: function(x) { return this.prev(Math.sin(x)); },
+        sinHi: function(x) { return this.next(Math.sin(x)); },
+        cosLo: function(x) { return this.prev(Math.cos(x)); },
+        cosHi: function(x) { return this.next(Math.cos(x)); },
+        tanLo: function(x) { return this.prev(Math.tan(x)); },
+        tanHi: function(x) { return this.next(Math.tan(x)); },
+        asinLo: function(x) { return this.prev(Math.asin(x)); },
+        asinHi: function(x) { return this.next(Math.asin(x)); },
+        acosLo: function(x) { return this.prev(Math.acos(x)); },
+        acosHi: function(x) { return this.next(Math.acos(x)); },
+        atanLo: function(x) { return this.prev(Math.atan(x)); },
+        atanHi: function(x) { return this.next(Math.atan(x)); },
+        sinhLo: function(x) { return this.prev(Mat.sinh(x)); },
+        sinhHi: function(x) { return this.next(Mat.sinh(x)); },
+        coshLo: function(x) { return this.prev(Mat.cosh(x)); },
+        coshHi: function(x) { return this.next(Mat.cosh(x)); },
+        tanhLo: function(x) { return this.prev(Mat.tanh(x)); },
+        tanhHi: function(x) { return this.next(Mat.tanh(x)); },
+        sqrtLo: function(x) { return this.prev(Math.sqrt(x)); },
+        sqrtHi: function(x) { return this.next(Math.sqrt(x)); },
+
+        powLo: function(x, power) {
+            var y;
+            if (power % 1 !== 0) {
+                // power has decimals
+                return this.prev(Math.pow(x, power));
+            }
+
+            y = (power & 1) === 1 ? x : 1;
+            power >>= 1;
+            while (power > 0) {
+                x = this.mulLo(x, x);
+                if ((power & 1) === 1) {
+                    y = this.mulLo(x, y);
+                }
+                power >>= 1;
+            }
+            return y;
+        },
+
+        powHi: function(x, power) {
+            var y;
+            if (power % 1 !== 0) {
+                // power has decimals
+                return this.next(Math.pow(x, power));
+            }
+
+            y = (power & 1) === 1 ? x : 1;
+            power >>= 1;
+            while (power > 0) {
+                x = this.mulHi(x, x);
+                if ((power & 1) === 1) {
+                    y = this.mulHi(x, y);
+                }
+                power >>= 1;
+            }
+            return y;
+        },
+
+        disable: function() {
+            this.next = this.prev = this.identity;
+        },
+
+        enable: function() {
+            this.prev = function(v) {
+                return this._prev(v);
+            };
+
+            this.next = function(v) {
+                return this._next(v);
+            };
+        },
+
+
+        /*
+         * nextafter
+         */
+        SMALLEST_DENORM: Math.pow(2, -1074),
+        UINT_MAX: (-1)>>>0,
+
+        nextafter: function(x, y) {
+            var lo, hi;
+
+            if (isNaN(x) || isNaN(y)) {
+                return NaN;
+            }
+            if (x === y) {
+                return x;
+            }
+            if (x === 0) {
+                if (y < 0) {
+                    return -this.SMALLEST_DENORM;
+                }
+                return this.SMALLEST_DENORM;
+            }
+            hi = doubleBits.hi(x);
+            lo = doubleBits.lo(x);
+            if ((y > x) === (x > 0)) {
+                if (lo === this.UINT_MAX) {
+                    hi += 1;
+                    lo = 0;
+                } else {
+                  lo += 1;
+                }
+            } else {
+                if (lo === 0) {
+                    lo = this.UINT_MAX;
+                    hi -= 1;
+                } else {
+                    lo -= 1;
+                }
+            }
+            return doubleBits.pack(lo, hi);
+        }
+
+    };
+
+    JXG.Math.IntervalArithmetic.PI       = new MatInterval(Mat.IntervalArithmetic.piLow, Mat.IntervalArithmetic.piHigh);
+    JXG.Math.IntervalArithmetic.PI_HALF  = new MatInterval(Mat.IntervalArithmetic.piHalfLow, Mat.IntervalArithmetic.piHalfHigh);
+    JXG.Math.IntervalArithmetic.PI_TWICE = new MatInterval(Mat.IntervalArithmetic.piTwiceLow, Mat.IntervalArithmetic.piTwiceHigh);
+    JXG.Math.IntervalArithmetic.ZERO     = new MatInterval(0);
+    JXG.Math.IntervalArithmetic.ONE      = new MatInterval(1);
+    JXG.Math.IntervalArithmetic.WHOLE    = new MatInterval().setWhole();
+    JXG.Math.IntervalArithmetic.EMPTY    = new MatInterval().setEmpty();
+
+    return JXG.Math.IntervalArithmetic;
+});
+
+
+
+/*
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Alfred Wassermann
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+ */
+
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ jxg
+ math/math
+ utils/type
+ */
+
+define('math/extrapolate',['math/math'], function (Mat) {
+
+    "use strict";
+
+    /**
+     * Functions for extrapolation of sequences. Used for finding limits of sequences which is used for curve plotting.
+     * @name JXG.Math.Extrapolate
+     * @exports Mat.Extrapolate as JXG.Math.Extrapolate
+     * @namespace
+     */
+    Mat.Extrapolate = {
+        upper: 15,
+        infty: 1.e+4,
+
+        /**
+         * Wynn's epsilon algorithm. Ported from the FORTRAN version in
+         * Ernst Joachim Weniger, "Nonlinear sequence transformations for the acceleration of convergence
+         * and the summation of divergent series", Computer Physics Reports Vol. 10, 189-371 (1989).
+         *
+         * @param {Number} s_n next value of sequence, i.e. n-th element of sequence
+         * @param {Number} n index of s_n in the sequence
+         * @param {Array} e One-dimensional array containing the extrapolation data. Has to be supplied by the calling routine.
+         * @returns {Number} New estimate of the limit of the sequence.
+         *
+         * @memberof JXG.Math.Extrapolate
+         */
+        wynnEps: function(s_n, n, e) {
+            var HUGE = 1.e+20,
+                TINY = 1.e-15,
+                f0 = 1, // f0 may be changed to other values, see vanden Broeck, Schwartz (1979)
+                f, j, aux1, aux2, diff, estlim;
+
+            e[n] = s_n;
+            if (n === 0) {
+                estlim = s_n;
+            } else {
+                aux2 = 0.0;
+                for (j = n; j > 0; j--) {
+                    aux1 = aux2;
+                    aux2 = e[j - 1];
+                    diff = e[j] - aux2;
+                    if (Math.abs(diff) <= TINY) {
+                        e[j - 1] = HUGE;
+                    } else {
+                        f = ((n - j + 1) % 2 === 1) ? f0 : 1;
+                        e[j - 1] = aux1 * f + 1 / diff;
+                    }
+                }
+                estlim = e[n % 2];
+            }
+
+            return estlim;
+        },
+
+        // wynnRho: function(s_n, n, e) {
+        //     var HUGE = 1.e+20,
+        //         TINY = 1.e-15,
+        //         j, f,
+        //         aux1, aux2, diff, estlim;
+
+        //     e[n] = s_n;
+        //     if (n === 0) {
+        //         estlim = s_n;
+        //     } else {
+        //         aux2 = 0.0;
+        //         for (j = n; j >= 1; j--) {
+        //             aux1 = aux2;
+        //             aux2 = e[j - 1];
+        //             diff = e[j] - aux2;
+        //             if (Math.abs(diff) <= TINY) {
+        //                 e[j - 1] = HUGE;
+        //             } else {
+        //                 f = ((n - j + 1) % 2 === 1) ? n - j + 1  : 1;
+        //                 e[j - 1] = aux1 + f / diff;
+        //             }
+        //         }
+        //         estlim = e[n % 2];
+        //     }
+
+        //     return estlim;
+        // },
+
+        /**
+         * Aitken transformation. Ported from the FORTRAN version in
+         * Ernst Joachim Weniger, "Nonlinear sequence transformations for the acceleration of convergence
+         * and the summation of divergent series", Computer Physics Reports Vol. 10, 189-371 (1989).
+         *
+         * @param {Number} s_n next value of sequence, i.e. n-th element of sequence
+         * @param {Number} n index of s_n in the sequence
+         * @param {Array} a One-dimensional array containing the extrapolation data. Has to be supplied by the calling routine.
+         * @returns {Number} New estimate of the limit of the sequence.
+         *
+         * @memberof JXG.Math.Extrapolate
+         */
+        aitken: function(s_n, n, a) {
+            var estlim,
+                HUGE = 1.e+20,
+                TINY = 1.e-15,
+                denom, v,
+                lowmax, j, m;
+
+            a[n] = s_n;
+            if (n < 2) {
+                estlim = s_n;
+            } else {
+                lowmax = n / 2;
+                for (j = 1; j <= lowmax; j++) {
+                    m = n - 2 * j;
+                    denom = a[m + 2] - 2 * a[m + 1] + a[m];
+                    if (Math.abs(denom) < TINY) {
+                         a[m] = HUGE;
+                    } else {
+                        v = a[m] - a[m + 1];
+                        a[m] -= v * v / denom;
+                    }
+                }
+                estlim = a[n % 2];
+            }
+            return estlim;
+        },
+
+        /**
+         * Iterated Brezinski transformation. Ported from the FORTRAN version in
+         * Ernst Joachim Weniger, "Nonlinear sequence transformations for the acceleration of convergence
+         * and the summation of divergent series", Computer Physics Reports Vol. 10, 189-371 (1989).
+         *
+         * @param {Number} s_n next value of sequence, i.e. n-th element of sequence
+         * @param {Number} n index of s_n in the sequence
+         * @param {Array} a One-dimensional array containing the extrapolation data. Has to be supplied by the calling routine.
+         * @returns {Number} New estimate of the limit of the sequence.
+         *
+         * @memberof JXG.Math.Extrapolate
+         */
+        brezinski: function(s_n, n, a) {
+            var estlim,
+                HUGE = 1.e+20,
+                TINY = 1.e-15,
+                denom,
+                d0, d1, d2,
+                lowmax, j, m;
+
+            a[n] = s_n;
+            if (n < 3) {
+                estlim = s_n;
+            } else {
+                lowmax = n / 3;
+                m = n;
+                for (j = 1; j <= lowmax; j++) {
+                    m -= 3;
+                    d0 = a[m + 1] - a[m];
+                    d1 = a[m + 2] - a[m + 1];
+                    d2 = a[m + 3] - a[m + 2];
+                    denom = d2 * (d1 - d0) - d0 * (d2 - d1);
+                    if (Math.abs(denom) < TINY) {
+                        a[m] = HUGE;
+                    } else {
+                        a[m] = a[m + 1] - d0 * d1 * (d2 - d1) / denom;
+                    }
+                }
+                estlim = a[n % 3];
+            }
+            return estlim;
+        },
+
+        /**
+         * Extrapolated iteration to approximate the value f(x_0).
+         *
+         * @param {Number} x0 Value for which the limit of f is to be determined. f(x0) may or may not exist.
+         * @param {Number} h0 Initial (signed) distance from x0.
+         * @param {Function} f Function for which the limit at x0 is to be determined
+         * @param {String} method String to choose the method. Available values: "wynnEps", "aitken", "brezinski"
+         * @param {Number} step_type Approximation method. step_type = 0 uses the sequence x0 + h0/n; step_type = 1 uses the sequence x0 + h0 * 2^(-n)
+         *
+         * @returns {Array} Array of length 3. Position 0: estimated value for f(x0), position 1: 'finite', 'infinite', or 'NaN'.
+         * Position 2: value between 0 and 1 judging the reliability of the result (1: high, 0: not successful).
+         *
+         * @memberof JXG.Math.Extrapolate
+         * @see JXG.Math.Extrapolate.limit
+         * @see JXG.Math.Extrapolate.wynnEps
+         * @see JXG.Math.Extrapolate.aitken
+         * @see JXG.Math.Extrapolate.brezinski
+         */
+        iteration: function(x0, h0, f, method, step_type) {
+            var n, v, w,
+                estlim = NaN,
+                diff,
+                r = 0.5,
+                E = [],
+                result = 'finite',
+                h = h0;
+
+            step_type = step_type || 0;
+
+            for (n = 1; n <= this.upper; n++) {
+                h = (step_type === 0) ?  h0 / (n + 1) : h * r;
+                v = f(x0 + h, true);
+
+                w = this[method](v, n - 1, E);
+//console.log(n, x0 + h, v, w);
+                if (isNaN(w)) {
+                    result = 'NaN';
+                    break;
+                }
+                if (v !== 0 && w / v > this.infty) {
+                    estlim = w;
+                    result = 'infinite';
+                    break;
+                }
+                diff = w - estlim;
+                if (Math.abs(diff) < 1.e-7) {
+                    break;
+                }
+                estlim = w;
+            }
+            return [estlim, result, 1 - (n - 1) / this.upper];
+        },
+
+        /**
+         * Levin transformation. See Numerical Recipes, ed. 3.
+         * Not yet ready for use.
+         *
+         * @param {Number} s_n next value of sequence, i.e. n-th element of sequence
+         * @param {Number} n index of s_n in the sequence
+         * @param {Array} numer One-dimensional array containing the extrapolation data for the numerator. Has to be supplied by the calling routine.
+         * @param {Array} denom One-dimensional array containing the extrapolation data for the denominator. Has to be supplied by the calling routine.
+         *
+         * @memberof JXG.Math.Extrapolate
+        */
+        levin: function(s_n, n, omega, beta, numer, denom) {
+            var HUGE = 1.e+20,
+                TINY = 1.e-15,
+                j,
+                fact, ratio, term, estlim;
+
+            term = 1.0 / (beta + n);
+            numer[n] = s_n / omega;
+            denom[n] = 1 / omega;
+            if (n > 0) {
+                numer[n - 1] = numer[n] - numer[n - 1];
+                denom[n - 1] = denom[n] - denom[n - 1];
+                if (n > 1) {
+                    ratio = (beta + n - 1) * term;
+                    for (j = 2; j <= n; j++) {
+                        fact = (beta + n - j) * Math.pow(ratio, j - 2) * term;
+                        numer[n - j] = numer[n - j + 1] - fact * numer[n - j];
+                        denom[n - j] = denom[n - j + 1] - fact * denom[n - j];
+                        term *= ratio;
+                    }
+                }
+            }
+            if (Math.abs(denom[0]) < TINY) {
+                estlim = HUGE;
+            } else {
+                estlim = numer[0] / denom[0];
+            }
+            return estlim;
+        },
+
+        iteration_levin: function(x0, h0, f, step_type) {
+            var n, v, w,
+                estlim = NaN,
+                v_prev,
+                delta, diff, omega,
+                beta = 1,
+                r = 0.5,
+                numer = [],
+                denom = [],
+                result = 'finite',
+                h = h0, transform = 'u';
+
+            step_type = step_type || 0;
+
+            v_prev = f(x0 + h0, true);
+            for (n = 1; n <= this.upper; n++) {
+                h = (step_type === 0) ?  h0 / (n + 1) : h * r;
+                v = f(x0 + h, true);
+                delta = v - v_prev;
+                if (Math.abs(delta) < 1) {
+                    transform = 'u';
+                } else {
+                    transform = 't';
+                }
+                if (transform === 'u') {
+                    omega = (beta + n) * delta; // u transformation
+                } else {
+                    omega = delta;              // t transformation
+                }
+
+                v_prev = v;
+                w = this.levin(v, n - 1, omega, beta, numer, denom);
+                diff = w - estlim;
+// console.log(n, delta, transform, x0 + h, v, w, diff);
+
+                if (isNaN(w)) {
+                    result = 'NaN';
+                    break;
+                }
+                if (v !== 0 && w / v > this.infty) {
+                    estlim = w;
+                    result = 'infinite';
+                    break;
+                }
+                if (Math.abs(diff) < 1.e-7) {
+                    break;
+                }
+                estlim = w;
+            }
+            return [estlim, result, 1 - (n - 1) / this.upper];
+        },
+
+        /**
+         *
+         * @param {Number} x0 Value for which the limit of f is to be determined. f(x0) may or may not exist.
+         * @param {Number} h0 Initial (signed) distance from x0.
+         * @param {Function} f Function for which the limit at x0 is to be determined
+         *
+         * @returns {Array} Array of length 3. Position 0: estimated value for f(x0), position 1: 'finite', 'infinite', or 'NaN'.
+         * Position 2: value between 0 and 1 judging the reliability of the result (1: high, 0: not successful).
+         * In case that the extrapolation fails, position 1 and 2 contain 'direct' and 0.
+         *
+         * @example
+         * var f1 = (x) => Math.log(x),
+         *     f2 = (x) => Math.tan(x - Math.PI * 0.5),
+         *     f3 = (x) => 4 / x;
+         *
+         * var x0 = 0.0000001;
+         * var h = 0.1;
+         * for (let f of [f1, f2, f3]) {
+         *     console.log("x0=", x0, f.toString());
+         *     console.log(JXG.Math.Extrapolate.limit(x0, h, f));
+         *  }
+         *
+         * </pre><div id="JXG5e8c6a7e-eeae-43fb-a669-26b5c9e40cab" class="jxgbox" style="width: 300px; height: 300px;"></div>
+         * <script type="text/javascript">
+         *     (function() {
+         *         var board = JXG.JSXGraph.initBoard('JXG5e8c6a7e-eeae-43fb-a669-26b5c9e40cab',
+         *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+         *     var f1 = (x) => Math.log(x),
+         *         f2 = (x) => Math.tan(x - Math.PI * 0.5),
+         *         f3 = (x) => 4 / x;
+         *
+         *     var x0 = 0.0000001;
+         *     var h = 0.1;
+         *     for (let f of [f1, f2, f3]) {
+         *         console.log("x0=", x0, f.toString());
+         *         console.log(JXG.Math.Extrapolate.limit(x0, h, f));
+         *      }
+         * 
+         *     })();
+         * 
+         * </script><pre>
+         *
+         *
+         * @see JXG.Math.Extrapolate.iteration
+         * @memberof JXG.Math.Extrapolate
+         */
+        limit: function(x0, h0, f) {
+            return this.iteration_levin(x0, h0, f, 0);
+            //return this.iteration(x0, h0, f, 'wynnEps', 1);
+
+            // var algs = ['wynnEps', 'levin'], //, 'wynnEps', 'levin', 'aitken', 'brezinski'],
+            //     le = algs.length,
+            //     i, t, res;
+            // for (i = 0; i < le; i++) {
+            //     for (t = 0; t < 1; t++) {
+            //         if (algs[i] === 'levin') {
+            //             res = this.iteration_levin(x0, h0, f, t);
+            //         } else {
+            //             res = this.iteration(x0, h0, f, algs[i], t);
+            //         }
+            //         if (res[2] > 0.6) {
+            //             return res;
+            //         }
+            //         console.log(algs[i], t, res)
+            //     }
+            // }
+            // return [f(x0 + Math.sign(h0) * Math.sqrt(Mat.eps)), 'direct', 0];
+        }
+    };
+
+    return Mat.Extrapolate;
+});
+
+/*
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -4845,7 +6749,7 @@ define('math/qdt',['math/math', 'utils/type'], function (Mat, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -6267,16 +8171,20 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
         /**
          * Abstract method to find roots of univariate functions, which - for the time being -
-         * is an alias for {@link JXG.Math.Numerics.fzero}
+         * is an alias for {@link JXG.Math.Numerics.chandrupatla}.
          * @param {function} f We search for a solution of f(x)=0.
-         * @param {Number} x initial guess for the root, i.e. starting value, or start interval enclosing the root.
+         * @param {Number|Array} x initial guess for the root, i.e. starting value, or start interval enclosing the root.
          * @param {Object} context optional object that is treated as "this" in the function body. This is useful if
          * the function is a method of an object and contains a reference to its parent object via "this".
          * @returns {Number} A root of the function f.
+         *
+         * @see JXG.Math.Numerics.chandrupatla
+         * @see JXG.Math.Numerics.fzero
          * @memberof JXG.Math.Numerics
          */
         root: function (f, x, context) {
-            return this.fzero(f, x, context);
+            //return this.fzero(f, x, context);
+            return this.chandrupatla(f, x, context);
         },
 
         /**
@@ -6791,7 +8699,7 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
                         for (s = 0; s < len - 3; s++) {
                             if (type === 'centripetal') {
-                                // The order is importeant, since p[0].coords === undefined
+                                // The order is important, since p[0].coords === undefined
                                 dt0 = p[s].Dist(p[s + 1]);
                                 dt1 = p[s + 2].Dist(p[s + 1]);
                                 dt2 = p[s + 3].Dist(p[s + 2]);
@@ -7189,29 +9097,29 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
          */
         D: function (f, obj) {
             if (!Type.exists(obj)) {
-                return function (x, suspendUpdate) {
+                return function (x, suspendedUpdate) {
                     var h = 0.00001,
                         h2 = (h * 2.0);
 
                     // Experiments with Richardsons rule
                     /*
-                    var phi = (f(x + h, suspendUpdate) - f(x - h, suspendUpdate)) / h2;
+                    var phi = (f(x + h, suspendedUpdate) - f(x - h, suspendedUpdate)) / h2;
                     var phi2;
                     h *= 0.5;
                     h2 *= 0.5;
-                    phi2 = (f(x + h, suspendUpdate) - f(x - h, suspendUpdate)) / h2;
+                    phi2 = (f(x + h, suspendedUpdate) - f(x - h, suspendedUpdate)) / h2;
 
                     return phi2 + (phi2 - phi) / 3.0;
                     */
-                    return (f(x + h, suspendUpdate) - f(x - h, suspendUpdate)) / h2;
+                    return (f(x + h, suspendedUpdate) - f(x - h, suspendedUpdate)) / h2;
                 };
             }
 
-            return function (x, suspendUpdate) {
+            return function (x, suspendedUpdate) {
                 var h = 0.00001,
                     h2 = (h * 2.0);
 
-                return (f.apply(obj, [x + h, suspendUpdate]) - f.apply(obj, [x - h, suspendUpdate])) / h2;
+                return (f.apply(obj, [x + h, suspendedUpdate]) - f.apply(obj, [x - h, suspendedUpdate])) / h2;
             };
         },
 
@@ -7550,7 +9458,8 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
         },
 
         /**
-         * Maximum number of iterations in {@link JXG.Math.Numerics.fzero}
+         * Maximum number of iterations in {@link JXG.Math.Numerics.fzero} and
+         * {@link JXG.Math.Numerics.chandrupatla}
          * @type Number
          * @default 80
          * @memberof JXG.Math.Numerics
@@ -7566,6 +9475,72 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
         maxIterationsMinimize: 500,
 
         /**
+         * Given a value x_0, this function tries to find a second value x_1 such that
+         * the function f has opposite signs at x_0 and x_1.
+         * The return values have to be tested if the method succeeded.
+         *
+         * @param {Function} f Function, whose root is to be found
+         * @param {Number} x0 Start value
+         * @param {Object} object Parent object in case f is method of it
+         * @returns {Array} [x_0, f(x_0), x_1, f(x_1)]
+         *
+         * @see JXG.Math.Numerics.fzero
+         * @see JXG.Math.Numerics.chandrupatla
+         *
+         * @memberof JXG.Math.Numerics
+         */
+        findBracket: function(f, x0, object) {
+            var a, aa, fa,
+                blist, b, fb,
+                u, fu,
+                i, len;
+
+            if (Type.isArray(x0)) {
+                return x0;
+            }
+
+            a = x0;
+            fa = f.call(object, a);
+            // nfev += 1;
+
+            // Try to get b, by trying several values related to a
+            aa = (a === 0) ? 1 : a;
+            blist = [
+                a - 0.1 * aa, a + 0.1 * aa,
+                a - 1, a + 1,
+                a - 0.5 * aa, a + 0.5 * aa,
+                a - 0.6 * aa, a + 0.6 * aa,
+                a - 1 * aa, a + 1 * aa,
+                a - 2 * aa, a + 2 * aa,
+                a - 5 * aa, a + 5 * aa,
+                a - 10 * aa, a + 10 * aa,
+                a - 50 * aa, a + 50 * aa,
+                a - 100 * aa, a + 100 * aa
+            ];
+            len = blist.length;
+
+            for (i = 0; i < len; i++) {
+                b = blist[i];
+                fb = f.call(object, b);
+                // nfev += 1;
+
+                if (fa * fb <= 0) {
+                    break;
+                }
+            }
+            if (b < a) {
+                u = a;
+                a = b;
+                b = u;
+
+                fu = fa;
+                fa = fb;
+                fb = fu;
+            }
+            return [a, fa, b, fb];
+        },
+
+        /**
          *
          * Find zero of an univariate function f.
          * @param {function} f Function, whose root is to be found
@@ -7573,19 +9548,25 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
          * @param {Object} object Parent object in case f is method of it
          * @returns {Number} the approximation of the root
          * Algorithm:
+         *  Brent's root finder from
          *  G.Forsythe, M.Malcolm, C.Moler, Computer methods for mathematical
          *  computations. M., Mir, 1980, p.180 of the Russian edition
+         *  http://www.netlib.org/c/brent.shar
          *
          * If x0 is an array containing lower and upper bound for the zero
          * algorithm 748 is applied. Otherwise, if x0 is a number,
          * the algorithm tries to bracket a zero of f starting from x0.
          * If this fails, we fall back to Newton's method.
+         *
+         * @see JXG.Math.Numerics.chandrupatla
+         * @see JXG.Math.Numerics.root
          * @memberof JXG.Math.Numerics
          */
         fzero: function (f, x0, object) {
             var a, b, c,
+                d, e,
                 fa, fb, fc,
-                aa, blist, i, len, u, fu,
+                res,
                 prev_step, t1, cb, t2,
                 // Actual tolerance
                 tol_act,
@@ -7611,38 +9592,18 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
                 fb = f.call(object, b);
                 // nfev += 1;
             } else {
-                a = x0;
-                fa = f.call(object, a);
-                // nfev += 1;
+                res = this.findBracket(f, x0, object);
+                a = res[0];
+                fa = res[1];
+                b = res[2];
+                fb = res[3];
+            }
 
-                // Try to get b.
-                if (a === 0) {
-                    aa = 1;
-                } else {
-                    aa = a;
-                }
-
-                blist = [0.9 * aa, 1.1 * aa, aa - 1, aa + 1, 0.5 * aa, 1.5 * aa, -aa, 2 * aa, -10 * aa, 10 * aa];
-                len = blist.length;
-
-                for (i = 0; i < len; i++) {
-                    b = blist[i];
-                    fb = f.call(object, b);
-                    // nfev += 1;
-
-                    if (fa * fb <= 0) {
-                        break;
-                    }
-                }
-                if (b < a) {
-                    u = a;
-                    a = b;
-                    b = u;
-
-                    fu = fa;
-                    fa = fb;
-                    fb = fu;
-                }
+            if (Math.abs(fa) <= eps) {
+                return a;
+            }
+            if (Math.abs(fb) <= eps) {
+                return b;
             }
 
             if (fa * fb > 0) {
@@ -7656,7 +9617,6 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
             // OK, we have enclosed a zero of f.
             // Now we can start Brent's method
-
             c = a;
             fc = fa;
 
@@ -7678,7 +9638,7 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
                 tol_act = 2 * eps * Math.abs(b) + eps * 0.5;
                 new_step = (c - b) * 0.5;
 
-                if (Math.abs(new_step) <= tol_act && Math.abs(fb) <= eps) {
+                if (Math.abs(new_step) <= tol_act || Math.abs(fb) <= eps) {
                     //  Acceptable approx. is found
                     return b;
                 }
@@ -7721,15 +9681,11 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
                 // Adjust the step to be not less than tolerance
                 if (Math.abs(new_step) < tol_act) {
-                    if (new_step > 0) {
-                        new_step = tol_act;
-                    } else {
-                        new_step = -tol_act;
-                    }
+                    new_step = (new_step > 0) ? tol_act : -tol_act;
                 }
 
                 // Save the previous approx.
-                a = b;
+                a  = b;
                 fa = fb;
                 b += new_step;
                 fb = f.call(object, b);
@@ -7745,6 +9701,123 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
             } // End while
 
             return b;
+        },
+
+        /**
+         * Find zero of an univariate function f.
+         * @param {function} f Function, whose root is to be found
+         * @param {Array,Number} x0  Start value or start interval enclosing the root
+         * @param {Object} object Parent object in case f is method of it
+         * @returns {Number} the approximation of the root
+         * Algorithm:
+         * Chandrupatla's method, see
+         * Tirupathi R. Chandrupatla,
+         * "A new hybrid quadratic/bisection algorithm for finding the zero of a nonlinear function without using derivatives",
+         * Advances in Engineering Software, Volume 28, Issue 3, April 1997, Pages 145-149.
+         *
+         * If x0 is an array containing lower and upper bound for the zero
+         * algorithm 748 is applied. Otherwise, if x0 is a number,
+         * the algorithm tries to bracket a zero of f starting from x0.
+         * If this fails, we fall back to Newton's method.
+         *
+         * @see JXG.Math.Numerics.root
+         * @see JXG.Math.Numerics.fzero
+         * @memberof JXG.Math.Numerics
+         */
+        chandrupatla: function (f, x0, object) {
+            var a, fa, b, fb, res,
+                niter = 0,
+                maxiter = this.maxIterationsRoot,
+                rand = (1 + Math.random() * 0.001),
+                t = 0.5 * rand,
+                eps = Mat.eps, // 1.e-10,
+                dlt = 0.00001,
+                x1, x2, x3, x,
+                f1, f2, f3, y,
+                xm, fm, tol, tl,
+                xi, ph, fl, fh,
+                AL, A, B, C, D;
+
+            if (Type.isArray(x0)) {
+                if (x0.length < 2) {
+                    throw new Error("JXG.Math.Numerics.fzero: length of array x0 has to be at least two.");
+                }
+
+                a = x0[0];
+                fa = f.call(object, a);
+                // nfev += 1;
+                b = x0[1];
+                fb = f.call(object, b);
+                // nfev += 1;
+            } else {
+                res = this.findBracket(f, x0, object);
+                a = res[0];
+                fa = res[1];
+                b = res[2];
+                fb = res[3];
+            }
+
+            if (fa * fb > 0) {
+                // Bracketing not successful, fall back to Newton's method or to fminbr
+                if (Type.isArray(x0)) {
+                    return this.fminbr(f, [a, b], object);
+                }
+
+                return this.Newton(f, a, object);
+            }
+
+            x1 = a;  x2 = b;
+            f1 = fa; f2 = fb;
+            do {
+                x = x1 + t * (x2 - x1);
+                y = f.call(object, x);
+
+                // Arrange 2-1-3: 2-1 interval, 1 middle, 3 discarded point
+                if (Math.sign(y) === Math.sign(f1)) {
+                    x3 = x1; x1 = x;
+                    f3 = f1; f1 = y;
+                } else {
+                    x3 = x2; x2 = x1;
+                    f3 = f2; f2 = f1;
+                }
+                x1 = x; f1 = y;
+
+                xm = x1; fm = f1;
+                if (Math.abs(f2) < Math.abs(f1)) {
+                    xm = x2; fm = f2;
+                }
+                tol = 2 * eps * Math.abs(xm) + 0.5 * dlt;
+                tl = tol / Math.abs(x2 - x1);
+                if (tl > 0.5 || fm === 0) {
+                    break;
+                }
+                // If inverse quadratic interpolation holds, use it
+                xi = (x1 - x2) / (x3 - x2);
+                ph = (f1 - f2) / (f3 - f2);
+                fl = 1 - Math.sqrt(1 - xi);
+                fh = Math.sqrt(xi);
+                if (fl < ph && ph < fh) {
+                    AL = (x3 - x1) / (x2 - x1);
+                    A = f1 / (f2 - f1);
+                    B = f3 / (f2 - f3);
+                    C = f1 / (f3 - f1);
+                    D = f2 / (f3 - f2);
+                    t = A * B + C * D * AL;
+                } else {
+                    t = 0.5 * rand;
+                }
+                // Adjust t away from the interval boundary
+                if (t < tl) {
+                    t = tl;
+                }
+                if (t > 1 - tl) {
+                    t = 1 - tl;
+                }
+                niter++;
+            } while (niter <= maxiter);
+            // console.log(niter);
+
+            return xm;
         },
 
         /**
@@ -7901,7 +9974,7 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
          * @memberof JXG.Math.Numerics
          */
         RamerDouglasPeucker: function (pts, eps) {
-            var newPts = [], i, k, len,
+            var allPts = [], newPts = [], i, k, len,
 
                 /**
                  * findSplit() is a subroutine of {@link JXG.Math.Numerics.RamerDouglasPeucker}.
@@ -7917,6 +9990,7 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
                     var d, k, ci, cj, ck,
                         x0, y0, x1, y1,
                         den, lbda,
+                        huge = 10000,
                         dist = 0,
                         f = i;
 
@@ -7927,16 +10001,16 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
                     ci = pts[i].scrCoords;
                     cj = pts[j].scrCoords;
 
-                    if (isNaN(ci[1] + ci[2])) {
+                    if (isNaN(ci[1]) || isNaN(ci[2])) {
                         return [NaN, i];
                     }
-                    if (isNaN(cj[1] + cj[2])) {
+                    if (isNaN(cj[1]) || isNaN(cj[2])) {
                         return [NaN, j];
                     }
 
                     for (k = i + 1; k < j; k++) {
                         ck = pts[k].scrCoords;
-                        if (isNaN(ck[1] + ck[2])) {
+                        if (isNaN(ck[1]) || isNaN(ck[2])) {
                             return [NaN, k];
                         }
 
@@ -7944,6 +10018,14 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
                         y0 = ck[2] - ci[2];
                         x1 = cj[1] - ci[1];
                         y1 = cj[2] - ci[2];
+                        x0 = x0 === Infinity ? huge : x0;
+                        y0 = y0 === Infinity ? huge : y0;
+                        x1 = x1 === Infinity ? huge : x1;
+                        y1 = y1 === Infinity ? huge : y1;
+                        x0 = x0 === -Infinity ? -huge : x0;
+                        y0 = y0 === -Infinity ? -huge : y0;
+                        x1 = x1 === -Infinity ? -huge : x1;
+                        y1 = y1 === -Infinity ? -huge : y1;
                         den = x1 * x1 + y1 * y1;
 
                         if (den >= Mat.eps) {
@@ -8011,24 +10093,37 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
             len = pts.length;
 
-            // Search for the left most point woithout NaN coordinates
             i = 0;
-            while (i < len && isNaN(pts[i].scrCoords[1] + pts[i].scrCoords[2])) {
-                i += 1;
-            }
-            // Search for the right most point woithout NaN coordinates
-            k = len - 1;
-            while (k > i && isNaN(pts[k].scrCoords[1] + pts[k].scrCoords[2])) {
-                k -= 1;
+            while (true) {
+                // Search for the next point without NaN coordinates
+                while (i < len && isNaN(pts[i].scrCoords[1] + pts[i].scrCoords[2])) {
+                    i += 1;
+                }
+                // Search for the next position of a NaN point
+                k = i + 1;
+                while (k < len && !isNaN(pts[k].scrCoords[1] + pts[k].scrCoords[2])) {
+                    k += 1;
+                }
+                k--;
+
+                // Only proceed if something is left
+                if (i < len && k > i) {
+                    newPts = [];
+                    newPts[0] = pts[i];
+                    RDP(pts, i, k, eps, newPts);
+                    allPts = allPts.concat(newPts);
+                }
+                if (i >= len) {
+                    break;
+                }
+                // Push the NaN point
+                if (k < len - 1) {
+                    allPts.push(pts[k + 1]);
+                }
+                i = k + 1;
             }
 
-            // Only proceed if something is left
-            if (!(i > k || i === len)) {
-                newPts[0] = pts[i];
-                RDP(pts, i, k, eps, newPts);
-            }
-
-            return newPts;
+            return allPts;
         },
 
         /**
@@ -8224,14 +10319,13 @@ define('math/numerics',['jxg', 'utils/type', 'math/math'], function (JXG, Type, 
 
             return points;
         }
-
     };
 
     return Mat.Numerics;
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -8341,13 +10435,18 @@ define('math/statistics',['jxg', 'math/math', 'utils/type'], function (JXG, Mat,
             var tmp, len;
 
             if (arr.length > 0) {
-                tmp = arr.slice(0);
-                tmp.sort(function (a, b) {
-                    return a - b;
-                });
+                if (ArrayBuffer.isView(arr)) {
+                    tmp = new Float64Array(arr);
+                    tmp.sort();
+                } else {
+                    tmp = arr.slice(0);
+                    tmp.sort(function (a, b) {
+                        return a - b;
+                    });
+                }
                 len = tmp.length;
 
-                if (len % 2 === 1) {
+                if (len & 1) { // odd
                     return tmp[parseInt(len * 0.5, 10)];
                 }
 
@@ -8456,16 +10555,21 @@ define('math/statistics',['jxg', 'math/math', 'utils/type'], function (JXG, Mat,
             var i, len, res;
 
             if (Type.isArray(arr)) {
-                len = arr.length;
-                res = [];
-
-                for (i = 0; i < len; i++) {
-                    res[i] = Math.abs(arr[i]);
+                if (arr.map) {
+                    res = arr.map(Math.abs);
+                } else {
+                    len = arr.length;
+                    res = [];
+    
+                    for (i = 0; i < len; i++) {
+                        res[i] = Math.abs(arr[i]);
+                    }
                 }
+            } else if (ArrayBuffer.isView(arr)) {
+                res = arr.map(Math.abs);
             } else {
                 res = Math.abs(arr);
             }
-
             return res;
         },
 
@@ -8728,7 +10832,7 @@ define('math/statistics',['jxg', 'math/math', 'utils/type'], function (JXG, Mat,
 
             if (this.hasSpare) {
                 this.hasSpare = false;
-                return this.spare * stdDev + this.mean;
+                return this.spare * stdDev + mean;
             }
 
             do {
@@ -8749,12 +10853,13 @@ define('math/statistics',['jxg', 'math/math', 'utils/type'], function (JXG, Mat,
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph.
@@ -8805,7 +10910,7 @@ define('math/geometry',[
 
     /**
      * Math.Geometry namespace definition. This namespace holds geometrical algorithms,
-     * espcecially intersection algorithms.
+     * especially intersection algorithms.
      * @name JXG.Math.Geometry
      * @namespace
      */
@@ -9257,10 +11362,11 @@ define('math/geometry',[
                 N = ps.length,
                 lastPoint = null;
 
-            // If the last point equals the first point, we take the last point out of the array
-            // If the user closes the polygon, there will be two points at the end which equal the
-            // the first point. Therefore, we use a while lopp to pop the last points.
-            while (ps[0][0] == ps[N - 1][0] && ps[0][1] == ps[N - 1][1] && ps[0][2] == ps[N - 1][2]) {
+            // If the last point equals the first point, we take the last point out of the array.
+            // It may be that the several points at the end of the array are equal to the first point.
+            // The polygonal chain is been closed by JSXGraph, but this may also have been done by the user.
+            // Therefore, we use a while lopp to pop the last points.
+            while (ps[0][0] === ps[N - 1][0] && ps[0][1] === ps[N - 1][1] && ps[0][2] === ps[N - 1][2]) {
                 lastPoint = ps.pop();
                 N--;
             }
@@ -9275,11 +11381,15 @@ define('math/geometry',[
             //     }
             // }
 
-            // Sort ps in increasing order of the angle between a point and the first point ll.
             ll = ps[0];
+            // Sort ps in increasing order of the angle between a point and the first point ll.
+            // If a point is equal to the first point ll, the angle is defined to be -Infinity.
+            // Otherwise, atan2 would return zero, which is a value which also attained by points
+            // on the same horizontal line.
             ps.sort(function (a, b) {
-                var rad1 = Math.atan2(a[2] - ll[2], a[1] - ll[1]),
-                    rad2 = Math.atan2(b[2] - ll[2], b[1] - ll[1]);
+                var rad1 = (a[2] === ll[2] && a[1] === ll[1]) ? -Infinity : Math.atan2(a[2] - ll[2], a[1] - ll[1]),
+                    rad2 = (b[2] === ll[2] && b[1] === ll[1]) ? -Infinity : Math.atan2(b[2] - ll[2], b[1] - ll[1]);
+
                 return rad1 - rad2;
             });
 
@@ -9365,9 +11475,8 @@ define('math/geometry',[
                         M -= 1;
                     } else if (i === N - 1) {
                         break;
-                    } else {
-                        i += 1;
                     }
+                    i += 1;
                 }
 
                 M += 1;
@@ -9714,7 +11823,7 @@ define('math/geometry',[
         },
 
         /**
-         * If you're looking from point "start" towards point "s" and can see the point "p", true is returned.
+         * If you're looking from point "start" towards point "s" and you can see the point "p", return true.
          * Otherwise return false.
          * @param {JXG.Coords} start The point you're standing on.
          * @param {JXG.Coords} p The point in which direction you're looking.
@@ -9797,14 +11906,14 @@ define('math/geometry',[
                 /** @ignore */
                 func = function () {
                     var res, c,
-                        first1, first2, last1, last2;
-
-                    first1 = first2 = Type.evaluate(el1.visProp.straightfirst);
-                    last1 = last2 = Type.evaluate(el1.visProp.straightlast);
+                        first1 = Type.evaluate(el1.visProp.straightfirst),
+                        last1 = Type.evaluate(el1.visProp.straightlast),
+                        first2 = Type.evaluate(el2.visProp.straightfirst),
+                        last2 = Type.evaluate(el2.visProp.straightlast);
 
                     /**
                      * If one of the lines is a segment or ray and
-                     * the the intersection point shpould disappear if outside
+                     * the the intersection point should disappear if outside
                      * of the segment or ray we call
                      * meetSegmentSegment
                      */
@@ -10440,6 +12549,7 @@ define('math/geometry',[
          * @returns {Array} [Intersection point, t, u] The first entry contains the homogeneous coordinates
          * of the intersection point. The second and third entry gives the position of the intersection between the
          * two defining points. For example, the second entry t is defined by: intersection point = t*p1 + (1-t)*p2.
+         * If the two segments are collinear, [[0,0,0], Infinity, Infinity] is returned.
          **/
         meetSegmentSegment: function (p1, p2, q1, q2) {
             var t, u, diff,
@@ -10909,21 +13019,30 @@ define('math/geometry',[
         /**
          * Calculates the coordinates of the orthogonal projection of a given point on a given line. I.o.w. the
          * intersection point of the given line and its perpendicular through the given point.
-         * @param {JXG.Point} point Point to project.
+         * @param {JXG.Point|JXG.Coords} point Point to project.
          * @param {JXG.Line} line Line on that the point is projected.
-         * @param {JXG.Board} [board=point.board] Reference to a board.
+         * @param {JXG.Board} [board=point.board|board=line.board] Reference to a board.
          * @returns {JXG.Coords} The coordinates of the projection of the given point on the given line.
          */
         projectPointToLine: function (point, line, board) {
-            // Homogeneous version
-            var v = [0, line.stdform[1], line.stdform[2]];
+            var v = [0, line.stdform[1], line.stdform[2]],
+                coords;
 
             if (!Type.exists(board)) {
-                board = point.board;
+                if (Type.exists(point.coords)) {
+                    board = point.board;
+                } else {
+                    board = line.board;
+                }
             }
 
-            v = Mat.crossProduct(v, point.coords.usrCoords);
-            //return this.meetLineLine(v, line.stdform, 0, board);
+            if (Type.exists(point.coords)) {
+                coords = point.coords.usrCoords;
+            } else {
+                coords = point.usrCoords;
+            }
+
+            v = Mat.crossProduct(v, coords);
             return new Coords(Const.COORDS_BY_USER, Mat.crossProduct(v, line.stdform), board);
         },
 
@@ -11353,7 +13472,2822 @@ define('math/geometry',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Alfred Wassermann
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+ */
+
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ jxg
+ math/math
+ utils/type
+ */
+
+define('math/plot',['jxg', 'base/constants', 'base/coords', 'math/math', 'math/extrapolate', 'math/numerics',
+        'math/statistics', 'math/geometry', 'math/ia', 'utils/type'],
+        function (JXG, Const, Coords, Mat, Extrapolate, Numerics, Statistics, Geometry, IntervalArithmetic, Type) {
+
+    "use strict";
+
+    /**
+     * Functions for plotting of curves.
+     * @name JXG.Math.Plot
+     * @exports Mat.Plot as JXG.Math.Plot
+     * @namespace
+     */
+    Mat.Plot = {
+
+        /**
+         * Check if at least one point on the curve is finite and real.
+         **/
+        checkReal: function (points) {
+            var b = false,
+                i, p,
+                len = points.length;
+
+            for (i = 0; i < len; i++) {
+                p = points[i].usrCoords;
+                if (!isNaN(p[1]) && !isNaN(p[2]) && Math.abs(p[0]) > Mat.eps) {
+                    b = true;
+                    break;
+                }
+            }
+            return b;
+        },
+
+        //----------------------------------------------------------------------
+        // Plot algorithm v0
+        //----------------------------------------------------------------------
+        /**
+         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>false</tt>.
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} mi Left bound of curve
+         * @param {Number} ma Right bound of curve
+         * @param {Number} len Number of data points
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        updateParametricCurveNaive: function (curve, mi, ma, len) {
+            var i, t,
+                suspendUpdate = false,
+                stepSize = (ma - mi) / len;
+
+            for (i = 0; i < len; i++) {
+                t = mi + i * stepSize;
+                // The last parameter prevents rounding in usr2screen().
+                curve.points[i].setCoordinates(Const.COORDS_BY_USER, [curve.X(t, suspendUpdate), curve.Y(t, suspendUpdate)], false);
+                curve.points[i]._t = t;
+                suspendUpdate = true;
+            }
+            return curve;
+        },
+
+        //----------------------------------------------------------------------
+        // Plot algorithm v1
+        //----------------------------------------------------------------------
+        /**
+         * Crude and cheap test if the segment defined by the two points <tt>(x0, y0)</tt> and <tt>(x1, y1)</tt> is
+         * outside the viewport of the board. All parameters have to be given in screen coordinates.
+         *
+         * @private
+         * @deprecated
+         * @param {Number} x0
+         * @param {Number} y0
+         * @param {Number} x1
+         * @param {Number} y1
+         * @param {JXG.Board} board
+         * @returns {Boolean} <tt>true</tt> if the given segment is outside the visible area.
+         */
+        isSegmentOutside: function (x0, y0, x1, y1, board) {
+            return (y0 < 0 && y1 < 0) || (y0 > board.canvasHeight && y1 > board.canvasHeight) ||
+                (x0 < 0 && x1 < 0) || (x0 > board.canvasWidth && x1 > board.canvasWidth);
+        },
+
+        /**
+         * Compares the absolute value of <tt>dx</tt> with <tt>MAXX</tt> and the absolute value of <tt>dy</tt>
+         * with <tt>MAXY</tt>.
+         *
+         * @private
+         * @deprecated
+         * @param {Number} dx
+         * @param {Number} dy
+         * @param {Number} MAXX
+         * @param {Number} MAXY
+         * @returns {Boolean} <tt>true</tt>, if <tt>|dx| &lt; MAXX</tt> and <tt>|dy| &lt; MAXY</tt>.
+         */
+        isDistOK: function (dx, dy, MAXX, MAXY) {
+            return (Math.abs(dx) < MAXX && Math.abs(dy) < MAXY) && !isNaN(dx + dy);
+        },
+
+         /**
+         * @private
+         * @deprecated
+         */
+        isSegmentDefined: function (x0, y0, x1, y1) {
+            return !(isNaN(x0 + y0) && isNaN(x1 + y1));
+        },
+
+        /**
+         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>true</tt>.
+         * Since 0.99 this algorithm is deprecated. It still can be used if {@link JXG.Curve#doadvancedplotold} is <tt>true</tt>.
+         *
+         * @deprecated
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} mi Left bound of curve
+         * @param {Number} ma Right bound of curve
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        updateParametricCurveOld: function (curve, mi, ma) {
+            var i, t, d,
+                x, y, t0, x0, y0, top, depth,
+                MAX_DEPTH, MAX_XDIST, MAX_YDIST,
+                suspendUpdate = false,
+                po = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                dyadicStack = [],
+                depthStack = [],
+                pointStack = [],
+                divisors = [],
+                distOK = false,
+                j = 0,
+                distFromLine = function (p1, p2, p0) {
+                    var lbda, d,
+                        x0 = p0[1] - p1[1],
+                        y0 = p0[2] - p1[2],
+                        x1 = p2[0] - p1[1],
+                        y1 = p2[1] - p1[2],
+                        den = x1 * x1 + y1 * y1;
+
+                    if (den >= Mat.eps) {
+                        lbda = (x0 * x1 + y0 * y1) / den;
+                        if (lbda > 0) {
+                            if (lbda <= 1) {
+                                x0 -= lbda * x1;
+                                y0 -= lbda * y1;
+                            // lbda = 1.0;
+                            } else {
+                                x0 -= x1;
+                                y0 -= y1;
+                            }
+                        }
+                    }
+                    d = x0 * x0 + y0 * y0;
+                    return Math.sqrt(d);
+                };
+
+            JXG.deprecated('Curve.updateParametricCurveOld()');
+
+            if (curve.board.updateQuality === curve.board.BOARD_QUALITY_LOW) {
+                MAX_DEPTH = 15;
+                MAX_XDIST = 10; // 10
+                MAX_YDIST = 10; // 10
+            } else {
+                MAX_DEPTH = 21;
+                MAX_XDIST = 0.7; // 0.7
+                MAX_YDIST = 0.7; // 0.7
+            }
+
+            divisors[0] = ma - mi;
+            for (i = 1; i < MAX_DEPTH; i++) {
+                divisors[i] = divisors[i - 1] * 0.5;
+            }
+
+            i = 1;
+            dyadicStack[0] = 1;
+            depthStack[0] = 0;
+
+            t = mi;
+            po.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, suspendUpdate), curve.Y(t, suspendUpdate)], false);
+
+            // Now, there was a first call to the functions defining the curve.
+            // Defining elements like sliders have been evaluated.
+            // Therefore, we can set suspendUpdate to false, so that these defining elements
+            // need not be evaluated anymore for the rest of the plotting.
+            suspendUpdate = true;
+            x0 = po.scrCoords[1];
+            y0 = po.scrCoords[2];
+            t0 = t;
+
+            t = ma;
+            po.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, suspendUpdate), curve.Y(t, suspendUpdate)], false);
+            x = po.scrCoords[1];
+            y = po.scrCoords[2];
+
+            pointStack[0] = [x, y];
+
+            top = 1;
+            depth = 0;
+
+            curve.points = [];
+            curve.points[j++] = new Coords(Const.COORDS_BY_SCREEN, [x0, y0], curve.board, false);
+
+            do {
+                distOK = this.isDistOK(x - x0, y - y0, MAX_XDIST, MAX_YDIST) || this.isSegmentOutside(x0, y0, x, y, curve.board);
+                while (depth < MAX_DEPTH && (!distOK || depth < 6) && (depth <= 7 || this.isSegmentDefined(x0, y0, x, y))) {
+                    // We jump out of the loop if
+                    // * depth>=MAX_DEPTH or
+                    // * (depth>=6 and distOK) or
+                    // * (depth>7 and segment is not defined)
+
+                    dyadicStack[top] = i;
+                    depthStack[top] = depth;
+                    pointStack[top] = [x, y];
+                    top += 1;
+
+                    i = 2 * i - 1;
+                    // Here, depth is increased and may reach MAX_DEPTH
+                    depth++;
+                    // In that case, t is undefined and we will see a jump in the curve.
+                    t = mi + i * divisors[depth];
+
+                    po.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, suspendUpdate), curve.Y(t, suspendUpdate)], false, true);
+                    x = po.scrCoords[1];
+                    y = po.scrCoords[2];
+                    distOK = this.isDistOK(x - x0, y - y0, MAX_XDIST, MAX_YDIST) || this.isSegmentOutside(x0, y0, x, y, curve.board);
+                }
+
+                if (j > 1) {
+                    d = distFromLine(curve.points[j - 2].scrCoords, [x, y], curve.points[j - 1].scrCoords);
+                    if (d < 0.015) {
+                        j -= 1;
+                    }
+                }
+
+                curve.points[j] = new Coords(Const.COORDS_BY_SCREEN, [x, y], curve.board, false);
+                curve.points[j]._t = t;
+                j += 1;
+
+                x0 = x;
+                y0 = y;
+                t0 = t;
+
+                top -= 1;
+                x = pointStack[top][0];
+                y = pointStack[top][1];
+                depth = depthStack[top] + 1;
+                i = dyadicStack[top] * 2;
+
+            } while (top > 0 && j < 500000);
+
+            curve.numberPoints = curve.points.length;
+
+            return curve;
+        },
+
+        //----------------------------------------------------------------------
+        // Plot algorithm v2
+        //----------------------------------------------------------------------
+
+        /**
+         * Add a point to the curve plot. If the new point is too close to the previously inserted point,
+         * it is skipped.
+         * Used in {@link JXG.Curve._plotRecursive}.
+         *
+         * @private
+         * @param {JXG.Coords} pnt Coords to add to the list of points
+         */
+        _insertPoint_v2: function (curve, pnt, t) {
+            var lastReal = !isNaN(this._lastCrds[1] + this._lastCrds[2]),     // The last point was real
+                newReal = !isNaN(pnt.scrCoords[1] + pnt.scrCoords[2]),        // New point is real point
+                cw = curve.board.canvasWidth,
+                ch = curve.board.canvasHeight,
+                off = 500;
+
+            newReal = newReal &&
+                        (pnt.scrCoords[1] > -off && pnt.scrCoords[2] > -off &&
+                         pnt.scrCoords[1] < cw + off && pnt.scrCoords[2] < ch + off);
+
+            /*
+             * Prevents two consecutive NaNs or points wich are too close
+             */
+            if ((!newReal && lastReal) ||
+                    (newReal && (!lastReal ||
+                        Math.abs(pnt.scrCoords[1] - this._lastCrds[1]) > 0.7 ||
+                        Math.abs(pnt.scrCoords[2] - this._lastCrds[2]) > 0.7))) {
+                pnt._t = t;
+                curve.points.push(pnt);
+                this._lastCrds = pnt.copy('scrCoords');
+            }
+        },
+
+
+        /**
+         * Investigate a function term at the bounds of intervals where
+         * the function is not defined, e.g. log(x) at x = 0.
+         *
+         * c is inbetween a and b
+         * @private
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Array} c Screen coordinates of the bisection point at (ta + tb) / 2
+         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
+         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
+         * @param {Number} tc (ta + tb) / 2 = tc. Parameter which evaluates to b, i.e. [1, X(tc), Y(tc)] = c in screen coordinates
+         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
+         * @returns {JXG.Boolean} true if the point is inserted and the recursion should stop, false otherwise.
+         */
+        _borderCase: function (curve, a, b, c, ta, tb, tc, depth) {
+            var t, pnt, p,
+                p_good = null,
+                j,
+                max_it = 30,
+                is_undef = false,
+                t_nan, t_real, t_real2,
+                vx, vy, vx2, vy2, dx, dy;
+                // asymptote;
+
+            if (depth <= 1) {
+               pnt = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false);
+               j = 0;
+               // Bisect a, b and c until the point t_real is inside of the definition interval
+               // and as close as possible at the boundary.
+               // t_real2 is the second closest point.
+               do {
+                   // There are four cases:
+                   //  a  |  c  |  b
+                   // ---------------
+                   // inf | R   | R
+                   // R   | R   | inf
+                   // inf | inf | R
+                   // R   | inf | inf
+                   //
+                   if (isNaN(a[1] + a[2]) && !isNaN(c[1] + c[2])) {
+                       t_nan = ta;
+                       t_real = tc;
+                       t_real2 = tb;
+                   } else if (isNaN(b[1] + b[2]) && !isNaN(c[1] + c[2])) {
+                       t_nan = tb;
+                       t_real = tc;
+                       t_real2 = ta;
+                   } else if (isNaN(c[1] + c[2]) && !isNaN(b[1] + b[2])) {
+                       t_nan = tc;
+                       t_real = tb;
+                       t_real2 = tb + (tb - tc);
+                   } else if (isNaN(c[1] + c[2]) && !isNaN(a[1] + a[2])) {
+                       t_nan = tc;
+                       t_real = ta;
+                       t_real2 = ta - (tc - ta);
+                   } else {
+                       return false;
+                   }
+                   t = 0.5 * (t_nan + t_real);
+                   pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, true), curve.Y(t, true)], false);
+                   p = pnt.usrCoords;
+
+                   is_undef = isNaN(p[1] + p[2]);
+                   if (is_undef) {
+                       t_nan = t;
+                   } else {
+                       t_real2 = t_real;
+                       t_real = t;
+                   }
+                   ++j;
+               } while (is_undef && j < max_it);
+
+               // If bisection was successful, take this point.
+               // Usefule only for general curves, for function graph
+               // the code below overwrite p_good from here.
+               if (j < max_it) {
+                   p_good = p.slice();
+                   c = p.slice();
+                   t_real = t;
+               }
+
+               // OK, bisection has been done now.
+               // t_real contains the closest inner point to the border of the interval we could find.
+               // t_real2 is the second nearest point to this boundary.
+               // Now we approximate the derivative by computing the slope of the line through these two points
+               // and test if it is "infinite", i.e larger than 400 in absolute values.
+               //
+               vx = curve.X(t_real, true) ;
+               vx2 = curve.X(t_real2, true) ;
+               dx = (vx - vx2) / (t_real - t_real2);
+               vy = curve.Y(t_real, true) ;
+               vy2 = curve.Y(t_real2, true) ;
+               dy = (vy - vy2) / (t_real - t_real2);
+
+               if (p_good !== null) {
+                   this._insertPoint_v2(curve, new Coords(Const.COORDS_BY_USER, p_good, curve.board, false));
+                   return true;
+               }
+           }
+           return false;
+       },
+
+        /**
+         * Recursive interval bisection algorithm for curve plotting.
+         * Used in {@link JXG.Curve.updateParametricCurve}.
+         * @private
+         * @deprecated
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
+         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
+         * @param {Number} delta If the distance of the bisection point at (ta + tb) / 2 from the point (a + b) / 2 is less then delta,
+         *                 the segment [a,b] is regarded as straight line.
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        _plotRecursive_v2: function (curve, a, ta, b, tb, depth, delta) {
+            var tc, c,
+                ds, mindepth = 0,
+                isSmooth, isJump, isCusp,
+                cusp_threshold = 0.5,
+                jump_threshold = 0.99,
+                pnt = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false);
+
+            if (curve.numberPoints > 65536) {
+                return;
+            }
+
+            // Test if the function is undefined in an interval
+            if (depth < this.nanLevel && this._isUndefined(curve, a, ta, b, tb)) {
+                return this;
+            }
+
+            if (depth < this.nanLevel && this._isOutside(a, ta, b, tb, curve.board)) {
+                return this;
+            }
+
+            tc = (ta  + tb) * 0.5;
+            pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(tc, true), curve.Y(tc, true)], false);
+            c = pnt.scrCoords;
+
+            if (this._borderCase(curve, a, b, c, ta, tb, tc, depth)) {
+                return this;
+            }
+
+            ds = this._triangleDists(a, b, c);           // returns [d_ab, d_ac, d_cb, d_cd]
+
+            isSmooth = (depth < this.smoothLevel) && (ds[3] < delta);
+
+            isJump = (depth < this.jumpLevel) &&
+                        ((ds[2] > jump_threshold * ds[0]) ||
+                         (ds[1] > jump_threshold * ds[0]) ||
+                        ds[0] === Infinity || ds[1] === Infinity || ds[2] === Infinity);
+
+            isCusp = (depth < this.smoothLevel + 2) && (ds[0] < cusp_threshold * (ds[1] + ds[2]));
+
+            if (isCusp) {
+                mindepth = 0;
+                isSmooth = false;
+            }
+
+            --depth;
+
+            if (isJump) {
+                this._insertPoint_v2(curve, new Coords(Const.COORDS_BY_SCREEN, [NaN, NaN], curve.board, false), tc);
+            } else if (depth <= mindepth || isSmooth) {
+                this._insertPoint_v2(curve, pnt, tc);
+                //if (this._borderCase(a, b, c, ta, tb, tc, depth)) {}
+            } else {
+                this._plotRecursive_v2(curve, a, ta, c, tc, depth, delta);
+                this._insertPoint_v2(curve, pnt, tc);
+                this._plotRecursive_v2(curve, c, tc, b, tb, depth, delta);
+            }
+
+            return this;
+        },
+
+        /**
+         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>true</tt>.
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} mi Left bound of curve
+         * @param {Number} ma Right bound of curve
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        updateParametricCurve_v2: function (curve, mi, ma) {
+            var ta, tb, a, b,
+                suspendUpdate = false,
+                pa = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                pb = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                depth, delta,
+                w2, h2, bbox,
+                ret_arr;
+
+            //console.time("plot");
+            if (curve.board.updateQuality === curve.board.BOARD_QUALITY_LOW) {
+                depth = Type.evaluate(curve.visProp.recursiondepthlow) || 13;
+                delta = 2;
+                // this.smoothLevel = 5; //depth - 7;
+                this.smoothLevel = depth - 6;
+                this.jumpLevel = 3;
+            } else {
+                depth = Type.evaluate(curve.visProp.recursiondepthhigh) || 17;
+                delta = 2;
+                // smoothLevel has to be small for graphs in a huge interval.
+                // this.smoothLevel = 3; //depth - 7; // 9
+                this.smoothLevel = depth - 9; // 9
+                this.jumpLevel = 2;
+            }
+            this.nanLevel = depth - 4;
+
+            curve.points = [];
+
+            if (this.xterm === 'x') {
+                // For function graphs we can restrict the plot interval
+                // to the visible area +plus margin
+                bbox = curve.board.getBoundingBox();
+                w2 = (bbox[2] - bbox[0]) * 0.3;
+                h2 = (bbox[1] - bbox[3]) * 0.3;
+                ta = Math.max(mi, bbox[0] - w2);
+                tb = Math.min(ma, bbox[2] + w2);
+            } else {
+                ta = mi;
+                tb = ma;
+            }
+            pa.setCoordinates(Const.COORDS_BY_USER, [curve.X(ta, suspendUpdate), curve.Y(ta, suspendUpdate)], false);
+
+            // The first function calls of X() and Y() are done. We can now
+            // switch `suspendUpdate` on. If supported by the functions, this
+            // avoids for the rest of the plotting algorithm, evaluation of any
+            // parent elements.
+            suspendUpdate = true;
+
+            pb.setCoordinates(Const.COORDS_BY_USER, [curve.X(tb, suspendUpdate), curve.Y(tb, suspendUpdate)], false);
+
+            // Find start and end points of the visible area (plus a certain margin)
+            ret_arr = this._findStartPoint(curve, pa.scrCoords, ta, pb.scrCoords, tb);
+            pa.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
+            ta = ret_arr[1];
+            ret_arr = this._findStartPoint(curve, pb.scrCoords, tb, pa.scrCoords, ta);
+            pb.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
+            tb = ret_arr[1];
+
+            // Save the visible area.
+            // This can be used in Curve.hasPoint().
+            this._visibleArea = [ta, tb];
+
+            // Start recursive plotting algorithm
+            a = pa.copy('scrCoords');
+            b = pb.copy('scrCoords');
+            pa._t = ta;
+            curve.points.push(pa);
+            this._lastCrds = pa.copy('scrCoords');   // Used in _insertPoint
+            this._plotRecursive_v2(curve, a, ta, b, tb, depth, delta);
+            pb._t = tb;
+            curve.points.push(pb);
+
+            curve.numberPoints = curve.points.length;
+            //console.timeEnd("plot");
+
+            return curve;
+        },
+
+        //----------------------------------------------------------------------
+        // Plot algorithm v3
+        //----------------------------------------------------------------------
+        /**
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {*} pnt
+         * @param {*} t
+         * @param {*} depth
+         * @param {*} limes
+         * @private
+         */
+        _insertLimesPoint: function(curve, pnt, t, depth, limes) {
+            var p0, p1, p2;
+
+            // Ignore jump point if it follows limes
+            if ((Math.abs(this._lastUsrCrds[1]) === Infinity && Math.abs(limes.left_x) === Infinity) ||
+                (Math.abs(this._lastUsrCrds[2]) === Infinity && Math.abs(limes.left_y) === Infinity)) {
+                // console.log("SKIP:", pnt.usrCoords, this._lastUsrCrds, limes);
+                return;
+            }
+
+            // // Ignore jump left from limes
+            // if (Math.abs(limes.left_x) > 100 * Math.abs(this._lastUsrCrds[1])) {
+            //     x = Math.sign(limes.left_x) * Infinity;
+            // } else {
+            //     x = limes.left_x;
+            // }
+            // if (Math.abs(limes.left_y) > 100 * Math.abs(this._lastUsrCrds[2])) {
+            //     y = Math.sign(limes.left_y) * Infinity;
+            // } else {
+            //     y = limes.left_y;
+            // }
+            // //pnt.setCoordinates(Const.COORDS_BY_USER, [x, y], false);
+
+            // Add points at a jump. pnt contains [NaN, NaN]
+            //console.log("Add", t, pnt.usrCoords, limes, depth)
+            p0 = new Coords(Const.COORDS_BY_USER, [limes.left_x, limes.left_y], curve.board);
+            p0._t = t;
+            curve.points.push(p0);
+
+            if (!isNaN(limes.left_x) && !isNaN(limes.left_y) && !isNaN(limes.right_x) && !isNaN(limes.right_y) &&
+                (Math.abs(limes.left_x - limes.right_x) > Mat.eps || Math.abs(limes.left_y - limes.right_y) > Mat.eps)) {
+                p1 = new Coords(Const.COORDS_BY_SCREEN, pnt, curve.board);
+                p1._t = t;
+                curve.points.push(p1);
+            }
+
+            p2 = new Coords(Const.COORDS_BY_USER, [limes.right_x, limes.right_y], curve.board);
+            p2._t = t;
+            curve.points.push(p2);
+            this._lastScrCrds = p2.copy('scrCoords');
+            this._lastUsrCrds = p2.copy('usrCoords');
+
+        },
+
+        /**
+         * Add a point to the curve plot. If the new point is too close to the previously inserted point,
+         * it is skipped.
+         * Used in {@link JXG.Curve._plotRecursive}.
+         *
+         * @private
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {JXG.Coords} pnt Coords to add to the list of points
+         */
+        _insertPoint: function (curve, pnt, t, depth, limes) {
+            var last_is_real = !isNaN(this._lastScrCrds[1] + this._lastScrCrds[2]),     // The last point was real
+                point_is_real  = !isNaN(pnt[1] + pnt[2]),                               // New point is real point
+                cw = curve.board.canvasWidth,
+                ch = curve.board.canvasHeight,
+                p,
+                near = 0.8,
+                off = 500;
+
+            if (Type.exists(limes)) {
+                this._insertLimesPoint(curve, pnt, t, depth, limes);
+                return;
+            }
+
+            // Check if point has real coordinates and
+            // coordinates are not too far away from canvas.
+            point_is_real = point_is_real &&
+                        (pnt[1] > -off     && pnt[2] > -off &&
+                         pnt[1] < cw + off && pnt[2] < ch + off);
+
+            // Prevent two consecutive NaNs
+            if (!last_is_real && !point_is_real) {
+                return;
+            }
+
+            // Prevent two consecutive points which are too close
+            if (point_is_real && last_is_real &&
+                Math.abs(pnt[1] - this._lastScrCrds[1]) < near &&
+                Math.abs(pnt[2] - this._lastScrCrds[2]) < near) {
+                return;
+            }
+
+            // Prevent two consecutive points at infinity (either direction)
+            if ((Math.abs(pnt[1]) === Infinity &&
+                 Math.abs(this._lastUsrCrds[1]) === Infinity) ||
+                (Math.abs(pnt[2]) === Infinity &&
+                 Math.abs(this._lastUsrCrds[2]) === Infinity)) {
+                return;
+            }
+
+            //console.log("add", t, pnt.usrCoords, depth)
+            // Add regular point
+            p = new Coords(Const.COORDS_BY_SCREEN, pnt, curve.board);
+            p._t = t;
+            curve.points.push(p);
+            this._lastScrCrds = p.copy('scrCoords');
+            this._lastUsrCrds = p.copy('usrCoords');
+        },
+
+        /**
+         * Compute distances in screen coordinates between the points ab,
+         * ac, cb, and cd, where d = (a + b)/2.
+         * cd is used for the smoothness test, ab, ac, cb are used to detect jumps, cusps and poles.
+         *
+         * @private
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Array} c Screen coordinates of the bisection point at (ta + tb) / 2
+         * @returns {Array} array of distances in screen coordinates between: ab, ac, cb, and cd.
+         */
+        _triangleDists: function (a, b, c) {
+            var d, d_ab, d_ac, d_cb, d_cd;
+
+            d = [a[0] * b[0], (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5];
+
+            d_ab = Geometry.distance(a, b, 3);
+            d_ac = Geometry.distance(a, c, 3);
+            d_cb = Geometry.distance(c, b, 3);
+            d_cd = Geometry.distance(c, d, 3);
+
+            return [d_ab, d_ac, d_cb, d_cd];
+        },
+
+        /**
+         * Test if the function is undefined on an interval:
+         * If the interval borders a and b are undefined, 20 random values
+         * are tested if they are undefined, too.
+         * Only if all values are undefined, we declare the function to be undefined in this interval.
+         *
+         * @private
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
+         */
+        _isUndefined: function (curve, a, ta, b, tb) {
+            var t, i, pnt;
+
+            if (!isNaN(a[1] + a[2]) || !isNaN(b[1] + b[2])) {
+                return false;
+            }
+
+            pnt = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false);
+
+            for (i = 0; i < 20; ++i) {
+                t = ta + Math.random() * (tb - ta);
+                pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, true), curve.Y(t, true)], false);
+                if (!isNaN(pnt.scrCoords[0] + pnt.scrCoords[1] + pnt.scrCoords[2])) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        /**
+         * Decide if a path segment is too far from the canvas that we do not need to draw it.
+         * @private
+         * @param  {Array}  a  Screen coordinates of the start point of the segment
+         * @param  {Array}  ta Curve parameter of a  (unused).
+         * @param  {Array}  b  Screen coordinates of the end point of the segment
+         * @param  {Array}  tb Curve parameter of b (unused).
+         * @param  {JXG.Board} board
+         * @returns {Boolean}   True if the segment is too far away from the canvas, false otherwise.
+         */
+        _isOutside: function (a, ta, b, tb, board) {
+            var off = 500,
+                cw = board.canvasWidth,
+                ch = board.canvasHeight;
+
+            return !!((a[1] < -off && b[1] < -off) ||
+                (a[2] < -off && b[2] < -off) ||
+                (a[1] > cw + off && b[1] > cw + off) ||
+                (a[2] > ch + off && b[2] > ch + off));
+        },
+
+        /**
+         * Decide if a point of a curve is too far from the canvas that we do not need to draw it.
+         * @private
+         * @param {Array}  a  Screen coordinates of the point
+         * @param {JXG.Board} board
+         * @returns {Boolean}  True if the point is too far away from the canvas, false otherwise.
+         */
+        _isOutsidePoint: function (a, board) {
+            var off = 500,
+                cw = board.canvasWidth,
+                ch = board.canvasHeight;
+
+            return !!(a[1] < -off ||
+                      a[2] < -off ||
+                      a[1] > cw + off ||
+                      a[2] > ch + off);
+        },
+
+        /**
+         * For a curve c(t) defined on the interval [ta, tb] find the first point
+         * which is in the visible area of the board (plus some outside margin).
+         * <p>
+         * This method is necessary to restrict the recursive plotting algorithm
+         * {@link JXG.Curve._plotRecursive} to the visible area and not waste
+         * recursion to areas far outside of the visible area.
+         * <p>
+         * This method can also be used to find the last visible point
+         * by reversing the input parameters.
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param  {Array}  ta Curve parameter of a.
+         * @param  {Array}  b  Screen coordinates of the end point of the segment (unused)
+         * @param  {Array}  tb Curve parameter of b
+         * @return {Array}  Array of length two containing the screen ccordinates of
+         * the starting point and the curve parameter at this point.
+         * @private
+         */
+        _findStartPoint: function (curve, a, ta, b, tb) {
+            var i, delta, tc,
+                td, z, isFound,
+                w2, h2,
+                pnt =  new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                steps = 40,
+                eps = 0.01,
+                fnX1, fnX2, fnY1, fnY2,
+                bbox = curve.board.getBoundingBox();
+
+            if (!this._isOutsidePoint(a, curve.board)) {
+                return [a, ta];
+            }
+
+            w2 = (bbox[2] - bbox[0]) * 0.3;
+            h2 = (bbox[1] - bbox[3]) * 0.3;
+            bbox[0] -= w2;
+            bbox[1] += h2;
+            bbox[2] += w2;
+            bbox[3] -= h2;
+
+            delta = (tb - ta) / steps;
+            tc = ta + delta;
+            isFound = false;
+
+            fnX1 = function(t) { return curve.X(t, true) - bbox[0]; };
+            fnY1 = function(t) { return curve.Y(t, true) - bbox[1]; };
+            fnX2 = function(t) { return curve.X(t, true) - bbox[2]; };
+            fnY2 = function(t) { return curve.Y(t, true) - bbox[3]; };
+            for (i = 0; i < steps; ++i) {
+                // Left border
+                z = bbox[0];
+                td = Numerics.root(fnX1, [tc - delta, tc], curve);
+                // td = Numerics.fzero(fnX1, [tc - delta, tc], this);
+                // console.log("A", tc - delta, tc, td, Math.abs(this.X(td, true) - z));
+                if (Math.abs(curve.X(td, true) - z) < eps) { //} * Math.abs(z)) {
+                    isFound = true;
+                    break;
+                }
+                // Top border
+                z = bbox[1];
+                td = Numerics.root(fnY1, [tc - delta, tc], curve);
+                // td = Numerics.fzero(fnY1, [tc - delta, tc], this);
+                // console.log("B", tc - delta, tc, td, Math.abs(this.Y(td, true) - z));
+                if (Math.abs(curve.Y(td, true) - z) < eps) { // * Math.abs(z)) {
+                    isFound = true;
+                    break;
+                }
+                // Right border
+                z = bbox[2];
+                td = Numerics.root(fnX2, [tc - delta, tc], curve);
+                // td = Numerics.fzero(fnX2, [tc - delta, tc], this);
+                // console.log("C", tc - delta, tc, td, Math.abs(this.X(td, true) - z));
+                if (Math.abs(curve.X(td, true) - z) < eps) { // * Math.abs(z)) {
+                    isFound = true;
+                    break;
+                }
+                // Bottom border
+                z = bbox[3];
+                td = Numerics.root(fnY2, [tc - delta, tc], curve);
+                // td = Numerics.fzero(fnY2, [tc - delta, tc], this);
+                // console.log("D", tc - delta, tc, td, Math.abs(this.Y(td, true) - z));
+                if (Math.abs(curve.Y(td, true) - z) < eps) { // * Math.abs(z)) {
+                    isFound = true;
+                    break;
+                }
+                tc += delta;
+            }
+            if (isFound) {
+                pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(td, true), curve.Y(td, true)], false);
+                return [pnt.scrCoords, td];
+            }
+            console.log("TODO _findStartPoint", curve.Y.toString(), tc);
+            pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(ta, true), curve.Y(ta, true)], false);
+            return [pnt.scrCoords, ta];
+        },
+
+        /**
+         * Investigate a function term at the bounds of intervals where
+         * the function is not defined, e.g. log(x) at x = 0.
+         *
+         * c is inbetween a and b
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Array} c Screen coordinates of the bisection point at (ta + tb) / 2
+         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
+         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
+         * @param {Number} tc (ta + tb) / 2 = tc. Parameter which evaluates to b, i.e. [1, X(tc), Y(tc)] = c in screen coordinates
+         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
+         * @returns {JXG.Boolean} true if the point is inserted and the recursion should stop, false otherwise.
+         *
+         * @private
+         */
+        _getBorderPos: function(curve, ta, a, tc, c, tb, b) {
+            var t, pnt, p,
+                j,
+                max_it = 30,
+                is_undef = false,
+                t_real2,
+                t_good, t_bad;
+
+            pnt = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false);
+            j = 0;
+            // Bisect a, b and c until the point t_real is inside of the definition interval
+            // and as close as possible at the boundary.
+            // t_real2 is the second closest point.
+            // There are four cases:
+            //  a  |  c  |  b
+            // ---------------
+            // inf | R   | R
+            // R   | R   | inf
+            // inf | inf | R
+            // R   | inf | inf
+            //
+            if (isNaN(a[1] + a[2]) && !isNaN(c[1] + c[2])) {
+                t_bad = ta;
+                t_good = tc;
+                t_real2 = tb;
+            } else if (isNaN(b[1] + b[2]) && !isNaN(c[1] + c[2])) {
+                t_bad = tb;
+                t_good = tc;
+                t_real2 = ta;
+            } else if (isNaN(c[1] + c[2]) && !isNaN(b[1] + b[2])) {
+                t_bad = tc;
+                t_good = tb;
+                t_real2 = tb + (tb - tc);
+            } else if (isNaN(c[1] + c[2]) && !isNaN(a[1] + a[2])) {
+                t_bad = tc;
+                t_good = ta;
+                t_real2 = ta - (tc - ta);
+            } else {
+                return false;
+            }
+            do {
+                t = 0.5 * (t_good + t_bad);
+                pnt.setCoordinates(Const.COORDS_BY_USER, [curve.X(t, true), curve.Y(t, true)], false);
+                p = pnt.usrCoords;
+                is_undef = isNaN(p[1] + p[2]);
+                if (is_undef) {
+                    t_bad = t;
+                } else {
+                    t_real2 = t_good;
+                    t_good = t;
+                }
+                ++j;
+            } while (j < max_it && Math.abs(t_good - t_bad) > Mat.eps);
+            return t;
+        },
+
+        /**
+         * 
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} ta
+         * @param {Number} tb
+         */
+        _getCuspPos: function(curve, ta, tb) {
+            var a = [curve.X(ta, true), curve.Y(ta, true)],
+                b = [curve.X(tb, true), curve.Y(tb, true)],
+                max_func = function(t) {
+                    var c = [curve.X(t, true), curve.Y(t, true)];
+                    return -(Math.sqrt((a[0] - c[0]) * (a[0] - c[0]) + (a[1] - c[1]) * (a[1] - c[1])) +
+                            Math.sqrt((b[0] - c[0]) * (b[0] - c[0]) + (b[1] - c[1]) * (b[1] - c[1])));
+                };
+
+            return Numerics.fminbr(max_func, [ta, tb], curve);
+        },
+
+        /**
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} ta
+         * @param {Number} tb
+         */
+        _getJumpPos: function(curve, ta, tb) {
+            var max_func = function(t) {
+                    var e = Mat.eps * Mat.eps,
+                        c1 = [curve.X(t, true), curve.Y(t, true)],
+                        c2 = [curve.X(t + e, true), curve.Y(t + e, true)];
+                    return -Math.abs( (c2[1] - c1[1]) / (c2[0] - c1[0]) );
+                };
+
+            return Numerics.fminbr(max_func, [ta, tb], curve);
+        },
+
+        /**
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} t
+         * @private
+         */
+        _getLimits: function(curve, t) {
+            var res,
+                step = 2 / (curve.maxX() - curve.minX()),
+                x_l, x_r, y_l, y_r;
+
+            // From left
+            res = Extrapolate.limit(t, -step, curve.X);
+            x_l = res[0];
+            if (res[1] === 'infinite') {
+                x_l = Math.sign(x_l) * Infinity;
+            }
+
+            res = Extrapolate.limit(t, -step, curve.Y);
+            y_l = res[0];
+            if (res[1] === 'infinite') {
+                y_l = Math.sign(y_l) * Infinity;
+            }
+
+            // From right
+            res = Extrapolate.limit(t, step, curve.X);
+            x_r = res[0];
+            if (res[1] === 'infinite') {
+                x_r = Math.sign(x_r) * Infinity;
+            }
+
+            res = Extrapolate.limit(t, step, curve.Y);
+            y_r = res[0];
+            if (res[1] === 'infinite') {
+                y_r = Math.sign(y_r) * Infinity;
+            }
+
+            return {
+                    left_x: x_l,
+                    left_y: y_l,
+                    right_x: x_r,
+                    right_y: y_r,
+                    t: t
+                };
+        },
+
+        /**
+         *
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a
+         * @param {Number} tc
+         * @param {Array} c
+         * @param {Number} tb
+         * @param {Array} b
+         * @param {String} may_be_special
+         * @param {Number} depth
+         * @private
+         */
+        _getLimes: function(curve, ta, a, tc, c, tb, b, may_be_special, depth) {
+            var t;
+
+            if (may_be_special === 'border') {
+                t = this._getBorderPos(curve, ta, a, tc, c, tb, b);
+            } else if (may_be_special === 'cusp') {
+                t = this._getCuspPos(curve, ta, tb);
+            } else if (may_be_special === 'jump') {
+                t = this._getJumpPos(curve, ta, tb);
+            }
+            return this._getLimits(curve, t);
+        },
+
+        /**
+         * Recursive interval bisection algorithm for curve plotting.
+         * Used in {@link JXG.Curve.updateParametricCurve}.
+         * @private
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Array} a Screen coordinates of the left interval bound
+         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
+         * @param {Array} b Screen coordinates of the right interval bound
+         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
+         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
+         * @param {Number} delta If the distance of the bisection point at (ta + tb) / 2 from the point (a + b) / 2 is less then delta,
+         *                 the segment [a,b] is regarded as straight line.
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        _plotNonRecursive: function (curve, a, ta, b, tb, d) {
+            var tc, c, ds,
+                mindepth = 0,
+                limes = null,
+                a_nan, b_nan,
+                isSmooth = false,
+                may_be_special = '',
+                x, y, oc, depth, ds0,
+                stack = [],
+                stack_length = 0,
+                item;
+
+            oc = curve.board.origin.scrCoords;
+            stack[stack_length++] = [a, ta, b, tb, d, Infinity];
+            while (stack_length > 0) {
+                // item = stack.pop();
+                item = stack[--stack_length];
+                a = item[0];
+                ta = item[1];
+                b = item[2];
+                tb = item[3];
+                depth = item[4];
+                ds0 = item[5];
+
+                isSmooth = false;
+                may_be_special = '';
+                limes = null;
+                //console.log(stack.length, item)
+
+                if (curve.points.length > 65536) {
+                    return;
+                }
+
+                if (depth < this.nanLevel) {
+                    // Test if the function is undefined in the whole interval [ta, tb]
+                    if (this._isUndefined(curve, a, ta, b, tb)) {
+                        continue;
+                    }
+                    // Test if the graph is far outside the visible are for the interval [ta, tb]
+                    if (this._isOutside(a, ta, b, tb, curve.board)) {
+                        continue;
+                    }
+                }
+
+                tc = (ta  + tb) * 0.5;
+
+                // Screen coordinates of point at tc
+                x = curve.X(tc, true);
+                y = curve.Y(tc, true);
+                c = [1, oc[1] + x * curve.board.unitX, oc[2] - y * curve.board.unitY];
+                ds = this._triangleDists(a, b, c);           // returns [d_ab, d_ac, d_cb, d_cd]
+
+                a_nan = isNaN(a[1] + a[2]);
+                b_nan = isNaN(b[1] + b[2]);
+                if ((a_nan && !b_nan) || (!a_nan && b_nan)) {
+                    may_be_special = 'border';
+                } else if (ds[0] > 0.66 * ds0 ||
+                            ds[0] < this.cusp_threshold * (ds[1] + ds[2]) ||
+                            ds[1] > 5 * ds[2] ||
+                            ds[2] > 5 * ds[1]) {
+                    may_be_special = 'cusp';
+                } else if ((ds[2] > this.jump_threshold * ds[0]) ||
+                           (ds[1] > this.jump_threshold * ds[0]) ||
+                            ds[0] === Infinity || ds[1] === Infinity || ds[2] === Infinity) {
+                    may_be_special = 'jump';
+                }
+                isSmooth = (may_be_special === '' && depth < this.smoothLevel && ds[3] < this.smooth_threshold);
+
+                if (depth < this.testLevel && !isSmooth) {
+                    if (may_be_special === '') {
+                        isSmooth = true;
+                    } else {
+                        limes = this._getLimes(curve, ta, a, tc, c, tb, b, may_be_special, depth);
+                    }
+                }
+
+                if (limes !== null) {
+                    c = [1, NaN, NaN];
+                    this._insertPoint(curve, c, tc, depth, limes);
+                } else if (depth <= mindepth || isSmooth) {
+                    this._insertPoint(curve, c, tc, depth, null);
+                } else {
+                    stack[stack_length++] = [c, tc, b, tb, depth - 1, ds[0]];
+                    stack[stack_length++] = [a, ta, c, tc, depth - 1, ds[0]];
+                }
+            }
+
+            return this;
+        },
+
+        /**
+         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>true</tt>.
+         * @param {JXG.Curve} curve JSXGraph curve element
+         * @param {Number} mi Left bound of curve
+         * @param {Number} ma Right bound of curve
+         * @returns {JXG.Curve} Reference to the curve object.
+         */
+        updateParametricCurve: function (curve, mi, ma) {
+            var ta, tb, a, b,
+                suspendUpdate = false,
+                pa = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                pb = new Coords(Const.COORDS_BY_USER, [0, 0], curve.board, false),
+                depth,
+                w2, // h2,
+                bbox,
+                ret_arr;
+
+            // console.log("-----------------------------------------------------------");
+            // console.time("plot");
+            if (curve.board.updateQuality === curve.board.BOARD_QUALITY_LOW) {
+                depth = Type.evaluate(curve.visProp.recursiondepthlow) || 14;
+            } else {
+                depth = Type.evaluate(curve.visProp.recursiondepthhigh) || 17;
+            }
+
+            // smoothLevel has to be small for graphs in a huge interval.
+            this.smoothLevel = 7; //depth - 10;
+            this.nanLevel = depth - 4;
+            this.testLevel = 4;
+            this.cusp_threshold = 0.5;
+            this.jump_threshold = 0.99;
+            this.smooth_threshold = 2;
+
+            curve.points = [];
+
+            if (curve.xterm === 'x') {
+                // For function graphs we can restrict the plot interval
+                // to the visible area +plus margin
+                bbox = curve.board.getBoundingBox();
+                w2 = (bbox[2] - bbox[0]) * 0.3;
+                //h2 = (bbox[1] - bbox[3]) * 0.3;
+                ta = Math.max(mi, bbox[0] - w2);
+                tb = Math.min(ma, bbox[2] + w2);
+            } else {
+                ta = mi;
+                tb = ma;
+            }
+            pa.setCoordinates(Const.COORDS_BY_USER, [curve.X(ta, suspendUpdate), curve.Y(ta, suspendUpdate)], false);
+
+            // The first function calls of X() and Y() are done. We can now
+            // switch `suspendUpdate` on. If supported by the functions, this
+            // avoids for the rest of the plotting algorithm, evaluation of any
+            // parent elements.
+            suspendUpdate = true;
+
+            pb.setCoordinates(Const.COORDS_BY_USER, [curve.X(tb, suspendUpdate), curve.Y(tb, suspendUpdate)], false);
+
+            // Find start and end points of the visible area (plus a certain margin)
+            ret_arr = this._findStartPoint(curve, pa.scrCoords, ta, pb.scrCoords, tb);
+            pa.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
+            ta = ret_arr[1];
+            ret_arr = this._findStartPoint(curve, pb.scrCoords, tb, pa.scrCoords, ta);
+            pb.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
+            tb = ret_arr[1];
+
+            // Save the visible area.
+            // This can be used in Curve.hasPoint().
+            this._visibleArea = [ta, tb];
+
+            // Start recursive plotting algorithm
+            a = pa.copy('scrCoords');
+            b = pb.copy('scrCoords');
+            pa._t = ta;
+            curve.points.push(pa);
+            this._lastScrCrds = pa.copy('scrCoords');   // Used in _insertPoint
+            this._lastUsrCrds = pa.copy('usrCoords');   // Used in _insertPoint
+
+            this._plotNonRecursive(curve, a, ta, b, tb, depth);
+
+            pb._t = tb;
+            curve.points.push(pb);
+
+            curve.numberPoints = curve.points.length;
+            // console.timeEnd("plot");
+            // console.log("number of points:", this.numberPoints);
+
+            return curve;
+        },
+
+        //----------------------------------------------------------------------
+        // Plot algorithm v4
+        //----------------------------------------------------------------------
+
+        _criticalInterval: function(vec, le, level) {
+            var i, j, le1, med,
+                sgn, sgnChange,
+                isGroup   = false,
+                abs_vec,
+                very_small = false,
+                smooth    = false,
+                group     = 0,
+                groups    = [],
+                types     = [],
+                positions = [];
+
+            abs_vec = Statistics.abs(vec);
+            med = Statistics.median(abs_vec);
+
+            if (med < 1.0e-7) {
+                med = 1.0e-7;
+                very_small = true;
+            } else {
+                med *= this.criticalThreshold;
+            }
+
+            //console.log("Median", med);
+            for (i = 0; i < le; i++) {
+                if (abs_vec[i] > med /*&& abs_vec[i] > 0.01*/)  {
+                    positions.push({i: i, v: vec[i], group: group});
+                    if (!isGroup) {
+                        isGroup = true;
+                    }
+                } else {
+                    if (isGroup) {
+                        if (positions.length > 0) {
+                            groups.push(positions.slice(0));
+                        }
+                        positions = [];
+                        isGroup = false;
+                        group++;
+                    }
+                }
+            }
+            if (isGroup) {
+                if (positions.length > 1) {
+                    groups.push(positions.slice(0));
+                }
+            }
+
+            if (very_small && groups.length === 0) {
+                smooth = true;
+            }
+
+            // Decide if there is a singular critical point
+            // or if a whole interval is problematic.
+            // The latter is the case if the differences have many sign changes.
+            for (j = 0; j < groups.length; j++) {
+                types[j] = 'point';
+                le1 = groups[j].length;
+                if (le1 < 64) {
+                    continue;
+                }
+                sgnChange = 0;
+                sgn = Math.sign(groups[j][0].v);
+                for (i = 1; i < le1; i++) {
+                    if (Math.sign(groups[j][i].v) !== sgn) {
+                        sgnChange++;
+                        sgn = Math.sign(groups[j][i].v);
+                    }
+                }
+                if (sgnChange * 6 > le1) {
+                    types[j] = 'interval';
+                }
+            }
+
+            return {smooth: smooth, groups: groups, types: types};
+        },
+
+        Component: function() {
+            this.left_isNaN =  false;
+            this.right_isNaN = false;
+            this.left_t = null;
+            this.right_t = null;
+            this.t_values = [];
+            this.x_values = [];
+            this.y_values = [];
+            this.len = 0;
+        },
+
+        findComponents: function(curve, mi, ma, steps) {
+            var i, t, le, h, x, y,
+                components = [],
+                comp,
+                comp_nr = 0,
+                cnt = 0,
+                cntNaNs = 0,
+                comp_started = false,
+                suspended = false;
+
+            h = (ma - mi) / steps;
+            components[comp_nr] = new this.Component();
+            comp = components[comp_nr];
+
+            for (i = 0, t = mi; i <= steps; i++, t += h) {
+                x = curve.X(t, suspended);
+                y = curve.Y(t, suspended);
+
+                if (isNaN(x) || isNaN(y)) {
+                    cntNaNs++;
+                    // Wait for - at least - two consecutive NaNs
+                    // This avoids starting a new component if
+                    // the function value has infinity as intermediate value.
+                    if (cntNaNs > 1 && comp_started) {
+                        // Finalize a component
+                        comp.right_isNaN = true;
+                        comp.right_t = t - h;
+                        comp.len = cnt;
+
+                        // Prepare a new component
+                        comp_started = false;
+                        comp_nr++;
+                        components[comp_nr] =  new this.Component();
+                        comp = components[comp_nr];
+                        cntNaNs = 0;
+                    }
+                } else {
+                    // Now there is a non-NaN entry.
+                    if (!comp_started) {
+                        // Start the component
+                        comp_started = true;
+                        cnt = 0;
+                        if (cntNaNs > 0) {
+                            comp.left_t = t - h;
+                            comp.left_isNaN = true;
+                        }
+                    }
+                    cntNaNs = 0;
+                    // Add the value to the component
+                    comp.t_values[cnt] = t;
+                    comp.x_values[cnt] = x;
+                    comp.y_values[cnt] = y;
+                    cnt++;
+                }
+                if (i === 0) {
+                    suspended = true;
+                }
+            }
+            if (comp_started) {
+                comp.len = cnt;
+            } else {
+                components.pop();
+            }
+
+            return components;
+        },
+
+        getPointType: function(curve, pos, t_approx, t_values, x_table, y_table, len) {
+            var x_values = x_table[0],
+                y_values = y_table[0],
+                full_len = t_values.length,
+                result = {
+                    idx: pos,
+                    t: t_approx, //t_values[pos],
+                    x: x_values[pos],
+                    y: y_values[pos],
+                    type: 'other'
+                };
+
+            if (pos < 5) {
+                result.type = 'borderleft';
+                result.idx = 0;
+                result.t = t_values[0];
+                result.x = x_values[0];
+                result.y = y_values[0];
+
+                // console.log('Border left', result.t);
+                return result;
+            }
+            if (pos > len - 6) {
+                result.type = 'borderright';
+                result.idx = full_len - 1;
+                result.t = t_values[full_len - 1];
+                result.x = x_values[full_len - 1];
+                result.y = y_values[full_len - 1];
+
+                // console.log('Border right', result.t, full_len - 1);
+                return result;
+            }
+
+            return result;
+        },
+
+        newtonApprox: function(idx, t, h, level, table) {
+            var i, s = 0.0;
+            for (i = level; i > 0; i--) {
+                s = (s + table[i][idx]) * (t - (i - 1) * h) / i;
+            }
+            return s + table[0][idx];
+        },
+
+        thiele: function(t, recip, t_values, idx, degree) {
+            var i, v = 0.0;
+            for (i = degree; i > 1; i--) {
+                v = (t - t_values[idx + i]) / (recip[i][idx + 1] - recip[i - 2][idx + 1] + v);
+            }
+            return recip[0][idx + 1] + (t - t_values[idx + 1]) / (recip[1][idx + 1] + v);
+        },
+
+        differenceMethodExperiments: function(component, curve) {
+            var i, level, le, up,
+                t_values = component.t_values,
+                x_values = component.x_values,
+                y_values = component.y_values,
+                x_diffs = [],
+                y_diffs = [],
+                x_slopes = [],
+                y_slopes = [],
+                x_table = [],
+                y_table = [],
+                x_recip = [],
+                y_recip = [],
+                h, numerator,
+                // x_med, y_med,
+                foundCriticalPoint = 0,
+                pos, ma, j, v,
+                groups,
+                criticalPoints = [];
+
+            h = t_values[1] - t_values[0];
+            x_table.push([]);
+            y_table.push([]);
+            x_recip.push([]);
+            y_recip.push([]);
+            le = y_values.length;
+            for (i = 0; i < le; i++) {
+                x_table[0][i] = x_values[i];
+                y_table[0][i] = y_values[i];
+                x_recip[0][i] = x_values[i];
+                y_recip[0][i] = y_values[i];
+            }
+
+            x_table.push([]);
+            y_table.push([]);
+            x_recip.push([]);
+            y_recip.push([]);
+            numerator = h;
+            le = y_values.length - 1;
+            for (i = 0; i < le; i++) {
+                x_diffs[i] = x_values[i + 1] - x_values[i];
+                y_diffs[i] = y_values[i + 1] - y_values[i];
+                x_slopes[i] = x_diffs[i];
+                y_slopes[i] = y_diffs[i];
+                x_table[1][i] = x_diffs[i];
+                y_table[1][i] = y_diffs[i];
+                x_recip[1][i] = numerator / x_diffs[i];
+                y_recip[1][i] = numerator / y_diffs[i];
+            }
+            le--;
+
+            up = Math.min(8, y_values.length - 1);
+            for (level = 1; level < up; level++) {
+                x_table.push([]);
+                y_table.push([]);
+                x_recip.push([]);
+                y_recip.push([]);
+                numerator *= h;
+                for (i = 0; i < le; i++) {
+                    x_diffs[i] = x_diffs[i + 1] - x_diffs[i];
+                    y_diffs[i] = y_diffs[i + 1] - y_diffs[i];
+                    x_table[level + 1][i] = x_diffs[i];
+                    y_table[level + 1][i] = y_diffs[i];
+                    x_recip[level + 1][i] = numerator / (x_recip[level][i + 1] - x_recip[level][i]) + x_recip[level - 1][i + 1];
+                    y_recip[level + 1][i] = numerator / (y_recip[level][i + 1] - y_recip[level][i]) + y_recip[level - 1][i + 1];
+                }
+
+                // if (level == 1) {
+                //     console.log("bends level=", level, y_diffs.toString());
+                // }
+
+                // Store point location which may be centered around
+                // critical points.
+                // If the lebvel is suitable, step out of the loop.
+                groups = this._criticalPoints(y_diffs, le, level);
+                if (groups === false) {
+                    // Its seems, the degree of the polynomial is equal to level
+console.log("Polynomial of degree", level);
+                    groups = [];
+                    break;
+                }
+                if (groups.length > 0) {
+                    foundCriticalPoint++;
+                    if (foundCriticalPoint > 1 && level % 2 === 0) {
+                        break;
+                    }
+                }
+                le--;
+            }
+
+            // console.log("Last diffs", y_diffs, "level", level);
+
+            // Analyze the groups which have been found.
+            for (i = 0; i < groups.length; i++) {
+                // console.log("Group", i, groups[i])
+                // Identify the maximum difference, i.e. the center of the "problem"
+                ma = -Infinity;
+                for (j = 0; j < groups[i].length; j++) {
+                    v = Math.abs(groups[i][j].v);
+                    if (v > ma) {
+                        ma = v;
+                        pos = j;
+                    }
+                }
+                pos = Math.floor(groups[i][pos].i + level / 2);
+                // Analyze the critical point
+                criticalPoints.push(this.getPointType(curve, pos, t_values, x_values, y_values, x_slopes, y_slopes, le + 1));
+            }
+
+            return [criticalPoints, x_table, y_table, x_recip, y_recip];
+
+        },
+
+        getCenterOfCriticalInterval: function(group, degree, t_values) {
+            var ma, j, pos, v,
+                num = 0.0,
+                den = 0.0,
+                h = t_values[1] - t_values[0],
+                pos_mean,
+                range = [];
+
+            // Identify the maximum difference, i.e. the center of the "problem"
+            // If there are several equal maxima, store the positions
+            // in the array range and determine the center of the array.
+
+            ma = -Infinity;
+            range = [];
+            for (j = 0; j < group.length; j++) {
+                v = Math.abs(group[j].v);
+                if (v > ma) {
+                    range = [j];
+                    ma = v;
+                    pos = j;
+                } else if (ma === v) {
+                    range.push(j);
+                }
+            }
+            if (range.length > 0) {
+                pos_mean = range.reduce(function(total, val) { return total + val; }, 0) / range.length;
+                pos = Math.floor(pos_mean);
+                pos_mean += group[0].i;
+            }
+
+            if (ma < Infinity) {
+                for (j = 0; j < group.length; j++) {
+                    num += Math.abs(group[j].v) * group[j].i;
+                    den += Math.abs(group[j].v);
+                }
+                pos_mean = num / den;
+            }
+            pos_mean += degree / 2;
+            return [group[pos].i + degree / 2, pos_mean, t_values[Math.floor(pos_mean)] + h * (pos_mean - Math.floor(pos_mean))];
+        },
+
+        differenceMethod: function(component, curve) {
+            var i, level, le, up,
+                t_values = component.t_values,
+                x_values = component.x_values,
+                y_values = component.y_values,
+                x_table = [],
+                y_table = [],
+                foundCriticalPoint = 0,
+                degree_x = -1,
+                degree_y = -1,
+                pos, res, res_x, res_y, t_approx,
+                groups = [],
+                types,
+                criticalPoints = [];
+
+            le = y_values.length;
+            // x_table.push([]);
+            // y_table.push([]);
+            // for (i = 0; i < le; i++) {
+            //     x_table[0][i] = x_values[i];
+            //     y_table[0][i] = y_values[i];
+            // }
+            x_table.push(new Float64Array(x_values));
+            y_table.push(new Float64Array(y_values));
+
+            le--;
+            up = Math.min(12, le);
+            for (level = 0; level < up; level++) {
+                // Old style method:
+                // x_table.push([]);
+                // y_table.push([]);
+                // for (i = 0; i < le; i++) {
+                //     x_table[level + 1][i] = x_table[level][i + 1] - x_table[level][i];
+                //     y_table[level + 1][i] = y_table[level][i + 1] - y_table[level][i];
+                // }
+                // New method:
+                x_table.push(new Float64Array(le));
+                y_table.push(new Float64Array(le));
+                x_table[level + 1] = x_table[level].map(function(v, idx, arr) { return arr[idx + 1] - v;});
+                y_table[level + 1] = y_table[level].map(function(v, idx, arr) { return arr[idx + 1] - v;});
+
+                // Store point location which may be centered around critical points.
+                // If the level is suitable, step out of the loop.
+                res_y = this._criticalInterval(y_table[level + 1], le, level);
+                if (res_y.smooth === true) {
+                    // Its seems, the degree of the polynomial is equal to level
+                    // If the values in level + 1 are zero, it might be a polynomial of degree level.
+                    // Seems to work numerically stable until degree 6.
+                    degree_y = level;
+                    groups = [];
+                }
+                res_x = this._criticalInterval(x_table[level + 1], le, level);
+                if (degree_x === -1 && res_x.smooth === true) {
+                    // Its seems, the degree of the polynomial is equal to level
+                    // If the values in level + 1 are zero, it might be a polynomial of degree level.
+                    // Seems to work numerically stable until degree 6.
+                    degree_x = level;
+                }
+                if (degree_y >= 0) {
+                    break;
+                }
+
+                if (res_y.groups.length > 0) {
+                    foundCriticalPoint++;
+                    if (foundCriticalPoint > 2 && (level + 1) % 2 === 0) {
+                        groups = res_y.groups;
+                        types = res_y.types;
+                        break;
+                    }
+                }
+                le--;
+            }
+
+            // console.log("Last diffs", y_table[Math.min(level + 1, up)], "level", level + 1);
+            // Analyze the groups which have been found.
+            for (i = 0; i < groups.length; i++) {
+                if (types[i] === 'interval') {
+                    continue;
+                }
+                // console.log("Group", i, groups[i], types[i], level + 1)
+                res = this.getCenterOfCriticalInterval(groups[i], level + 1, t_values);
+                pos = res_y[0];
+                pos = Math.floor(res[1]);
+                t_approx = res[2];
+                // console.log("Critical points:", groups, res, pos)
+
+                // Analyze the type of the critical point
+                // Result is of type 'borderleft', borderright', 'other'
+                criticalPoints.push(this.getPointType(curve, pos, t_approx, t_values, x_table, y_table, le + 1));
+            }
+
+            // if (level === up) {
+            //     console.log("No convergence!");
+            // } else {
+            //     console.log("Convergence level", level);
+            // }
+            return [criticalPoints, x_table, y_table, degree_x, degree_y];
+
+        },
+
+        _insertPoint_v4: function (curve, crds, t, doLog) {
+            var p,
+                prev = null,
+                near = 0.8;
+
+            if (curve.points.length > 0) {
+                prev = curve.points[curve.points.length - 1].scrCoords;
+            }
+
+            // Add regular point
+            p = new Coords(Const.COORDS_BY_USER, crds, curve.board);
+
+            if (prev !== null &&
+                Math.abs(p.scrCoords[1] - prev[1]) < near &&
+                Math.abs(p.scrCoords[2] - prev[2]) < near) {
+                    return;
+                }
+
+//console.log("insert", t)
+            p._t = t;
+            curve.points.push(p);
+        },
+
+        getInterval: function(curve, ta, tb) {
+            var t_int, x_int, y_int;
+
+            //console.log('critical point', ta, tb);
+            IntervalArithmetic.disable();
+
+            t_int = IntervalArithmetic.Interval(ta, tb);
+            curve.board.mathLib = IntervalArithmetic;
+            curve.board.mathLibJXG = IntervalArithmetic;
+            x_int = curve.X(t_int, true);
+            y_int = curve.Y(t_int, true);
+            curve.board.mathLib = Math;
+            curve.board.mathLibJXG = JXG.Math;
+
+            //console.log(x_int, y_int);
+            return y_int;
+        },
+
+        sign: function (v) {
+            if (v < 0) { return -1; }
+            if (v > 0) { return 1; }
+            return 0;
+        },
+
+        handleBorder: function(curve, comp, group, x_table, y_table) {
+            var idx = group.idx,
+                t, t1, t2,
+                size = 32,
+                y_int,
+                x, y,
+                lo, hi, i,
+                components2, le, h;
+
+            // console.log("HandleBorder at t =", t_approx);
+            // console.log("component:", comp)
+            // console.log("Group:", group);
+
+            h = comp.t_values[1] - comp.t_values[0];
+            if (group.type === 'borderleft') {
+                t = comp.left_isNaN ? comp.left_t : group.t - h;
+                t1 = t;
+                t2 = t1 + h;
+            } else if (group.type === 'borderright') {
+                t = comp.right_isNaN ? comp.right_t : group.t + h;
+                t2 = t;
+                t1 = t2 - h;
+            } else {
+                console.log("No bordercase!!!");
+            }
+
+            components2 = this.findComponents(curve, t1, t2, size);
+            if (group.type === 'borderleft') {
+                t1 = components2[0].left_t;
+                t2 = components2[0].t_values[0];
+                h = components2[0].t_values[1] - components2[0].t_values[0];
+                t1 = (t1 === null) ? t2- h : t1;
+                t = t1;
+                y_int = this.getInterval(curve, t1, t2);
+                if (Type.isObject(y_int)) {
+                    lo = y_int.lo;
+                    hi = y_int.hi;
+
+                    x = curve.X(t, true);
+                    y = (y_table[1][idx] < 0) ? hi : lo;
+                    this._insertPoint_v4(curve, [1, x, y], t);
+                }
+            }
+
+            le = components2[0].t_values.length;
+            for (i = 0; i < le; i++) {
+                t = components2[0].t_values[i];
+                x = components2[0].x_values[i];
+                y = components2[0].y_values[i];
+                this._insertPoint_v4(curve, [1, x, y], t);
+            }
+
+            if (group.type === 'borderright') {
+                t1 = components2[0].t_values[le - 1];
+                t2 = components2[0].right_t;
+                h = components2[0].t_values[1] - components2[0].t_values[0];
+                t2 = (t2 === null) ? t1 + h : t2;
+
+                t = t2;
+                y_int = this.getInterval(curve, t1, t2);
+                if (Type.isObject(y_int)) {
+                    lo = y_int.lo;
+                    hi = y_int.hi;
+                    x = curve.X(t, true);
+                    y = (y_table[1][idx] > 0) ? hi : lo;
+                    this._insertPoint_v4(curve, [1, x, y], t);
+                }
+            }
+
+        },
+
+        _recurse_v4: function(curve, comp, group, x_table, y_table) {
+            var i, t1, t2, ret,
+                components2, comp2, idx, groups2, g,
+                x_table2, y_table2, start, le;
+
+            // Look at two points, hopefully left and right from the critical point
+            t1 = comp.t_values[group.idx - 2];
+            t2 = comp.t_values[group.idx + 2];
+            components2 = this.findComponents(curve, t1, t2, 64);
+            for (idx = 0; idx < components2.length; idx++) {
+                comp2 = components2[idx];
+                ret = this.differenceMethod(comp2, curve);
+                groups2 = ret[0];
+                x_table2 = ret[1];
+                y_table2 = ret[2];
+                start = 0;
+                for (g = 0; g <= groups2.length; g++) {
+                    if (g === groups2.length) {
+                        le = comp2.len;
+                    } else {
+                        le = groups2[g].idx;
+                    }
+
+                    // Insert all uncritical points until next critical point
+                    for (i = start; i < le; i++) {
+                        if (!isNaN(comp2.x_values[i]) && !isNaN(comp2.y_values[i])) {
+                            this._insertPoint_v4(curve, [1, comp2.x_values[i], comp2.y_values[i]], comp2.t_values[i]);
+                        }
+                    }
+                    // Handle next critical point
+                    if (g < groups2.length) {
+                        this.handleSingularity(curve, comp2, groups2[g], x_table2, y_table2);
+                        start = groups2[g].idx + 1;
+                    }
+                }
+                le = comp2.len;
+                if (idx < components2.length - 1) {
+                    this._insertPoint_v4(curve, [1, NaN, NaN], comp2.right_t);
+                }
+            }
+            return this;
+        },
+
+        handleSingularity: function(curve, comp, group, x_table, y_table) {
+            var idx = group.idx,
+                t, t1, t2, y_int,
+                x, lo, hi,
+                d_lft, d_rgt,
+                d_thresh = 100,
+                di1 = 5,
+                di2 = 3;
+
+            t = group.t;
+            // console.log("HandleSingularity at t =", t);
+            // console.log(comp.t_values[idx - 1], comp.y_values[idx - 1], comp.t_values[idx + 1], comp.y_values[idx + 1]);
+            // console.log(group);
+
+            // Look at two points, hopefully left and right from the critical point
+            t1 = comp.t_values[idx - di1];
+            t2 = comp.t_values[idx + di1];
+
+            y_int = this.getInterval(curve, t1, t2);
+            if (Type.isObject(y_int)) {
+                lo = y_int.lo;
+                hi = y_int.hi;
+            } else {
+                if (y_table[0][idx - 1] < y_table[0][idx + 1]) {
+                    lo = y_table[0][idx - 1];
+                    hi = y_table[0][idx + 1];
+                } else {
+                    lo = y_table[0][idx + 1];
+                    hi = y_table[0][idx - 1];
+                }
+            }
+
+            x = curve.X(t, true);
+
+            // console.log(">>>", t1, t2, lo, hi, x);
+
+            d_lft = (y_table[0][idx - di2] - y_table[0][idx - di1]) / (comp.t_values[idx - di2] - comp.t_values[idx - di1]);
+            d_rgt = (y_table[0][idx + di2] - y_table[0][idx + di1]) / (comp.t_values[idx + di2] - comp.t_values[idx + di1]);
+
+            // console.log(":::", d_lft, d_rgt);
+
+            if (d_lft < -d_thresh) {
+                // Left branch very steep downwards -> add the minimum
+                this._insertPoint_v4(curve, [1, x, lo], t, true);
+                if (d_rgt <= d_thresh) {
+                    // Right branch not very steep upwards -> interrupt the curve
+                    // I.e. exclude the case -infty / -infty
+                    this._insertPoint_v4(curve, [1, NaN, NaN], t);
+                }
+            } else if (d_lft > d_thresh) {
+                // Left branch very steep upwards -> add the maximum
+                this._insertPoint_v4(curve, [1, x, hi], t);
+                if (d_rgt >= -d_thresh) {
+                    // Right branch not very steep downwards -> interrupt the curve
+                    // I.e. exclude the case infty / infty
+                    this._insertPoint_v4(curve, [1, NaN, NaN], t);
+                }
+            } else {
+                if (Math.abs(y_table[0][idx - 1] - y_table[0][idx + 1]) * curve.board.unitY >= 2) {
+                    // Finite jump
+                    // console.log("JUMP")
+                    this._insertPoint_v4(curve, [1, NaN, NaN], t);
+                } else {
+                    if (lo === -Infinity) {
+                        this._insertPoint_v4(curve, [1, x, lo], t, true);
+                        this._insertPoint_v4(curve, [1, NaN, NaN], t);
+                    }
+                    if (hi === Infinity) {
+                        this._insertPoint_v4(curve, [1, NaN, NaN], t);
+                        this._insertPoint_v4(curve, [1, x, hi], t, true);
+                    }
+                }
+            }
+            if (d_rgt < -d_thresh) {
+                // Right branch very steep downwards -> add the maximum
+                this._insertPoint_v4(curve, [1, x, hi], t);
+            } else if (d_rgt > d_thresh) {
+                // Right branch very steep upwards -> add the minimum
+                this._insertPoint_v4(curve, [1, x, lo], t);
+            }
+
+        },
+
+        /**
+         * Number of equidistant points where the function is evaluated
+         */
+        steps: 1024,
+
+        /**
+         * If the absolute maximum of the set of differences is larger than
+         * criticalThreshold * median of these values, it is regarded as critical point.
+         * @see JXG.Math.Plot#_criticalInterval
+         */
+        criticalThreshold: 1000,
+
+        plot_v4: function(curve, ta, tb, steps) {
+            var i, j, le, components, idx, comp,
+                groups, g, start,
+                ret, x_table, y_table,
+                t, t1, t2,
+                good, bad,
+                x_int, y_int,
+                degree_x, degree_y,
+                h  = (tb - ta) / steps,
+                Ypl = function(x) { return curve.Y(x, true); },
+                Ymi = function(x) { return -curve.Y(x, true); },
+                h2 = h * 0.5;
+
+            components = this.findComponents(curve, ta, tb, steps);
+            for (idx = 0; idx < components.length; idx++) {
+                comp = components[idx];
+                ret = this.differenceMethod(comp, curve);
+                groups = ret[0];
+                x_table = ret[1];
+                y_table = ret[2];
+                degree_x = ret[3];
+                degree_y = ret[4];
+
+                // if (degree_x >= 0) {
+                //     console.log("x polynomial of degree", degree_x);
+                // }
+                // if (degree_y >= 0) {
+                //     console.log("y polynomial of degree", degree_y);
+                // }
+
+                if (groups.length === 0 || groups[0].type !== 'borderleft') {
+                    groups.unshift({
+                        idx: 0,
+                        t: comp.t_values[0],
+                        x: comp.x_values[0],
+                        y: comp.y_values[0],
+                        type: 'borderleft'
+                    });
+                }
+                if (groups[groups.length - 1].type !== 'borderright') {
+                    le = comp.t_values.length;
+                    groups.push({
+                        idx: le - 1,
+                        t: comp.t_values[le - 1],
+                        x: comp.x_values[le - 1],
+                        y: comp.y_values[le - 1],
+                        type: 'borderright'
+                    });
+                }
+
+
+                start = 0;
+                for (g = 0; g <= groups.length; g++) {
+                    if (g === groups.length) {
+                        le = comp.len;
+                    } else {
+                        le = groups[g].idx - 1;
+                    }
+
+                    good = 0;
+                    bad = 0;
+                    // Insert all uncritical points until next critical point
+                    for (i = start; i < le - 2; i++) {
+                        this._insertPoint_v4(curve, [1, comp.x_values[i], comp.y_values[i]], comp.t_values[i]);
+                        j = Math.max(0, i - 2);
+                        // Add more points in critical intervals
+                        if (true &&
+                            //degree_y === -1 && // No polynomial
+                            i >= start + 3 &&
+                            i < le - 3 &&               // Do not do this if too close to a critical point
+                            y_table.length > 3 &&
+                            Math.abs(y_table[2][i]) > 0.2 * Math.abs(y_table[0][i])) {
+                            t = comp.t_values[i];
+                            h2 = h * 0.25;
+                            y_int = this.getInterval(curve, t, t + h);
+                            if (Type.isObject(y_int)) {
+                                if (y_table[2][i] > 0) {
+                                    this._insertPoint_v4(curve, [1, t + h2, y_int.lo], t + h2);
+                                } else {
+                                    this._insertPoint_v4(curve, [1, t + h - h2, y_int.hi], t + h - h2);
+                                }
+                            } else {
+                                t1 = Numerics.fminbr(Ypl, [t, t + h]);
+                                t2 = Numerics.fminbr(Ymi, [t, t + h]);
+                                if (t1 < t2) {
+                                    this._insertPoint_v4(curve, [1, curve.X(t1, true), curve.Y(t1, true)], t1);
+                                    this._insertPoint_v4(curve, [1, curve.X(t2, true), curve.Y(t2, true)], t2);
+                                } else {
+                                    this._insertPoint_v4(curve, [1, curve.X(t2, true), curve.Y(t2, true)], t2);
+                                    this._insertPoint_v4(curve, [1, curve.X(t1, true), curve.Y(t1, true)], t1);
+                                }
+                            }
+                            bad++;
+                        } else {
+                            good++;
+                        }
+                    }
+                    // console.log("GOOD", good, "BAD", bad);
+
+                    // Handle next critical point
+                    if (g < groups.length) {
+                        //console.log("critical point / interval", groups[g]);
+
+                        i = groups[g].idx;
+                        if (groups[g].type === 'borderleft' || groups[g].type === 'borderright') {
+                            this.handleBorder(curve, comp, groups[g], x_table, y_table);
+                        } else {
+                            this._recurse_v4(curve, comp, groups[g], x_table, y_table);
+                        }
+
+                        start = groups[g].idx + 1 + 1;
+                    }
+                }
+
+                le = comp.len;
+                if (idx < components.length - 1) {
+                    this._insertPoint_v4(curve, [1, NaN, NaN], comp.right_t);
+                }
+            }
+
+
+        },
+
+        updateParametricCurve_v4: function (curve, mi, ma) {
+            var ta, tb, w2, bbox;
+
+            if (curve.xterm === 'x') {
+                // For function graphs we can restrict the plot interval
+                // to the visible area +plus margin
+                bbox = curve.board.getBoundingBox();
+                w2 = (bbox[2] - bbox[0]) * 0.3;
+                // h2 = (bbox[1] - bbox[3]) * 0.3;
+                ta = Math.max(mi, bbox[0] - w2);
+                tb = Math.min(ma, bbox[2] + w2);
+            } else {
+                ta = mi;
+                tb = ma;
+            }
+
+            curve.points = [];
+
+            //console.log("--------------------");
+            this.plot_v4(curve, ta, tb, this.steps);
+
+            curve.numberPoints = curve.points.length;
+            //console.log(curve.numberPoints);
+        }
+    };
+
+
+    return Mat.Plot;
+});
+
+/*
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Bianca Valentin,
+        Alfred Wassermann,
+        Peter Wilfahrt
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+
+
+    Metapost/Hobby curves, see e.g. https://bosker.wordpress.com/2013/11/13/beyond-bezier-curves/
+
+    * Ported to Python for the project PyX. Copyright (C) 2011 Michael Schindler <m-schindler@users.sourceforge.net>
+    * Ported to javascript from the PyX implementation (http://pyx.sourceforge.net/) by Vlad-X.
+    * Adapted to JSXGraph and some code changes by Alfred Wassermann 2020.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+    Internal functions of MetaPost
+    This file re-implements some of the functionality of MetaPost
+    (http://tug.org/metapost). MetaPost was developed by John D. Hobby and
+    others. The code of Metapost is in the public domain, which we understand as
+    an implicit permission to reuse the code here (see the comment at
+    http://www.gnu.org/licenses/license-list.html)
+
+    This file is based on the MetaPost version distributed by TeXLive:
+    svn://tug.org/texlive/trunk/Build/source/texk/web2c/mplibdir revision 22737 #
+    (2011-05-31)
+*/
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ utils/type
+ math/math
+ */
+
+/**
+ * @fileoverview In this file the namespace Math.Metapost is defined which holds algorithms translated from Metapost
+ * by D.E. Knuth and J.D. Hobby.
+ */
+
+define('math/metapost',['utils/type', 'math/math'], function (Type, Mat) {
+
+    "use strict";
+
+    /**
+     * The JXG.Math.Metapost namespace holds algorithms translated from Metapost
+     * by D.E. Knuth and J.D. Hobby.
+     *
+     * @name JXG.Math.Metapost
+     * @exports Mat.Metapost as JXG.Math.Metapost
+     * @namespace
+     */
+    Mat.Metapost = {
+        MP_ENDPOINT: 0,
+        MP_EXPLICIT: 1,
+        MP_GIVEN: 2,
+        MP_CURL: 3,
+        MP_OPEN: 4,
+        MP_END_CYCLE: 5,
+
+        UNITY: 1.0,
+        // two: 2,
+        // fraction_half: 0.5,
+        FRACTION_ONE: 1.0,
+        FRACTION_THREE: 3.0,
+        ONE_EIGHTY_DEG: Math.PI,
+        THREE_SIXTY_DEG: 2 * Math.PI,
+        // EPSILON: 1e-5,
+        EPS_SQ: 1e-5 * 1e-5,
+
+        /**
+         * @private
+         */
+        make_choices: function (knots) {
+            var dely, h, k, delx, n,
+                q, p, s, cosine, t, sine,
+                delta_x, delta_y, delta, psi;
+
+            p = knots[0];
+            do {
+                if (!p) {
+                    break;
+                }
+                q = p.next;
+
+                // Join two identical knots by setting the control points to the same
+                // coordinates.
+                // MP 291
+                if (p.rtype > this.MP_EXPLICIT &&
+                    ((p.x - q.x) * (p.x - q.x)  + (p.y - q.y) * (p.y - q.y) < this.EPS_SQ)) {
+
+                    p.rtype = this.MP_EXPLICIT;
+                    if (p.ltype === this.MP_OPEN) {
+                        p.ltype = this.MP_CURL;
+                        p.set_left_curl(this.UNITY);
+                    }
+
+                    q.ltype = this.MP_EXPLICIT;
+                    if (q.rtype === this.MP_OPEN) {
+                        q.rtype = this.MP_CURL;
+                        q.set_right_curl(this.UNITY);
+                    }
+
+                    p.rx = p.x;
+                    q.lx = p.x;
+                    p.ry = p.y;
+                    q.ly = p.y;
+                }
+                p = q;
+            } while (p !== knots[0]);
+
+            // Find the first breakpoint, h, on the path
+            // MP 292
+            h = knots[0];
+            while (true) {
+                if (h.ltype !== this.MP_OPEN || h.rtype !== this.MP_OPEN) {
+                    break;
+                }
+                h = h.next;
+                if (h === knots[0]) {
+                    h.ltype = this.MP_END_CYCLE;
+                    break;
+                }
+            }
+
+            p = h;
+            while (true) {
+                if (!p) {
+                  break;
+                }
+
+                // Fill in the control points between p and the next breakpoint,
+                // then advance p to that breakpoint
+                // MP 299
+                q = p.next;
+                if (p.rtype >= this.MP_GIVEN) {
+                    while (q.ltype === this.MP_OPEN && q.rtype === this.MP_OPEN) {
+                        q = q.next;
+                    }
+
+                    // Calculate the turning angles psi_ k and the distances d_{k,k+1};
+                    // set n to the length of the path
+                    // MP 302
+                    k = 0;
+                    s = p;
+                    n = knots.length;
+
+                    delta_x = [];
+                    delta_y = [];
+                    delta = [];
+                    psi = [null];
+
+                    // tuple([]) = tuple([[], [], [], [null]]);
+                    while (true) {
+                        t = s.next;
+                        // None;
+                        delta_x.push(t.x - s.x);
+                        delta_y.push(t.y - s.y);
+                        delta.push( this.mp_pyth_add(delta_x[k], delta_y[k]) );
+                        if (k > 0) {
+                            sine =   delta_y[k - 1] / delta[k - 1];
+                            cosine = delta_x[k - 1] / delta[k - 1];
+                            psi.push(
+                                Math.atan2(
+                                    delta_y[k] * cosine - delta_x[k] * sine,
+                                    delta_x[k] * cosine + delta_y[k] * sine
+                                    )
+                                );
+                        }
+                        k++;
+                        s = t;
+                        if (s === q) {
+                            n = k;
+                        }
+                        if (k >= n && s.ltype !== this.MP_END_CYCLE) {
+                            break;
+                        }
+                    }
+                    if (k === n) {
+                        psi.push(0);
+                    } else {
+                        psi.push(psi[1]);
+                    }
+
+                    // Remove open types at the breakpoints
+                    // MP 303
+                    if (q.ltype === this.MP_OPEN) {
+                        delx = (q.rx - q.x);
+                        dely = (q.ry - q.y);
+                        if (delx * delx + dely * dely < this.EPS_SQ) {
+                            q.ltype = this.MP_CURL;
+                            q.set_left_curl(this.UNITY);
+                        } else {
+                            q.ltype = this.MP_GIVEN;
+                            q.set_left_given(Math.atan2(dely, delx));
+                        }
+                    }
+                    if (p.rtype === this.MP_OPEN && p.ltype === this.MP_EXPLICIT) {
+                        delx = (p.x - p.lx);
+                        dely = (p.y - p.ly);
+                        if ( delx * delx + dely * dely  < this.EPS_SQ) {
+                            p.rtype = this.MP_CURL;
+                            p.set_right_curl(this.UNITY);
+                        } else {
+                            p.rtype = this.MP_GIVEN;
+                            p.set_right_given(Math.atan2(dely, delx));
+                        }
+                    }
+                    this.mp_solve_choices(p, q, n, delta_x, delta_y, delta, psi);
+                } else if (p.rtype === this.MP_ENDPOINT) {
+                    // MP 294
+                    p.rx = p.x;
+                    p.ry = p.y;
+                    q.lx = q.x;
+                    q.ly = q.y;
+                }
+                p = q;
+
+                if (p === h) {
+                    break;
+                }
+            }
+        },
+
+        /**
+         * Implements solve_choices form metapost
+         * MP 305
+         * @private
+         */
+        mp_solve_choices: function (p, q, n, delta_x, delta_y, delta, psi) {
+            var aa, acc, vv, bb, ldelta, ee, k, s,
+                ww, uu, lt, r, t, ff, theta, rt, dd, cc,
+                ct_st, ct, st, cf_sf, cf, sf, i,
+                k_idx;
+
+            ldelta = delta.length + 1;
+            uu = new Array(ldelta);
+            ww = new Array(ldelta);
+            vv = new Array(ldelta);
+            theta = new Array(ldelta);
+            for (i = 0; i < ldelta; i++) {
+                theta[i] = vv[i] = ww[i] = uu[i] = 0;
+            }
+            k = 0;
+            s = p;
+            r = 0;
+            while (true) {
+                t = s.next;
+                if (k === 0) {
+                    // MP 306
+                    if (s.rtype === this.MP_GIVEN) {
+                        // MP 314
+                        if (t.ltype === this.MP_GIVEN) {
+                            aa = Math.atan2(delta_y[0], delta_x[0]);
+                            ct_st = this.mp_n_sin_cos(p.right_given() - aa);
+                            ct = ct_st[0];
+                            st = ct_st[1];
+                            cf_sf = this.mp_n_sin_cos(q.left_given() - aa);
+                            cf = cf_sf[0];
+                            sf = cf_sf[1];
+                            this.mp_set_controls(p, q, delta_x[0], delta_y[0], st, ct, -sf, cf);
+                            return;
+                        }
+                        vv[0] = s.right_given() - Math.atan2(delta_y[0], delta_x[0]);
+                        vv[0] = this.reduce_angle(vv[0]);
+                        uu[0] = 0;
+                        ww[0] = 0;
+
+                    } else if (s.rtype === this.MP_CURL) {
+                        // MP 315
+                        if (t.ltype === this.MP_CURL) {
+                            p.rtype = this.MP_EXPLICIT;
+                            q.ltype = this.MP_EXPLICIT;
+                            lt = Math.abs(q.left_tension());
+                            rt = Math.abs(p.right_tension());
+                            ff = this.UNITY / (3.0 * rt);
+                            p.rx = p.x + delta_x[0] * ff;
+                            p.ry = p.y + delta_y[0] * ff;
+                            ff = this.UNITY / (3.0 * lt);
+                            q.lx = q.x - delta_x[0] * ff;
+                            q.ly = q.y - delta_y[0] * ff;
+                            return;
+                        }
+                        cc = s.right_curl();
+                        lt = Math.abs(t.left_tension());
+                        rt = Math.abs(s.right_tension());
+                        uu[0] = this.mp_curl_ratio(cc, rt, lt);
+                        vv[0] = -psi[1] * uu[0];
+                        ww[0] = 0;
+                    } else {
+                        if (s.rtype === this.MP_OPEN) {
+                            uu[0] = 0;
+                            vv[0] = 0;
+                            ww[0] = this.FRACTION_ONE;
+                        }
+                    }
+                } else {
+                    if (s.ltype === this.MP_END_CYCLE || s.ltype === this.MP_OPEN) {
+                        // MP 308
+                        aa = this.UNITY / (3.0 * Math.abs(r.right_tension()) - this.UNITY);
+                        dd = delta[k] * (this.FRACTION_THREE - this.UNITY / Math.abs(r.right_tension()));
+                        bb = this.UNITY / (3 * Math.abs(t.left_tension()) - this.UNITY);
+                        ee = delta[k - 1] * (this.FRACTION_THREE - this.UNITY / Math.abs(t.left_tension()));
+                        cc = this.FRACTION_ONE - uu[k - 1] * aa;
+                        dd = dd * cc;
+                        lt = Math.abs(s.left_tension());
+                        rt = Math.abs(s.right_tension());
+                        if (lt < rt) {
+                            dd *= Math.pow(lt / rt, 2);
+                        } else {
+                            if (lt > rt) {
+                                ee *= Math.pow(rt / lt, 2);
+                            }
+                        }
+                        ff = ee / (ee + dd);
+                        uu[k] = ff * bb;
+                        acc = -psi[k + 1] * uu[k];
+                        if (r.rtype === this.MP_CURL) {
+                            ww[k] = 0;
+                            vv[k] = acc - psi[1] * (this.FRACTION_ONE - ff);
+                        } else {
+                            ff = (this.FRACTION_ONE - ff) / cc;
+                            acc = acc - psi[k] * ff;
+                            ff = ff * aa;
+                            vv[k] = acc - vv[k - 1] * ff;
+                            ww[k] = -ww[k - 1] * ff;
+                        }
+                        if (s.ltype === this.MP_END_CYCLE) {
+                            aa = 0;
+                            bb = this.FRACTION_ONE;
+                            while (true) {
+                                k -= 1;
+                                if (k === 0) {
+                                    k = n;
+                                }
+                                aa = vv[k] - aa * uu[k];
+                                bb = ww[k] - bb * uu[k];
+                                if (k === n) {
+                                    break;
+                                }
+                            }
+                            aa = aa / (this.FRACTION_ONE - bb);
+                            theta[n] = aa;
+                            vv[0] = aa;
+                            // k_val = range(1, n);
+                            // for (k_idx in k_val) {
+                              // k = k_val[k_idx];
+                            for (k_idx = 1; k_idx < n; k_idx++) {
+                                vv[k_idx] = vv[k_idx] + aa * ww[k_idx];
+                            }
+                            break;
+                        }
+                    } else {
+                        if (s.ltype === this.MP_CURL) {
+                            cc = s.left_curl();
+                            lt = Math.abs(s.left_tension());
+                            rt = Math.abs(r.right_tension());
+                            ff = this.mp_curl_ratio(cc, lt, rt);
+                            theta[n] = -(vv[n - 1] * ff) / (this.FRACTION_ONE - ff * uu[n - 1]);
+                            break;
+                        }
+                        if (s.ltype === this.MP_GIVEN) {
+                            theta[n] = s.left_given() - Math.atan2(delta_y[n - 1], delta_x[n - 1]);
+                            theta[n] = this.reduce_angle(theta[n]);
+                            break;
+                        }
+                    }
+                }
+                r = s;
+                s = t;
+                k += 1;
+            }
+
+            // MP 318
+            for (k = n-1; k > -1; k--) {
+                theta[k] = vv[k] - theta[k + 1] * uu[k];
+            }
+
+            s = p;
+            k = 0;
+            while (true) {
+                t = s.next;
+                ct_st = this.mp_n_sin_cos(theta[k]);
+                ct = ct_st[0];
+                st = ct_st[1];
+                cf_sf = this.mp_n_sin_cos((-(psi[k + 1]) - theta[k + 1]));
+                cf = cf_sf[0];
+                sf = cf_sf[1];
+                this.mp_set_controls(s, t, delta_x[k], delta_y[k], st, ct, sf, cf);
+                k++;
+                s = t;
+                if (k === n) {
+                  break;
+                }
+            }
+        },
+
+        /**
+         * @private
+         */
+        mp_n_sin_cos: function (z) {
+            return [Math.cos(z), Math.sin(z)];
+        },
+
+        /**
+         * @private
+         */
+        mp_set_controls: function (p, q, delta_x, delta_y, st, ct, sf, cf) {
+            var rt, ss, lt, sine, rr;
+            lt = Math.abs(q.left_tension());
+            rt = Math.abs(p.right_tension());
+            rr = this.mp_velocity(st, ct, sf, cf, rt);
+            ss = this.mp_velocity(sf, cf, st, ct, lt);
+
+            // console.log('lt rt rr ss', lt, rt, rr, ss);
+            if (p.right_tension() < 0 || q.left_tension() < 0) {
+                if ((st >= 0 && sf >= 0) || (st <= 0 && sf <= 0)) {
+                    sine = Math.abs(st) * cf + Math.abs(sf) * ct;
+                    if (sine > 0) {
+                        sine *= 1.00024414062;
+                        if (p.right_tension() < 0) {
+                            if (this.mp_ab_vs_cd(Math.abs(sf), this.FRACTION_ONE, rr, sine) < 0) {
+                                rr = Math.abs(sf) / sine;
+                            }
+                        }
+                        if (q.left_tension() < 0) {
+                            if (this.mp_ab_vs_cd(Math.abs(st), this.FRACTION_ONE, ss, sine) < 0) {
+                                ss = Math.abs(st) / sine;
+                            }
+                        }
+                    }
+                }
+            }
+            p.rx = p.x + (delta_x * ct - delta_y * st) * rr;
+            p.ry = p.y + (delta_y * ct + delta_x * st) * rr;
+            q.lx = q.x - (delta_x * cf + delta_y * sf) * ss;
+            q.ly = q.y - (delta_y * cf - delta_x * sf) * ss;
+            p.rtype = this.MP_EXPLICIT;
+            q.ltype = this.MP_EXPLICIT;
+        },
+
+        /**
+         * @private
+         */
+        mp_pyth_add: function (a, b) {
+            return Math.sqrt((a * a + b * b));
+        },
+
+        /**
+         *
+         * @private
+         */
+        mp_curl_ratio: function (gamma, a_tension, b_tension) {
+            var alpha = 1.0 / a_tension,
+                beta =  1.0 / b_tension;
+
+            return Math.min (4.0,
+                ((3.0 - alpha) * alpha * alpha * gamma + beta * beta * beta) /
+                 (alpha * alpha * alpha * gamma + (3.0 - beta) * beta * beta)
+                );
+        },
+
+        /**
+         * @private
+         */
+        mp_ab_vs_cd: function (a, b, c, d) {
+            if (a * b === c * d) {
+                return 0;
+            }
+            if (a * b > c * d) {
+                return 1;
+            }
+            return -1;
+        },
+
+        /**
+         * @private
+         */
+        mp_velocity: function (st, ct, sf, cf, t) {
+          return Math.min (4.0,
+                (2.0 + Math.sqrt(2) * (st - sf / 16.0) * (sf - st / 16.0) * (ct - cf)) /
+                (1.5 * t * ((2 + (Math.sqrt(5) - 1) * ct) + (3 - Math.sqrt(5)) * cf))
+            );
+        },
+
+        /**
+         * @private
+         * @param {Number} A
+         */
+        reduce_angle: function (A) {
+            if (Math.abs(A) > this.ONE_EIGHTY_DEG) {
+                if (A > 0) {
+                    A -= this.THREE_SIXTY_DEG;
+                } else {
+                    A += this.THREE_SIXTY_DEG;
+                }
+            }
+            return A;
+        },
+
+        /**
+         *
+         * @private
+         * @param {Array} p
+         * @param {Number} tension
+         * @param {Boolean} cycle
+         */
+        makeknots: function (p, tension, cycle) {
+            var i, len,
+                knots = [];
+
+            tension = tension || 1;
+
+            len = p.length;
+            for (i = 0; i < len; i++) {
+                knots.push({
+                    x: p[i][0],
+                    y: p[i][1],
+                    ltype: this.MP_OPEN,
+                    rtype: this.MP_OPEN,
+                    ly: tension,
+                    ry: tension,
+                    lx: tension,
+                    rx: tension,
+                    left_curl: function() { return this.lx || 0; },
+                    right_curl: function() { return this.rx || 0; },
+                    left_tension: function() {
+                            if (!this.ly) { this.ly = 1; }
+                            return this.ly;
+                        },
+                    right_tension: function() {
+                            if (!this.ry) { this.ry = 1; }
+                            return this.ry;
+                        },
+                    set_right_curl: function(x) { this.rx = x || 0; },
+                    set_left_curl: function(x) { this.lx = x || 0; }
+                });
+            }
+            len = knots.length;
+            for (i = 0; i < len; i++) {
+                knots[i].next = knots[i+1] || knots[i];
+                knots[i].set_right_given = knots[i].set_right_curl;
+                knots[i].set_left_given = knots[i].set_left_curl;
+                knots[i].right_given = knots[i].right_curl;
+                knots[i].left_given = knots[i].left_curl;
+            }
+            knots[len - 1].next = knots[0];
+
+            if (!cycle) {
+                knots[len - 1].rtype = this.MP_ENDPOINT;
+
+                knots[len - 1].ltype = this.MP_CURL;
+                knots[0].rtype = this.MP_CURL;
+            }
+
+            return knots;
+        },
+
+        /**
+         *
+         * @param {Array} point_list
+         * @param {Object} controls
+         *
+         * @returns {Array}
+         */
+        curve: function(point_list, controls) {
+            var knots, len, i, val,
+                x = [],
+                y = [];
+
+            controls = controls || {
+                    tension: 1,
+                    direction: {},
+                    curl: {},
+                    isClosed: false
+                };
+
+            knots = this.makeknots(point_list, Type.evaluate(controls.tension), controls.isClosed);
+
+            len = knots.length;
+            for (i in controls.direction) {
+                if (controls.direction.hasOwnProperty(i)) {
+                    val = Type.evaluate(controls.direction[i]);
+                    if (Type.isArray(val)) {
+                        if (val[0] !== false) {
+                            knots[i].lx = val[0] * Math.PI / 180;
+                            knots[i].ltype = this.MP_GIVEN;
+                        }
+                        if (val[1] !== false) {
+                            knots[i].rx = val[1] * Math.PI / 180;
+                            knots[i].rtype = this.MP_GIVEN;
+                        }
+                    } else {
+                        knots[i].lx = val * Math.PI / 180;
+                        knots[i].rx = val * Math.PI / 180;
+                        knots[i].ltype = knots[i].rtype = this.MP_GIVEN;
+                    }
+                }
+            }
+            for (i in controls.curl) {
+                if (controls.curl.hasOwnProperty(i)) {
+                    val = Type.evaluate(controls.curl[i]);
+                    if (parseInt(i, 10) === 0) {
+                        knots[i].rtype = this.MP_CURL;
+                        knots[i].set_right_curl(val);
+                    } else if (parseInt(i, 10) === len - 1) {
+                        knots[i].ltype = this.MP_CURL;
+                        knots[i].set_left_curl(val);
+                    }
+                }
+            }
+
+            this.make_choices(knots);
+
+            for (i = 0; i < len - 1; i++) {
+                x.push(knots[i].x);
+                x.push(knots[i].rx);
+                x.push(knots[i + 1].lx);
+                y.push(knots[i].y);
+                y.push(knots[i].ry);
+                y.push(knots[i + 1].ly);
+            }
+            x.push(knots[len - 1].x);
+            y.push(knots[len - 1].y);
+
+            if (controls.isClosed) {
+                x.push(knots[len - 1].rx);
+                y.push(knots[len - 1].ry);
+                x.push(knots[0].lx);
+                y.push(knots[0].ly);
+                x.push(knots[0].x);
+                y.push(knots[0].y);
+            }
+
+            return [x, y];
+        }
+
+    };
+
+    return Mat.Metapost;
+});
+
+/*
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -12456,7 +17390,7 @@ define('utils/encoding',['jxg'], function (JXG) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -12667,7 +17601,7 @@ define('utils/base64',['jxg', 'utils/encoding'], function (JXG, Encoding) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -12909,7 +17843,7 @@ define('server/server',[
     return JXG.Server;
 });
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -13291,7 +18225,7 @@ define('math/symbolic',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -13363,7 +18297,7 @@ define('math/clip',[
          * @param  {Array} S Array
          * @return {Array} return the array S
          */
-        doublyLinkedList: function(S) {
+        makeDoublyLinkedList: function(S) {
             var i,
                 le = S.length;
 
@@ -13427,17 +18361,17 @@ define('math/clip',[
             }
 
             // Handle the case if the point is a vertex of the path
-            if (path[0].usrCoords[1] === x &&
-                path[0].usrCoords[2] === y) {
+            if (path[0].coords.usrCoords[1] === x &&
+                path[0].coords.usrCoords[2] === y) {
 
                 // console.log('<<<<<<< Vertex 1');
                 return 1;
             }
 
-            for (i = 0; i < le - 1; i++) {
+            for (i = 0; i < le; i++) {
                 // Consider the edge from p1 = path[i] to p2 = path[i+1]
-                p1 = path[i].usrCoords;
-                p2 = path[(i + 1) % le].usrCoords;
+                p1 = path[i].coords.usrCoords;
+                p2 = path[(i + 1) % le].coords.usrCoords;
                 if (p1[0] === 0 || p2[0] === 0 ||
                     isNaN(p1[1]) || isNaN(p2[1]) ||
                     isNaN(p1[2]) || isNaN(p2[2])) {
@@ -13449,11 +18383,10 @@ define('math/clip',[
                     if (p2[1] === x) {
                         // console.log('<<<<<<< Vertex 2');
                         return 1;
-                    } else {
-                        if (p1[2] === y && ((p2[1] > x) === (p1[1] < x))) {
-                            // console.log('<<<<<<< Edge 1', p1, p2, [x, y]);
-                            return 0;
-                        }
+                    }
+                    if (p1[2] === y && ((p2[1] > x) === (p1[1] < x))) {
+                        // console.log('<<<<<<< Edge 1', p1, p2, [x, y]);
+                        return 0;
                     }
                 }
 
@@ -13500,22 +18433,45 @@ define('math/clip',[
          * @param  {Array} path      Pointer to the path containing the intersection point
          * @param  {String} pathname Name of the path: 'S' or 'C'.
          */
-        Vertex: function(coords, i, alpha, path, pathname) {
-            this.coords = coords;
-            this.usrCoords = this.coords.usrCoords;
-            this.scrCoords = this.coords.scrCoords;
-
-            this.intersect = true;
-            this.alpha = alpha;
+        Vertex: function(coords, i, alpha, path, pathname, type) {
             this.pos = i;
-            this.path = path;
-            this.pathname = pathname;
-            this.done = false;
+            this.intersection = true;
+            this.coords = coords;
+            this.elementClass = Const.OBJECT_CLASS_POINT;
+
+            this.data = {
+                alpha: alpha,
+                path: path,
+                pathname: pathname,
+                done: false,
+                type: type,
+                revtype: type,
+                link: null,
+                idx: 0
+            };
 
             // Set after initialisation
             this.neighbour = null;
             this.entry_exit = false;
-            this.cnt = 0;
+        },
+
+        _addToList: function(list, coords, pos) {
+            var len = list.length,
+                eps = Mat.eps * Mat.eps;
+
+            if (len > 0 &&
+                Math.abs(list[len - 1].coords.usrCoords[0] - coords.usrCoords[0]) < eps &&
+                Math.abs(list[len - 1].coords.usrCoords[1] - coords.usrCoords[1]) < eps &&
+                Math.abs(list[len - 1].coords.usrCoords[2] - coords.usrCoords[2]) < eps) {
+                // Skip point
+                return;
+            }
+            list.push({
+                pos: pos,
+                intersection: false,
+                coords: coords,
+                elementClass: Const.OBJECT_CLASS_POINT
+            });
         },
 
         /**
@@ -13526,30 +18482,133 @@ define('math/clip',[
          * @return {Array}  Array of intersection points ordered by first occurrence in the path.
          */
         sortIntersections: function(P_crossings) {
-            var i, j, P, last,
+            var i, j, P, Q,
+                last,
+                next_node,
                 P_intersect = [],
                 P_le = P_crossings.length;
 
             for (i = 0; i < P_le; i++) {
-                P_crossings[i].sort(function(a, b) { return (a.alpha > b.alpha) ? 1 : -1; });
+                P_crossings[i].sort(function(a, b) { return (a.data.alpha > b.data.alpha) ? 1 : -1; });
+
                 if (P_crossings[i].length > 0) {
+            // console.log("Crossings", P_crossings[i])
                     last = P_crossings[i].length - 1;
                     P = P_crossings[i][0];
-                    P._prev = P.path[P.pos];
-                    P._prev._next = P;
+//console.log("SORT", P.coords.usrCoords)
+                    Q =  P.data.path[P.pos];
+                    next_node = Q._next;  // Store the next "normal" node
+
+                    if (i === P_le - 1) {
+                        Q._end = false;
+                    }
+
+                    if (P.data.alpha === 0.0 && P.data.type === 'T') {
+//            console.log("SKIP", P.coords.usrCoords, P.data.type, P.neighbour.data.type);
+                        Q.intersection = true;
+                        Q.data = P.data;
+                        Q.neighbour = P.neighbour;
+                        Q.neighbour.neighbour = Q;
+                        Q.entry_exit = false;
+                        P_crossings[i][0] = Q;
+                    } else {
+                        // Insert the first intersection point
+                        P._prev = Q;
+                        P._prev._next = P;
+                    }
+
+                    // Insert the other intersection points, but the last
                     for (j = 1; j <= last; j++) {
                         P = P_crossings[i][j];
                         P._prev = P_crossings[i][j - 1];
                         P._prev._next = P;
                     }
+
+                    // Link last intersection point to the next node
                     P = P_crossings[i][last];
-                    P._next = P.path[P.pos + 1];
+                    P._next = next_node;
                     P._next._prev = P;
+
+                    if (i === P_le - 1) {
+                        P._end = true;
+            //console.log("END", P._end, P.coords.usrCoords, P._prev.coords.usrCoords, P._next.coords.usrCoords);
+                    }
 
                     P_intersect = P_intersect.concat(P_crossings[i]);
                 }
             }
             return P_intersect;
+        },
+
+        _inbetween: function(q, p1, p2) {
+            var alpha,
+                eps = Mat.eps * Mat.eps,
+                px = p2[1] - p1[1],
+                py = p2[2] - p1[2],
+                qx = q[1]  - p1[1],
+                qy = q[2]  - p1[2];
+
+            if (px === 0 && py === 0 && qx === 0 && qy === 0) {
+                // All three points are equal
+                return true;
+            }
+            if (Math.abs(qx) < eps && Math.abs(px) < eps) {
+                alpha = qy / py;
+            } else {
+                alpha = qx / px;
+            }
+            if (Math.abs(alpha) < eps) {
+                alpha = 0.0;
+            }
+            return alpha;
+        },
+
+        _print_array: function(arr) {
+            var i;
+            for (i = 0; i < arr.length; i++) {
+                console.log(i, arr[i].coords.usrCoords,  arr[i].data.type);
+            }
+        },
+
+        _print_list: function(P) {
+            var cnt = 0, alpha;
+            while (cnt < 100) {
+                if (P.data) {
+                    alpha = P.data.alpha;
+                } else {
+                    alpha = '-';
+                }
+                console.log("\t", P.coords.usrCoords, "\n\t\tis:", P.intersection, "end:", P._end,
+                            alpha,
+                            "\n\t\t-:", P._prev.coords.usrCoords,
+                            "\n\t\t+:", P._next.coords.usrCoords,
+                            "\n\t\tn:", (P.intersection) ? P.neighbour.coords.usrCoords : '-'
+                            );
+                if (P._end) {
+                    break;
+                }
+                P = P._next;
+                cnt++;
+            }
+        },
+
+        _noOverlap: function(p1, p2, q1, q2) {
+            var k,
+                eps = Mat.eps * Mat.eps,
+                minp, maxp, minq, maxq,
+                no_overlap = false;
+
+            for (k = 0; k < 3; k++) {
+                minp = Math.min(p1[k], p2[k]);
+                maxp = Math.max(p1[k], p2[k]);
+                minq = Math.min(q1[k], q2[k]);
+                maxq = Math.max(q1[k], q2[k]);
+                if (maxp < minq - eps|| minp > maxq + eps) {
+                    no_overlap = true;
+                    break;
+                }
+            }
+            return no_overlap;
         },
 
         /**
@@ -13565,10 +18624,14 @@ define('math/clip',[
          */
         findIntersections: function(S, C, board) {
             var res = [],
-                i, j, k, ignore, min_S, min_C, max_S, max_C, swap, crds,
-                S_le = S.length - 1,
-                C_le = C.length - 1,
-                // cnt = 0,
+                eps = Mat.eps,
+                i, j,
+                crds,
+                S_le = S.length,
+                C_le = C.length,
+                Si, Si1, Cj, Cj1,
+                alpha,
+                type,
                 IS, IC,
                 S_intersect = [],
                 C_intersect = [],
@@ -13582,48 +18645,96 @@ define('math/clip',[
             // Run through the subject path.
             for (i = 0; i < S_le; i++) {
                 S_crossings.push([]);
+                Si = S[i].coords.usrCoords;
+                Si1 = S[(i + 1) % S_le].coords.usrCoords;
 
                 // Run through the clip path.
                 for (j = 0; j < C_le; j++) {
                     // Test if bounding boxes of the two curve segments overlap
                     // If not, the expensive intersection test can be skipped.
-                    ignore = false;
-                    for (k = 0; k < 3; k++) {
-                        min_S = S[i].usrCoords[k];
-                        max_S = S[i + 1].usrCoords[k];
-                        if (min_S > max_S) {
-                            swap = max_S;
-                            max_S = min_S;
-                            min_S = swap;
-                        }
-                        min_C = C[j].usrCoords[k];
-                        max_C = C[j + 1].usrCoords[k];
-                        if (min_C > max_C) {
-                            swap = max_C;
-                            max_C = min_C;
-                            min_C = swap;
-                        }
-                        if (max_S < min_C || min_S > max_C) {
-                            ignore = true;
-                            break;
-                        }
-                    }
-                    if (ignore) {
+                    Cj  = C[j].coords.usrCoords;
+                    Cj1 = C[(j + 1) % C_le].coords.usrCoords;
+
+                    if (this._noOverlap(Si, Si1, Cj, Cj1)) {
                         continue;
                     }
 
                     // Intersection test
-                    res = Geometry.meetSegmentSegment(S[i].usrCoords, S[i + 1].usrCoords,
-                                                      C[j].usrCoords, C[j + 1].usrCoords);
+                    res = Geometry.meetSegmentSegment(Si, Si1, Cj, Cj1);
+//console.log(i, j, ":", res[0][1] / res[0][0], res[0][2] / res[0][0], res[1], res[2]);
 
                     // Found an intersection point
-                    if (res[1] >= 0.0 && res[1] <= 1.0 &&
-                        res[2] >= 0.0 && res[2] <= 1.0) {
+                    // isCollinear = false;
+                    if ((res[1] > -eps && res[1] < 1 - eps &&           // "regular" intersection
+                         res[2] > -eps && res[2] < 1 - eps) ||
+                        (res[1] === Infinity &&
+                         res[2] === Infinity && Mat.norm(res[0], 3) < eps) // collinear
+                        ) {
 
                         crds = new Coords(Const.COORDS_BY_USER, res[0], board);
+                        type = 'X';
+// console.log("IS", i, j, crds.usrCoords, res[1], res[2]);
 
-                        IS = new this.Vertex(crds, i, res[1], S, 'S');
-                        IC = new this.Vertex(crds, j, res[2], C, 'C');
+                        // Degenerate cases
+                        if (Math.abs(res[1]) < eps || Math.abs(res[2]) < eps) {
+                            // Crossing / bouncing at vertex or
+                            // end of delayed crossing / bouncing
+                            type  = 'T';
+                            if (Math.abs(res[1]) < eps) {
+                                res[1] = 0;
+                            }
+                            if (Math.abs(res[2]) < eps) {
+                                res[2] = 0;
+                            }
+                            if (res[1] === 0) {
+                                crds = new Coords(Const.COORDS_BY_USER, Si, board);
+                            } else {
+                                crds = new Coords(Const.COORDS_BY_USER, Cj, board);
+                            }
+                        } else if (res[1] === Infinity &&
+                                   res[2] === Infinity &&
+                                   Mat.norm(res[0], 3) < eps) {
+
+                            // In this case there might be two intersection points to be added
+                            // Collinear segments
+                            alpha = this._inbetween(Si, Cj, Cj1);
+// console.log("alpha Si", alpha, Si);
+// console.log(j, Cj)
+// console.log((j + 1) % C_le, Cj1)
+                            if (alpha >= 0 && alpha < 1) {
+                                type = 'T';
+                                crds = new Coords(Const.COORDS_BY_USER, Si, board);
+                                res[1] = 0;
+                                res[2] = alpha;
+                                IS = new this.Vertex(crds, i, res[1], S, 'S', type);
+                                IC = new this.Vertex(crds, j, res[2], C, 'C', type);
+                                IS.neighbour = IC;
+                                IC.neighbour = IS;
+
+                                S_crossings[i].push(IS);
+                                C_crossings[j].push(IC);
+                            }
+                            alpha = this._inbetween(Cj, Si, Si1);
+// console.log("alpha Cj", alpha, Si);
+                            if (Geometry.distance(Si, Cj, 3) > Mat.eps &&
+                                alpha >= 0 && alpha < 1) {
+                                    type = 'T';
+                                    crds = new Coords(Const.COORDS_BY_USER, Cj, board);
+                                    res[1] = alpha;
+                                    res[2] = 0;
+                                    IS = new this.Vertex(crds, i, res[1], S, 'S', type);
+                                    IC = new this.Vertex(crds, j, res[2], C, 'C', type);
+                                    IS.neighbour = IC;
+                                    IC.neighbour = IS;
+
+                                    S_crossings[i].push(IS);
+                                    C_crossings[j].push(IC);
+                            }
+                            continue;
+                        }
+
+                        IS = new this.Vertex(crds, i, res[1], S, 'S', type);
+                        IC = new this.Vertex(crds, j, res[2], C, 'C', type);
                         IS.neighbour = IC;
                         IC.neighbour = IS;
 
@@ -13635,13 +18746,257 @@ define('math/clip',[
 
             // For both paths, sort their intersection points
             S_intersect = this.sortIntersections(S_crossings);
+// console.log('>>>>>>')
+// this._print_array(S_intersect);
+//console.log(S_intersect)
+// console.log('----------')
             for (i = 0; i < S_intersect.length; i++) {
-                S_intersect[i].cnt = i;
-                S_intersect[i].neighbour.cnt = i;
+                S_intersect[i].data.idx = i;
+                S_intersect[i].neighbour.data.idx = i;
             }
             C_intersect = this.sortIntersections(C_crossings);
 
+// this._print_array(C_intersect);
+// console.log(C_intersect)
+// console.log('<<<<<< Phase 1 done')
             return [S_intersect, C_intersect];
+        },
+
+        _getPosition: function(q, p1, p2, p3) {
+            var s1 = this.det(q, p1, p2),
+                s2 = this.det(q, p2, p3),
+                s3 = this.det(p1, p2, p3);
+
+            if (s3 >= 0) {   // Left turn or straight
+                if (s1 > 0 && s2 > 0) {
+                    return 'left';
+                }
+                return 'right';
+            }
+            // Right turn
+            if (s1 < 0 && s2 < 0) {
+                return 'right';
+            }
+            return 'left';
+        },
+
+        _classifyDegenerateIntersections: function(P) {
+            var Pp, Pm, Qp, Qm, Q, side,
+                cnt;
+
+            cnt = 0;
+            while (true) {
+                if (P.intersection && P.data.type === 'T') {
+//console.log("P:", P.coords.usrCoords, P.data.type)
+
+                    // Handle the degenerate cases
+                    // Decide if they are (delayed) bouncing or crossing intersections
+                    Pp = P._next.coords.usrCoords;  // P+
+                    Pm = P._prev.coords.usrCoords;  // P-
+
+                    Q = P.neighbour;
+                    Qm = P.neighbour._prev.coords.usrCoords;  // Q-
+                    Qp = P.neighbour._next.coords.usrCoords;  // Q+
+
+// console.log("Chain 1:", Pm, P.coords.usrCoords, Pp)
+// console.log("Chain 2:", Qm, P.neighbour.coords.usrCoords, Qp)
+// console.log(P._next.neighbour, Q._prev)
+// console.log(P._next.intersection, P._next.neighbour === Q._prev)
+                    if (P._next.intersection && P._next.neighbour === Q._next) {
+                        if (P._prev.intersection && P._prev.neighbour === Q._prev) {
+                            P.delayedStatus = ['on', 'on'];
+                        } else {
+                            side = this._getPosition(Qm,  Pm, P.coords.usrCoords, Pp);
+                            if (side === 'right') {
+                                P.delayedStatus = ['left', 'on'];
+                            } else {
+                                P.delayedStatus = ['right', 'on'];
+                            }
+                        }
+                    } else if (P._next.intersection && P._next.neighbour === Q._prev) {
+                        if (P._prev.intersection && P._prev.neighbour === Q._next) {
+                            P.delayedStatus = ['on', 'on'];
+                        } else {
+                            side = this._getPosition(Qp,  Pm, P.coords.usrCoords, Pp);
+                            if (side === 'right') {
+                                P.delayedStatus = ['left', 'on'];
+                            } else {
+                                P.delayedStatus = ['right', 'on'];
+                            }
+                        }
+                    }
+
+                    if (P._prev.intersection && P._prev.neighbour === Q._prev) {
+                        if (!(P._next.intersection && P._next.neighbour === Q._next)) {
+                            side = this._getPosition(Qp,  Pm, P.coords.usrCoords, Pp);
+                            if (side === 'right') {
+                                P.delayedStatus = ['on', 'left'];
+                            } else {
+                                P.delayedStatus = ['on', 'right'];
+                            }
+                        }
+                    } else if (P._prev.intersection && P._prev.neighbour === Q._next) {
+                        if (!(P._next.intersection && P._next.neighbour === Q._prev)) {
+                            side = this._getPosition(Qm,  Pm, P.coords.usrCoords, Pp);
+                            if (side === 'right') {
+                                P.delayedStatus = ['on', 'left'];
+                            } else {
+                                P.delayedStatus = ['on', 'right'];
+                            }
+                        }
+                    }
+
+                    if ((!P._next.intersection || (P._next.neighbour !== Q._prev && P._next.neighbour !== Q._next)) &&
+                        (!P._prev.intersection || (P._prev.neighbour !== Q._prev && P._prev.neighbour !== Q._next))) {
+                        // Neither P- nor P+ are intersections
+
+                        side = this._getPosition(Qm,   Pm, P.coords.usrCoords, Pp);
+                        if (side !== this._getPosition(Qp,  Pm, P.coords.usrCoords, Pp)) {
+                            P.data.type    = 'X';
+                            P.data.revtype = 'X';
+                        } else{
+                            P.data.type    = 'B';
+                            P.data.revtype = 'B';
+                        }
+// console.log("OTHER4", P.coords.usrCoords, P.data.type);
+                    }
+//console.log("P result", P.coords.usrCoords, P.data.type, P.delayedStatus)
+
+                    cnt++;
+                }
+                if (P._end || cnt > 1000) {
+                    break;
+                }
+                P = P._next;
+            }
+        },
+
+        _handleIntersectionChains: function(P) {
+            var cnt = 0,
+                start_status = 'Null',
+                P_start,
+                intersection_chain = false,
+                wait_for_exit = false;
+
+            while (true) {
+                if (P.intersection === true) {
+    //console.log("Chain point", P.coords.usrCoords, P.data.type);
+                    if (P.data.type === 'T') {
+                        if (P.delayedStatus[0] !== 'on' && P.delayedStatus[1] === 'on') {
+                            intersection_chain = true;
+                            P_start = P;
+                            start_status = P.delayedStatus[0];
+                        } else if (P.delayedStatus[0] === 'on' && P.delayedStatus[1] === 'on') {
+                            P.data.type    = 'B';
+                            P.data.revtype = 'B';
+                        } else if (P.delayedStatus[0] === 'on' && P.delayedStatus[1] !== 'on' &&
+                                    intersection_chain) {
+                            intersection_chain = false;
+                            if (start_status === P.delayedStatus[1]) {
+                                P.data.type          = 'B';
+                                P.data.revtype       = 'B';
+                                P_start.data.type    = 'B';
+                                P_start.data.revtype = 'B';
+                            } else {
+                                P.data.type          = 'X';
+                                P.data.revtype       = 'B';
+                                P_start.data.type    = 'B';
+                                P_start.data.revtype = 'X';
+                            }
+                            P_start.data.link = P;
+                            P.data.link       = P_start;
+                        }
+                    }
+                    cnt++;
+                }
+                if (P._end) {
+                    wait_for_exit = true;
+                }
+                if (wait_for_exit && !intersection_chain) {
+                    break;
+                }
+                if (cnt > 1000) {
+                    console.log("Intersection chain: SAFETY EXIT!!!!");
+                    break;
+                }
+                P = P._next;
+            }
+        },
+
+        /**
+         * Handle the case that all vertices of one path are contained
+         * in the other path. In this case we search for a midpoint of an edge
+         * which is not contained in the other path and add it to the path.
+         * It will be used as starting point for the entry/exit algorithm.
+         *
+         * @private
+         * @param {Array} S Subject path
+         * @param {Array} C Clip path
+         * @param {JXG.board} board JSXGraph board object. It is needed to convert between
+         * user coordinates and screen coordinates.
+         */
+        _handleFullyDegenerateCase: function(S, C, board) {
+            var P, Q, l, M, crds, q1, q2, node,
+                i, j, le, le2, is_on_Q,
+                is_fully_degenerated,
+                arr = [S, C];
+
+            for (l = 0; l < 2; l++) {
+                P = arr[l];
+                le = P.length;
+                for (i = 0, is_fully_degenerated = true; i < le; i++) {
+                    if (!P[i].intersection) {
+                        is_fully_degenerated = false;
+                        break;
+                    }
+                }
+
+                if (is_fully_degenerated) {
+                    // All nodes of P are also on the other path.
+                    Q = arr[(l + 1) % 2];
+                    le2 = Q.length;
+
+                    // We search for a midpoint of one edge of P which is not the other path and
+                    // we add that midpoint to P.
+                    for (i = 0; i < le; i++) {
+                        q1 = P[i].coords.usrCoords;
+                        q2 = P[(i + 1) % le].coords.usrCoords;
+                        // M id the midpoint
+                        M = [(q1[0] +  q2[0]) * 0.5,
+                             (q1[1] +  q2[1]) * 0.5,
+                             (q1[2] +  q2[2]) * 0.5];
+
+                        // Test if M is on path Q. If this is not the case,
+                        // we take M as additional point of P.
+                        for (j = 0, is_on_Q = false; j < le2; j++) {
+                            if (Math.abs(this.det(Q[j].coords.usrCoords, Q[(j + 1) % le2].coords.usrCoords, M)) < Mat.eps) {
+                                is_on_Q = true;
+                                break;
+                            }
+                        }
+                        if (!is_on_Q) {
+                            // The midpoint is added to the doubly-linked list.
+                            crds = new Coords(Const.COORDS_BY_USER, M, board);
+                            node = {
+                                    pos: i,
+                                    intersection: false,
+                                    coords: crds,
+                                    elementClass: Const.OBJECT_CLASS_POINT
+                                };
+                            P[i]._next = node;
+                            node._prev = P[i];
+                            P[(i + 1) % le]._prev = node;
+                            node._next = P[(i + 1) % le];
+                            if (P[i]._end) {
+                                P[i]._end = false;
+                                node._end = true;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
         },
 
         /**
@@ -13657,28 +19012,65 @@ define('math/clip',[
          * @param  {Array} path2 Second path
          */
         markEntryExit: function(path1, path2) {
-            var status,
-                P = path1[0];
+            var status, P, P_start, cnt;
 
-            if (this.windingNumber(P.usrCoords, path2) === 0) {
+            this._classifyDegenerateIntersections(path1[0]);
+            this._handleIntersectionChains(path1[0]);
+
+            // Decide if the first point of the path is inside or outside
+            // of the other path.
+            P = path1[0];
+            while (P.intersection) {
+                if (P._end) {
+                    break;
+                }
+                P = P._next;
+            }
+            if (this.windingNumber(P.coords.usrCoords, path2) === 0) {
+                // Outside
                 status = 'entry';
             } else {
+                // Inside
                 status = 'exit';
             }
 
-            while (!P._end) {
-                P = P._next;
-                if (Type.exists(P.intersect)) {
-                    // console.log("MARKED", status);
+            P_start = P;
+            // Greiner-Hormann entry/exit algorithm
+            cnt = 0;
+            while (true) {
+                if (P.intersection === true && P.data.type === 'X') {
                     P.entry_exit = status;
-
-                    if (status === 'entry') {
-                        status = 'exit';
-                    } else {
-                        status = 'entry';
+                    status = (status === 'entry') ? 'exit' : 'entry';
+                    if (P.data.link !== null && !P.data.link.entry_exit) {
+                        P.data.link.entry_exit = P.entry_exit;
                     }
                 }
+                if (P.intersection === true && P.data.type !== 'X') {
+                    if (!P.entry_exit && P.data.link !== null) {
+                        P.entry_exit = P.data.link.entry_exit;
+                    }
+                }
+                P = P._next;
+                if (P === P_start || cnt > 1000) {
+                    break;
+                }
+                cnt++;
             }
+
+            P_start = P;
+            cnt = 0;
+            while (true) {
+                P = P._next;
+                if (P === P_start || cnt > 1000) {
+                    break;
+                }
+                cnt++;
+            }
+        },
+
+        _isCrossing: function(P, isBackward) {
+            isBackward = isBackward || false;
+            return P.intersection && ((isBackward ? P.data.revtype : P.data.type) === 'X');
         },
 
         /**
@@ -13695,90 +19087,88 @@ define('math/clip',[
          * @return {Array}             Array consisting of two arrays containing the x-coordinates and the y-coordintaes of
          *      the resulting path.
          */
-        tracing:  function(S, S_intersect, clip_type) {
+        tracing: function(S, S_intersect, clip_type) {
             var P, current, start,
                 cnt = 0,
-                maxCnt = 40000,
+                reverse,
+                maxCnt = 10000,
                 S_idx = 0,
-                pathX = [],
-                pathY = [];
+                path = [];
 
+// console.log("------ Start Phase 3");
+
+            reverse = (clip_type === 'difference' || clip_type === 'union') ? true : false;
             while (S_idx < S_intersect.length && cnt < maxCnt) {
                 current = S_intersect[S_idx];
-                if (current.done) {
+                if (current.data.done || !this._isCrossing(current, reverse)) {
                     S_idx++;
                     continue;
                 }
 
-                //console.log("Start", current.usrCoords, current.entry_exit, S_idx);
-                if (pathX.length > 0) {    // Add a new path
-                    pathX.push(NaN);
-                    pathY.push(NaN);
+// console.log("Start", current.data.pathname, current.coords.usrCoords, current.data.type, current.data.revtype, current.entry_exit, S_idx);
+                if (path.length > 0) {    // Add a new path
+                    path.push([NaN, NaN]);
                 }
 
-                start = current.cnt;
+                start = current.data.idx;
                 P = S;
                 do {
                     // Add the "current" intersection vertex
-                    pathX.push(current.usrCoords[1]);
-                    pathY.push(current.usrCoords[2]);
-                    current.done = true;
+                    path.push(current);
+// console.log("Add intersection", current.coords.usrCoords);
+                    current.data.done = true;
 
-                    // console.log(current.pathname, current.cnt, current.entry_exit, current.usrCoords[1].toFixed(3), current.usrCoords[2].toFixed(3));
+// console.log("AT", current.data.pathname, current.entry_exit, current.coords.usrCoords, current.data.type, current.data.revtype);
                     if ((clip_type === 'intersection' && current.entry_exit === 'entry') ||
                         (clip_type === 'union' && current.entry_exit === 'exit') ||
-                        (clip_type === 'difference' && (P === S) === (current.entry_exit === 'exit'))
-                        ) {
+                        (clip_type === 'difference' && (P === S) === (current.entry_exit === 'exit')) ) {
+
                         current = current._next;
                         do {
                             cnt++;
 
-                            pathX.push(current.usrCoords[1]);
-                            pathY.push(current.usrCoords[2]);
+                            path.push(current);
+// console.log("Add fw", current.coords.usrCoords);
 
-                            if (!Type.exists(current.intersect)) {  // In case there are two adjacent intersects
+                            if (!this._isCrossing(current, reverse)) {  // In case there are two adjacent intersects
                                 current = current._next;
                             }
-                        } while (!Type.exists(current.intersect) &&
-                                //  !Type.exists(current.first_point_type) &&
-                                 cnt < maxCnt);
+                        } while (!this._isCrossing(current, reverse) && cnt < maxCnt);
                     } else {
                         current = current._prev;
                         do {
                             cnt++;
 
-                            pathX.push(current.usrCoords[1]);
-                            pathY.push(current.usrCoords[2]);
+                            path.push(current);
+// console.log("Add bw", current.coords.usrCoords);
 
-                            if (!Type.exists(current.intersect)) {  // In case there are two adjacent intersects
+                            if (!this._isCrossing(current, true)) {  // In case there are two adjacent intersects
                                 current = current._prev;
+//console.log("goto", current.coords.usrCoords)
                             }
-                        } while (!Type.exists(current.intersect) &&
-                                //  !Type.exists(current.first_point_type) &&
-                                 cnt < maxCnt);
+                        } while (!this._isCrossing(current, true) && cnt < maxCnt);
                     }
-                    current.done = true;
+                    current.data.done = true;
 
                     if (!current.neighbour) {
                         console.log("BREAK!!!!!!!!!!!!!!!!!", cnt);
                         return [[0], [0]];
                     }
 
-                    // console.log("Switch", current.pathname, current.cnt, "to", current.neighbour.pathname, current.neighbour.cnt);
+// console.log("Switch", current.coords.usrCoords, current.data.pathname, "to", current.neighbour.data.pathname);
                     current = current.neighbour;
-                    if (current.done) {
-                        pathX.push(current.usrCoords[1]);
-                        pathY.push(current.usrCoords[2]);
+                    if (current.data.done) {
+                        path.push(current);
                         break;
                     }
-                    P = current.path;
+                    P = current.data.path;
 
-                } while (!(current.pathname === 'S' && current.cnt === start) && cnt < maxCnt);
+                } while (!(current.data.pathname === 'S' && current.data.idx === start) && cnt < maxCnt);
 
                 S_idx++;
             }
 
-            return [pathX, pathY];
+            return this._getCoordsArrays(path, false);
         },
 
         /**
@@ -13792,34 +19182,80 @@ define('math/clip',[
          * @return {Boolean}        true, if one of the input paths is empty, false otherwise.
          */
         isEmptyCase: function(S, C, clip_type, pathX, pathY) {
-            var i;
+            // var i;
 
             if (clip_type === 'intersection' && (S.length === 0 || C.length === 0)) {
                 return true; //[pathX, pathY];
-            } else if (clip_type === 'union' && (S.length === 0 || C.length === 0)) {
-                if (S.length === 0) {
-                    for (i = 0; i < C.length; ++i) {
-                        pathX.push(C[i].usrCoords[1]);
-                        pathY.push(C[i].usrCoords[2]);
-                    }
-                } else {
-                    for (i = 0; i < S.length; ++i) {
-                        pathX.push(S[i].usrCoords[1]);
-                        pathY.push(S[i].usrCoords[2]);
-                    }
-                }
+            }
+            if (clip_type === 'union' && (S.length === 0 || C.length === 0)) {
+                // if (S.length === 0) {
+                //     for (i = 0; i < C.length; ++i) {
+                //         pathX.push(C[i].coords.usrCoords[1]);
+                //         pathY.push(C[i].coords.usrCoords[2]);
+                //     }
+                //     if (C.length > 0) {
+                //         pathX.push(C[0].coords.usrCoords[1]);
+                //         pathY.push(C[0].coords.usrCoords[2]);
+                //     }
+                // } else {
+                //     for (i = 0; i < S.length; ++i) {
+                //         pathX.push(S[i].coords.usrCoords[1]);
+                //         pathY.push(S[i].coords.usrCoords[2]);
+                //     }
+                //     if (S.length > 0) {
+                //         pathX.push(S[0].coords.usrCoords[1]);
+                //         pathY.push(S[0].coords.usrCoords[2]);
+                //     }
+                // }
                 return true; //[pathX, pathY];
-            } if (clip_type === 'difference' && (S.length === 0 || C.length === 0)) {
-                if (C.length === 0) {
-                    for (i = 0; i < S.length; ++i) {
-                        pathX.push(S[i].usrCoords[1]);
-                        pathY.push(S[i].usrCoords[2]);
-                    }
-                }
+            }
+            if (clip_type === 'difference' && (S.length === 0 || C.length === 0)) {
+                // if (C.length === 0) {
+                //     for (i = 0; i < S.length; ++i) {
+                //         pathX.push(S[i].coords.usrCoords[1]);
+                //         pathY.push(S[i].coords.usrCoords[2]);
+                //     }
+                //     if (S.length > 0) {
+                //         pathX.push(S[0].coords.usrCoords[1]);
+                //         pathY.push(S[0].coords.usrCoords[2]);
+                //     }
+                // }
                 return true; //[pathX, pathY];
             }
 
             return false;
+        },
+
+        _getCoordsArrays: function(path, doClose) {
+            var pathX = [],
+                pathY = [],
+                i, le = path.length;
+
+            for (i = 0; i < le; i++) {
+                if (path[i].coords) {
+                    pathX.push(path[i].coords.usrCoords[1]);
+                    pathY.push(path[i].coords.usrCoords[2]);
+                } else {
+                    pathX.push(path[i][0]);
+                    pathY.push(path[i][1]);
+                }
+            }
+            if (doClose && le > 0) {
+                if (path[0].coords) {
+                    pathX.push(path[0].coords.usrCoords[1]);
+                    pathY.push(path[0].coords.usrCoords[2]);
+                } else {
+                    pathX.push(path[0][0]);
+                    pathY.push(path[0][1]);
+                }
+            }
+
+            // le = pathX.length;
+            // for (i = 0; i < le; i++) {
+            //     console.log(pathX[i], pathY[i]);
+            // }
+
+            return [pathX, pathY];
         },
 
         /**
@@ -13833,64 +19269,138 @@ define('math/clip',[
          *      the resulting path.
          */
         handleEmptyIntersection: function(S, C, clip_type) {
-            var i, P,
-                pathX = [],
-                pathY = [];
+            var P, Q,
+                doClose = false,
+                path = [];
 
+            // Handle trivial cases
+            if (S.length === 0) {
+                if (clip_type === 'union') {
+                    // S cup C = C
+                    path = C;
+                } else {
+                    // S cap C = S \ C = {}
+                    path = [];
+                }
+                return this._getCoordsArrays(path, true);
+            }
+            if (C.length === 0) {
+                if (clip_type === 'intersection') {
+                    // S cap C = {}
+                    path = [];
+                } else {
+                    // S cup C = S \ C = S
+                    path = S;
+                }
+                return this._getCoordsArrays(path, true);
+            }
+
+            // From now on, both paths have non-zero length
+            //
+            // Handle union
             if (clip_type === 'union') {
-                for (i = 0; i < S.length; ++i) {
-                    pathX.push(S[i].usrCoords[1]);
-                    pathY.push(S[i].usrCoords[2]);
+                path = path.concat(S);
+                path.push(S[0]);
+                path.push([NaN, NaN]);
+                path = path.concat(C);
+                path.push(C[0]);
+                return this._getCoordsArrays(path, false);
+            }
+
+            // The two paths have no crossing intersections,
+            // but there might be bounicng intersections.
+
+            // First, we find - if possible - on each path a point which is not an intersection point.
+            if (S.length > 0) {
+                P = S[0];
+                while (P.intersection) {
+                    P = P._next;
+                    if (P._end) {
+                        break;
+                    }
                 }
-                pathX.push(NaN);
-                pathY.push(NaN);
-                for (i = 0; i < C.length; ++i) {
-                    pathX.push(C[i].usrCoords[1]);
-                    pathY.push(C[i].usrCoords[2]);
+            }
+            if (C.length > 0) {
+                Q = C[0];
+                while (Q.intersection) {
+                    Q = Q._next;
+                    if (Q._end) {
+                        break;
+                    }
                 }
-                return [pathX, pathY];
             }
 
             // Test if one curve is contained by the other
-            if (this.windingNumber(S[0].usrCoords, C) === 0) {     // S is outside of C,
-                if (this.windingNumber(C[0].usrCoords, S) !== 0) { // C is inside of S, i.e. C subset of S
+            if (this.windingNumber(P.coords.usrCoords, C) === 0) {
+                // S is outside of C.
+                if (this.windingNumber(Q.coords.usrCoords, S) !== 0) {
+                    // C is inside of S, i.e. C subset of S
+
                     if (clip_type === 'difference') {
-                        for (i = 0; i < S.length; ++i) {
-                            pathX.push(S[i].usrCoords[1]);
-                            pathY.push(S[i].usrCoords[2]);
+
+                        path = path.concat(S);
+                        path.push(S[0]);
+                        if (Geometry.signedPolygon(S) * Geometry.signedPolygon(C) > 0) {
+                            // Pathes have same orientation, we have to revert one.
+                            path.reverse();
                         }
-                        pathX.push(NaN);
-                        pathY.push(NaN);
+                        path.push([NaN, NaN]);
                     }
-                    P = C;
+                    path = path.concat(C);
+                    path.push(C[0]);
+                    doClose = false;
                 } else {                                           // The curves are disjoint
-                    if (clip_type === 'intersection') {
-                        P = [];
-                    } else if (clip_type === 'difference') {
-                        P = S;
+                    if (clip_type === 'difference') {
+                        path = path.concat(S);
+                        doClose = true;
                     }
                 }
-            } else {                                               // S inside of C, i.e. S subset of C
+            } else {
+                                                                    // S inside of C, i.e. S subset of C
                 if (clip_type === 'intersection') {
-                    P = S;
-                } else if (clip_type === 'difference') {
-                    P = [];
+                    path = path.concat(S);
+                    doClose = true;
                 }
-            }
-            for (i = 0; i < P.length; ++i) {
-                pathX.push(P[i].usrCoords[1]);
-                pathY.push(P[i].usrCoords[2]);
+                // 'difference': path is empty
             }
 
-            return [pathX, pathY];
+            return this._getCoordsArrays(path, doClose);
+        },
+
+        _countCrossingIntersections: function(intersections) {
+            var i,
+                le = intersections.length,
+                sum = 0;
+
+            for (i = 0; i  < le; i++) {
+                if (intersections[i].data.type === 'X') {
+                    sum++;
+                }
+            }
+            return sum;
         },
 
         /**
          * Determine the intersection, union or difference of two closed paths.
-         *
+         * <p>
          * This is an implementation of the Greiner-Hormann algorithm, see
-         * Greiner, Günther; Kai Hormann (1998).
+         * Günther Greiner and Kai Hormann (1998).
          * "Efficient clipping of arbitrary polygons". ACM Transactions on Graphics. 17 (2): 71–83.
+         * and
+         * Erich, L. Foster, and Kai Hormann, Kai, and Romeo Traaian Popa (2019),
+         * "Clipping simple polygons with degenerate intersections", Computers & Graphics:X, 2.
+         * <p>
+         * It is assumed that the pathes are closed, whereby it does not matter if the last point indeed
+         * equals the first point. In contrast to the original Greiner-Hormann algorithm,
+         * this algorithm can cope with many degenerate cases. A degenerate case is a vertext of one path
+         * which is contained in the other path.
+         * <p>
+         *
+         * <p>Problematic are:
+         * <ul>
+         *   <li>degenerate cases where one path additionally has self-intersections
+         *   <li>differences with one path having self-intersections.
+         * </ul>
          *
          * @param  {JXG.Circle|JXG.Curve|JXG.Polygon} subject   First closed path, usually called 'subject'.
          * @param  {JXG.Circle|JXG.Curve|JXG.Polygon} clip      Second closed path, usually called 'clip'.
@@ -14058,11 +19568,55 @@ define('math/clip',[
          *
          * </script><pre>
          *
+         * @example
+         * var clip_path = board.create('curve', [[], []], {strokeWidth: 1, fillColor: 'yellow', fillOpacity: 0.6});
+         * clip_path.updateDataArray = function() {
+         *     var bbox = this.board.getBoundingBox(),
+         *         canvas, triangle;
+         *
+         *     canvas = [[bbox[0], bbox[1]], // ul
+         *          [bbox[0], bbox[3]], // ll
+         *          [bbox[2], bbox[3]], // lr
+         *          [bbox[2], bbox[1]], // ur
+         *          [bbox[0], bbox[1]]] // ul
+         *     triangle = [[-1,1], [1,1], [0,-1], [-1,1]];
+         * 
+         *     var a = JXG.Math.Clip.greinerHormann(canvas, triangle, 'difference', this.board);
+         *     this.dataX = a[0];
+         *     this.dataY = a[1];
+         * };
+         * 
+         * </pre><div id="JXGe94da07a-2a01-4498-ad62-f71a327f8e25" class="jxgbox" style="width: 300px; height: 300px;"></div>
+         * <script type="text/javascript">
+         *     (function() {
+         *         var board = JXG.JSXGraph.initBoard('JXGe94da07a-2a01-4498-ad62-f71a327f8e25',
+         *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+         *     var clip_path = board.create('curve', [[], []], {strokeWidth: 1, fillColor: 'yellow', fillOpacity: 0.6});
+         *     clip_path.updateDataArray = function() {
+         *         var bbox = this.board.getBoundingBox(),
+         *             canvas, triangle;
+         *
+         *         canvas = [[bbox[0], bbox[1]], // ul
+         *              [bbox[0], bbox[3]], // ll
+         *              [bbox[2], bbox[3]], // lr
+         *              [bbox[2], bbox[1]], // ur
+         *              [bbox[0], bbox[1]]] // ul
+         *         triangle = [[-1,1], [1,1], [0,-1], [-1,1]];
+         *     
+         *         var a = JXG.Math.Clip.greinerHormann(canvas, triangle, 'difference', this.board);
+         *         this.dataX = a[0];
+         *         this.dataY = a[1];
+         *     };
+         * 
+         *     })();
+         * 
+         * </script><pre>
+         * 
          */
         greinerHormann: function(subject, clip, clip_type, board) { //},
                 // subject_first_point_type, clip_first_point_type) {
 
-            var i, r, rad,
+            var i, r, rad, len,
                 steps = 359,
                 S = [],
                 C = [],
@@ -14074,41 +19628,83 @@ define('math/clip',[
 
             // Collect all points into subject array S
             if (subject.elementClass === Const.OBJECT_CLASS_CURVE && Type.exists(subject.points)) {
-                    S = subject.points;
+                len = subject.points.length;
+                for (i = 0; i < len; i++) {
+                    this._addToList(S, subject.points[i], i);
+                }
             } else if (subject.type === Const.OBJECT_TYPE_POLYGON) {
                 for (i = 0; i < subject.vertices.length; i++) {
-                    S.push(new Coords(Const.COORDS_BY_USER, subject.vertices[i].coords.usrCoords, board));
+                    this._addToList(S, subject.vertices[i].coords, i);
                 }
             } else if (subject.elementClass === Const.OBJECT_CLASS_CIRCLE) {
                 r = subject.Radius();
                 rad = 2 * Math.PI / steps;
                 for (i = 0; i <= steps; i++) {
-                    S.push(new Coords(Const.COORDS_BY_USER, [
-                            subject.center.coords.usrCoords[0],
-                            subject.center.coords.usrCoords[1] + Math.cos(i * rad) * r,
-                            subject.center.coords.usrCoords[2] + Math.sin(i * rad) * r
-                        ], board));
+                    this._addToList(S, new Coords(Const.COORDS_BY_USER, [
+                        subject.center.coords.usrCoords[0],
+                        subject.center.coords.usrCoords[1] + Math.cos(i * rad) * r,
+                        subject.center.coords.usrCoords[2] + Math.sin(i * rad) * r
+                    ], board), i);
+                }
+            } else if (Type.isArray(subject)) {
+                len = subject.length;
+                for (i = 0; i < len; i++) {
+                    if (Type.exists(subject[i].coords)) {
+                        // Point type
+                        this._addToList(S, subject[i].coords, i);
+                    } else if (Type.isArray(subject[i])) {
+                        // Coordinate pair
+                        this._addToList(S, new Coords(Const.COORDS_BY_USER, subject[i], board), i);
+                    } else if (Type.exists(subject[i].usrCoords)) {
+                        // JXG.Coordinates
+                        this._addToList(S, subject[i], i);
+                    }
                 }
             }
+            len = S.length;
+            if (len > 0 && Geometry.distance(S[0].coords.usrCoords, S[len - 1].coords.usrCoords, 3) < Mat.eps) {
+                S.pop();
+            }
 
-            // Collect all points into client array C
-            if (clip.elementClass === Const.OBJECT_CLASS_CURVE &&
-                Type.exists(clip.points)) {
-                    C = clip.points;
+            // Collect all points into clip array C
+            if (clip.elementClass === Const.OBJECT_CLASS_CURVE && Type.exists(clip.points)) {
+                len = clip.points.length;
+                for (i = 0; i < len; i++) {
+                    this._addToList(C, clip.points[i], i);
+                }
             } else if (clip.type === Const.OBJECT_TYPE_POLYGON) {
                 for (i = 0; i < clip.vertices.length; i++) {
-                    C.push(new Coords(Const.COORDS_BY_USER, clip.vertices[i].coords.usrCoords, board));
+                    this._addToList(C, clip.vertices[i].coords, i);
                 }
             } else if (clip.elementClass === Const.OBJECT_CLASS_CIRCLE) {
                 r = clip.Radius();
                 rad = 2 * Math.PI / steps;
                 for (i = 0; i <= steps; i++) {
-                    C.push(new Coords(Const.COORDS_BY_USER, [
-                            clip.center.coords.usrCoords[0],
-                            clip.center.coords.usrCoords[1] + Math.cos(i * rad) * r,
-                            clip.center.coords.usrCoords[2] + Math.sin(i * rad) * r
-                        ], board));
+                    this._addToList(C, new Coords(Const.COORDS_BY_USER, [
+                        clip.center.coords.usrCoords[0],
+                        clip.center.coords.usrCoords[1] + Math.cos(i * rad) * r,
+                        clip.center.coords.usrCoords[2] + Math.sin(i * rad) * r
+                    ], board), i);
                 }
+            } else if (Type.isArray(clip)) {
+                len = clip.length;
+                for (i = 0; i < len; i++) {
+                    if (Type.exists(clip[i].coords)) {
+                        // Point type
+                        this._addToList(C, clip[i].coords, i);
+                    } else if (Type.isArray(clip[i])) {
+                        // Coordinate pair
+                        this._addToList(C, new Coords(Const.COORDS_BY_USER, clip[i], board), i);
+                    } else if (Type.exists(clip[i].usrCoords)) {
+                        // JXG.Coordinates
+                        this._addToList(C, clip[i], i);
+                    }
+                }
+            }
+
+            len = C.length;
+            if (len > 0 && Geometry.distance(C[0].coords.usrCoords, C[len - 1].coords.usrCoords, 3) < Mat.eps * Mat.eps) {
+                C.pop();
             }
 
             // Handle cases where at least one of the paths is empty
@@ -14117,8 +19713,8 @@ define('math/clip',[
             }
 
             // Add pointers for doubly linked lists
-            this.doublyLinkedList(S);
-            this.doublyLinkedList(C);
+            this.makeDoublyLinkedList(S);
+            this.makeDoublyLinkedList(C);
 
             res = this.findIntersections(S, C, board);
             S_intersect = res[0];
@@ -14138,20 +19734,22 @@ define('math/clip',[
             //     C[C.length - 1].first_point_type = clip_first_point_type;
             // }
 
-            // Handle cases without intersections
-            if (S_intersect.length === 0) {
-                return this.handleEmptyIntersection(S, C, clip_type);
-            }
+            this._handleFullyDegenerateCase(S, C, board);
 
             // Phase 2: mark intersection points as entry or exit points
             this.markEntryExit(S, C);
-            if (S[0].distance(Const.COORDS_BY_USER, C[0]) === 0) {
-                // Randomly disturb the first point of the second path
-                // if both paths start at the same point.
-                C[0].usrCoords[1] *= 1 + Math.random() * 0.0001 - 0.00005;
-                C[0].usrCoords[2] *= 1 + Math.random() * 0.0001 - 0.00005;
-            }
+            // if (S[0].coords.distance(Const.COORDS_BY_USER, C[0].coords) === 0) {
+            //     // Randomly disturb the first point of the second path
+            //     // if both paths start at the same point.
+            //     C[0].usrCoords[1] *= 1 + Math.random() * 0.0001 - 0.00005;
+            //     C[0].usrCoords[2] *= 1 + Math.random() * 0.0001 - 0.00005;
+            // }
             this.markEntryExit(C, S);
+
+            // Handle cases without intersections
+            if (this._countCrossingIntersections(S_intersect) === 0) {
+                return this.handleEmptyIntersection(S, C, clip_type);
+            }
 
             // if (false) {
             //     for (i = 0; i < S_intersect.length; i++) {
@@ -14390,7 +19988,7 @@ define('math/clip',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -14703,7 +20301,7 @@ define('math/poly',['jxg', 'math/math', 'utils/type'], function (JXG, Mat, Type)
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -15014,12 +20612,13 @@ define('math/complex',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
         Bianca Valentin,
         Alfred Wassermann,
+        Andreas Walter,
         Peter Wilfahrt
 
     This file is part of JSXGraph.
@@ -15043,7 +20642,6 @@ define('math/complex',['jxg', 'utils/type'], function (JXG, Type) {
     the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
     and <http://opensource.org/licenses/MIT/>.
  */
-
 
 /*global JXG: true, define: true*/
 
@@ -15125,8 +20723,8 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
             greenyellow: 'adff2f',
             honeydew: 'f0fff0',
             hotpink: 'ff69b4',
-            indianred : 'cd5c5c',
-            indigo : '4b0082',
+            indianred: 'cd5c5c',
+            indigo: '4b0082',
             ivory: 'fffff0',
             khaki: 'f0e68c',
             lavender: 'e6e6fa',
@@ -15449,36 +21047,36 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
             t = V * (1.0 - (S * (1.0 - f)));
 
             switch (i) {
-            case 0:
-                R = V;
-                G = t;
-                B = p;
-                break;
-            case 1:
-                R = q;
-                G = V;
-                B = p;
-                break;
-            case 2:
-                R = p;
-                G = V;
-                B = t;
-                break;
-            case 3:
-                R = p;
-                G = q;
-                B = V;
-                break;
-            case 4:
-                R = t;
-                G = p;
-                B = V;
-                break;
-            case 5:
-                R = V;
-                G = p;
-                B = q;
-                break;
+                case 0:
+                    R = V;
+                    G = t;
+                    B = p;
+                    break;
+                case 1:
+                    R = q;
+                    G = V;
+                    B = p;
+                    break;
+                case 2:
+                    R = p;
+                    G = V;
+                    B = t;
+                    break;
+                case 3:
+                    R = p;
+                    G = q;
+                    B = V;
+                    break;
+                case 4:
+                    R = t;
+                    G = p;
+                    B = V;
+                    break;
+                case 5:
+                    R = V;
+                    G = p;
+                    B = q;
+                    break;
             }
         }
 
@@ -15550,7 +21148,6 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
 
         return [h, s, v];
     };
-
 
     /**
      * Converts a color from the RGB color space into the LMS space. Input can be any valid HTML/CSS color definition.
@@ -15746,57 +21343,57 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
         deficiency = deficiency.toLowerCase();
 
         switch (deficiency) {
-        case "protanopia":
-            a1 = -0.06150039994295001;
-            b1 = 0.08277001656812001;
-            c1 = -0.013200141220000003;
-            a2 = 0.05858939668799999;
-            b2 = -0.07934519995360001;
-            c2 = 0.013289415272000003;
-            inflection = 0.6903216543277437;
+            case "protanopia":
+                a1 = -0.06150039994295001;
+                b1 = 0.08277001656812001;
+                c1 = -0.013200141220000003;
+                a2 = 0.05858939668799999;
+                b2 = -0.07934519995360001;
+                c2 = 0.013289415272000003;
+                inflection = 0.6903216543277437;
 
-            tmp = s / m;
+                tmp = s / m;
 
-            if (tmp < inflection) {
-                l = -(b1 * m + c1 * s) / a1;
-            } else {
-                l = -(b2 * m + c2 * s) / a2;
-            }
-            break;
-        case "tritanopia":
-            a1 = -0.00058973116217;
-            b1 = 0.007690316482;
-            c1 = -0.01011703519052;
-            a2 = 0.025495080838999994;
-            b2 = -0.0422740347;
-            c2 = 0.017005316784;
-            inflection = 0.8349489908460004;
+                if (tmp < inflection) {
+                    l = -(b1 * m + c1 * s) / a1;
+                } else {
+                    l = -(b2 * m + c2 * s) / a2;
+                }
+                break;
+            case "tritanopia":
+                a1 = -0.00058973116217;
+                b1 = 0.007690316482;
+                c1 = -0.01011703519052;
+                a2 = 0.025495080838999994;
+                b2 = -0.0422740347;
+                c2 = 0.017005316784;
+                inflection = 0.8349489908460004;
 
-            tmp = m / l;
+                tmp = m / l;
 
-            if (tmp < inflection) {
-                s = -(a1 * l + b1 * m) / c1;
-            } else {
-                s = -(a2 * l + b2 * m) / c2;
-            }
-            break;
-        default:
-            a1 = -0.06150039994295001;
-            b1 = 0.08277001656812001;
-            c1 = -0.013200141220000003;
-            a2 = 0.05858939668799999;
-            b2 = -0.07934519995360001;
-            c2 = 0.013289415272000003;
-            inflection = 0.5763833686400911;
+                if (tmp < inflection) {
+                    s = -(a1 * l + b1 * m) / c1;
+                } else {
+                    s = -(a2 * l + b2 * m) / c2;
+                }
+                break;
+            default:
+                a1 = -0.06150039994295001;
+                b1 = 0.08277001656812001;
+                c1 = -0.013200141220000003;
+                a2 = 0.05858939668799999;
+                b2 = -0.07934519995360001;
+                c2 = 0.013289415272000003;
+                inflection = 0.5763833686400911;
 
-            tmp = s / l;
+                tmp = s / l;
 
-            if (tmp < inflection) {
-                m = -(a1 * l + c1 * s) / b1;
-            } else {
-                m = -(a2 * l + c2 * s) / b2;
-            }
-            break;
+                if (tmp < inflection) {
+                    m = -(a1 * l + c1 * s) / b1;
+                } else {
+                    m = -(a2 * l + c2 * s) / b2;
+                }
+                break;
         }
 
         rgb = JXG.LMS2rgb(l, m, s);
@@ -15815,7 +21412,7 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
     };
 
     /**
-     * Determines highlight color to a given color. Done by reducing (or increasing) the opacity,
+     * Determines highlight color to a given color. Done by reducing (or increasing) the opacity.
      * @param {String} color HTML RGBA string containing the HTML color code.
      * @returns {String} Returns a HTML RGBA color string
      */
@@ -15837,11 +21434,62 @@ define('utils/color',['jxg', 'utils/type', 'math/math'], function (JXG, Type, Ma
         return colstr;
     };
 
+    /**
+     * Calculate whether a light or a dark color is needed as a contrast.
+     * Especially useful to determine whether white or black font goes
+     * better with a given background color.
+     * @param {String} hexColor HEX value of color.
+     * @param {String} [darkColor="#000000"] HEX string for a dark color.
+     * @param {String} [lightColor="#ffffff"] HEX string for a light color.
+     * @param {Number} [threshold=8]
+     * @returns {String} Returns darkColor or lightColor.
+     */
+    JXG.contrast = function (hexColor, darkColor, lightColor, threshold) {
+        var rgb,
+            black = '#000000',
+            rgbBlack,
+            l1, l2,
+            contrastRatio;
+
+        darkColor = darkColor || '#000000';
+        lightColor = lightColor || '#ffffff';
+        threshold = threshold || 7;
+
+        // hexColor RGB
+        rgb = JXG.rgbParser(hexColor);
+
+        // Black RGB
+        rgbBlack = JXG.rgbParser(black);
+
+        // Calc contrast ratio
+        l1 = 0.2126 * Math.pow(rgb[0] / 255, 2.2) +
+            0.7152 * Math.pow(rgb[1] / 255, 2.2) +
+            0.0722 * Math.pow(rgb[2] / 255, 2.2);
+
+        l2 = 0.2126 * Math.pow(rgbBlack[0] / 255, 2.2) +
+            0.7152 * Math.pow(rgbBlack[1] / 255, 2.2) +
+            0.0722 * Math.pow(rgbBlack[2] / 255, 2.2);
+
+        if (l1 > l2) {
+            contrastRatio = Math.floor((l1 + 0.05) / (l2 + 0.05));
+        } else {
+            contrastRatio = Math.floor((l2 + 0.05) / (l1 + 0.05));
+        }
+        contrastRatio = contrastRatio - 1;
+
+        // If contrast is more than threshold, return darkColor
+        if (contrastRatio > threshold) {
+            return darkColor;
+        }
+        // if not, return lightColor.
+        return lightColor;
+    };
+
     return JXG;
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -15998,6 +21646,36 @@ define('options',[
             zoomY: 1,
 
             /**
+             * Title string for the board.
+             * Primarily used in an invisible text element which is adressed by
+             * the attribute 'aria-labelledby' from the JSXGraph container.
+             * JSXGraph creates a new div-element with id "{containerid}_ARIAlabel"
+             * containing this string.
+             *
+             * @name JXG.Board#title
+             * @see JXG.Board#description
+             * @type String
+             * @default ''
+             *
+             */
+            title: '',
+
+            /**
+             * Description string for the board.
+             * Primarily used in an invisible text element which is adressed by
+             * the attribute 'aria-describedby' from the JSXGraph container.
+             * JSXGraph creates a new div-element with id "{containerid}_ARIAdescription"
+             * containing this string.
+             *
+             * @name JXG.Board#description
+             * @see JXG.Board#title
+             * @type String
+             * @default ''
+             *
+             */
+            description: '',
+
+            /**
              * Show copyright string in canvas.
              *
              * @name JXG.Board#showCopyright
@@ -16132,7 +21810,7 @@ define('options',[
             showFullscreen: false,
 
             /**
-             * Attribute(s) to control the fullscreen icon. The attribute "showFullscreen" 
+             * Attribute(s) to control the fullscreen icon. The attribute "showFullscreen"
              * controls if the icon is shown.
              * The following attribute(s) can be set:
              * <ul>
@@ -16174,7 +21852,7 @@ define('options',[
             },
 
             /**
-             * Show a button which allows to clear all traces of a board. 
+             * Show a button which allows to clear all traces of a board.
              *
              * @name JXG.Board#showClearTraces
              * @type Boolean
@@ -16282,7 +21960,17 @@ define('options',[
             animationDelay: 35,
 
             /**
-             * Allow user interaction by registering mouse and touch events.
+             * Maximum frame rate of the board, i.e. maximum number of updates per second
+             * triggered by move events.
+             *
+             * @name JXG.Board#maxFrameRate
+             * @type Number
+             * @default 40
+             */
+            maxFrameRate: 40,
+
+            /**
+             * Allow user interaction by registering mouse, pointer and touch events.
              *
              * @name JXG.Board#registerEvents
              * @type Boolean
@@ -16377,18 +22065,35 @@ define('options',[
              * <pre>
              * pan: {
              *   enabled: true   // Allow panning
-             *   needTwoFingers: true, // panning is done with two fingers on touch devices
+             *   needTwoFingers: false, // panning is done with two fingers on touch devices
              *   needShift: true, // mouse panning needs pressing of the shift key
              * }
              * </pre>
              *
              * @name JXG.Board#pan
              * @type Object
-             * @default
              */
             pan: {
                 needShift: true,
                 needTwoFingers: false,
+                enabled: true
+            },
+
+            /**
+             * Control the possibilities for dragging objects.
+             *
+             * Possible sub-attributes with default values are:
+             * <pre>
+             * drag: {
+             *   enabled: true   // Allow dragging
+             * }
+             * </pre>
+             *
+             * @name JXG.Board#drag
+             * @type Object
+             * @default {enabled: true}
+             */
+            drag: {
                 enabled: true
             },
 
@@ -16448,7 +22153,21 @@ define('options',[
                 },
                 fillColor: '#ffff00',
                 visible: false
-            }
+            },
+
+            /**
+             * If true, the infobox is shown on mouse/pen over for all points
+             * which have set their attribute showInfobox to 'inherit'.
+             * If a point has set its attribute showInfobox to false or true,
+             * that value will have priority over this value.
+             *
+             * @name JXG.Board#showInfobox
+             * @see Point#showInfobox
+             * @type Boolean
+             * @default true
+             */
+            showInfobox: true
+
             /**#@-*/
         },
 
@@ -16472,6 +22191,9 @@ define('options',[
          * </pre>
          * These settings are overruled by the CSS class 'JXG_navigation'.
          * @deprecated
+         * @type {Object}
+         * @name JXG.Options#navbar
+         *
          */
         navbar: {
             strokeColor: '#333333', //'#aaaaaa',
@@ -16656,7 +22378,7 @@ define('options',[
              *                 gradientEndOffset: function() { return o2.Value(); },
              *                 hasInnerPoints: true
              *     });
-             * 
+             *
              * </pre><div id="JXG6081ca7f-0d09-4525-87ac-325a02fe2225" class="jxgbox" style="width: 300px; height: 300px;"></div>
              * <script type="text/javascript">
              *     (function() {
@@ -16684,11 +22406,11 @@ define('options',[
              *                     gradientEndOffset: function() { return o2.Value(); },
              *                     hasInnerPoints: true
              *         });
-             * 
+             *
              *     })();
-             * 
+             *
              * </script><pre>
-             * 
+             *
              *
              * @type String
              * @name JXG.GeometryElement#gradient
@@ -16825,7 +22547,6 @@ define('options',[
              * @default 0.5
              */
             gradientFY: 0.5,
-
 
             /**
              * This attribute defines the radius of the start circle of the radial gradient.
@@ -17035,13 +22756,50 @@ define('options',[
 
             /**
              * If the element is dragged it will be moved on mousedown or touchstart to the
-             * top of its layer. Works only for SVG renderer and for ssimple elements
+             * top of its layer. Works only for SVG renderer and for simple elements
              * consisting of one SVG node.
+             * @example
+             * var li1 = board.create('line', [1, 1, 1], {strokeWidth: 20, dragToTopOfLayer: true});
+             * var li2 = board.create('line', [1, -1, 1], {strokeWidth: 20, strokeColor: 'red'});
+             *
+             * </pre><div id="JXG38449fee-1ab4-44de-b7d1-43caa1f50f86" class="jxgbox" style="width: 300px; height: 300px;"></div>
+             * <script type="text/javascript">
+             *     (function() {
+             *         var board = JXG.JSXGraph.initBoard('JXG38449fee-1ab4-44de-b7d1-43caa1f50f86',
+             *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+             *     var li1 = board.create('line', [1, 1, 1], {strokeWidth: 20, dragToTopOfLayer: true});
+             *     var li2 = board.create('line', [1, -1, 1], {strokeWidth: 20, strokeColor: 'red'});
+             *
+             *     })();
+             *
+             * </script><pre>
+             *
              * @type Boolean
              * @default false
-             * @name JXG.GeometryElement#scalable
+             * @name JXG.GeometryElement#dragToTopOfLayer
              */
             dragToTopOfLayer: false,
+
+            /**
+             * Precision options for JSXGraph elements.
+             * This attributes takes either the value 'inherit' or an object of the form:
+             * <pre>
+             * precision: {
+             *      touch: 15,
+             *      mouse: 4,
+             *      pen: 4
+             * }
+             * </pre>
+             *
+             * In the first case, the global, JSXGraph-wide values of JXGraph.Options.precision
+             * are taken.
+             *
+             * @type {String|Object}
+             * @name JXG.GeometryElement#precision
+             * @see JXG.Options#precision
+             * @default 'inherit'
+             */
+            precision: 'inherit',
 
             /*draft options */
             draft: {
@@ -17103,8 +22861,27 @@ define('options',[
              * @default false
              */
             drawLabels: false,
+
+            /**
+             * Attributes for the ticks labels
+             *
+             * @name Ticks#label
+             * @type {Object}
+             * @default {}
+             *
+             */
             label: {
             },
+
+            /**
+            * Format tick labels that were going to have scientific notation
+            * like 5.00e+6 to look like 5•10⁶.
+            *
+            * @name Ticks#beautifulScientificTickLabels
+            * @type Boolean
+            * @default false
+            */
+            beautifulScientificTickLabels: false,
 
             /**
              * Use the unicode character 0x2212, i.e. the HTML entity &amp;minus; as minus sign.
@@ -17119,7 +22896,7 @@ define('options',[
             /**
              * Determine the position of the tick with value 0. 'left' means point1 of the line, 'right' means point2,
              * and 'middle' is equivalent to the midpoint of the defining points. This attribute is ignored if the parent
-             * line is of type axis and is parallel to either the x (i.e. y = 0) or the y (i.e. x = 0) axis.
+             * line is of type axis.
              *
              * @type String
              * @name Ticks#anchor
@@ -17145,7 +22922,6 @@ define('options',[
              *
              * @type Boolean
              * @name Ticks#insertTicks
-             * @see Ticks#equidistant
              * @see Ticks#minTicksDistance
              * @default false
              * @example
@@ -17173,6 +22949,14 @@ define('options',[
              * </script><pre>
              */
             insertTicks: false,
+
+            /**
+             * Minimum distance in pixel of equidistant ticks in case insertTicks==true.
+             * @name Ticks#minTicksDistance
+             * @type: Number
+             * @default: 10
+             * @see Ticks#insertTicks
+             */
             minTicksDistance: 10,
 
             /**
@@ -17225,7 +23009,7 @@ define('options',[
 
             /**
              * A string that is appended to every tick, used to represent the scale
-             * factor given in {@link JXG.Ticks#scaleSymbol}.
+             * factor given in {@link Ticks#scaleSymbol}.
              *
              * @type String
              * @default ''
@@ -17256,7 +23040,7 @@ define('options',[
             maxLabelLength: 5,
 
             /**
-             * If a label exceeds {@link JXG.Ticks#maxLabelLength} this determines the precision used to shorten the tick label.
+             * If a label exceeds {@link Ticks#maxLabelLength} this determines the precision used to shorten the tick label.
              *
              * @type Number
              * @name Ticks#precision
@@ -17267,11 +23051,10 @@ define('options',[
 
             /**
              * The default distance between two ticks. Please be aware that this value does not have
-             * to be used if {@link JXG.Ticks#insertTicks} is set to true.
+             * to be used if {@link Ticks#insertTicks} is set to true.
              *
              * @type Number
              * @name Ticks#ticksDistance
-             * @see Ticks#equidistant
              * @see Ticks#insertTicks
              * @default 1
              */
@@ -17327,12 +23110,14 @@ define('options',[
             includeBoundaries: false,
 
             /**
-             * Possible values. 'line' or 'string'
+             * Set the ticks type.
+             * Possible values are 'linear' or 'polar'.
              *
              * @type String
-             * @default 'line'
+             * @name Ticks#type
+             * @default 'linear'
              */
-            type: 'line'
+            type: 'linear'
 
             // close the meta tag
             /**#@-*/
@@ -17353,7 +23138,10 @@ define('options',[
         },
 
         /**
-         * Precision options.
+         * Precision options, defining how close a pointer device (mouse, finger, pen) has to be
+         * to an object such that the object is highlighted or can be dragged.
+         * These values are board-wide and can be overwritten for individual elements by
+         * changing their precision attribute.
          *
          * The default values are
          * <pre>
@@ -17366,18 +23154,23 @@ define('options',[
          *   hasPoint: 4
          * }
          * </pre>
+         *
+         * @type {Object}
+         * @name JXG.Options#precision
+         * @see JXG.GeometryElement#precision
          */
         precision: {
             touch: 15,
             touchMax: 100,
             mouse: 4,
             pen: 4,
-            epsilon: 0.0001,
+            epsilon: 0.0001, // Unused
             hasPoint: 4
         },
 
         /**
          * Default ordering of the layers.
+         * The numbering starts from 0 and the highest layer number is numlayers-1.
          *
          * The default values are
          * <pre>
@@ -17402,9 +23195,21 @@ define('options',[
          *   trace: 0
          * }
          * </pre>
+         * @type {Object}
+         * @name JXG.Options#layer
          */
         layer: {
             numlayers: 20, // only important in SVG
+            unused9: 19,
+            unused8: 18,
+            unused7: 17,
+            unused6: 16,
+            unused5: 15,
+            unused4: 14,
+            unused3: 13,
+            unused2: 12,
+            unused1: 11,
+            unused0: 10,
             text: 9,
             point: 9,
             glider: 9,
@@ -17518,9 +23323,18 @@ define('options',[
                 strokeColor: '#0000FF'
             },
 
+            /**
+             * Attributes for sub-element arc. In general, the arc will run through the first point and
+             * thus will not have the same radius as the angle sector.
+             *
+             * @type Arc
+             * @name Angle#arc
+             * @default '{visible:false}'
+             */
             arc: {
-                visible: false
-            }
+                visible: false,
+                fillColor: 'none'
+            },
 
             /**#@-*/
         },
@@ -17575,9 +23389,9 @@ define('options',[
              * Attributes for radius point.
              *
              * @type Point
-             * @name Arc#radiuspoint
+             * @name Arc#radiusPoint
              */
-            radiuspoint: {
+            radiusPoint: {
             },
 
             /**
@@ -18190,7 +24004,7 @@ define('options',[
              * @type Number
              * @default 13
              */
-             recursionDepthLow: 13,
+             recursionDepthLow: 15,
 
             /**
              * If true use the algorithm by Gillam and Hohenwarter, which was default until version 0.98.
@@ -18199,8 +24013,19 @@ define('options',[
              * @see Curve#doAdvancedPlot
              * @type Boolean
              * @default false
+             * @deprecated
              */
-            doAdvancedPlotOld: false,
+            doAdvancedPlotOld: false,   // v1
+
+            /**
+             * Select the version of the plot algorithm.
+             * The latest version number is equal to 3.
+             *
+             * @name Curve#plotVersion
+             * @type Number
+             * @default 3
+             */
+            plotVersion: 4,
 
             /**
              * Attributes for circle label.
@@ -18344,7 +24169,7 @@ define('options',[
              *
              * @name Image#snapSizeX
              *
-             * @see JXG.Point#snapToGrid
+             * @see Point#snapToGrid
              * @see Image#snapSizeY
              * @see JXG.Board#defaultAxes
              * @type Number
@@ -18360,7 +24185,7 @@ define('options',[
              *
              * @name Image#snapSizeY
              *
-             * @see JXG.Point#snapToGrid
+             * @see Point#snapToGrid
              * @see Image#snapSizeX
              * @see JXG.Board#defaultAxes
              * @type Number
@@ -18633,8 +24458,8 @@ define('options',[
             position: 'urt',
 
             /**
-             *  Label offset from label anchor
-             *  The label anchor is determined by JXG.GeometryElement#label.position
+             *  Label offset from label anchor.
+             *  The label anchor is determined by {@link Label#position}
              *
              * @name Label#offset
              * @see Label#position
@@ -18745,9 +24570,9 @@ define('options',[
              * In case firstArrow is an object it has the sub-attributes:
              * <pre>
              * {
-             *      type: 1, // possible values are 1, 2, 3
-             *      size: 3,  // size of the arrow head.
-             *               //This value is multiplied with the strokeWidth of the line
+             *      type: 1, // possible values are 1, 2, ..., 6
+             *      size: 3, // size of the arrow head.
+             *               // This value is multiplied with the strokeWidth of the line
              *      highlightSize: 3, // size of the arrow head in case the element is highlighted
              * }
              * </pre>
@@ -18766,6 +24591,13 @@ define('options',[
              *
              * In case firstArrow is an object it has the sub-attributes:
              * <pre>
+             * {
+             *      type: 1, // possible values are 1, 2, ..., 6
+             *      size: 3, // size of the arrow head.
+             *               // This value is multiplied with the strokeWidth of the line
+             *      highlightSize: 3, // size of the arrow head in case the element is highlighted
+             * }
+             * </pre>
              *
              * @example
              *     var p1 = board.create('point', [-5, 2], {size:1});
@@ -18799,15 +24631,7 @@ define('options',[
              *
              *     })();
              *
-             * </script><pre>
-             *
-             * {
-             *      type: 1, // possible values are 1, 2, 3
-             *      size: 3,  // size of the arrow head.
-             *               //This value is multiplied with the strokeWidth of the line
-             *      highlightSize: 3, // size of the arrow head in case the element is highlighted
-             * }
-             * </pre>
+             * </script>
              *
              * @name Line#lastArrow
              * @see Line#firstArrow
@@ -18917,7 +24741,7 @@ define('options',[
 
             /**
              * If set to true, the point will snap to a grid defined by
-             * {@link JXG.Point#snapSizeX} and {@link JXG.Point#snapSizeY}.
+             * {@link Point#snapSizeX} and {@link Point#snapSizeY}.
              *
              * @see Point#snapSizeX
              * @see Point#snapSizeY
@@ -18928,7 +24752,7 @@ define('options',[
             snapToGrid: false,
 
             /**
-             * Defines together with {@link JXG.Point#snapSizeY} the grid the point snaps on to.
+             * Defines together with {@link Point#snapSizeY} the grid the point snaps on to.
              * The point will only snap on integer multiples to snapSizeX in x and snapSizeY in y direction.
              * If this value is equal to or less than <tt>0</tt>, it will use the grid displayed by the major ticks
              * of the default ticks of the default x axes of the board.
@@ -18943,14 +24767,14 @@ define('options',[
             snapSizeX: 1,
 
             /**
-             * Defines together with {@link JXG.Point#snapSizeX} the grid the point snaps on to.
+             * Defines together with {@link Point#snapSizeX} the grid the point snaps on to.
              * The point will only snap on integer multiples to snapSizeX in x and snapSizeY in y direction.
              * If this value is equal to or less than <tt>0</tt>, it will use the grid displayed by the major ticks
              * of the default ticks of the default y axes of the board.
              *
              * @see Point#snapToGrid
              * @see Point#snapSizeX
-             * @see Board#defaultAxes
+             * @see JXG.Board#defaultAxes
              * @type Number
              * @name Line#snapSizeY
              * @default 1
@@ -19009,6 +24833,63 @@ define('options',[
             stretch: false,
             toOrigin: null,
             to10: null
+            /**#@-*/
+        },
+
+        /* special cardinal spline options */
+        metapostspline: {
+            /**#@+
+             * @visprop
+             */
+
+             /**
+              * Controls if the data points of the cardinal spline when given as
+              * arrays should be converted into {@link JXG.Points}.
+              *
+              * @name createPoints
+              * @memberOf Metapostspline.prototype
+              *
+              * @see Metapostspline#points
+              *
+              * @type Boolean
+              * @default true
+              */
+            createPoints: true,
+
+            /**
+             * If set to true, the supplied coordinates are interpreted as
+             * [[x_0, y_0], [x_1, y_1], p, ...].
+             * Otherwise, if the data consists of two arrays of equal length,
+             * it is interpreted as
+             * [[x_o x_1, ..., x_n], [y_0, y_1, ..., y_n]]
+             *
+             * @name isArrayOfCoordinates
+             * @memberOf Metapostspline.prototype
+             * @type {Boolean}
+             * @default false
+             */
+            isArrayOfCoordinates: false,
+
+            /**
+             * Attributes for the points generated by Metapostspline in cases
+             * {@link createPoints} is set to true
+             *
+             * @name points
+             * @memberOf Metapostspline.prototype
+             *
+             * @see Metapostspline#createPoints
+             * @type Object
+             */
+            points: {
+                strokeOpacity: 0.05,
+                fillOpacity: 0.05,
+                highlightStrokeOpacity: 1.0,
+                highlightFillOpacity: 1.0,
+                withLabel: false,
+                name: '',
+                fixed: false
+            }
+
             /**#@-*/
         },
 
@@ -19194,7 +25075,7 @@ define('options',[
              * @name Point#face
              *
              * @type String
-             * @see Point#setStyle
+             * @see JXG.Point#setStyle
              * @default circle
              */
             face: 'o',
@@ -19206,7 +25087,7 @@ define('options',[
              * @name Point#size
              *
              * @see Point#face
-             * @see Point#setStyle
+             * @see JXG.Point#setStyle
              * @see Point#sizeUnit
              * @type Number
              * @default 3
@@ -19242,27 +25123,31 @@ define('options',[
             zoom: false,             // Change the point size on zoom
 
             /**
-             * If true, the infobox is shown on mouse over, else not.
+             * If true, the infobox is shown on mouse/pen over, if false not.
+             * If the value is 'inherit', the value of
+             * {@link JXG.Board#showInfobox} is taken.
              *
              * @name Point#showInfobox
-             *
-             * @type Boolean
+             * @see JXG.Board#showInfobox
+             * @type {Boolean|String} true | false | 'inherit'
              * @default true
              */
-            showInfobox: true,
+            showInfobox: 'inherit',
 
             /**
              * Truncating rule for the digits in the infobox.
              * <ul>
-             * <li>'auto': done automatically by JXG#autoDigits
+             * <li>'auto': done automatically by JXG.autoDigits()
              * <li>'none': no truncation
-             * <li>number: truncate after "number digits" with JXG.toFixed();
+             * <li>number: truncate after "number digits" with JXG.toFixed()
              * </ul>
              *
              * @name Point#infoboxDigits
              *
              * @type String, Number
              * @default 'auto'
+             * @see JXG#autoDigits
+             * @see JXG#toFixed
              */
             infoboxDigits: 'auto',
 
@@ -19326,8 +25211,8 @@ define('options',[
              *
              * @name Point#snapToGrid
              *
-             * @see JXG.Point#snapSizeX
-             * @see JXG.Point#snapSizeY
+             * @see Point#snapSizeX
+             * @see Point#snapSizeY
              * @type Boolean
              * @default false
              */
@@ -19343,7 +25228,7 @@ define('options',[
              *
              * @see Point#snapToGrid
              * @see Point#snapSizeY
-             * @see Board#defaultAxes
+             * @see JXG.Board#defaultAxes
              * @type Number
              * @default 1
              */
@@ -19359,7 +25244,7 @@ define('options',[
              *
              * @see Point#snapToGrid
              * @see Point#snapSizeX
-             * @see Board#defaultAxes
+             * @see JXG.Board#defaultAxes
              * @type Number
              * @default 1
              */
@@ -19647,6 +25532,7 @@ define('options',[
              *
              * @type Arc
              * @name Sector#arc
+             * @default '{visible:false}'
              */
             arc: {
                 visible: false,
@@ -19657,9 +25543,9 @@ define('options',[
              * Attributes for helper point radiuspoint in case it is provided by coordinates.
              *
              * @type Point
-             * @name Sector#radiuspoint
+             * @name Sector#radiusPoint
              */
-            radiuspoint: {
+            radiusPoint: {
                 visible: false,
                 withLabel: false
             },
@@ -19873,6 +25759,7 @@ define('options',[
              */
             baseline: {
                 needsRegularUpdate: false,
+                visible: 'inherit',
                 fixed: true,
                 scalable: false,
                 name: '',
@@ -19912,7 +25799,6 @@ define('options',[
                 tickEndings: [0, 1],
                 strokeColor: '#000000',
                 visible: 'inherit'
-
             },
 
             /**
@@ -19923,6 +25809,7 @@ define('options',[
              */
             highline: {
                 strokeWidth: 3,
+                visible: 'inherit',
                 fixed: true,
                 name: '',
                 strokeColor: '#000000',
@@ -19936,6 +25823,7 @@ define('options',[
              * @name Slider#label
              */
             label: {
+                visible: 'inherit',
                 strokeColor: '#000000'
             },
 
@@ -20335,6 +26223,7 @@ define('options',[
              * before initializing the board
              * <pre>
              *   JXG.Options.text.cssDefaultStyle = '';
+             *   JXG.Options.text.highlightCssDefaultStyle = '';
              * </pre>
              * should be called.
              *
@@ -20342,33 +26231,41 @@ define('options',[
              * @memberOf Text.prototype
              * @default  'font-family: Arial, Helvetica, Geneva, sans-serif;'
              * @type String
-             * @see JXG.Text#highlightCssDefaultStyle
-             * @see JXG.Text#cssStyle
-             * @see JXG.Text#highlightCssStyle
+             * @see Text#highlightCssDefaultStyle
+             * @see Text#cssStyle
+             * @see Text#highlightCssStyle
              */
             cssDefaultStyle: 'font-family: Arial, Helvetica, Geneva, sans-serif;',
 
             /**
              * Default CSS properties of the HTML text element in case of highlighting.
              * <p>
-             * The CSS properties which are set here, are haded over to the style property
+             * The CSS properties which are set here, are handed over to the style property
              * of the HTML text element. That means, they have higher property than any
              * CSS class.
+             * @example
+             * If all texts should get its font-family from the default CSS class
+             * before initializing the board
+             * <pre>
+             *   JXG.Options.text.cssDefaultStyle = '';
+             *   JXG.Options.text.highlightCssDefaultStyle = '';
+             * </pre>
+             * should be called.
              *
              * @name highlightCssDefaultStyle
              * @memberOf Text.prototype
              * @default  'font-family: Arial, Helvetica, Geneva, sans-serif;'
              * @type String
-             * @see JXG.Text#cssDefaultStyle
-             * @see JXG.Text#cssStyle
-             * @see JXG.Text#highlightCssStyle
+             * @see Text#cssDefaultStyle
+             * @see Text#cssStyle
+             * @see Text#highlightCssStyle
             */
             highlightCssDefaultStyle: 'font-family: Arial, Helvetica, Geneva, sans-serif;',
 
             /**
              * CSS properties of the HTML text element.
              * <p>
-             * The CSS properties which are set here, are haded over to the style property
+             * The CSS properties which are set here, are handed over to the style property
              * of the HTML text element. That means, they have higher property than any
              * CSS class.
              *
@@ -20376,16 +26273,16 @@ define('options',[
              * @memberOf Text.prototype
              * @default  ''
              * @type String
-             * @see JXG.Text#cssDefaultStyle
-             * @see JXG.Text#highlightCssDefaultStyle
-             * @see JXG.Text#highlightCssStyle
+             * @see Text#cssDefaultStyle
+             * @see Text#highlightCssDefaultStyle
+             * @see Text#highlightCssStyle
             */
             cssStyle: '',
 
             /**
              * CSS properties of the HTML text element in case of highlighting.
              * <p>
-             * The CSS properties which are set here, are haded over to the style property
+             * The CSS properties which are set here, are handed over to the style property
              * of the HTML text element. That means, they have higher property than any
              * CSS class.
              *
@@ -20393,9 +26290,9 @@ define('options',[
              * @memberOf Text.prototype
              * @default  ''
              * @type String
-             * @see JXG.Text#cssDefaultStyle
-             * @see JXG.Text#highlightCssDefaultStyle
-             * @see JXG.Text#cssStyle
+             * @see Text#cssDefaultStyle
+             * @see Text#highlightCssDefaultStyle
+             * @see Text#cssStyle
             */
             highlightCssStyle: '',
 
@@ -20411,12 +26308,16 @@ define('options',[
 
             /**
              * If true, MathJax will be used to render the input string.
-             *  Supports MathJax 2 as well as Mathjax 3
+             * Supports MathJax 2 as well as Mathjax 3.
+             * It is recommended to use this option together with the option
+             * "parse: false". Otherwise, 4 backslashes (e.g. \\\\alpha) are needed
+             * instead of two (e.g. \\alpha).
              *
              * @name useMathJax
              * @memberOf Text.prototype
              * @default false
              * @type Boolean
+             * @see Text#parse
              *
              * @example
              *  // Before loading MathJax, it has to be configured something like this:
@@ -20738,7 +26639,7 @@ define('options',[
              * @name snapSizeX
              * @memberOf Text.prototype
              *
-             * @see JXG.Point#snapToGrid
+             * @see Point#snapToGrid
              * @see Text#snapSizeY
              * @see JXG.Board#defaultAxes
              * @type Number
@@ -20755,7 +26656,7 @@ define('options',[
              * @name snapSizeY
              * @memberOf Text.prototype
              *
-             * @see JXG.Point#snapToGrid
+             * @see Point#snapToGrid
              * @see Text#snapSizeX
              * @see JXG.Board#defaultAxes
              * @type Number
@@ -20816,17 +26717,21 @@ define('options',[
             arrow: {
                 strokeWidth: 2,
                 withLabel: false,
-                strokeColor: '#ff0000'
+                strokeColor: '#ff0000',
+                lastArrow: true
             }
             /**#@-*/
         },
 
         /**
-         * Abbreviations of properties. Setting the shortcut means setting abbreviated properties
+         * Abbreviations of attributes. Setting the shortcut means setting abbreviated properties
          * to the same value.
          * It is used in {@link JXG.GeometryElement#setAttribute} and in
          * the constructor {@link JXG.GeometryElement}.
          * Attention: In Options.js abbreviations are not allowed.
+         * @type {Object}
+         * @name JXG.Options#shortcuts
+         *
          */
         shortcuts: {
             color: ['strokeColor', 'fillColor'],
@@ -20835,13 +26740,13 @@ define('options',[
             highlightOpacity: ['highlightStrokeOpacity', 'highlightFillOpacity'],
             strokeWidth: ['strokeWidth', 'highlightStrokeWidth']
         }
-
     };
 
     /**
-     * Holds all possible properties and the according validators for geometry elements. A validator is either a function
-     * which takes one parameter and returns true, if the value is valid for the property, or it is false if no validator
-     * is required.
+     * Holds all possible properties and the according validators for geometry elements.
+     * A validator is either a function
+     * which takes one parameter and returns true, if the value is valid for the property,
+     * or it is false if no validator is required.
      */
     JXG.Validator = (function () {
         var i,
@@ -20860,6 +26765,9 @@ define('options',[
             },
             validateInteger = function (v) {
                 return (Math.abs(v - Math.round(v)) < Mat.eps);
+            },
+            validateNotNegativeInteger = function (v) {
+                return validateInteger(v) && v >= 0;
             },
             validatePositiveInteger = function (v) {
                 return validateInteger(v) && v > 0;
@@ -20903,6 +26811,7 @@ define('options',[
                 insertTicks: false,
                 //: validateScreenCoords,
                 lastArrow: false,
+                layer: validateNotNegativeInteger,
                 majorHeight: validateInteger,
                 minorHeight: validateInteger,
                 minorTicks: validateNotNegative,
@@ -20917,7 +26826,7 @@ define('options',[
                 showCopyright: false,
                 showInfobox: false,
                 showNavigation: false,
-                size: validateInteger,
+                size: validateNotNegative, //validateInteger,
                 snapSizeX: validatePositive,
                 snapSizeY: validatePositive,
                 snapWidth: Type.isNumber,
@@ -20928,7 +26837,7 @@ define('options',[
                 stretch: false,
                 strokeColor: validateColor,
                 strokeOpacity: Type.isNumber,
-                strokeWidth: validateInteger,
+                strokeWidth: validateNotNegative, //validateInteger,
                 takeFirst: false,
                 takeSizeFromFile: false,
                 to10: false,
@@ -21118,7 +27027,7 @@ define('options',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -21509,53 +27418,212 @@ define('renderer/abstract',[
         },
 
         /**
+         * This method determines some data about the line endings of this element.
+         * If there are arrow heads, the offset is determined so that no parts of the line stroke
+         * overlap over the arrow head.
+         *
+         * @param {JXG.GeometryElement} el JSXGraph line or curve element
+         * @param {Number} strokewidth strokewidth of the element
+         * @param {String} hl Ither 'highlight' or empty string
+         * @returns {Object} object containing the data
+         *
+         * @private
+         */
+        getArrowHeadData: function(el, strokewidth, hl) {
+            var minlen = Mat.eps,
+                typeFirst, typeLast,
+                offFirst = 0,
+                offLast = 0,
+                sizeFirst = 0,
+                sizeLast = 0,
+                ev_fa = Type.evaluate(el.visProp.firstarrow),
+                ev_la = Type.evaluate(el.visProp.lastarrow),
+                off, size;
+
+            /*
+               Handle arrow heads.
+
+               The default arrow head is an isosceles triangle with base length 10 units and height 10 units.
+               These 10 units are scaled to strokeWidth * arrowSize pixels pixels.
+            */
+            if (ev_fa || ev_la) {
+
+                if (Type.exists(ev_fa.type)) {
+                    typeFirst = Type.evaluate(ev_fa.type);
+                }
+                if (Type.exists(ev_la.type)) {
+                    typeLast = Type.evaluate(ev_la.type);
+                }
+
+                if (ev_fa) {
+                    size = 6;
+                    if (Type.exists(ev_fa.size)) {
+                        size = Type.evaluate(ev_fa.size);
+                    }
+                    if (hl !== '' && Type.exists(ev_fa[hl + 'size'])) {
+                        size = Type.evaluate(ev_fa[hl + 'size']);
+                    }
+                    off = strokewidth * size;
+                    if (typeFirst === 2) {
+                        off *= 0.5;
+                        minlen += strokewidth * size;
+                    } else if (typeFirst === 3) {
+                        off = strokewidth * size / 3;
+                        minlen += strokewidth;
+                    } else if (typeFirst === 4 || typeFirst === 5 || typeFirst === 6) {
+                        off = strokewidth * size / 1.5;
+                        minlen += strokewidth * size;
+                    } else {
+                        minlen += strokewidth * size;
+                    }
+                    offFirst += off;
+                    sizeFirst = size;
+                }
+
+                if (ev_la) {
+                    size = 6;
+                    if (Type.exists(ev_la.size)) {
+                        size = Type.evaluate(ev_la.size);
+                    }
+                    if (hl !== '' && Type.exists(ev_la[hl + 'size'])) {
+                        size = Type.evaluate(ev_la[hl + 'size']);
+                    }
+                    off = strokewidth * size;
+                    if (typeLast === 2) {
+                        off *= 0.5;
+                        minlen += strokewidth * size;
+                    } else if (typeLast === 3) {
+                        off = strokewidth * size / 3;
+                        minlen += strokewidth;
+                    } else if (typeLast === 4 || typeLast === 5 || typeLast === 6) {
+                        off = strokewidth * size / 1.5;
+                        minlen += strokewidth * size;
+                    } else {
+                        minlen += strokewidth * size;
+                    }
+                    offLast += off;
+                    sizeLast = size;
+                }
+            }
+
+            return {
+                evFirst: ev_fa,
+                evLast: ev_la,
+                offFirst: offFirst,
+                offLast: offLast,
+                sizeFirst: sizeFirst,
+                sizeLast: sizeLast,
+                showFirst: 1, // Show arrow head. 0 if the distance is too small
+                showLast: 1,  // Show arrow head. 0 if the distance is too small
+                minLen: minlen,
+                strokeWidth: strokewidth
+            };
+        },
+
+        /**
+         * Shorten the line length such that the arrow head touches
+         * the start or end point and such that the arrow head ends exactly
+         * at the start / end position of the line.
+         *
+         * @param  {JXG.Line} el Reference to the line object that gets arrow heads.
+         * @param  {JXG.Coords} c1  Coords of the first point of the line (after {@link JXG.Math.Geometry#calcStraight}).
+         * @param  {JXG.Coords} c2  Coords of the second point of the line (after {@link JXG.Math.Geometry#calcStraight}).
+         * @param  {Object}  a
+         * @return {object} Object containing how much the line has to be shortened.
+         * Data structure: {c1, c2, d1x, d1y, d2x, d2y, sFirst, sLast}. sFirst and sLast is the length by which
+         * firstArrow and lastArrow have to shifted such that there is no gap between arrow head and line.
+         * Additionally, if one of these values is zero, the arrow is not displayed. This is the case, if the
+         * line length is very short.
+         */
+        getPositionArrowHead: function(el, c1, c2, a) {
+            var d, d1x, d1y, d2x, d2y;
+
+            /*
+               Handle arrow heads.
+
+               The default arrow head is an isosceles triangle with base length 10 units and height 10 units.
+               These 10 units are scaled to strokeWidth * arrowSize pixels pixels.
+            */
+            if (a.evFirst || a.evLast) {
+                // Correct the position of the arrow heads
+                d1x = d1y = d2x = d2y = 0.0;
+                d = c1.distance(Const.COORDS_BY_SCREEN, c2);
+
+                if (a.evFirst &&
+                    el.board.renderer.type !== 'vml') {
+                    if (d >= a.minLen) {
+                        d1x = (c2.scrCoords[1] - c1.scrCoords[1]) * a.offFirst / d;
+                        d1y = (c2.scrCoords[2] - c1.scrCoords[2]) * a.offFirst / d;
+                    } else {
+                        a.showFirst = 0;
+                    }
+                }
+
+                if (a.evLast &&
+                    el.board.renderer.type !== 'vml') {
+                    if (d >= a.minLen) {
+                        d2x = (c2.scrCoords[1] - c1.scrCoords[1]) * a.offLast / d;
+                        d2y = (c2.scrCoords[2] - c1.scrCoords[2]) * a.offLast / d;
+                    } else {
+                        a.showLast = 0;
+                    }
+                }
+                c1.setCoordinates(Const.COORDS_BY_SCREEN, [c1.scrCoords[1] + d1x, c1.scrCoords[2] + d1y], false, true);
+                c2.setCoordinates(Const.COORDS_BY_SCREEN, [c2.scrCoords[1] - d2x, c2.scrCoords[2] - d2y], false, true);
+            }
+
+            return this;
+        },
+
+        /**
+         * Handle touchlastpoint / touchfirstpoint
+         *
+         * @param {JXG.GeometryElement} el
+         * @param {JXG.Coords} c1 Coordinates of the start of the line. The coordinates are changed in place.
+         * @param {JXG.Coords} c2 Coordinates of the end of the line. The coordinates are changed in place.
+         * @param {Object} a
+         */
+        handleTouchpoints: function(el, c1, c2, a) {
+            var s1, s2, s, d,
+                d1x, d1y, d2x, d2y;
+
+            if (a.evFirst || a.evLast) {
+                d = d1x = d1y = d2x = d2y = 0.0;
+
+                s1 = Type.evaluate(el.point1.visProp.size) + Type.evaluate(el.point1.visProp.strokewidth);
+                s2 = Type.evaluate(el.point2.visProp.size) + Type.evaluate(el.point2.visProp.strokewidth);
+                s = s1 + s2;
+
+                // Handle touchlastpoint /touchfirstpoint
+                if (a.evFirst && Type.evaluate(el.visProp.touchfirstpoint)) {
+                    d = c1.distance(Const.COORDS_BY_SCREEN, c2);
+                    //if (d > s) {
+                        d1x = (c2.scrCoords[1] - c1.scrCoords[1]) * s1 / d;
+                        d1y = (c2.scrCoords[2] - c1.scrCoords[2]) * s1 / d;
+                    //}
+                }
+                if (a.evLast && Type.evaluate(el.visProp.touchlastpoint)) {
+                    d = c1.distance(Const.COORDS_BY_SCREEN, c2);
+                    //if (d > s) {
+                        d2x = (c2.scrCoords[1] - c1.scrCoords[1]) * s2 / d;
+                        d2y = (c2.scrCoords[2] - c1.scrCoords[2]) * s2 / d;
+                    //}
+                }
+                c1.setCoordinates(Const.COORDS_BY_SCREEN, [c1.scrCoords[1] + d1x, c1.scrCoords[2] + d1y], false, true);
+                c2.setCoordinates(Const.COORDS_BY_SCREEN, [c2.scrCoords[1] - d2x, c2.scrCoords[2] - d2y], false, true);
+            }
+
+            return this;
+        },
+
+        /**
          * Corrects the line length if there are arrow heads, such that
          * the arrow ends exactly at the intended position.
          * Calls the renderer method to draw the line.
          *
-         * @param {JXG.Line} el Reference to a line object, that has to be drawn.
-         * @param {Number} strokeWidth Stroke width of the line. This determines the size of the
-         *  arrow head.
-         * @param  {Boolean} doHighlight true if the object is to be highlighted, false otherwise. This parameter
-         *  is necessary for the attribute highlightSize of the arrow heads.
+         * @param {JXG.Line} el Reference to a line object, that has to be drawn
+         * @param {Object} arrowData Data concerning possible arrow heads
          *
-         * @returns {Object} Returns the object returned by
-         *  {@link JXG.AbstractRenderer#getPositionArrowHead}. This contains the information in
-         * horizontal and vertical pixels how much
-         * the line has to be shortened on each end.
-         *
-         * @private
-         * @see Line
-         * @see JXG.Line
-         * @see JXG.AbstractRenderer#updateLine
-         * @see JXG.AbstractRenderer#getPositionArrowHead
-         *
-         */
-        updateLineEndings: function(el, strokewidth, hl) {
-            var c1 = new Coords(Const.COORDS_BY_USER, el.point1.coords.usrCoords, el.board),
-                c2 = new Coords(Const.COORDS_BY_USER, el.point2.coords.usrCoords, el.board),
-                obj, margin = null;
-
-            margin = Type.evaluate(el.visProp.margin);
-            Geometry.calcStraight(el, c1, c2, margin);
-
-            obj = this.getPositionArrowHead(el, c1, c2, strokewidth, hl);
-            this.updateLinePrim(el.rendNode,
-                obj.c1.scrCoords[1] + obj.d1x, obj.c1.scrCoords[2] + obj.d1y,
-                obj.c2.scrCoords[1] - obj.d2x, obj.c2.scrCoords[2] - obj.d2y, el.board);
-
-            return obj;
-        },
-
-        /**
-         * Read the attribute "size" of the arrow heads. Multiplied with the stroke width of the line
-         * this gives the absolute size of the arrow heads. Then the arrow heads are redrawn by the renderer.
-         *
-         * @param {JXG.Line} el Reference to a line object, that has to be drawn.
-         * @param {Object} obj Reference to a object returned by
-         *     {@link JXG.AbstractRenderer#getPositionArrowHead}
-         * @param  {Boolean} doHighlight true if the object is to be highlighted, false otherwise. This parameter
-         *  is necessary for the attribute highlightSize of the arrow heads.
          * @returns {JXG.AbstractRenderer} Reference to the renderer
          *
          * @private
@@ -21563,43 +27631,133 @@ define('renderer/abstract',[
          * @see JXG.Line
          * @see JXG.AbstractRenderer#updateLine
          * @see JXG.AbstractRenderer#getPositionArrowHead
+         * @see JXG.AbstractRenderer#getArrowHeadData
+         *
          */
-        updateArrowSize: function(el, obj, hl) {
-            var size, ev_fa, ev_la;
+        updateLineEndings: function(el, arrowData) {
+            var c1, c2,
+                // useTotalLength = true,
+                margin = null;
 
-            ev_fa = Type.evaluate(el.visProp.firstarrow);
-            if (ev_fa) {
-                size = 6;
-                if (Type.exists(ev_fa.size)) {
-                    size = Type.evaluate(ev_fa.size);
-                }
-                if (hl !== '' && Type.exists(ev_fa[hl + 'size'])) {
-                    size = Type.evaluate(ev_fa.highlightsize);
-                }
-                this._setArrowWidth(el.rendNodeTriangleStart, obj.sFirst, el.rendNode, size);
+            c1 = new Coords(Const.COORDS_BY_USER, el.point1.coords.usrCoords, el.board);
+            c2 = new Coords(Const.COORDS_BY_USER, el.point2.coords.usrCoords, el.board);
+            margin = Type.evaluate(el.visProp.margin);
+            Geometry.calcStraight(el, c1, c2, margin);
+
+            this.handleTouchpoints(el, c1, c2, arrowData);
+
+            // Shorten path without el.rendNode.getTotalLength
+            // if (!Type.exists(el.rendNode.getTotalLength)) {
+                this.getPositionArrowHead(el, c1, c2, arrowData);
+            //     useTotalLength = false;
+            // }
+
+            this.updateLinePrim(el.rendNode,
+                c1.scrCoords[1], c1.scrCoords[2],
+                c2.scrCoords[1], c2.scrCoords[2], el.board);
+
+            // Shorten path with el.rendNode.getTotalLength
+            // This does not work sufficiently good in webkit.
+            // See also _createArrowHead for arrow head position
+            // if (useTotalLength) {
+            //     this.shortenPath(el.rendNode, arrowData.offFirst, arrowData.offLast);
+            // }
+
+            return this;
+        },
+
+        /**
+         *
+         * Calls the renderer method to draw the curve and
+         * corrects the curve length if there are arrow heads, such that
+         * the arrow ends exactly at the intended position.
+         *
+         * @param {JXG.GeometryElement} el Reference to a line object, that has to be drawn.
+         * @param {Object} arrowData Data concerning possible arrow heads
+         * @returns {JXG.AbstractRenderer} Reference to the renderer
+         *
+         * @private
+         * @see Curve
+         * @see JXG.Curve
+         * @see JXG.AbstractRenderer#updateCurve
+         * @see JXG.AbstractRenderer#getArrowHeadData
+         */
+        updatePathEndings: function(el, arrowData) {
+            if (Type.evaluate(el.visProp.handdrawing)) {
+                this.updatePathPrim(el.rendNode, this.updatePathStringBezierPrim(el), el.board);
+            } else {
+                this.updatePathPrim(el.rendNode, this.updatePathStringPrim(el), el.board);
             }
-            ev_la = Type.evaluate(el.visProp.lastarrow);
-            if (ev_la) {
-                size = 6;
-                if (Type.exists(ev_la.size)) {
-                    size = Type.evaluate(ev_la.size);
-                }
-                if (hl !== '' && Type.exists(ev_la[hl + 'size'])) {
-                    size = Type.evaluate(ev_la[hl + 'size']);
-                }
-                this._setArrowWidth(el.rendNodeTriangleEnd, obj.sLast, el.rendNode, size);
+
+            this.shortenPath(el.rendNode, arrowData.offFirst, arrowData.offLast);
+
+            return this;
+        },
+
+        /**
+         * Set the arrow head size.
+         *
+         * @param {JXG.GeometryElement} el Reference to a line or curve object that has to be drawn.
+         * @param {Object} arrowData Data concerning possible arrow heads
+         * @returns {JXG.AbstractRenderer} Reference to the renderer
+         *
+         * @private
+         * @see Line
+         * @see JXG.Line
+         * @see Curve
+         * @see JXG.Curve
+         * @see JXG.AbstractRenderer#updatePathWithArrowHeads
+         * @see JXG.AbstractRenderer#getArrowHeadData
+         */
+        setArrowSize: function(el, a) {
+            if (a.evFirst) {
+                this._setArrowWidth(el.rendNodeTriangleStart, a.showFirst * a.strokeWidth, el.rendNode, a.sizeFirst);
+            }
+            if (a.evLast) {
+                this._setArrowWidth(el.rendNodeTriangleEnd, a.showLast * a.strokeWidth, el.rendNode, a.sizeLast);
             }
             return this;
         },
 
-        updateLineEndsArrows: function(el, strokeWidth, doHighlight) {
-            var hl, obj;
+        /**
+         * Handle arrow heads of a line or curve element and call the renderer primitive.
+         *
+         * @param {JXG.GeometryElement} el Reference to a line or curve object that has to be drawn.
+         * @param {Boolean} doHighlight
+         *
+         * @private
+         * @see Line
+         * @see JXG.Line
+         * @see Curve
+         * @see JXG.Curve
+         * @see JXG.AbstractRenderer#makeArrows
+         * @see JXG.AbstractRenderer#getArrowHeadData
+         */
+        updatePathWithArrowHeads: function(el, doHighlight) {
+            var ev = el.visProp,
+                hl = doHighlight ? 'highlight' : '',
+                w,
+                arrowData;
 
-            hl = doHighlight ? 'highlight' : '';
-            obj = this.updateLineEndings(el, Type.evaluate(el.visProp[hl + 'strokewidth']), hl);
+            if (doHighlight && ev.highlightstrokewidth) {
+                w = Math.max(Type.evaluate(ev.highlightstrokewidth), Type.evaluate(ev.strokewidth));
+            } else {
+                w = Type.evaluate(ev.strokewidth);
+            }
 
+            // Get information if there are arrow heads and how large they are.
+            arrowData = this.getArrowHeadData(el, w, hl);
+
+            // Create the SVG nodes if neccessary
             this.makeArrows(el);
-            this.updateArrowSize(el, obj, hl);
+
+            // Draw the paths with arrow heads
+            if (el.elementClass === Const.OBJECT_CLASS_LINE) {
+                this.updateLineEndings(el, arrowData);
+            } else if (el.elementClass === Const.OBJECT_CLASS_CURVE) {
+                this.updatePathEndings(el, arrowData);
+            }
+            this.setArrowSize(el, arrowData);
         },
 
         /**
@@ -21611,147 +27769,8 @@ define('renderer/abstract',[
          */
         updateLine: function (el) {
             this._updateVisual(el);
-            this.updateLineEndsArrows(el, Type.evaluate(el.visProp.strokewidth));
+            this.updatePathWithArrowHeads(el);
             this.setLineCap(el);
-        },
-
-        /**
-         * Shorten the line length such that the arrow head touches
-         * the start or end point and such that the arrow head ends exactly
-         * at the start / end position of the line.
-         *
-         * @param  {JXG.Line} el Reference to the line object that gets arrow heads.
-         * @param  {JXG.Coords} c1   Coords of the first point of the line (after {@link JXG.Geometry#calcStraight}).
-         * @param  {JXG.Coords} c2  Coords of the second point of the line (after {@link JXG.Geometry#calcStraight}).
-         * @param  {Boolean} doHighlight true if the object is to be highlighted, false otherwise. This parameter
-         *  is necessary for the attribute highlightSize of the arrow heads.
-         * @return {object} Object containing how much the line has to be shortened.
-         * Data structure: {c1, c2, d1x, d1y, d2x, d2y, sFirst, sLast}. sFirst and sLast is the length by which
-         * firstArrow and lastArrow have to shifted such that there is no gap between arrow head and line.
-         * Additionally, if one of these values is zero, the arrow is not displayed. This is the case, if the
-         * line length is very short.
-         */
-        getPositionArrowHead: function(el, c1, c2, strokewidth, hl) {
-            var s, s1, s2, d, d1x, d1y, d2x, d2y,
-                minlen = Mat.eps,
-                typeFirst, typeLast,
-                sFirst = 0,
-                sLast = 0,
-                ev_fa = Type.evaluate(el.visProp.firstarrow),
-                ev_la = Type.evaluate(el.visProp.lastarrow),
-                size;
-
-            d1x = d1y = d2x = d2y = 0.0;
-            /*
-               Handle arrow heads.
-
-               The arrow head is an isosceles triangle with base length 10 units and height 10 units.
-               These 10 units are scaled to strokeWidth * arrowSize pixels pixels.
-            */
-            if (ev_fa || ev_la) {
-                s1 = Type.evaluate(el.point1.visProp.size) + Type.evaluate(el.point1.visProp.strokewidth);
-                s2 = Type.evaluate(el.point2.visProp.size) + Type.evaluate(el.point2.visProp.strokewidth);
-                s = s1 + s2;
-
-                // Handle touchlastpoint /touchfirstpoint
-                if (ev_la && Type.evaluate(el.visProp.touchlastpoint)) {
-                    d = c1.distance(Const.COORDS_BY_SCREEN, c2);
-                    if (d > s) {
-                        d2x = (c2.scrCoords[1] - c1.scrCoords[1]) * s2 / d;
-                        d2y = (c2.scrCoords[2] - c1.scrCoords[2]) * s2 / d;
-                        c2 = new Coords(Const.COORDS_BY_SCREEN, [c2.scrCoords[1] - d2x, c2.scrCoords[2] - d2y], el.board);
-                    }
-                }
-                if (ev_fa && Type.evaluate(el.visProp.touchfirstpoint)) {
-                    d = c1.distance(Const.COORDS_BY_SCREEN, c2);
-                    if (d > s) {
-                        d1x = (c2.scrCoords[1] - c1.scrCoords[1]) * s1 / d;
-                        d1y = (c2.scrCoords[2] - c1.scrCoords[2]) * s1 / d;
-                        c1 = new Coords(Const.COORDS_BY_SCREEN, [c1.scrCoords[1] + d1x, c1.scrCoords[2] + d1y], el.board);
-                    }
-                }
-
-                // Correct the position of the arrow heads
-                d1x = d1y = d2x = d2y = 0.0;
-                d = c1.distance(Const.COORDS_BY_SCREEN, c2);
-
-                if (Type.exists(ev_fa.type)) {
-                    typeFirst = Type.evaluate(ev_fa.type);
-                }
-                if (Type.exists(ev_la.type)) {
-                    typeLast = Type.evaluate(ev_la.type);
-                }
-
-                if (ev_fa) {
-                    size = 3;
-                    if (Type.exists(ev_fa.size)) {
-                        size = Type.evaluate(ev_fa.size);
-                    }
-                    if (hl !== '' && Type.exists(ev_fa[hl + 'size'])) {
-                        size = Type.evaluate(ev_fa[hl + 'size']);
-                    }
-                    sFirst = strokewidth * size;
-                    if (typeFirst === 2) {
-                        sFirst *= 0.5;
-                        minlen += strokewidth * size;
-                    } else if (typeFirst === 3) {
-                        sFirst = strokewidth * size / 3;
-                        minlen += strokewidth;
-                    } else {
-                        minlen += strokewidth * size;
-                    }
-                }
-                if (ev_la) {
-                    size = 3;
-                    if (Type.exists(ev_la.size)) {
-                        size = Type.evaluate(ev_la.size);
-                    }
-                    if (hl !== '' && Type.exists(ev_la[hl + 'size'])) {
-                        size = Type.evaluate(ev_la[hl + 'size']);
-                    }
-                    sLast = strokewidth * size;
-                    if (typeLast === 2) {
-                        sLast *= 0.5;
-                        minlen += strokewidth * size;
-                    } else if (typeLast === 3) {
-                        sLast = strokewidth * size / 3;
-                        minlen += strokewidth;
-                    } else {
-                        minlen += strokewidth * size;
-                    }
-                }
-
-                if (ev_fa &&
-                    el.board.renderer.type !== 'vml') {
-                    if (d >= minlen) {
-                        d1x = (c2.scrCoords[1] - c1.scrCoords[1]) * sFirst / d;
-                        d1y = (c2.scrCoords[2] - c1.scrCoords[2]) * sFirst / d;
-                    } else {
-                        sFirst = 0;
-                    }
-                }
-
-                if (ev_la &&
-                    el.board.renderer.type !== 'vml') {
-                    if (d >= minlen) {
-                        d2x = (c2.scrCoords[1] - c1.scrCoords[1]) * sLast / d;
-                        d2y = (c2.scrCoords[2] - c1.scrCoords[2]) * sLast / d;
-                    } else {
-                        sLast = 0.0;
-                    }
-                }
-            }
-
-            return {
-                c1: c1,
-                c2: c2,
-                d1x: d1x,
-                d1y: d1y,
-                d2x: d2x,
-                d2y: d2y,
-                sFirst: sFirst,
-                sLast: sLast
-            };
         },
 
         /**
@@ -21822,40 +27841,8 @@ define('renderer/abstract',[
          * @see JXG.AbstractRenderer#drawCurve
          */
         updateCurve: function (el) {
-            var w = Type.evaluate(el.visProp.strokewidth),
-                size, ev_fa, ev_la;
-
-            if (Type.evaluate(el.visProp.handdrawing)) {
-                this.updatePathPrim(el.rendNode, this.updatePathStringBezierPrim(el), el.board);
-            } else {
-                this.updatePathPrim(el.rendNode, this.updatePathStringPrim(el), el.board);
-            }
-
-            if (el.numberPoints > 1) {
-                this.makeArrows(el);
-
-                ev_fa = Type.evaluate(el.visProp.firstarrow);
-                if (ev_fa) {
-                    if (Type.exists(ev_fa.size)) {
-                        size = Type.evaluate(ev_fa.size);
-                    } else {
-                        size = 3;
-                    }
-
-                    this._setArrowWidth(el.rendNodeTriangleStart, w, el.rendNode, size);
-                }
-                ev_la = Type.evaluate(el.visProp.lastarrow);
-                if (ev_la) {
-                    if (Type.exists(ev_la.size)) {
-                        size = Type.evaluate(ev_la.size);
-                    } else {
-                        size = 3;
-                    }
-                    this._setArrowWidth(el.rendNodeTriangleEnd, w, el.rendNode, size);
-                }
-            }
+            this.updatePathWithArrowHeads(el);
             this._updateVisual(el);
-
         },
 
         /* **************************
@@ -22510,7 +28497,7 @@ define('renderer/abstract',[
          * @param {Number} size A positive number describing the size. Usually the half of the width and height of
          * the drawn point.
          * @param {String} type A string describing the point's face. This method only accepts the shortcut version of
-         * each possible face: <tt>x, +, <>, ^, v, >, <
+         * each possible face: <tt>x, +, <>, ^, v, >, < </tt>
          */
         updatePathStringPoint: function (element, size, type) { /* stub */ },
 
@@ -22750,8 +28737,8 @@ define('renderer/abstract',[
                 if (ev.highlightstrokewidth) {
                     sw = Math.max(Type.evaluate(ev.highlightstrokewidth), Type.evaluate(ev.strokewidth));
                     this.setObjectStrokeWidth(el, sw);
-                    if (el.elementClass === Const.OBJECT_CLASS_LINE) {
-                        this.updateLineEndsArrows(el, sw, true);
+                    if (el.elementClass === Const.OBJECT_CLASS_LINE || el.elementClass === Const.OBJECT_CLASS_CURVE) {
+                        this.updatePathWithArrowHeads(el, true);
                     }
                 }
             }
@@ -22800,8 +28787,8 @@ define('renderer/abstract',[
 
                 sw = Type.evaluate(ev.strokewidth);
                 this.setObjectStrokeWidth(el, sw);
-                if (el.elementClass === Const.OBJECT_CLASS_LINE) {
-                    this.updateLineEndsArrows(el, sw, false);
+                if (el.elementClass === Const.OBJECT_CLASS_LINE || el.elementClass === Const.OBJECT_CLASS_CURVE) {
+                    this.updatePathWithArrowHeads(el, false);
                 }
 
             }
@@ -22859,7 +28846,9 @@ define('renderer/abstract',[
                     button.style.paddingLeft = '7px';
                     button.style.paddingRight = '7px';
 
-                    button.classList.add('JXG_navigation_button');
+                    if (button.classList !== undefined) { // classList not available in IE 9
+                        button.classList.add('JXG_navigation_button');
+                    }
 
                     // Highlighting is now done with CSS
                     // Env.addEvent(button, 'mouseover', function () {
@@ -22898,8 +28887,9 @@ define('renderer/abstract',[
                 node.style.right = attr.right;
                 node.style.bottom = attr.bottom;
 
-                node.classList.add('JXG_navigation');
-
+                if (node.classList !== undefined) { // classList not available in IE 9
+                    node.classList.add('JXG_navigation');
+                }
                 // For XHTML we need unicode instead of HTML entities
 
                 if (board.attr.showfullscreen) {
@@ -22971,6 +28961,9 @@ define('renderer/abstract',[
             var parentNode = el.parentNode,
                 nextSibling = el.nextSibling;
 
+            if (parentNode === null) {
+                return;
+            }
             parentNode.removeChild(el);
 
             return function () {
@@ -23018,7 +29011,7 @@ define('renderer/abstract',[
          * Convert SVG construction to base64 encoded SVG data URL.
          * Only available on SVGRenderer.
          *
-         * @see JXG.SVGRenderer#dumpToDataURL
+         * @see JXG.SVGRenderer#dumpToDataURI
          */
         dumpToDataURI: function (_ignoreTexts) {},
 
@@ -23036,7 +29029,30 @@ define('renderer/abstract',[
          *
          * See JXG.SVGRenderer#screenshot
          */
-        screenshot: function (board) {}
+        screenshot: function (board) {},
+
+        /**
+         * Shorten SVG path at the beginning and at the end to avoid visible overlap of
+         * the line and its arrow heads. This method uses the SVG method getTotalLength.
+         *
+         * @param {Node} node Reference to a SVG node representing a line or curve.
+         * @param {Number} offFirst Shorten path at the beginning by this number of pixels
+         * @param {Number} offLast Shorten path at the end by this number of pixels
+         *
+         * @see JXG.AbstractRenderer#updatePathEndings
+         * @see JXG.AbstractRenderer#updateLineEndings
+         */
+        shortenPath: function(node, offFirst, offLast) {},
+
+        /**
+         * Move element into new layer. This is trivial for canvas, but needs more effort in SVG.
+         * Does not work dynamically, i.e. if level is a function.
+         *
+         * @param {JXG.GeometryElement} el Element which is put into different layer
+         * @param {Number} value Layer number
+         * @private
+         */
+        setLayer: function(el, level) {}
 
     });
 
@@ -23044,7 +29060,7 @@ define('renderer/abstract',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -23096,6 +29112,124 @@ define('reader/file',[
      * The FileReader object bundles the file input capabilities of JSXGraph.
      */
     JXG.FileReader = {
+        /**
+         *
+         * @param {String} url
+         * @param {JXG.Board} board
+         * @param {String} format
+         * @param {Boolean} async
+         * @param {Function} callback
+         *
+         * @private
+         */
+        handleRemoteFile: function(url, board, format, async, encoding, callback) {
+            var request = false;
+
+            try {
+                request = new XMLHttpRequest();
+                if (format.toLowerCase() === 'raw') {
+                    request.overrideMimeType('text/plain; charset=' + encoding);
+                } else {
+                    request.overrideMimeType('text/xml; charset=' + encoding);
+                }
+            } catch (e) {
+                try {
+                    request = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (ex) {
+                    try {
+                        request = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (exc) {
+                        request = false;
+                    }
+                }
+            }
+            if (!request) {
+                JXG.debug("AJAX not activated!");
+                return;
+            }
+
+            request.open("GET", url, async);
+            if (format.toLowerCase() === 'raw') {
+                this.cbp = function () {
+                    var req = request;
+                    if (req.readyState === 4) {
+                        board(req.responseText);
+                    }
+                };
+            } else {
+                this.cbp = function () {
+                    var req = request,
+                        text = '';
+
+                    if (req.readyState === 4) {
+                        // Hack for ancient IEs:
+                        // We use the Visual Basic stuff from below.
+                        if (Type.exists(req.responseStream) &&
+                                // PK: zip, geogebra
+                                // 31: gzip, cinderella
+                                (req.responseText.slice(0, 2) === "PK" ||
+                                Encoding.asciiCharCodeAt(req.responseText.slice(0, 1), 0) === 31)) {
+
+                            // After this, text contains the binary? zip-compressed string
+                            text = Base64.decode(jxgBinFileReader(req));
+                        } else {
+                            // This is for all browsers except ancient IEs.
+                            text = req.responseText;
+                            console.log(text);
+                        }
+                        this.parseString(text, board, format, callback);
+                    }
+                };
+            }
+
+            this.cb = Type.bind(this.cbp, this);
+            // Old style
+            request.onreadystatechange = this.cb;
+
+            try {
+                request.send(null);
+            } catch (ex2) {
+                throw new Error("JSXGraph: A problem occurred while trying to read remote file '" + url + "'.");
+            }
+        },
+
+        /**
+         *
+         * @param {Blob} url The Blob or File from which to read
+         * @param {JXG.Board} board
+         * @param {String} format
+         * @param {Boolean} async
+         * @param {Function} callback
+         *
+         * @private
+         */
+        handleLocalFile: function(url, board, format, async, encoding, callback) {
+            if (!Type.exists(async)) {
+                async = true;
+            }
+
+            if (format.toLowerCase() === 'raw') {
+                this.cbp = function (e) {
+                    board(e.target.result);
+                };
+            } else {
+                this.cbp = function (e) {
+                    var text = e.target.result;
+                    //console.log(text);
+                    this.parseString(text, board, format, callback);
+                };
+            }
+
+            this.cb = Type.bind(this.cbp, this);
+
+            var reader = new FileReader();
+            reader.onload = this.cb;
+            if (format.toLowerCase() === 'raw') {
+                reader.readAsText(url);
+            } else {
+                reader.readAsText(url, encoding);
+            }
+        },
 
         /**
          * Opens a file using the given URL and passes the contents to {@link JXG.FileReader#parseString}
@@ -23114,77 +29248,11 @@ define('reader/file',[
          * @param {Boolean} async Call ajax asynchonously.
          * @param {function} callback A function that is run when the board is ready.
          */
-        parseFileContent: function (url, board, format, async, callback) {
-            var request = false;
-
-            if (!Type.exists(async)) {
-                async = true;
-            }
-
-            //this.request = false;
-
-            try {
-                request = new XMLHttpRequest();
-                if (format.toLowerCase() === 'raw') {
-                    request.overrideMimeType('text/plain; charset=iso-8859-1');
-                } else {
-                    request.overrideMimeType('text/xml; charset=iso-8859-1');
-                }
-            } catch (e) {
-                try {
-                    request = new ActiveXObject("Msxml2.XMLHTTP");
-                } catch (ex) {
-                    try {
-                        request = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch (exc) {
-                        request = false;
-                    }
-                }
-            }
-
-            if (!request) {
-                JXG.debug("AJAX not activated!");
-                return;
-            }
-
-            request.open("GET", url, async);
-
-            if (format.toLowerCase() === 'raw') {
-                this.cbp = function () {
-                    var req = request;
-                    if (req.readyState === 4) {
-                        board(req.responseText);
-                    }
-                };
+        parseFileContent: function (url, board, format, async, encoding, callback) {
+            if (Type.isString(url) || FileReader === undefined) {
+                this.handleRemoteFile(url, board, format, async, encoding, callback);
             } else {
-                this.cbp = function () {
-                    var req = request,
-                        text = '';
-
-                    if (req.readyState === 4) {
-                        if (Type.exists(req.responseStream) &&
-                                // PK: zip, geogebra
-                                // 31: gzip, cinderella
-                                (req.responseText.slice(0, 2) === "PK" ||
-                                Encoding.asciiCharCodeAt(req.responseText.slice(0, 1), 0) === 31)) {
-
-                            // After this, text contains the base64 encoded, zip-compressed string
-                            text = Base64.decode(jxgBinFileReader(req));
-                        } else {
-                            text = req.responseText;
-                        }
-                        this.parseString(text, board, format, callback);
-                    }
-                };
-            }
-
-            this.cb = Type.bind(this.cbp, this);
-            request.onreadystatechange = this.cb;
-
-            try {
-                request.send(null);
-            } catch (ex2) {
-                throw new Error("JSXGraph: A problem occurred while trying to read '" + url + "'.");
+                this.handleLocalFile(url, board, format, async, encoding, callback);
             }
         },
 
@@ -23209,7 +29277,6 @@ define('reader/file',[
                 read;
 
             format = format.toLowerCase();
-
             Reader = JXG.readers[format];
 
             if (Type.exists(Reader)) {
@@ -23279,7 +29346,7 @@ End Function\n\
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -23792,7 +29859,7 @@ define('parser/geonext',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -24031,7 +30098,7 @@ define('base/element',[
         this._pos = -1;
 
         /**
-         * [c,b0,b1,a,k,r,q0,q1]
+         * [c, b0, b1, a, k, r, q0, q1]
          *
          * See
          * A.E. Middleditch, T.W. Stacey, and S.B. Tor:
@@ -24039,12 +30106,12 @@ define('base/element',[
          * ACM Transactions on Graphics, Vol. 8, 1, 1989, pp 25-40.
          *
          * The meaning of the parameters is:
-         * Circle: points p=[p0,p1] on the circle fulfill
-         *  a&lt;p,p&gt; + &lt;b,p&gt; + c = 0
+         * Circle: points p=[p0, p1] on the circle fulfill
+         *  a&lt;p, p&gt; + &lt;b, p&gt; + c = 0
          * For convenience we also store
          *  r: radius
          *  k: discriminant = sqrt(&lt;b,b&gt;-4ac)
-         *  q=[q0,q1] center
+         *  q=[q0, q1] center
          *
          * Points have radius = 0.
          * Lines have radius = infinity.
@@ -24074,7 +30141,10 @@ define('base/element',[
             animate: 'animate',
             on: 'on',
             off: 'off',
-            trigger: 'trigger'
+            trigger: 'trigger',
+            addTicks: 'addTicks',
+            removeTicks: 'removeTicks',
+            removeAllTicks: 'removeAllTicks'
         };
 
         /**
@@ -24399,7 +30469,7 @@ define('base/element',[
         },
 
         /**
-         * Returns the elements name, Used in JessieCode.
+         * Returns the elements name. Used in JessieCode.
          * @returns {String}
          */
         getName: function () {
@@ -24450,9 +30520,8 @@ define('base/element',[
                 if (Type.isPoint(el)) {
                     if (!el.draggable()) {
                         return this;
-                    } else {
-                        parents.push(el);
                     }
+                    parents.push(el);
                 }
             }
 
@@ -25140,12 +31209,16 @@ define('base/element',[
                         if (Type.exists(this.rendNodeTag)) {
                             this.rendNodeCheckbox.checked = !!value;
                         }
-                            break;
+                        break;
                     case 'maxlength':
                         // input. Is not available on initial call.
                         if (Type.exists(this.rendNodeTag)) {
                             this.rendNodeTag.maxlength = !!value;
                         }
+                        break;
+                    case 'layer':
+                        this.board.renderer.setLayer(this, Type.evaluate(value));
+                        this._set(key, value);
                         break;
                     default:
                         if (Type.exists(this.visProp[key]) &&
@@ -25689,6 +31762,68 @@ define('base/element',[
         },
 
         /**
+         * Adds ticks to this line or curve. Ticks can be added to a curve or any kind of line: line, arrow, and axis.
+         * @param {JXG.Ticks} ticks Reference to a ticks object which is describing the ticks (color, distance, how many, etc.).
+         * @returns {String} Id of the ticks object.
+         */
+        addTicks: function (ticks) {
+            if (ticks.id === '' || !Type.exists(ticks.id)) {
+                ticks.id = this.id + '_ticks_' + (this.ticks.length + 1);
+            }
+
+            this.board.renderer.drawTicks(ticks);
+            this.ticks.push(ticks);
+
+            return ticks.id;
+        },
+
+        /**
+         * Removes all ticks from a line or curve.
+         */
+        removeAllTicks: function () {
+            var t;
+
+            if (Type.exists(this.ticks)) {
+                for (t = this.ticks.length; t > 0; t--) {
+                    this.removeTicks(this.ticks[t - 1]);
+                }
+                this.ticks = [];
+                this.board.update();
+            }
+        },
+
+        /**
+         * Removes ticks identified by parameter named tick from this line or curve.
+         * @param {JXG.Ticks} tick Reference to tick object to remove.
+         */
+        removeTicks: function (tick) {
+            var t, j;
+
+            if (Type.exists(this.defaultTicks) && this.defaultTicks === tick) {
+                this.defaultTicks = null;
+            }
+
+            if (Type.exists(this.ticks)) {
+                for (t = this.ticks.length; t > 0; t--) {
+                    if (this.ticks[t - 1] === tick) {
+                        this.board.removeObject(this.ticks[t - 1]);
+
+                        if (this.ticks[t - 1].ticks) {
+                            for (j = 0; j < this.ticks[t - 1].ticks.length; j++) {
+                                if (Type.exists(this.ticks[t - 1].labels[j])) {
+                                    this.board.removeObject(this.ticks[t - 1].labels[j]);
+                                }
+                            }
+                        }
+
+                        delete this.ticks[t - 1];
+                        break;
+                    }
+                }
+            }
+        },
+
+        /**
          * Move an element to its nearest grid point.
          * The function uses the coords object of the element as
          * its actual position. If there is no coords object, nothing is done.
@@ -25757,7 +31892,7 @@ define('base/element',[
             var i, le, v, x, y,
                 bb = [Infinity, Infinity, -Infinity, -Infinity];
 
-            if (this.type == Const.OBJECT_TYPE_POLYGON) {
+            if (this.type === Const.OBJECT_TYPE_POLYGON) {
                 le = this.vertices.length - 1;
                 if (le <= 0) {
                     return bb;
@@ -25770,13 +31905,13 @@ define('base/element',[
                     bb[1] = (v < bb[1]) ? v : bb[1];
                     bb[3] = (v > bb[3]) ? v : bb[3];
                 }
-            } else if (el.elementClass == Const.OBJECT_CLASS_CIRCLE) {
+            } else if (this.elementClass === Const.OBJECT_CLASS_CIRCLE) {
                 x = this.center.X();
                 y = this.center.Y();
                 bb = [x - this.radius, y + this.radius, x + this.radius, y - this.radius];
-            } else if (el.elementClass == Const.OBJECT_CLASS_CURVE) {
+            } else if (this.elementClass === Const.OBJECT_CLASS_CURVE) {
                 le = this.vertices.length;
-                if (le == 0) {
+                if (le === 0) {
                     return bb;
                 }
                 for (i = 0; i < le; i++) {
@@ -25974,7 +32109,7 @@ define('base/element',[
          * @description This is a generic event handler. It exists for every possible attribute that can be set for
          * any element, e.g. if you want to be notified everytime an element's strokecolor is changed, is the event
          * <tt>attribute:strokecolor</tt>.
-         * @name JXG.GeometryElement#attribute:&lt;attribute&gt;
+         * @name JXG.GeometryElement#attribute:key
          * @param val The old value.
          * @param nval The new value
          * @param {Object} el Reference to the element
@@ -25993,7 +32128,7 @@ define('base/element',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -26464,7 +32599,7 @@ define('base/transformation',[
      * @constructor
      * @type JXG.Transformation
      * @throws {Exception} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {number,function} The parameters depend on the transformation type, supplied as attribute 'type'.
+     * @param {numbers,functions} parameters The parameters depend on the transformation type, supplied as attribute 'type'.
      * Possible transformation types are
      * <ul><li> 'translate'
      * <li> 'scale'
@@ -26512,6 +32647,8 @@ define('base/transformation',[
      * ( d  e  f ) * ( x )
      * ( g  h  i )   ( y )
      * </pre>
+     *
+     * @see JXG.Transformation#setMatrix
      *
      * @example
      * // The point B is determined by taking twice the vector A from the origin
@@ -26736,7 +32873,7 @@ define('base/transformation',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -27571,7 +33708,7 @@ define('base/coordselement',[
                     if (ev_is2p) {
                         ignore = false;
                         for (j = 0; j < len2; j++) {
-                            if (pEl == this.board.select(ev_is2p[j])) {
+                            if (pEl === this.board.select(ev_is2p[j])) {
                                 ignore = true;
                                 break;
                             }
@@ -27674,12 +33811,10 @@ define('base/coordselement',[
                         if (!(this.type === Const.OBJECT_TYPE_GLIDER && this.slideObject === el)) {
                             this.makeGlider(el);
                         }
-
                         break;       // bind the point to the first attractor in its list.
-                    } else {
-                        if (el === this.slideObject && d >= ev_sd) {
-                            this.popSlideObject();
-                        }
+                    }
+                    if (el === this.slideObject && d >= ev_sd) {
+                        this.popSlideObject();
                     }
                 }
             }
@@ -28284,6 +34419,9 @@ define('base/coordselement',[
          * will interpolate the path
          * using {@link JXG.Math.Numerics.Neville}. Set this flag to false if you don't want to use interpolation.
          * @returns {JXG.CoordsElement} Reference to itself.
+         * @see JXG.CoordsElement#moveAlong
+         * @see JXG.CoordsElement#moveTo
+         * @see JXG.GeometryElement#animate
          */
         moveAlong: function (path, time, options) {
             options = options || {};
@@ -28373,7 +34511,9 @@ define('base/coordselement',[
          * '<>' for speed increase on start and slow down at the end (default) and '--' for constant speed during
          * the whole animation.
          * @returns {JXG.CoordsElement} Reference to itself.
-         * @see #animate
+         * @see JXG.CoordsElement#moveAlong
+         * @see JXG.CoordsElement#visit
+         * @see JXG.GeometryElement#animate
          */
         moveTo: function (where, time, options) {
             options = options || {};
@@ -28431,7 +34571,9 @@ define('base/coordselement',[
          * the whole animation.
          * @param {Number} [options.repeat=1] How often this animation should be repeated.
          * @returns {JXG.CoordsElement} Reference to itself.
-         * @see #animate
+         * @see JXG.CoordsElement#moveAlong
+         * @see JXG.CoordsElement#moveTo
+         * @see JXG.GeometryElement#animate
          */
         visit: function (where, time, options) {
             where = new Coords(Const.COORDS_BY_USER, where, this.board);
@@ -28634,7 +34776,7 @@ define('base/coordselement',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -28684,9 +34826,9 @@ define('base/coordselement',[
  */
 
 define('base/text',[
-    'jxg', 'base/constants', 'base/coords', 'base/element', 'parser/geonext', 'math/statistics',
+    'jxg', 'base/constants', 'base/element', 'parser/geonext',
     'utils/env', 'utils/type', 'math/math', 'math/geometry', 'base/coordselement'
-], function (JXG, Const, Coords, GeometryElement, GeonextParser, Statistics, Env, Type, Mat, Geometry, CoordsElement) {
+], function (JXG, Const, GeometryElement, GeonextParser, Env, Type, Mat, Geometry, CoordsElement) {
 
     "use strict";
 
@@ -28774,9 +34916,15 @@ define('base/text',[
          * @returns {Boolean}
          */
         hasPoint: function (x, y) {
-            var lft, rt, top, bot, ax, ay,
-                r = this.board.options.precision.hasPoint;
+            var lft, rt, top, bot, ax, ay, type, r;
 
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                r = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                r = this.board.options.precision.hasPoint;
+            }
             if (this.transformations.length > 0) {
                 //Transform the mouse/touch coordinates
                 // back to the original position of the text.
@@ -28807,14 +34955,11 @@ define('base/text',[
 
             if (Type.evaluate(this.visProp.dragarea) === 'all') {
                 return x >= lft - r && x < rt + r && y >= top - r  && y <= bot + r;
-            } else {
-                // e.g. 'small'
-                return (y >= top - r && y <= bot + r) &&
-                    ((x >= lft - r  && x <= lft + 2 * r) ||
-                    (x >= rt - 2 * r && x <= rt + r));
-
             }
-
+            // e.g. 'small'
+            return (y >= top - r && y <= bot + r) &&
+                ((x >= lft - r  && x <= lft + 2 * r) ||
+                (x >= rt - 2 * r && x <= rt + r));
         },
 
         /**
@@ -29361,14 +35506,13 @@ define('base/text',[
 
             if (Type.evaluate(this.visProp.islabel) || this.board.unitY === 0 || this.board.unitX === 0) {
                 return [0, 0, 0, 0];
-            } else {
-                return [c[1], c[2] + this.size[1] / this.board.unitY, c[1] + this.size[0] / this.board.unitX, c[2]];
             }
+            return [c[1], c[2] + this.size[1] / this.board.unitY, c[1] + this.size[0] / this.board.unitX, c[2]];
         },
 
         getAnchorX: function() {
             var a = Type.evaluate(this.visProp.anchorx);
-            if (a == 'auto') {
+            if (a === 'auto') {
                 switch (this.visProp.position) {
                     case 'top':
                     case 'bot':
@@ -29389,7 +35533,7 @@ define('base/text',[
 
         getAnchorY: function() {
             var a = Type.evaluate(this.visProp.anchory);
-            if (a == 'auto') {
+            if (a === 'auto') {
                 switch (this.visProp.position) {
                     case 'top':
                     case 'ulft':
@@ -29427,12 +35571,14 @@ define('base/text',[
             // Set the precision of hasPoint to half the max if label isn't too long
             savePointPrecision = this.board.options.precision.hasPoint;
             this.board.options.precision.hasPoint = Math.max(w, h) * 0.5;
+            // TODO:
+            // Make it compatible with the objects' visProp.precision attribute
 			for (i = 0, le = this.board.objectsList.length; i < le; i++) {
 				obj = this.board.objectsList[i];
 				if (obj.visPropCalc.visible &&
-                    obj.elType != 'axis' &&
-                    obj.elType != 'ticks' &&
-                    obj != this.board.infobox &&
+                    obj.elType !== 'axis' &&
+                    obj.elType !== 'ticks' &&
+                    obj !== this.board.infobox &&
                     obj !== this &&
                     obj.hasPoint(x, y)) {
 
@@ -29803,7 +35949,7 @@ define('utils/uuid',['jxg'], function (JXG) {
 /*
  JessieCode Interpreter and Compiler
 
-    Copyright 2011-2020
+    Copyright 2011-2019
         Michael Gerhaeuser,
         Alfred Wassermann
 
@@ -29851,8 +35997,8 @@ define('utils/uuid',['jxg'], function (JXG) {
  */
 
 define('parser/jessiecode',[
-    'jxg', 'base/constants', 'base/text', 'math/math', 'math/geometry', 'math/statistics', 'utils/type', 'utils/uuid', 'utils/env'
-], function (JXG, Const, Text, Mat, Geometry, Statistics, Type, UUID, Env) {
+    'jxg', 'base/constants', 'base/text', 'math/math', 'math/ia', 'math/geometry', 'math/statistics', 'utils/type', 'utils/uuid', 'utils/env'
+], function (JXG, Const, Text, Mat, Interval, Geometry, Statistics, Type, UUID, Env) {
 
     ;
 
@@ -30280,7 +36426,7 @@ define('parser/jessiecode',[
          * @param {Boolean} [withProps=false]
          */
         getvarJS: function (vname, local, withProps) {
-            var s, r = '';
+            var s, r = '', re;
 
             local = Type.def(local, false);
             withProps = Type.def(withProps, false);
@@ -30305,12 +36451,42 @@ define('parser/jessiecode',[
             }
 
             if (this.isBuiltIn(vname)) {
-                // if src does not exist, it is a number. in that case, just return the value.
-                return this.builtIn[vname].src || this.builtIn[vname];
+                // If src does not exist, it is a number. In that case, just return the value.
+                r = this.builtIn[vname].src || this.builtIn[vname];
+
+                // Get the "real" name of the function
+                if (Type.isNumber(r)) {
+                    return r;
+                }
+                // Search a JSXGraph object in board
+                if (r.match(/board\.select/)) {
+                    return r;
+                }
+
+                vname = r.split('.').pop();
+                if (Type.exists(this.board.mathLib)) {
+                    // Handle builtin case: ln(x) -> Math.log
+                    re = new RegExp('^Math\.' + vname);
+                    if (re.exec(r) !== null) {
+                        return r.replace(re, '$jc$.board.mathLib.' + vname);
+                    }
+                }
+                if (Type.exists(this.board.mathLibJXG)) {
+                    // Handle builtin case: factorial(x) -> JXG.Math.factorial
+                    re = new RegExp('^JXG\.Math\.');
+                    if (re.exec(r) !== null) {
+                        return r.replace(re, '$jc$.board.mathLibJXG.');
+                    }
+                    return r;
+                }
+                return r;
+
+                // return this.builtIn[vname].src || this.builtIn[vname];
             }
 
             if (this.isMathMethod(vname)) {
-                return 'Math.' + vname;
+                return '$jc$.board.mathLib.' + vname;
+//                return 'Math.' + vname;
             }
 
             // if (!local) {
@@ -30341,8 +36517,6 @@ define('parser/jessiecode',[
 
                 return r;
             }
-
-
 
             return '';
         },
@@ -31305,7 +37479,11 @@ define('parser/jessiecode',[
                     ret = ' do {\n' + this.compile(node.children[0], js) + '} while (' + this.compile(node.children[1], js) + ');\n';
                     break;
                 case 'op_for':
-                    ret = ' for (' + this.compile(node.children[0], js) + '; ' + this.compile(node.children[1], js) + '; ' + this.compile(node.children[2], js) + ') {\n' + this.compile(node.children[3], js) + '\n}\n';
+                    //ret = ' for (' + this.compile(node.children[0], js) + '; ' + this.compile(node.children[1], js) + '; ' + this.compile(node.children[2], js) + ') {\n' + this.compile(node.children[3], js) + '\n}\n';
+                    ret = ' for (' + this.compile(node.children[0], js) +               // Assignment ends with ";"
+                                    this.compile(node.children[1], js) + '; ' +         // Logical test comes without ";"
+                                    this.compile(node.children[2], js).slice(0, -2) +   // Counting comes with ";" which has to be removed
+                                    ') {\n' + this.compile(node.children[3], js) + '\n}\n';
                     break;
                 case 'op_proplst':
                     if (node.children[0]) {
@@ -31426,16 +37604,32 @@ define('parser/jessiecode',[
                     ret = '(' + this.compile(node.children[0], js) + ' ~= ' + this.compile(node.children[1], js) + ')';
                     break;
                 case 'op_grt':
-                    ret = '(' + this.compile(node.children[0], js) + ' > ' + this.compile(node.children[1], js) + ')';
+                    if (js) {
+                        ret = '$jc$.gt(' + this.compile(node.children[0], js) + ', ' + this.compile(node.children[1], js) + ')';
+                    } else {
+                        ret = '(' + this.compile(node.children[0], js) + ' > ' + this.compile(node.children[1], js) + ')';
+                    }
                     break;
                 case 'op_lot':
-                    ret = '(' + this.compile(node.children[0], js) + ' < ' + this.compile(node.children[1], js) + ')';
+                    if (js) {
+                        ret = '$jc$.lt(' + this.compile(node.children[0], js) + ', ' + this.compile(node.children[1], js) + ')';
+                    } else {
+                        ret = '(' + this.compile(node.children[0], js) + ' < ' + this.compile(node.children[1], js) + ')';
+                    }
                     break;
                 case 'op_gre':
-                    ret = '(' + this.compile(node.children[0], js) + ' >= ' + this.compile(node.children[1], js) + ')';
+                    if (js) {
+                        ret = '$jc$.geq(' + this.compile(node.children[0], js) + ', ' + this.compile(node.children[1], js) + ')';
+                    } else {
+                        ret = '(' + this.compile(node.children[0], js) + ' >= ' + this.compile(node.children[1], js) + ')';
+                    }
                     break;
                 case 'op_loe':
-                    ret = '(' + this.compile(node.children[0], js) + ' <= ' + this.compile(node.children[1], js) + ')';
+                    if (js) {
+                        ret = '$jc$.leq(' + this.compile(node.children[0], js) + ', ' + this.compile(node.children[1], js) + ')';
+                    } else {
+                        ret = '(' + this.compile(node.children[0], js) + ' <= ' + this.compile(node.children[1], js) + ')';
+                    }
                     break;
                 case 'op_or':
                     ret = '(' + this.compile(node.children[0], js) + ' || ' + this.compile(node.children[1], js) + ')';
@@ -31588,7 +37782,9 @@ define('parser/jessiecode',[
             a = Type.evalSlider(a);
             b = Type.evalSlider(b);
 
-            if (Type.isArray(a) && Type.isArray(b)) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                res = Interval.add(a, b);
+            } else if (Type.isArray(a) && Type.isArray(b)) {
                 len = Math.min(a.length, b.length);
                 res = [];
 
@@ -31618,7 +37814,9 @@ define('parser/jessiecode',[
             a = Type.evalSlider(a);
             b = Type.evalSlider(b);
 
-            if (Type.isArray(a) && Type.isArray(b)) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                res = Interval.sub(a, b);
+            } else if (Type.isArray(a) && Type.isArray(b)) {
                 len = Math.min(a.length, b.length);
                 res = [];
 
@@ -31644,7 +37842,9 @@ define('parser/jessiecode',[
 
             a = Type.evalSlider(a);
 
-            if (Type.isArray(a)) {
+            if (Interval.isInterval(a)) {
+                res = Interval.negative(a);
+            } else if (Type.isArray(a)) {
                 len = a.length;
                 res = [];
 
@@ -31679,7 +37879,9 @@ define('parser/jessiecode',[
                 b = a;
             }
 
-            if (Type.isArray(a) && Type.isArray(b)) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                res = Interval.mul(a, b);
+            } else if (Type.isArray(a) && Type.isArray(b)) {
                 len = Math.min(a.length, b.length);
                 res = Mat.innerProduct(a, b, len);
             } else if (Type.isNumber(a) && Type.isArray(b)) {
@@ -31710,7 +37912,9 @@ define('parser/jessiecode',[
             a = Type.evalSlider(a);
             b = Type.evalSlider(b);
 
-            if (Type.isArray(a) && Type.isNumber(b)) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                res = Interval.div(a, b);
+            } else if (Type.isArray(a) && Type.isNumber(b)) {
                 len = a.length;
                 res = [];
 
@@ -31738,7 +37942,9 @@ define('parser/jessiecode',[
             a = Type.evalSlider(a);
             b = Type.evalSlider(b);
 
-            if (Type.isArray(a) && Type.isNumber(b)) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Interval.fmod(a, b);
+            } else if (Type.isArray(a) && Type.isNumber(b)) {
                 len = a.length;
                 res = [];
 
@@ -31764,7 +37970,35 @@ define('parser/jessiecode',[
             a = Type.evalSlider(a);
             b = Type.evalSlider(b);
 
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Interval.pow(a, b);
+            }
             return Mat.pow(a, b);
+        },
+
+        lt: function(a, b) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Interval.lt(a, b);
+            }
+            return a < b;
+        },
+        leq: function(a, b) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Interval.leq(a, b);
+            }
+            return a <= b;
+        },
+        gt: function(a, b) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Interval.gt(a, b);
+            }
+            return a > b;
+        },
+        geq: function(a, b) {
+            if (Interval.isInterval(a) || Interval.isInterval(b)) {
+                return Intervalt.geq(a, b);
+            }
+            return a >= b;
         },
 
         DDD: function(f) {
@@ -31899,6 +38133,7 @@ define('parser/jessiecode',[
                     nthroot: Mat.nthroot,
                     cbrt: Mat.cbrt,
                     pow: Mat.pow,
+                    ratpow: Mat.ratpow,
                     gcd: Mat.gcd,
                     lcm: Mat.lcm,
                     binomial: Mat.binomial,
@@ -31930,6 +38165,7 @@ define('parser/jessiecode',[
             builtIn.deg.src = 'JXG.Math.Geometry.trueAngle';
             builtIn.factorial.src = 'JXG.Math.factorial';
             builtIn.trunc.src = 'JXG.trunc';
+            builtIn.log.src = 'JXG.Math.log';
             builtIn.ln.src = 'Math.log';
             builtIn.log10.src = 'JXG.Math.log10';
             builtIn.lg.src = 'JXG.Math.log10';
@@ -31943,6 +38179,7 @@ define('parser/jessiecode',[
             builtIn.nthroot.src = 'JXG.Math.nthroot';
             builtIn.cbrt.src = 'JXG.Math.cbrt';
             builtIn.pow.src = 'JXG.Math.pow';
+            builtIn.ratpow.src = 'JXG.Math.ratpow';
             builtIn.gcd.src = 'JXG.Math.gcd';
             builtIn.lcm.src = 'JXG.Math.lcm';
             builtIn.binomial.src = 'JXG.Math.binomial';
@@ -32081,7 +38318,7 @@ define('parser/jessiecode',[
 */
 var parser = (function(){
 var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[2,14],$V1=[1,13],$V2=[1,37],$V3=[1,14],$V4=[1,15],$V5=[1,21],$V6=[1,16],$V7=[1,17],$V8=[1,33],$V9=[1,18],$Va=[1,19],$Vb=[1,12],$Vc=[1,59],$Vd=[1,60],$Ve=[1,58],$Vf=[1,46],$Vg=[1,48],$Vh=[1,49],$Vi=[1,50],$Vj=[1,51],$Vk=[1,52],$Vl=[1,53],$Vm=[1,54],$Vn=[1,45],$Vo=[1,38],$Vp=[1,39],$Vq=[5,7,8,14,15,16,17,19,20,21,23,26,27,50,51,58,65,74,75,76,77,78,79,80,82,91,93],$Vr=[5,7,8,12,14,15,16,17,19,20,21,23,26,27,50,51,58,65,74,75,76,77,78,79,80,82,91,93],$Vs=[8,10,16,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,57,64,65,66,83,86],$Vt=[2,48],$Vu=[1,72],$Vv=[10,16,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,57,66,83,86],$Vw=[1,78],$Vx=[8,10,16,32,34,35,37,41,42,43,45,46,47,48,50,51,53,54,55,57,64,65,66,83,86],$Vy=[1,82],$Vz=[8,10,16,32,34,35,37,39,45,46,47,48,50,51,53,54,55,57,64,65,66,83,86],$VA=[1,83],$VB=[1,84],$VC=[1,85],$VD=[8,10,16,32,34,35,37,39,41,42,43,50,51,53,54,55,57,64,65,66,83,86],$VE=[1,89],$VF=[1,90],$VG=[1,91],$VH=[1,92],$VI=[1,97],$VJ=[8,10,16,32,34,35,37,39,41,42,43,45,46,47,48,53,54,55,57,64,65,66,83,86],$VK=[1,103],$VL=[1,104],$VM=[8,10,16,32,34,35,37,39,41,42,43,45,46,47,48,50,51,57,64,65,66,83,86],$VN=[1,105],$VO=[1,106],$VP=[1,107],$VQ=[1,126],$VR=[1,139],$VS=[83,86],$VT=[1,149],$VU=[10,66,86],$VV=[8,10,16,20,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,57,64,65,66,82,83,86],$VW=[1,166],$VX=[10,86];
-var parser = {trace: function trace() { },
+var parser = {trace: function trace () { },
 yy: {},
 symbols_: {"error":2,"Program":3,"StatementList":4,"EOF":5,"IfStatement":6,"IF":7,"(":8,"Expression":9,")":10,"Statement":11,"ELSE":12,"LoopStatement":13,"WHILE":14,"FOR":15,";":16,"DO":17,"UnaryStatement":18,"USE":19,"IDENTIFIER":20,"DELETE":21,"ReturnStatement":22,"RETURN":23,"EmptyStatement":24,"StatementBlock":25,"{":26,"}":27,"ExpressionStatement":28,"AssignmentExpression":29,"ConditionalExpression":30,"LeftHandSideExpression":31,"=":32,"LogicalORExpression":33,"?":34,":":35,"LogicalANDExpression":36,"||":37,"EqualityExpression":38,"&&":39,"RelationalExpression":40,"==":41,"!=":42,"~=":43,"AdditiveExpression":44,"<":45,">":46,"<=":47,">=":48,"MultiplicativeExpression":49,"+":50,"-":51,"UnaryExpression":52,"*":53,"/":54,"%":55,"ExponentExpression":56,"^":57,"!":58,"MemberExpression":59,"CallExpression":60,"PrimaryExpression":61,"FunctionExpression":62,"MapExpression":63,".":64,"[":65,"]":66,"BasicLiteral":67,"ObjectLiteral":68,"ArrayLiteral":69,"NullLiteral":70,"BooleanLiteral":71,"StringLiteral":72,"NumberLiteral":73,"NULL":74,"TRUE":75,"FALSE":76,"STRING":77,"NUMBER":78,"NAN":79,"INFINITY":80,"ElementList":81,"<<":82,">>":83,"PropertyList":84,"Property":85,",":86,"PropertyName":87,"Arguments":88,"AttributeList":89,"Attribute":90,"FUNCTION":91,"ParameterDefinitionList":92,"MAP":93,"->":94,"$accept":0,"$end":1},
 terminals_: {2:"error",5:"EOF",7:"IF",8:"(",10:")",12:"ELSE",14:"WHILE",15:"FOR",16:";",17:"DO",19:"USE",20:"IDENTIFIER",21:"DELETE",23:"RETURN",26:"{",27:"}",32:"=",34:"?",35:":",37:"||",39:"&&",41:"==",42:"!=",43:"~=",45:"<",46:">",47:"<=",48:">=",50:"+",51:"-",53:"*",54:"/",55:"%",57:"^",58:"!",64:".",65:"[",66:"]",74:"NULL",75:"TRUE",76:"FALSE",77:"STRING",78:"NUMBER",79:"NAN",80:"INFINITY",82:"<<",83:">>",86:",",91:"FUNCTION",93:"MAP",94:"->"},
@@ -32278,7 +38515,7 @@ break;
 },
 table: [o([5,7,8,14,15,16,17,19,20,21,23,26,50,51,58,65,74,75,76,77,78,79,80,82,91,93],$V0,{3:1,4:2}),{1:[3]},{5:[1,3],6:6,7:$V1,8:$V2,9:20,11:4,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{1:[2,1]},o($Vq,[2,13]),o($Vr,[2,15]),o($Vr,[2,16]),o($Vr,[2,17]),o($Vr,[2,18]),o($Vr,[2,19]),o($Vr,[2,20]),o($Vr,[2,21]),o([7,8,14,15,16,17,19,20,21,23,26,27,50,51,58,65,74,75,76,77,78,79,80,82,91,93],$V0,{4:61}),{8:[1,62]},{8:[1,63]},{8:[1,64]},{6:6,7:$V1,8:$V2,9:20,11:65,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{20:[1,66]},{20:[1,67]},{8:$V2,9:69,16:[1,68],20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{16:[1,70]},o($Vr,[2,11]),o($Vs,[2,23]),o($Vs,[2,24]),o([8,10,16,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,64,65,66,83,86],$Vt,{32:[1,71],57:$Vu}),o([8,10,16,32,35,39,41,42,43,45,46,47,48,50,51,53,54,55,57,64,65,66,83,86],[2,26],{34:[1,73],37:[1,74]}),o($Vv,[2,54],{88:77,8:$Vw,64:[1,75],65:[1,76]}),o($Vv,[2,55],{88:79,8:$Vw,64:[1,81],65:[1,80]}),o($Vx,[2,28],{39:$Vy}),o($Vs,[2,56]),o($Vs,[2,57]),o($Vs,[2,58]),o($Vz,[2,30],{41:$VA,42:$VB,43:$VC}),o($Vs,[2,61]),o($Vs,[2,62]),o($Vs,[2,63]),o($Vs,[2,64]),{8:$V2,9:86,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:[1,87]},{8:[1,88]},o($VD,[2,32],{45:$VE,46:$VF,47:$VG,48:$VH}),o($Vs,[2,66]),o($Vs,[2,67]),o($Vs,[2,68]),o($Vs,[2,69]),{20:$VI,72:98,73:99,77:$Vj,78:$Vk,79:$Vl,80:$Vm,83:[1,93],84:94,85:95,87:96},{8:$V2,20:$V8,29:102,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,66:[1,100],67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,81:101,82:$Vn,91:$Vo,93:$Vp},o($VJ,[2,36],{50:$VK,51:$VL}),o($Vs,[2,70]),o($Vs,[2,71]),o($Vs,[2,72]),o($Vs,[2,73]),o($Vs,[2,74]),o($Vs,[2,75]),o($Vs,[2,76]),o($VM,[2,41],{53:$VN,54:$VO,55:$VP}),o($Vs,[2,44]),o($Vs,[2,50]),{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:108,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:110,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:111,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{6:6,7:$V1,8:$V2,9:20,11:4,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,27:[1,112],28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:113,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:114,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:115,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{14:[1,116]},o($Vr,[2,7]),o($Vr,[2,8]),o($Vr,[2,9]),{16:[1,117]},o($Vr,[2,22]),{8:$V2,20:$V8,29:118,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:119,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,29:120,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,36:121,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{20:[1,122]},{8:$V2,9:123,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,87],{89:124,90:125,68:127,20:$VQ,82:$Vn}),{8:$V2,10:[1,128],20:$V8,29:102,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,81:129,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,89]),{8:$V2,9:130,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{20:[1,131]},{8:$V2,20:$V8,31:109,38:132,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,40:133,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,40:134,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,40:135,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{10:[1,136]},{10:[1,137],20:$VR,92:138},{20:$VR,92:140},{8:$V2,20:$V8,31:109,44:141,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,44:142,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,44:143,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,44:144,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,79]),{83:[1,145],86:[1,146]},o($VS,[2,81]),{35:[1,147]},{35:[2,84]},{35:[2,85]},{35:[2,86]},o($Vs,[2,77]),{66:[1,148],86:$VT},o($VU,[2,98]),{8:$V2,20:$V8,31:109,49:150,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,49:151,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:152,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:153,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,31:109,50:$Vc,51:$Vd,52:154,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,51]),o([8,10,16,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,64,65,66,83,86],$Vt,{57:$Vu}),o($Vs,[2,52]),o($Vs,[2,53]),o([5,7,8,10,12,14,15,16,17,19,20,21,23,26,27,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,57,58,64,65,66,74,75,76,77,78,79,80,82,83,86,91,93],[2,12]),{10:[1,155]},{10:[1,156]},{16:[1,157]},{8:[1,158]},o($Vr,[2,10]),o($Vs,[2,25]),o($Vs,[2,49]),{35:[1,159]},o($Vx,[2,29],{39:$Vy}),o($Vs,[2,59]),{66:[1,160]},o([8,10,16,32,34,35,37,39,41,42,43,45,46,47,48,50,51,53,54,55,57,64,65,66,83],[2,88],{86:[1,161]}),o($Vs,[2,94]),o($Vs,[2,96]),o($Vs,[2,97]),o($VV,[2,92]),{10:[1,162],86:$VT},{66:[1,163]},o($Vs,[2,91]),o($Vz,[2,31],{41:$VA,42:$VB,43:$VC}),o($VD,[2,33],{45:$VE,46:$VF,47:$VG,48:$VH}),o($VD,[2,34],{45:$VE,46:$VF,47:$VG,48:$VH}),o($VD,[2,35],{45:$VE,46:$VF,47:$VG,48:$VH}),o($Vs,[2,65]),{25:164,26:$Vb},{10:[1,165],86:$VW},o($VX,[2,103]),{10:[1,167],86:$VW},o($VJ,[2,37],{50:$VK,51:$VL}),o($VJ,[2,38],{50:$VK,51:$VL}),o($VJ,[2,39],{50:$VK,51:$VL}),o($VJ,[2,40],{50:$VK,51:$VL}),o($Vs,[2,80]),{20:$VI,72:98,73:99,77:$Vj,78:$Vk,79:$Vl,80:$Vm,85:168,87:96},{8:$V2,20:$V8,29:169,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,78]),{8:$V2,20:$V8,29:170,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($VM,[2,42],{53:$VN,54:$VO,55:$VP}),o($VM,[2,43],{53:$VN,54:$VO,55:$VP}),o($Vs,[2,45]),o($Vs,[2,46]),o($Vs,[2,47]),{6:6,7:$V1,8:$V2,9:20,11:171,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{6:6,7:$V1,8:$V2,9:20,11:172,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:173,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:174,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,20:$V8,29:175,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vs,[2,60]),{20:$VQ,68:127,82:$Vn,90:176},o($VV,[2,93]),o($Vs,[2,90]),o($Vs,[2,100]),{25:177,26:$Vb},{20:[1,178]},{94:[1,179]},o($VS,[2,82]),o($VS,[2,83]),o($VU,[2,99]),o($Vq,[2,2],{12:[1,180]}),o($Vr,[2,4]),{16:[1,181]},{10:[1,182]},o($Vs,[2,27]),o($Vs,[2,95]),o($Vs,[2,101]),o($VX,[2,104]),{8:$V2,9:183,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{6:6,7:$V1,8:$V2,9:20,11:184,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{8:$V2,9:185,20:$V8,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},{16:[1,186]},o($Vs,[2,102]),o($Vr,[2,3]),{10:[1,187]},o($Vr,[2,6]),{6:6,7:$V1,8:$V2,9:20,11:188,13:7,14:$V3,15:$V4,16:$V5,17:$V6,18:8,19:$V7,20:$V8,21:$V9,22:9,23:$Va,24:11,25:5,26:$Vb,28:10,29:22,30:23,31:24,33:25,36:28,38:32,40:40,44:47,49:55,50:$Vc,51:$Vd,52:56,56:57,58:$Ve,59:26,60:27,61:29,62:30,63:31,65:$Vf,67:34,68:35,69:36,70:41,71:42,72:43,73:44,74:$Vg,75:$Vh,76:$Vi,77:$Vj,78:$Vk,79:$Vl,80:$Vm,82:$Vn,91:$Vo,93:$Vp},o($Vr,[2,5])],
 defaultActions: {3:[2,1],97:[2,84],98:[2,85],99:[2,86]},
-parseError: function parseError(str, hash) {
+parseError: function parseError (str, hash) {
     if (hash.recoverable) {
         this.trace(str);
     } else {
@@ -32598,7 +38835,7 @@ showPosition:function () {
     },
 
 // test the lexed token: return FALSE when not a match, otherwise return token
-test_match:function (match, indexed_rule) {
+test_match:function(match, indexed_rule) {
         var token,
             lines,
             backup;
@@ -32728,7 +38965,7 @@ next:function () {
     },
 
 // return next match that has a token
-lex:function lex() {
+lex:function lex () {
         var r = this.next();
         if (r) {
             return r;
@@ -32738,12 +38975,12 @@ lex:function lex() {
     },
 
 // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
-begin:function begin(condition) {
+begin:function begin (condition) {
         this.conditionStack.push(condition);
     },
 
 // pop the previously active lexer condition state off the condition stack
-popState:function popState() {
+popState:function popState () {
         var n = this.conditionStack.length - 1;
         if (n > 0) {
             return this.conditionStack.pop();
@@ -32753,7 +38990,7 @@ popState:function popState() {
     },
 
 // produce the lexer rule set which is active for the currently active lexer condition state
-_currentRules:function _currentRules() {
+_currentRules:function _currentRules () {
         if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) {
             return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
         } else {
@@ -32762,7 +38999,7 @@ _currentRules:function _currentRules() {
     },
 
 // return the currently active lexer condition state; when an index argument is provided it produces the N-th previous condition state, if available
-topState:function topState(n) {
+topState:function topState (n) {
         n = this.conditionStack.length - 1 - Math.abs(n || 0);
         if (n >= 0) {
             return this.conditionStack[n];
@@ -32772,7 +39009,7 @@ topState:function topState(n) {
     },
 
 // alias for begin(condition)
-pushState:function pushState(condition) {
+pushState:function pushState (condition) {
         this.begin(condition);
     },
 
@@ -32918,7 +39155,7 @@ if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
 exports.parser = parser;
 exports.Parser = parser.Parser;
 exports.parse = function () { return parser.parse.apply(parser, arguments); };
-exports.main = function commonjsMain(args) {
+exports.main = function commonjsMain (args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');
         process.exit(1);
@@ -32937,7 +39174,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -33045,16 +39282,24 @@ define('base/point',[
          */
         hasPoint: function (x, y) {
             var coordsScr = this.coords.scrCoords, r,
+                prec, type,
                 unit = Type.evaluate(this.visProp.sizeunit);
 
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
             r = parseFloat(Type.evaluate(this.visProp.size));
             if (unit === 'user') {
                 r *= Math.sqrt(this.board.unitX * this.board.unitY);
             }
 
             r += parseFloat(Type.evaluate(this.visProp.strokewidth)) * 0.5;
-            if (r < this.board.options.precision.hasPoint) {
-                r = this.board.options.precision.hasPoint;
+            if (r < prec) {
+                r = prec;
             }
 
             return ((Math.abs(coordsScr[1] - x) < r + 2) && (Math.abs(coordsScr[2] - y) < r + 2));
@@ -33702,7 +39947,7 @@ define('base/point',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -33846,10 +40091,7 @@ define('base/line',[
             getYIntersect: 'getRise',
             getAngle: 'getAngle',
             L: 'L',
-            length: 'L',
-            addTicks: 'addTicks',
-            removeTicks: 'removeTicks',
-            removeAllTicks: 'removeAllTicks'
+            length: 'L'
         });
     };
 
@@ -33868,10 +40110,17 @@ define('base/line',[
                 v = [1, x, y],
                 vnew,
                 p1c, p2c, d, pos, i,
-                prec,
+                prec, type,
                 sw = Type.evaluate(this.visProp.strokewidth);
 
-            prec = this.board.options.precision.hasPoint + sw * 0.5;
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
+            prec += sw * 0.5;
 
             c[0] = this.stdform[0] -
                 this.stdform[1] * this.board.origin.scrCoords[1] / this.board.unitX +
@@ -34118,7 +40367,6 @@ define('base/line',[
                 }
             }
 
-
             if (this.visPropCalc.visible) {
                 this.board.renderer.updateLine(this);
             }
@@ -34301,7 +40549,7 @@ define('base/line',[
                 }
 
                 if (Math.abs(x) < Mat.eps) {
-                    x = fs + 0;
+                    x = fs;
                 } else if (this.board.canvasWidth + Mat.eps > x &&
                             x > this.board.canvasWidth - fs - Mat.eps) {
                     x = this.board.canvasWidth - fs;
@@ -34441,8 +40689,9 @@ define('base/line',[
         /**
          * Treat the line as parametric curve in homogeneous coordinates, where the parameter t runs from 0 to 1.
          * First we transform the interval [0,1] to [-1,1].
-         * If the line has homogeneous coordinates [c,a,b] = stdform[] then the direction of the line is [b,-a].
-         * Now, we take one finite point that defines the line, i.e. we take either point1 or point2 (in case the line is not the ideal line).
+         * If the line has homogeneous coordinates [c, a, b] = stdform[] then the direction of the line is [b, -a].
+         * Now, we take one finite point that defines the line, i.e. we take either point1 or point2
+         * (in case the line is not the ideal line).
          * Let the coordinates of that point be [z, x, y].
          * Then, the curve runs linearly from
          * [0, b, -a] (t=-1) to [z, x, y] (t=0)
@@ -34501,7 +40750,6 @@ define('base/line',[
             return (1 - Math.abs(t)) * z;
         },
 
-
         /**
          * The distance between the two points defining the line.
          * @returns {Number}
@@ -34534,70 +40782,11 @@ define('base/line',[
             return [Math.min(p1c[1], p2c[1]), Math.max(p1c[2], p2c[2]), Math.max(p1c[1], p2c[1]), Math.min(p1c[2], p2c[2])];
         },
 
-        /**
-         * Adds ticks to this line. Ticks can be added to any kind of line: line, arrow, and axis.
-         * @param {JXG.Ticks} ticks Reference to a ticks object which is describing the ticks (color, distance, how many, etc.).
-         * @returns {String} Id of the ticks object.
-         */
-        addTicks: function (ticks) {
-            if (ticks.id === '' || !Type.exists(ticks.id)) {
-                ticks.id = this.id + '_ticks_' + (this.ticks.length + 1);
-            }
-
-            this.board.renderer.drawTicks(ticks);
-            this.ticks.push(ticks);
-
-            return ticks.id;
-        },
-
         // documented in GeometryElement.js
         remove: function () {
             this.removeAllTicks();
             GeometryElement.prototype.remove.call(this);
         },
-
-        /**
-         * Removes all ticks from a line.
-         */
-        removeAllTicks: function () {
-            var t;
-
-            for (t = this.ticks.length; t > 0; t--) {
-                this.removeTicks(this.ticks[t - 1]);
-            }
-
-            this.ticks = [];
-            this.board.update();
-        },
-
-        /**
-         * Removes ticks identified by parameter named tick from this line.
-         * @param {JXG.Ticks} tick Reference to tick object to remove.
-         */
-        removeTicks: function (tick) {
-            var t, j;
-
-            if (Type.exists(this.defaultTicks) && this.defaultTicks === tick) {
-                this.defaultTicks = null;
-            }
-
-            for (t = this.ticks.length; t > 0; t--) {
-                if (this.ticks[t - 1] === tick) {
-                    this.board.removeObject(this.ticks[t - 1]);
-
-                    if (this.ticks[t - 1].ticks) {
-                        for (j = 0; j < this.ticks[t - 1].ticks.length; j++) {
-                            if (Type.exists(this.ticks[t - 1].labels[j])) {
-                                this.board.removeObject(this.ticks[t - 1].labels[j]);
-                            }
-                        }
-                    }
-
-                    delete this.ticks[t - 1];
-                    break;
-                }
-            }
-        }
 
         // hideElement: function () {
         //     var i;
@@ -34922,8 +41111,8 @@ define('base/line',[
 
     /**
      * @class This element is used to provide a constructor for a segment.
-     * It's strictly spoken just a wrapper for element {@link Line} with {@link JXG.Line#straightFirst}
-     * and {@link JXG.Line#straightLast} properties set to false. If there is a third variable then the
+     * It's strictly spoken just a wrapper for element {@link Line} with {@link Line#straightFirst}
+     * and {@link Line#straightLast} properties set to false. If there is a third variable then the
      * segment has a fixed length (which may be a function, too).
      * @pseudo
      * @description
@@ -35018,8 +41207,9 @@ define('base/line',[
     JXG.registerElement('segment', JXG.createSegment);
 
     /**
-     * @class This element is used to provide a constructor for arrow, which is just a wrapper for element {@link Line} with {@link JXG.Line#straightFirst}
-     * and {@link JXG.Line#straightLast} properties set to false and {@link JXG.Line#lastArrow} set to true.
+     * @class This element is used to provide a constructor for arrow, which is just a wrapper for element
+     * {@link Line} with {@link Line#straightFirst}
+     * and {@link Line#straightLast} properties set to false and {@link Line#lastArrow} set to true.
      * @pseudo
      * @description
      * @name Arrow
@@ -35062,8 +41252,8 @@ define('base/line',[
     JXG.registerElement('arrow', JXG.createArrow);
 
     /**
-     * @class This element is used to provide a constructor for an axis. It's strictly spoken just a wrapper for element {@link Line} with {@link JXG.Line#straightFirst}
-     * and {@link JXG.Line#straightLast} properties set to true. Additionally {@link JXG.Line#lastArrow} is set to true and default {@link Ticks} will be created.
+     * @class This element is used to provide a constructor for an axis. It's strictly spoken just a wrapper for element {@link Line} with {@link Line#straightFirst}
+     * and {@link Line#straightLast} properties set to true. Additionally {@link Line#lastArrow} is set to true and default {@link Ticks} will be created.
      * @pseudo
      * @description
      * @name Axis
@@ -35195,17 +41385,17 @@ define('base/line',[
             tangent.glider = p;
         } else if (c.elementClass === Const.OBJECT_CLASS_CURVE && c.type !== Const.OBJECT_TYPE_CONIC) {
             if (Type.evaluate(c.visProp.curvetype) !== 'plot') {
-                g = c.X;
-                f = c.Y;
                 tangent = board.create('line', [
                     function () {
+                        var g = c.X,
+                            f = c.Y;
                         return -p.X() * Numerics.D(f)(p.position) + p.Y() * Numerics.D(g)(p.position);
                     },
                     function () {
-                        return Numerics.D(f)(p.position);
+                        return Numerics.D(c.Y)(p.position);
                     },
                     function () {
-                        return -Numerics.D(g)(p.position);
+                        return -Numerics.D(c.X)(p.position);
                     }
                 ], attributes);
 
@@ -35569,7 +41759,7 @@ define('base/line',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -35623,9 +41813,9 @@ define('base/line',[
  */
 
 define('base/curve',[
-    'jxg', 'base/constants', 'base/coords', 'base/element', 'math/math', 'math/statistics', 'math/numerics',
-    'math/geometry', 'parser/geonext', 'utils/type', 'base/transformation', 'math/qdt'
-], function (JXG, Const, Coords, GeometryElement, Mat, Statistics, Numerics, Geometry, GeonextParser, Type, Transform, QDT) {
+    'jxg', 'base/constants', 'base/coords', 'base/element', 'math/math', 'math/numerics',
+    'math/plot', 'math/geometry', 'parser/geonext', 'utils/type', 'math/qdt'
+], function (JXG, Const, Coords, GeometryElement, Mat, Numerics, Plot, Geometry, GeonextParser, Type, QDT) {
 
     "use strict";
 
@@ -35668,6 +41858,15 @@ define('base/curve',[
          * @type {array}
          */
         this.dataY = null;
+
+        /**
+         * Array of ticks storing all the ticks on this curve. Do not set this field directly and use
+         * {@link JXG.Curve#addTicks} and {@link JXG.Curve#removeTicks} to add and remove ticks to and
+         * from the curve.
+         * @type Array
+         * @see JXG.Ticks
+         */
+        this.ticks = [];
 
         /**
          * Stores a quad tree if it is required. The quad tree is generated in the curve
@@ -35732,7 +41931,7 @@ define('base/curve',[
                 return 0;
             }
 
-            leftCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board, false);
+            leftCoords = new Coords(Const.COORDS_BY_SCREEN, [-this.board.canvasWidth * 0.1, 0], this.board, false);
             return leftCoords.usrCoords[1];
         },
 
@@ -35747,7 +41946,7 @@ define('base/curve',[
             if (Type.evaluate(this.visProp.curvetype) === 'polar') {
                 return 2 * Math.PI;
             }
-            rightCoords = new Coords(Const.COORDS_BY_SCREEN, [this.board.canvasWidth, 0], this.board, false);
+            rightCoords = new Coords(Const.COORDS_BY_SCREEN, [this.board.canvasWidth * 1.1, 0], this.board, false);
 
             return rightCoords.usrCoords[1];
         },
@@ -35801,13 +42000,21 @@ define('base/curve',[
                 points, qdt,
                 steps = Type.evaluate(this.visProp.numberpointslow),
                 d = (this.maxX() - this.minX()) / steps,
-                prec = this.board.options.precision.hasPoint,
+                prec, type,
                 dist = Infinity,
                 ux2, uy2,
                 ev_ct,
                 mi, ma,
                 suspendUpdate = true;
 
+
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
             checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board, false);
             x = checkPoint.usrCoords[1];
             y = checkPoint.usrCoords[2];
@@ -35961,7 +42168,7 @@ define('base/curve',[
             if (this.visPropCalc.visible) {
                 // wasReal = this.isReal;
 
-                this.checkReal();
+                this.isReal = Plot.checkReal(this.points);
 
                 if (//wasReal &&
                     !this.isReal) {
@@ -36244,15 +42451,13 @@ define('base/curve',[
         },
 
         /**
-         * Computes for equidistant points on the x-axis the values
-         * of the function.
-         * If the mousemove event triggers this update, we use only few
-         * points. Otherwise, e.g. on mouseup, many points are used.
+         * Computes the curve path
          * @see JXG.Curve#update
          * @returns {JXG.Curve} Reference to the curve object.
          */
         updateCurve: function () {
             var len, mi, ma, x, y, i,
+                version = this.visProp.plotversion,
                 //t1, t2, l1,
                 suspendUpdate = false;
 
@@ -36292,9 +42497,18 @@ define('base/curve',[
             // continuous x data
             } else {
                 if (Type.evaluate(this.visProp.doadvancedplot)) {
-                    this.updateParametricCurve(mi, ma);
-                } else if (Type.evaluate(this.visProp.doadvancedplotold)) {
-                    this.updateParametricCurveOld(mi, ma);
+                    // console.time("plot");
+
+                    if (version === 1 || Type.evaluate(this.visProp.doadvancedplotold)) {
+                        Plot.updateParametricCurveOld(this, mi, ma);
+                    } else if (version === 2) {
+                        Plot.updateParametricCurve_v2(this, mi, ma);
+                    } else if (version === 4) {
+                        Plot.updateParametricCurve_v4(this, mi, ma);
+                    } else {
+                        Plot.updateParametricCurve(this, mi, ma);
+                    }
+                    // console.timeEnd("plot");
                 } else {
                     if (this.board.updateQuality === this.board.BOARD_QUALITY_HIGH) {
                         this.numberPoints = Type.evaluate(this.visProp.numberpointshigh);
@@ -36304,7 +42518,7 @@ define('base/curve',[
 
                     // It is possible, that the array length has increased.
                     this.allocatePoints();
-                    this.updateParametricCurveNaive(mi, ma, this.numberPoints);
+                    Plot.updateParametricCurveNaive(this, mi, ma, this.numberPoints);
                 }
                 len = this.numberPoints;
 
@@ -36331,8 +42545,11 @@ define('base/curve',[
 
             if (Type.evaluate(this.visProp.curvetype) !== 'plot' &&
                     Type.evaluate(this.visProp.rdpsmoothing)) {
+                // console.time("rdp");
                 this.points = Numerics.RamerDouglasPeucker(this.points, 0.2);
                 this.numberPoints = this.points.length;
+                // console.timeEnd("rdp");
+                // console.log(this.numberPoints);
             }
 
             len = this.numberPoints;
@@ -36359,799 +42576,6 @@ define('base/curve',[
         },
 
         /**
-         * Check if at least one point on the curve is finite and real.
-         **/
-        checkReal: function () {
-            var b = false, i, p,
-                len = this.numberPoints;
-
-            for (i = 0; i < len; i++) {
-                p = this.points[i].usrCoords;
-                if (!isNaN(p[1]) && !isNaN(p[2]) && Math.abs(p[0]) > Mat.eps) {
-                    b = true;
-                    break;
-                }
-            }
-            this.isReal = b;
-        },
-
-        /**
-         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>false</tt>.
-         * @param {Number} mi Left bound of curve
-         * @param {Number} ma Right bound of curve
-         * @param {Number} len Number of data points
-         * @returns {JXG.Curve} Reference to the curve object.
-         */
-        updateParametricCurveNaive: function (mi, ma, len) {
-            var i, t,
-                suspendUpdate = false,
-                stepSize = (ma - mi) / len;
-
-            for (i = 0; i < len; i++) {
-                t = mi + i * stepSize;
-                // The last parameter prevents rounding in usr2screen().
-                this.points[i].setCoordinates(Const.COORDS_BY_USER, [this.X(t, suspendUpdate), this.Y(t, suspendUpdate)], false);
-                this.points[i]._t = t;
-                suspendUpdate = true;
-            }
-            return this;
-        },
-
-        /**
-         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>true</tt>.
-         * Since 0.99 this algorithm is deprecated. It still can be used if {@link JXG.Curve#doadvancedplotold} is <tt>true</tt>.
-         *
-         * @deprecated
-         * @param {Number} mi Left bound of curve
-         * @param {Number} ma Right bound of curve
-         * @returns {JXG.Curve} Reference to the curve object.
-         */
-        updateParametricCurveOld: function (mi, ma) {
-            var i, t, d,
-                x, y, x0, y0, top, depth,
-                MAX_DEPTH, MAX_XDIST, MAX_YDIST,
-                suspendUpdate = false,
-                po = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false),
-                dyadicStack = [],
-                depthStack = [],
-                pointStack = [],
-                divisors = [],
-                distOK = false,
-                j = 0,
-                distFromLine = function (p1, p2, p0) {
-                    var lbda, d,
-                        x0 = p0[1] - p1[1],
-                        y0 = p0[2] - p1[2],
-                        x1 = p2[0] - p1[1],
-                        y1 = p2[1] - p1[2],
-                        den = x1 * x1 + y1 * y1;
-
-                    if (den >= Mat.eps) {
-                        lbda = (x0 * x1 + y0 * y1) / den;
-                        if (lbda > 0) {
-                            if (lbda <= 1) {
-                                x0 -= lbda * x1;
-                                y0 -= lbda * y1;
-                            // lbda = 1.0;
-                            } else {
-                                x0 -= x1;
-                                y0 -= y1;
-                            }
-                        }
-                    }
-                    d = x0 * x0 + y0 * y0;
-                    return Math.sqrt(d);
-                };
-
-            JXG.deprecated('Curve.updateParametricCurveOld()');
-
-            if (this.board.updateQuality === this.board.BOARD_QUALITY_LOW) {
-                MAX_DEPTH = 15;
-                MAX_XDIST = 10; // 10
-                MAX_YDIST = 10; // 10
-            } else {
-                MAX_DEPTH = 21;
-                MAX_XDIST = 0.7; // 0.7
-                MAX_YDIST = 0.7; // 0.7
-            }
-
-            divisors[0] = ma - mi;
-            for (i = 1; i < MAX_DEPTH; i++) {
-                divisors[i] = divisors[i - 1] * 0.5;
-            }
-
-            i = 1;
-            dyadicStack[0] = 1;
-            depthStack[0] = 0;
-
-            t = mi;
-            po.setCoordinates(Const.COORDS_BY_USER, [this.X(t, suspendUpdate), this.Y(t, suspendUpdate)], false);
-
-            // Now, there was a first call to the functions defining the curve.
-            // Defining elements like sliders have been evaluated.
-            // Therefore, we can set suspendUpdate to false, so that these defining elements
-            // need not be evaluated anymore for the rest of the plotting.
-            suspendUpdate = true;
-            x0 = po.scrCoords[1];
-            y0 = po.scrCoords[2];
-            t0 = t;
-
-            t = ma;
-            po.setCoordinates(Const.COORDS_BY_USER, [this.X(t, suspendUpdate), this.Y(t, suspendUpdate)], false);
-            x = po.scrCoords[1];
-            y = po.scrCoords[2];
-
-            pointStack[0] = [x, y];
-
-            top = 1;
-            depth = 0;
-
-            this.points = [];
-            this.points[j++] = new Coords(Const.COORDS_BY_SCREEN, [x0, y0], this.board, false);
-
-            do {
-                distOK = this.isDistOK(x - x0, y - y0, MAX_XDIST, MAX_YDIST) || this.isSegmentOutside(x0, y0, x, y);
-                while (depth < MAX_DEPTH && (!distOK || depth < 6) && (depth <= 7 || this.isSegmentDefined(x0, y0, x, y))) {
-                    // We jump out of the loop if
-                    // * depth>=MAX_DEPTH or
-                    // * (depth>=6 and distOK) or
-                    // * (depth>7 and segment is not defined)
-
-                    dyadicStack[top] = i;
-                    depthStack[top] = depth;
-                    pointStack[top] = [x, y];
-                    top += 1;
-
-                    i = 2 * i - 1;
-                    // Here, depth is increased and may reach MAX_DEPTH
-                    depth++;
-                    // In that case, t is undefined and we will see a jump in the curve.
-                    t = mi + i * divisors[depth];
-
-                    po.setCoordinates(Const.COORDS_BY_USER, [this.X(t, suspendUpdate), this.Y(t, suspendUpdate)], false, true);
-                    x = po.scrCoords[1];
-                    y = po.scrCoords[2];
-                    distOK = this.isDistOK(x - x0, y - y0, MAX_XDIST, MAX_YDIST) || this.isSegmentOutside(x0, y0, x, y);
-                }
-
-                if (j > 1) {
-                    d = distFromLine(this.points[j - 2].scrCoords, [x, y], this.points[j - 1].scrCoords);
-                    if (d < 0.015) {
-                        j -= 1;
-                    }
-                }
-
-                this.points[j] = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board, false);
-                this.points[j]._t = t;
-                j += 1;
-
-                x0 = x;
-                y0 = y;
-                t0 = t;
-
-                top -= 1;
-                x = pointStack[top][0];
-                y = pointStack[top][1];
-                depth = depthStack[top] + 1;
-                i = dyadicStack[top] * 2;
-
-            } while (top > 0 && j < 500000);
-
-            this.numberPoints = this.points.length;
-
-            return this;
-        },
-
-        /**
-         * Crude and cheap test if the segment defined by the two points <tt>(x0, y0)</tt> and <tt>(x1, y1)</tt> is
-         * outside the viewport of the board. All parameters have to be given in screen coordinates.
-         *
-         * @private
-         * @param {Number} x0
-         * @param {Number} y0
-         * @param {Number} x1
-         * @param {Number} y1
-         * @returns {Boolean} <tt>true</tt> if the given segment is outside the visible area.
-         */
-        isSegmentOutside: function (x0, y0, x1, y1) {
-            return (y0 < 0 && y1 < 0) || (y0 > this.board.canvasHeight && y1 > this.board.canvasHeight) ||
-                (x0 < 0 && x1 < 0) || (x0 > this.board.canvasWidth && x1 > this.board.canvasWidth);
-        },
-
-        /**
-         * Compares the absolute value of <tt>dx</tt> with <tt>MAXX</tt> and the absolute value of <tt>dy</tt>
-         * with <tt>MAXY</tt>.
-         *
-         * @private
-         * @param {Number} dx
-         * @param {Number} dy
-         * @param {Number} MAXX
-         * @param {Number} MAXY
-         * @returns {Boolean} <tt>true</tt>, if <tt>|dx| &lt; MAXX</tt> and <tt>|dy| &lt; MAXY</tt>.
-         */
-        isDistOK: function (dx, dy, MAXX, MAXY) {
-            return (Math.abs(dx) < MAXX && Math.abs(dy) < MAXY) && !isNaN(dx + dy);
-        },
-
-         /**
-         * @private
-         */
-        isSegmentDefined: function (x0, y0, x1, y1) {
-            return !(isNaN(x0 + y0) && isNaN(x1 + y1));
-        },
-
-        /**
-         * Add a point to the curve plot. If the new point is too close to the previously inserted point,
-         * it is skipped.
-         * Used in {@link JXG.Curve._plotRecursive}.
-         *
-         * @private
-         * @param {JXG.Coords} pnt Coords to add to the list of points
-         */
-        _insertPoint: function (pnt, t) {
-            var lastReal = !isNaN(this._lastCrds[1] + this._lastCrds[2]),     // The last point was real
-                newReal = !isNaN(pnt.scrCoords[1] + pnt.scrCoords[2]),        // New point is real point
-                cw = this.board.canvasWidth,
-                ch = this.board.canvasHeight,
-                off = 500;
-
-            newReal = newReal &&
-                        (pnt.scrCoords[1] > -off && pnt.scrCoords[2] > -off &&
-                         pnt.scrCoords[1] < cw + off && pnt.scrCoords[2] < ch + off);
-
-            /*
-             * Prevents two consecutive NaNs or points wich are too close
-             */
-            if ((!newReal && lastReal) ||
-                    (newReal && (!lastReal ||
-                        Math.abs(pnt.scrCoords[1] - this._lastCrds[1]) > 0.7 ||
-                        Math.abs(pnt.scrCoords[2] - this._lastCrds[2]) > 0.7))) {
-                pnt._t = t;
-                this.points.push(pnt);
-                this._lastCrds = pnt.copy('scrCoords');
-            }
-        },
-
-        /**
-         * Find the intersection of the asymptote for e.g. a log function
-         * with the canvas.
-         * @private
-         * @param  {Array} asymptote Asymptote line in standard form
-         * @param  {Array} box       Bounding box of the canavs
-         * @param  {Number} direction horizontal direction of the asymptote. If < 0 the asymptote
-         *  goes to the left, otherwise to the right.
-         * @returns {Array}           Homogeneous coordinate array of the intersection point.
-         */
-        _intersectWithBorder: function(asymptote, box, direction) {
-            var border, intersection, x, y;
-
-            if (direction <= 0) { // Intersect with left border
-                border = [-box[0], 1, 0];
-                intersection = Mat.crossProduct(border, asymptote);
-                if (intersection[0] !== 0.0) {
-                    x = intersection[1] / intersection[0];
-                    y = intersection[2] / intersection[0];
-                } else {
-                    y = Infinity;
-                }
-
-                if (y < box[3]) { // Intersect with bottom border
-                    border = [-box[3], 0, 1];
-                    intersection = Mat.crossProduct(border, asymptote);
-                    if (intersection[0] !== 0.0) {
-                        x = intersection[1] / intersection[0];
-                        y = intersection[2] / intersection[0];
-                    } else {
-                        x = Infinity;
-                    }
-                } else if (y > box[1]) { // Intersect with top border
-                    border = [-box[1], 0, 1];
-                    intersection = Mat.crossProduct(border, asymptote);
-                    if (intersection[0] !== 0.0) {
-                        x = intersection[1] / intersection[0];
-                        y = intersection[2] / intersection[0];
-                    } else {
-                        x = Infinity;
-                    }
-                }
-            } else { // Intersect with right border
-                border = [-box[2], 1, 0];
-                intersection = Mat.crossProduct(border, asymptote);
-                if (intersection[0] !== 0.0) {
-                    x = intersection[1] / intersection[0];
-                    y = intersection[2] / intersection[0];
-                } else {
-                    y = Infinity;
-                }
-
-                if (y < box[3]) { // Intersect with bottom border
-                    border = [-box[3], 0, 1];
-                    intersection = Mat.crossProduct(border, asymptote);
-                    if (intersection[0] !== 0.0) {
-                        x = intersection[1] / intersection[0];
-                        y = intersection[2] / intersection[0];
-                    } else {
-                        x = Infinity;
-                    }
-                } else if (y > box[1]) { // Intersect with top border
-                    border = [-box[1], 0, 1];
-                    intersection = Mat.crossProduct(border, asymptote);
-                    if (intersection[0] !== 0.0) {
-                        x = intersection[1] / intersection[0];
-                        y = intersection[2] / intersection[0];
-                    } else {
-                        x = Infinity;
-                    }
-                }
-            }
-            return [1, x, y];
-        },
-
-        /**
-         * Investigate a function term at the bounds of intervals where
-         * the function is not defined, e.g. log(x) at x = 0.
-         *
-         * c is inbetween a and b
-         * @private
-         * @param {Array} a Screen coordinates of the left interval bound
-         * @param {Array} b Screen coordinates of the right interval bound
-         * @param {Array} c Screen coordinates of the bisection point at (ta + tb) / 2
-         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
-         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
-         * @param {Number} tc (ta + tb) / 2 = tc. Parameter which evaluates to b, i.e. [1, X(tc), Y(tc)] = c in screen coordinates
-         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
-         * @returns {JXG.Boolean} true if the point is inserted and the recursion should stop, false otherwise.
-         */
-         _borderCase: function (a, b, c, ta, tb, tc, depth) {
-             var t, pnt, p,
-                 p_good = null,
-                 j,
-                 max_it = 30,
-                 is_undef = false,
-                 t_nan, t_real, t_real2,
-                 box,
-                 vx, vy, vx2, vy2, dx, dy,
-                 asymptote;
-
-
-             if (depth <= 1) {
-                pnt = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false);
-                j = 0;
-                // Bisect a, b and c until the point t_real is inside of the definition interval
-                // and as close as possible at the boundary.
-                // t_real2 is the second closest point.
-                do {
-                    // There are four cases:
-                    //  a  |  c  |  b
-                    // ---------------
-                    // inf | R   | R
-                    // R   | R   | inf
-                    // inf | inf | R
-                    // R   | inf | inf
-                    //
-                    if (isNaN(a[1] + a[2]) && !isNaN(c[1] + c[2])) {
-                        t_nan = ta;
-                        t_real = tc;
-                        t_real2 = tb;
-                    } else if (isNaN(b[1] + b[2]) && !isNaN(c[1] + c[2])) {
-                        t_nan = tb;
-                        t_real = tc;
-                        t_real2 = ta;
-                    } else if (isNaN(c[1] + c[2]) && !isNaN(b[1] + b[2])) {
-                        t_nan = tc;
-                        t_real = tb;
-                        t_real2 = tb + (tb - tc);
-                    } else if (isNaN(c[1] + c[2]) && !isNaN(a[1] + a[2])) {
-                        t_nan = tc;
-                        t_real = ta;
-                        t_real2 = ta - (tc - ta);
-                    } else {
-                        return false;
-                    }
-                    t = 0.5 * (t_nan + t_real);
-                    pnt.setCoordinates(Const.COORDS_BY_USER, [this.X(t, true), this.Y(t, true)], false);
-                    p = pnt.usrCoords;
-
-                    is_undef = isNaN(p[1] + p[2]);
-                    if (is_undef) {
-                        t_nan = t;
-                    } else {
-                        t_real2 = t_real;
-                        t_real = t;
-                    }
-                    ++j;
-                } while (is_undef && j < max_it);
-
-                // If bisection was successful, take this point.
-                // Usefule only for general curves, for function graph
-                // the code below overwrite p_good from here.
-                if (j < max_it) {
-                    p_good = p.slice();
-                    c = p.slice();
-                    t_real = t;
-                }
-
-                // OK, bisection has been done now.
-                // t_real contains the closest inner point to the border of the interval we could find.
-                // t_real2 is the second nearest point to this boundary.
-                // Now we approximate the derivative by computing the slope of the line through these two points
-                // and test if it is "infinite", i.e larger than 400 in absolute values.
-                //
-                vx = this.X(t_real, true) ;
-                vx2 = this.X(t_real2, true) ;
-                dx = (vx - vx2) / (t_real - t_real2);
-                vy = this.Y(t_real, true) ;
-                vy2 = this.Y(t_real2, true) ;
-                dy = (vy - vy2) / (t_real - t_real2);
-
-                // If the derivatives are large enough we draw the asymptote.
-                // box = this.board.getBoundingBox();
-                // if (Math.sqrt(dx * dx + dy * dy) > 500.0) {
-                //
-                //     // The asymptote is a line of the form
-                //     //  [c, a, b] = [dx * vy - dy * vx, dy, -dx]
-                //     //  Now we have to find the intersection with the correct canvas border.
-                //     asymptote = [dx * vy - dy * vx, dy, -dx];
-                //
-                //     p_good = this._intersectWithBorder(asymptote, box, vx - vx2);
-                // }
-
-                if (p_good !== null) {
-                    this._insertPoint(new Coords(Const.COORDS_BY_USER, p_good, this.board, false));
-                    return true;
-                }
-            }
-            return false;
-        },
-
-        /**
-         * Compute distances in screen coordinates between the points ab,
-         * ac, cb, and cd, where d = (a + b)/2.
-         * cd is used for the smoothness test, ab, ac, cb are used to detect jumps, cusps and poles.
-         *
-         * @private
-         * @param {Array} a Screen coordinates of the left interval bound
-         * @param {Array} b Screen coordinates of the right interval bound
-         * @param {Array} c Screen coordinates of the bisection point at (ta + tb) / 2
-         * @returns {Array} array of distances in screen coordinates between: ab, ac, cb, and cd.
-         */
-        _triangleDists: function (a, b, c) {
-            var d, d_ab, d_ac, d_cb, d_cd;
-
-            d = [a[0] * b[0], (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5];
-
-            d_ab = Geometry.distance(a, b, 3);
-            d_ac = Geometry.distance(a, c, 3);
-            d_cb = Geometry.distance(c, b, 3);
-            d_cd = Geometry.distance(c, d, 3);
-
-            return [d_ab, d_ac, d_cb, d_cd];
-        },
-
-        /**
-         * Test if the function is undefined on an interval:
-         * If the interval borders a and b are undefined, 20 random values
-         * are tested if they are undefined, too.
-         * Only if all values are undefined, we declare the function to be undefined in this interval.
-         *
-         * @private
-         * @param {Array} a Screen coordinates of the left interval bound
-         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
-         * @param {Array} b Screen coordinates of the right interval bound
-         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
-         */
-        _isUndefined: function (a, ta, b, tb) {
-            var t, i, pnt;
-
-            if (!isNaN(a[1] + a[2]) || !isNaN(b[1] + b[2])) {
-                return false;
-            }
-
-            pnt = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false);
-
-            for (i = 0; i < 20; ++i) {
-                t = ta + Math.random() * (tb - ta);
-                pnt.setCoordinates(Const.COORDS_BY_USER, [this.X(t, true), this.Y(t, true)], false);
-                if (!isNaN(pnt.scrCoords[0] + pnt.scrCoords[1] + pnt.scrCoords[2])) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-
-        /**
-         * Decide if a path segment is too far from the canvas that we do not need to draw it.
-         * @private
-         * @param  {Array}  a  Screen coordinates of the start point of the segment
-         * @param  {Array}  ta Curve parameter of a  (unused).
-         * @param  {Array}  b  Screen coordinates of the end point of the segment
-         * @param  {Array}  tb Curve parameter of b (unused).
-         * @returns {Boolean}   True if the segment is too far away from the canvas, false otherwise.
-         */
-        _isOutside: function (a, ta, b, tb) {
-            var off = 500,
-                cw = this.board.canvasWidth,
-                ch = this.board.canvasHeight;
-
-            return !!((a[1] < -off && b[1] < -off) ||
-                (a[2] < -off && b[2] < -off) ||
-                (a[1] > cw + off && b[1] > cw + off) ||
-                (a[2] > ch + off && b[2] > ch + off));
-        },
-
-        /**
-         * Decide if a point of a curve is too far from the canvas that we do not need to draw it.
-         * @private
-         * @param  {Array}  a  Screen coordinates of the point
-         * @returns {Boolean}  True if the point is too far away from the canvas, false otherwise.
-         */
-        _isOutsidePoint: function (a) {
-            var off = 500,
-                cw = this.board.canvasWidth,
-                ch = this.board.canvasHeight;
-
-            return !!(a[1] < -off ||
-                      a[2] < -off ||
-                      a[1] > cw + off ||
-                      a[2] > ch + off);
-        },
-
-        /**
-         * For a curve c(t) defined on the interval [ta, tb] find the first point
-         * which is in the visible area of the board (plus some outside margin).
-         * <p>
-         * This method is necessary to restrict the recursive plotting algorithm
-         * {@link JXG.Curve._plotRecursive} to the visible area and not waste
-         * recursion to areas far outside of the visible area.
-         * <p>
-         * This method can also be used to find the last visible  point
-         * by reversing the input parameters.
-         *
-         * @param  {Array}  a  Screen coordinates of the start point of the segment
-         * @param  {Array}  ta Curve parameter of a.
-         * @param  {Array}  b  Screen coordinates of the end point of the segment (unused)
-         * @param  {Array}  tb Curve parameter of b
-         * @return {Array}  Array of length two containing the screen ccordinates of
-         * the starting point and the curve parameter at this point.
-         * @private
-         */
-        _findStartPoint: function (a, ta, b, tb) {
-            var i, delta, tc,
-                td, z, isFound,
-                w2, h2,
-                pnt =  new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false),
-                steps = 40,
-                eps = 0.01,
-                fnX1, fnX2, fnY1, fnY2,
-                bbox = this.board.getBoundingBox();
-
-            if (!this._isOutsidePoint(a)) {
-                return [a, ta];
-            }
-
-            w2 = (bbox[2] - bbox[0]) * 0.3;
-            h2 = (bbox[1] - bbox[3]) * 0.3;
-
-            delta = (tb - ta) / steps;
-            tc = ta + delta;
-            isFound = false;
-
-            fnX1 = function(t) { return this.X(t, true) - (bbox[0] - w2); };
-            fnY1 = function(t) { return this.X(t, true) - (bbox[1] + h2); };
-            fnX2 = function(t) { return this.X(t, true) - (bbox[2] + w2); };
-            fnY2 = function(t) { return this.X(t, true) - (bbox[1] - h2); };
-
-            for (i = 0; i < steps; ++i) {
-                // Left border
-                z = bbox[0] - w2;
-                td = Numerics.fzero(fnX1, [tc - delta, tc], this);
-                // console.log("A", td, Math.abs(this.X(td, true) - z));
-                if (Math.abs(this.X(td, true) - z) < eps) { //} * Math.abs(z)) {
-                    isFound = true;
-                    break;
-                }
-                // Top border
-                z = bbox[1] + h2;
-                td = Numerics.fzero(fnY1, [tc - delta, tc], this);
-                // console.log("B", td, Math.abs(this.Y(td, true) - z));
-                if (Math.abs(this.Y(td, true) - z) < eps) { // * Math.abs(z)) {
-                    isFound = true;
-                    break;
-                }
-                // Right border
-                z = bbox[2] + w2;
-                td = Numerics.fzero(fnX2, [tc - delta, tc], this);
-                // console.log("C", td, Math.abs(this.X(td, true) - z));
-                if (Math.abs(this.X(td, true) - z) < eps) { // * Math.abs(z)) {
-                    isFound = true;
-                    break;
-                }
-                // Bottom border
-                z = bbox[3] - h2;
-                td = Numerics.fzero(fnY2, [tc - delta, tc], this);
-                // console.log("D", td, Math.abs(this.Y(td, true) - z));
-                if (Math.abs(this.Y(td, true) - z) < eps) { // * Math.abs(z)) {
-                    isFound = true;
-                    break;
-                }
-                // pnt.setCoordinates(Const.COORDS_BY_USER, [this.X(tc, true), this.Y(tc, true)], false);
-                // //console.log(i, tc, pnt.scrCoords);
-                // if (!this._isOutsidePoint(pnt.scrCoords)) {
-                //     return [pnt.scrCoords, tc];
-                // }
-                tc += delta;
-            }
-            if (isFound) {
-                // console.log("Found in step", i, td);
-                pnt.setCoordinates(Const.COORDS_BY_USER, [this.X(td, true), this.Y(td, true)], false);
-                return [pnt.scrCoords, td];
-            } else {
-                // console.log("not found", ta);
-            }
-
-            return [a, ta];
-        },
-
-        /**
-         * Recursive interval bisection algorithm for curve plotting.
-         * Used in {@link JXG.Curve.updateParametricCurve}.
-         * @private
-         * @param {Array} a Screen coordinates of the left interval bound
-         * @param {Number} ta Parameter which evaluates to a, i.e. [1, X(ta), Y(ta)] = a in screen coordinates
-         * @param {Array} b Screen coordinates of the right interval bound
-         * @param {Number} tb Parameter which evaluates to b, i.e. [1, X(tb), Y(tb)] = b in screen coordinates
-         * @param {Number} depth Actual recursion depth. The recursion stops if depth is equal to 0.
-         * @param {Number} delta If the distance of the bisection point at (ta + tb) / 2 from the point (a + b) / 2 is less then delta,
-         *                 the segment [a,b] is regarded as straight line.
-         * @returns {JXG.Curve} Reference to the curve object.
-         */
-        _plotRecursive: function (a, ta, b, tb, depth, delta) {
-            var tc, c,
-                ds, mindepth = 0,
-                isSmooth, isJump, isCusp,
-                cusp_threshold = 0.5,
-                jump_threshold = 0.99,
-                pnt = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false);
-
-            if (this.numberPoints > 65536) {
-                return;
-            }
-
-            // Test if the function is undefined in an interval
-            if (depth < this.nanLevel && this._isUndefined(a, ta, b, tb)) {
-                return this;
-            }
-
-            if (depth < this.nanLevel && this._isOutside(a, ta, b, tb)) {
-                return this;
-            }
-
-            tc = (ta  + tb) * 0.5;
-            pnt.setCoordinates(Const.COORDS_BY_USER, [this.X(tc, true), this.Y(tc, true)], false);
-            c = pnt.scrCoords;
-
-            if (this._borderCase(a, b, c, ta, tb, tc, depth)) {
-                return this;
-            }
-
-            ds = this._triangleDists(a, b, c);           // returns [d_ab, d_ac, d_cb, d_cd]
-
-            isSmooth = (depth < this.smoothLevel) && (ds[3] < delta);
-
-            isJump = (depth < this.jumpLevel) &&
-                        ((ds[2] > jump_threshold * ds[0]) ||
-                         (ds[1] > jump_threshold * ds[0]) ||
-                        ds[0] === Infinity || ds[1] === Infinity || ds[2] === Infinity);
-
-            isCusp = (depth < this.smoothLevel + 2) && (ds[0] < cusp_threshold * (ds[1] + ds[2]));
-
-            if (isCusp) {
-                mindepth = 0;
-                isSmooth = false;
-            }
-
-            --depth;
-
-            if (isJump) {
-                this._insertPoint(new Coords(Const.COORDS_BY_SCREEN, [NaN, NaN], this.board, false), tc);
-            } else if (depth <= mindepth || isSmooth) {
-                this._insertPoint(pnt, tc);
-                //if (this._borderCase(a, b, c, ta, tb, tc, depth)) {}
-            } else {
-                this._plotRecursive(a, ta, c, tc, depth, delta);
-                this._insertPoint(pnt, tc);
-                this._plotRecursive(c, tc, b, tb, depth, delta);
-            }
-
-            return this;
-        },
-
-        /**
-         * Updates the data points of a parametric curve. This version is used if {@link JXG.Curve#doadvancedplot} is <tt>true</tt>.
-         * @param {Number} mi Left bound of curve
-         * @param {Number} ma Right bound of curve
-         * @returns {JXG.Curve} Reference to the curve object.
-         */
-        updateParametricCurve: function (mi, ma) {
-            var ta, tb, a, b,
-                suspendUpdate = false,
-                pa = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false),
-                pb = new Coords(Const.COORDS_BY_USER, [0, 0], this.board, false),
-                depth, delta,
-                w2, h2, bbox,
-                ret_arr;
-
-            //console.time("plot");
-            if (this.board.updateQuality === this.board.BOARD_QUALITY_LOW) {
-                depth = Type.evaluate(this.visProp.recursiondepthlow) || 13;
-                delta = 2;
-                // this.smoothLevel = 5; //depth - 7;
-                this.smoothLevel = depth - 6;
-                this.jumpLevel = 3;
-            } else {
-                depth = Type.evaluate(this.visProp.recursiondepthhigh) || 17;
-                delta = 2;
-                // smoothLevel has to be small for graphs in a huge interval.
-                // this.smoothLevel = 3; //depth - 7; // 9
-                this.smoothLevel = depth - 9; // 9
-                this.jumpLevel = 2;
-            }
-            this.nanLevel = depth - 4;
-
-            this.points = [];
-
-            if (this.xterm === 'x') {
-                // For function graphs we can restrict the plot interval
-                // to the visible area +plus margin
-                bbox = this.board.getBoundingBox();
-                w2 = (bbox[2] - bbox[0]) * 0.3;
-                h2 = (bbox[1] - bbox[3]) * 0.3;
-                ta = Math.max(mi, bbox[0] - w2);
-                tb = Math.min(ma, bbox[2] + w2);
-            } else {
-                ta = mi;
-                tb = ma;
-            }
-            pa.setCoordinates(Const.COORDS_BY_USER, [this.X(ta, suspendUpdate), this.Y(ta, suspendUpdate)], false);
-
-            // The first function calls of X() and Y() are done. We can now
-            // switch `suspendUpdate` on. If supported by the functions, this
-            // avoids for the rest of the plotting algorithm, evaluation of any
-            // parent elements.
-            suspendUpdate = true;
-
-            pb.setCoordinates(Const.COORDS_BY_USER, [this.X(tb, suspendUpdate), this.Y(tb, suspendUpdate)], false);
-            // Find start and end points of the visible area (plus a certain margin)
-            ret_arr = this._findStartPoint(pa.scrCoords, ta, pb.scrCoords, tb);
-            pa.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
-            ta = ret_arr[1];
-            ret_arr = this._findStartPoint(pb.scrCoords, tb, pa.scrCoords, ta);
-            pb.setCoordinates(Const.COORDS_BY_SCREEN, ret_arr[0], false);
-            tb = ret_arr[1];
-            // console.log(ta, tb);
-
-            // Save the visible area.
-            // This can be used in Curve.hasPoint().
-            this._visibleArea = [ta, tb];
-
-            // Start recursive plotting algorithm
-            a = pa.copy('scrCoords');
-            b = pb.copy('scrCoords');
-            pa._t = ta;
-            this.points.push(pa);
-            this._lastCrds = pa.copy('scrCoords');   //Used in _insertPoint
-            this._plotRecursive(a, ta, b, tb, depth, delta);
-            pb._t = tb;
-            this.points.push(pb);
-
-            this.numberPoints = this.points.length;
-            //console.timeEnd("plot");
-
-            return this;
-        },
-
-        /**
          * Applies the transformations of the curve to the given point <tt>p</tt>.
          * Before using it, {@link JXG.Curve#updateTransformMatrix} has to be called.
          * @param {JXG.Point} p
@@ -37163,7 +42587,7 @@ define('base/curve',[
 
             if (len > 0) {
                 c = Mat.matVecMult(this.transformMat, p.usrCoords);
-                p.setCoordinates(Const.COORDS_BY_USER, [c[1], c[2]], false, true);
+                p.setCoordinates(Const.COORDS_BY_USER, c, false, true);
             }
 
             return p;
@@ -37194,12 +42618,14 @@ define('base/curve',[
          * @returns {function}
          **/
         interpolationFunctionFromArray: function (which) {
-            var data = 'data' + which;
+            var data = 'data' + which,
+                that = this;
 
             return function (t, suspendedUpdate) {
                 var i, j, t0, t1,
-                    arr = this[data],
+                    arr = that[data],
                     len = arr.length,
+                    last,
                     f = [];
 
                 if (isNaN(t)) {
@@ -37214,9 +42640,10 @@ define('base/curve',[
                     return arr[0];
                 }
 
-                if (this.bezierDegree === 3) {
-                    len /= 3;
-                    if (t >= len) {
+                if (that.bezierDegree === 3) {
+                    last = (len - 1) / 3;
+
+                    if (t >= last) {
                         if (Type.isFunction(arr[arr.length - 1])) {
                             return arr[arr.length - 1]();
                         }
@@ -37278,7 +42705,7 @@ define('base/curve',[
                 this.dataX = xterm;
 
                 this.numberPoints = this.dataX.length;
-                this.X = this.interpolationFunctionFromArray('X');
+                this.X = this.interpolationFunctionFromArray.apply(this, ['X']);
                 this.visProp.curvetype = 'plot';
                 this.isDraggable = true;
             } else {
@@ -37295,7 +42722,7 @@ define('base/curve',[
 
             if (Type.isArray(yterm)) {
                 this.dataY = yterm;
-                this.Y = this.interpolationFunctionFromArray('Y');
+                this.Y = this.interpolationFunctionFromArray.apply(this, ['Y']);
             } else {
                 this.Y = Type.createFunction(yterm, this.board, varname);
             }
@@ -37449,9 +42876,9 @@ define('base/curve',[
                 }
                 bezier = Numerics.bezier(this.points);
                 up = bezier[3]();
-                minX = Numerics.fminbr(function(t) { return bezier[0](t); }, [0, up]);
+                minX = Numerics.fminbr(function(t) { return  bezier[0](t); }, [0, up]);
                 maxX = Numerics.fminbr(function(t) { return -bezier[0](t); }, [0, up]);
-                minY = Numerics.fminbr(function(t) { return bezier[1](t); }, [0, up]);
+                minY = Numerics.fminbr(function(t) { return  bezier[1](t); }, [0, up]);
                 maxY = Numerics.fminbr(function(t) { return -bezier[1](t); }, [0, up]);
 
                 minX = bezier[0](minX);
@@ -37520,11 +42947,11 @@ define('base/curve',[
 
         /**
          * If the curve is the result of a transformation applied
-         * to a continuous curve, the glider projection has to be done 
+         * to a continuous curve, the glider projection has to be done
          * on the original curve. Otherwise there will be problems
          * when changing between high and low precision plotting,
          * since there number of points changes.
-         * 
+         *
          * @private
          * @returns {Array} [Boolean, curve]: Array contining 'true' if curve is result of a transformation,
          *   and the source curve of the transformation.
@@ -37538,7 +42965,7 @@ define('base/curve',[
                     ) {
                         isTransformed = true;
                 }
-            } 
+            }
             return [isTransformed, curve_org];
         }
 
@@ -37749,10 +43176,9 @@ define('base/curve',[
             cu._transformationSource = obj;
 
             return cu;
-        } else {
-            attr = Type.copyAttributes(attributes, board.options, 'curve');
-            return new JXG.Curve(board, ['x'].concat(parents), attr);
         }
+        attr = Type.copyAttributes(attributes, board.options, 'curve');
+        return new JXG.Curve(board, ['x'].concat(parents), attr);
     };
 
     JXG.registerElement('curve', JXG.createCurve);
@@ -38075,7 +43501,12 @@ define('base/curve',[
                     points.push(
                         (function(ii) { return {
                             X: function() { return q[ii][0]; },
-                            Y: function() { return q[ii][1]; }
+                            Y: function() { return q[ii][1]; },
+                            Dist: function(p) {
+                                    var dx = this.X() - p.X(),
+                                        dy = this.Y() - p.Y();
+                                    return Math.sqrt(dx * dx + dy * dy);
+                                }
                             };
                         })(i)
                     );
@@ -38086,7 +43517,7 @@ define('base/curve',[
         tau = parents[1];
         type = parents[2];
 
-        splineArr = ['x'].concat(Numerics.CardinalSpline(points, tau));
+        splineArr = ['x'].concat(Numerics.CardinalSpline(points, tau, type));
 
         el = new JXG.Curve(board, splineArr, attributes);
         le = points.length;
@@ -38102,10 +43533,221 @@ define('base/curve',[
     };
 
     /**
-     * Register the element type spline at JSXGraph
+     * Register the element type cardinalspline at JSXGraph
      * @private
      */
     JXG.registerElement('cardinalspline', JXG.createCardinalSpline);
+
+    /**
+     * @class This element is used to provide a constructor for metapost spline curves.
+     * Create a dynamic metapost spline interpolated curve given by sample points p_1 to p_n.
+     * @pseudo
+     * @description
+     * @name Metapostspline
+     * @augments JXG.Curve
+     * @constructor
+     * @type JXG.Curve
+     * @param {JXG.Board} board Reference to the board the metapost spline is drawn on.
+     * @param {Array} parents Array with two entries.
+     * <p>
+     *   First entry: Array of points the spline interpolates. This can be
+     *   <ul>
+     *   <li> an array of JXGGraph points</li>
+     *   <li> an object of coordinate pairs</li>
+     *   <li> an array of functions returning coordinate pairs</li>
+     *   <li> an array consisting of an array with x-coordinates and an array of y-coordinates</li>
+     *   </ul>
+     *   All individual entries of coordinates arrays may be numbers or functions returning numbers.
+     *   <p>
+     *   Second entry: JavaScript object containing the control values like tension, direction, curl.
+     * @param {Object} attributes Define color, width, ... of the metapost spline
+     * @returns {JXG.Curve} Returns reference to an object of type JXG.Curve.
+     * @see JXG.Curve
+     * @example
+     *     var po = [],
+     *         attr = {
+     *             size: 5,
+     *             color: 'red'
+     *         },
+     *         controls;
+     *
+     *     var tension = board.create('slider', [[-3, 6], [3, 6], [0, 1, 20]], {name: 'tension'});
+     *     var curl = board.create('slider', [[-3, 5], [3, 5], [0, 1, 30]], {name: 'curl A, D'});
+     *     var dir = board.create('slider', [[-3, 4], [3, 4], [-180, 0, 180]], {name: 'direction B'});
+     *
+     *     po.push(board.create('point', [-3, -3]));
+     *     po.push(board.create('point', [0, -3]));
+     *     po.push(board.create('point', [4, -5]));
+     *     po.push(board.create('point', [6, -2]));
+     *
+     *     var controls = {
+     *         tension: function() {return tension.Value(); },
+     *         direction: { 1: function() {return dir.Value(); } },
+     *         curl: { 0: function() {return curl.Value(); },
+     *                 3: function() {return curl.Value(); }
+     *             },
+     *         isClosed: false
+     *     };
+     *
+     *     // Plot a metapost curve
+     *     var cu = board.create('metapostspline', [po, controls], {strokeColor: 'blue', strokeWidth: 2});
+     *
+     *
+     * </pre><div id="JXGb8c6ffed-7419-41a3-9e55-3754b2327ae9" class="jxgbox" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     *     (function() {
+     *         var board = JXG.JSXGraph.initBoard('JXGb8c6ffed-7419-41a3-9e55-3754b2327ae9',
+     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+     *         var po = [],
+     *             attr = {
+     *                 size: 5,
+     *                 color: 'red'
+     *             },
+     *             controls;
+     *
+     *         var tension = board.create('slider', [[-3, 6], [3, 6], [0, 1, 20]], {name: 'tension'});
+     *         var curl = board.create('slider', [[-3, 5], [3, 5], [0, 1, 30]], {name: 'curl A, D'});
+     *         var dir = board.create('slider', [[-3, 4], [3, 4], [-180, 0, 180]], {name: 'direction B'});
+     *
+     *         po.push(board.create('point', [-3, -3]));
+     *         po.push(board.create('point', [0, -3]));
+     *         po.push(board.create('point', [4, -5]));
+     *         po.push(board.create('point', [6, -2]));
+     *
+     *         var controls = {
+     *             tension: function() {return tension.Value(); },
+     *             direction: { 1: function() {return dir.Value(); } },
+     *             curl: { 0: function() {return curl.Value(); },
+     *                     3: function() {return curl.Value(); }
+     *                 },
+     *             isClosed: false
+     *         };
+     *
+     *         // Plot a metapost curve
+     *         var cu = board.create('metapostspline', [po, controls], {strokeColor: 'blue', strokeWidth: 2});
+     *
+     *
+     *     })();
+     *
+     * </script><pre>
+     *
+     */
+    JXG.createMetapostSpline = function (board, parents, attributes) {
+        var el,
+            points, controls,
+            p, q, i, le,
+            errStr = "\nPossible parent types: [points:array, controls:object";
+
+        if (!Type.exists(parents[0]) || !Type.isArray(parents[0])) {
+            throw new Error("JSXGraph: JXG.createMetapostSpline: argument 1 'points' has to be array of points or coordinate pairs" + errStr);
+        }
+        if (!Type.exists(parents[1]) || !Type.isObject(parents[1])) {
+            throw new Error("JSXGraph: JXG.createMetapostSpline: argument 2 'controls' has to be a JavaScript object'" + errStr);
+        }
+
+        attributes = Type.copyAttributes(attributes, board.options, 'curve');
+        attributes = Type.copyAttributes(attributes, board.options, 'metapostspline');
+        attributes.curvetype = 'parameter';
+
+        p = parents[0];
+        q = [];
+
+        // given as [x[], y[]]
+        if (!attributes.isarrayofcoordinates &&
+            p.length === 2 && Type.isArray(p[0]) && Type.isArray(p[1]) &&
+            p[0].length === p[1].length) {
+            for (i = 0; i < p[0].length; i++) {
+                q[i] = [];
+                if (Type.isFunction(p[0][i])) {
+                    q[i].push(p[0][i]());
+                } else {
+                    q[i].push(p[0][i]);
+                }
+
+                if (Type.isFunction(p[1][i])) {
+                    q[i].push(p[1][i]());
+                } else {
+                    q[i].push(p[1][i]);
+                }
+            }
+        } else {
+            // given as [[x0, y0], [x1, y1], point, ...]
+            for (i = 0; i < p.length; i++) {
+                if (Type.isString(p[i])) {
+                    q.push(board.select(p[i]));
+                } else if (Type.isPoint(p[i])) {
+                    q.push(p[i]);
+                // given as [[x0,y0], [x1, y2], ...]
+                } else if (Type.isArray(p[i]) && p[i].length === 2) {
+                    q[i] = [];
+                    if (Type.isFunction(p[i][0])) {
+                        q[i].push(p[i][0]());
+                    } else {
+                        q[i].push(p[i][0]);
+                    }
+
+                    if (Type.isFunction(p[i][1])) {
+                        q[i].push(p[i][1]());
+                    } else {
+                        q[i].push(p[i][1]);
+                    }
+                } else if (Type.isFunction(p[i]) && p[i]().length === 2) {
+                    q.push(parents[i]());
+                }
+            }
+        }
+
+        if (attributes.createpoints === true) {
+            points = Type.providePoints(board, q, attributes, 'metapostspline', ['points']);
+        } else {
+            points = [];
+            for (i = 0; i < q.length; i++) {
+                if (Type.isPoint(q[i])) {
+                    points.push(q[i]);
+                } else {
+                    points.push(
+                        (function(ii) { return {
+                            X: function() { return q[ii][0]; },
+                            Y: function() { return q[ii][1]; }
+                            };
+                        })(i)
+                    );
+                }
+            }
+        }
+
+        controls = parents[1];
+
+        el = new JXG.Curve(board, ['t', [], [], 0, p.length - 1], attributes);
+        el.updateDataArray = function () {
+            var res, i,
+                len = points.length,
+                p = [];
+
+            for (i = 0; i < len; i++) {
+                p.push([points[i].X(), points[i].Y()]);
+            }
+
+            res = JXG.Math.Metapost.curve(p, controls);
+            this.dataX = res[0];
+            this.dataY = res[1];
+        };
+        el.bezierDegree = 3;
+
+        le = points.length;
+        el.setParents(points);
+        for (i = 0; i < le; i++) {
+            if (Type.isPoint(points[i])) {
+                points[i].addChild(el);
+            }
+        }
+        el.elType = 'metapostspline';
+
+        return el;
+    };
+
+    JXG.registerElement('metapostspline', JXG.createMetapostSpline);
+
 
     /**
      * @class This element is used to provide a constructor for Riemann sums, which is realized as a special curve.
@@ -38206,6 +43848,13 @@ define('base/curve',[
         c = board.create('curve', par, attr);
 
         c.sum = 0.0;
+        /**
+         * Returns the value of the Riemann sum, i.e. the sum of the (signed) areas of the rectangles.
+         * @name Value
+         * @memberOf Riemann.prototype
+         * @function
+         * @returns {Number} value of Riemann sum.
+         */
         c.Value = function () {
             return this.sum;
         };
@@ -38501,7 +44150,7 @@ define('base/curve',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -39482,7 +45131,7 @@ define('element/conic',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -39688,19 +45337,26 @@ define('base/circle',[
          * @private
          */
         hasPoint: function (x, y) {
-            var prec = this.board.options.precision.hasPoint,
+            var prec, type,
                 mp = this.center.coords.usrCoords,
                 p = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
                 r = this.Radius(),
                 dx, dy, dist;
 
-                dx = mp[1] - p.usrCoords[1];
-                dy = mp[2] - p.usrCoords[2];
-                dist = Math.sqrt(dx * dx + dy * dy);
 
-                // We have to use usrCoords, since Radius is available in usrCoords only.
-                prec += Type.evaluate(this.visProp.strokewidth) * 0.5;
-                prec /= Math.sqrt(this.board.unitX * this.board.unitY);
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
+            dx = mp[1] - p.usrCoords[1];
+            dy = mp[2] - p.usrCoords[2];
+            dist = Math.sqrt(dx * dx + dy * dy);
+            // We have to use usrCoords, since Radius is available in usrCoords only.
+            prec += Type.evaluate(this.visProp.strokewidth) * 0.5;
+            prec /= Math.sqrt(this.board.unitX * this.board.unitY);
 
             if (Type.evaluate(this.visProp.hasinnerpoints)) {
                 return (dist < r + prec);
@@ -40299,17 +45955,16 @@ define('base/circle',[
             el.addTransform(parents[1]);
             return el;
 
-        } else {
-            // Circle defined by points
-            for (i = 0; i < parents.length; i++) {
-                if (Type.isPointType(board, parents[i])) {
-                    p = p.concat(Type.providePoints(board, [parents[i]], attributes, 'circle', ['center']));
-                    if (p[p.length - 1] === false) {
-                        throw new Error('JSXGraph: Can\'t create circle from this type. Please provide a point type.');
-                    }
-                } else {
-                    p.push(parents[i]);
+        }
+        // Circle defined by points
+        for (i = 0; i < parents.length; i++) {
+            if (Type.isPointType(board, parents[i])) {
+                p = p.concat(Type.providePoints(board, [parents[i]], attributes, 'circle', ['center']));
+                if (p[p.length - 1] === false) {
+                    throw new Error('JSXGraph: Can\'t create circle from this type. Please provide a point type.');
                 }
+            } else {
+                p.push(parents[i]);
             }
         }
 
@@ -40373,7 +46028,7 @@ define('base/circle',[
 });
 
 /*
- Copyright 2008-2020
+ Copyright 2008-2021
  Matthias Ehmann,
  Michael Gerhaeuser,
  Carsten Miller,
@@ -40658,7 +46313,7 @@ define('base/composition',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -41906,2044 +47561,7 @@ define('base/polygon',[
 });
 
 /*
-    Copyright 2008-2020
-        Matthias Ehmann,
-        Michael Gerhaeuser,
-        Carsten Miller,
-        Bianca Valentin,
-        Alfred Wassermann,
-        Peter Wilfahrt
-
-    This file is part of JSXGraph.
-
-    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
-
-    You can redistribute it and/or modify it under the terms of the
-
-      * GNU Lesser General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version
-      OR
-      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
-
-    JSXGraph is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License and
-    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
-    and <http://opensource.org/licenses/MIT/>.
- */
-
-
-/*global JXG: true, define: true*/
-/*jslint nomen: true, plusplus: true*/
-
-/* depends:
- jxg
- math/geometry
- math/math
- base/coords
- base/circle
- utils/type
- base/constants
-  elements:
-   curve
-   midpoint
-   circumcenter
- */
-
-/**
- * @fileoverview In this file the geometry object Arc is defined. Arc stores all
- * style and functional properties that are required to draw an arc on a board.
- */
-
-define('element/arc',[
-    'jxg', 'math/geometry', 'math/math', 'base/coords', 'base/circle', 'utils/type', 'base/constants',
-    'base/curve', 'element/composition'
-], function (JXG, Geometry, Mat, Coords, Circle, Type, Const, Curve, Compositions) {
-
-    "use strict";
-
-    /**
-     * @class An arc is a segment of the circumference of a circle. It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the arc.
-     *
-     * @pseudo
-     * @name Arc
-     * @augments Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 The result will be an arc of a circle around p1 through p2. The arc is drawn
-     * counter-clockwise from p2 to p3.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('arc', [p1, p2, p3]);
-     * board.create('text',[1,6,function(){return 'arclength: '+Math.round(a.Value()*100)/100}])
-     * </pre><div class="jxgbox" id="JXG114ef584-4a5e-4686-8392-c97501befb5b" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG114ef584-4a5e-4686-8392-c97501befb5b', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       a = board.create('arc', [p1, p2, p3]);
-     *       board.create('text',[1,6,function(){return 'arclength: '+Math.round(a.Value()*100)/100}])
-     * })();
-     * </script><pre>
-     *
-     * @example
-     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     * var a1 = board.create('arc', [[1, 1], [0, 1], [1, 0]], {strokeColor: 'red'});
-     * var a2 = board.create('curve', [a1, t], {strokeColor: 'red'});
-     *
-     * </pre><div id="JXG1949da46-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     *     (function() {
-     *         var board = JXG.JSXGraph.initBoard('JXG1949da46-6339-11e8-9fb9-901b0e1b8723',
-     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     *     var a1 = board.create('arc', [[1, 1], [0, 1], [1, 0]], {strokeColor: 'red'});
-     *     var a2 = board.create('curve', [a1, t], {strokeColor: 'red'});
-     *
-     *     })();
-     *
-     * </script><pre>
-     *
-     */
-    JXG.createArc = function (board, parents, attributes) {
-        var el, attr, points;
-
-        points = Type.providePoints(board, parents, attributes, 'arc', ['center', 'radiuspoint', 'anglepoint']);
-        if (points === false || points.length < 3) {
-            throw new Error("JSXGraph: Can't create Arc with parent types '" +
-                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" +
-                (typeof parents[2]) + "'." +
-                "\nPossible parent types: [point,point,point], [arc, transformation]");
-        }
-
-        attr = Type.copyAttributes(attributes, board.options, 'arc');
-        el = board.create('curve', [[0], [0]], attr);
-
-        el.elType = 'arc';
-        el.setParents(points);
-
-        /**
-         * documented in JXG.GeometryElement
-         * @ignore
-         */
-        el.type = Const.OBJECT_TYPE_ARC;
-
-        /**
-         * Center of the arc.
-         * @memberOf Arc.prototype
-         * @name center
-         * @type JXG.Point
-         */
-        el.center = points[0];
-
-        /**
-         * Point defining the arc's radius.
-         * @memberOf Arc.prototype
-         * @name radiuspoint
-         * @type JXG.Point
-         */
-        el.radiuspoint = points[1];
-        el.point2 = el.radiuspoint;
-
-        /**
-         * The point defining the arc's angle.
-         * @memberOf Arc.prototype
-         * @name anglepoint
-         * @type JXG.Point
-         */
-        el.anglepoint = points[2];
-        el.point3 = el.anglepoint;
-
-        // Add arc as child to defining points
-        el.center.addChild(el);
-        el.radiuspoint.addChild(el);
-        el.anglepoint.addChild(el);
-
-        // should be documented in options
-        el.useDirection = attr.usedirection;
-
-        // documented in JXG.Curve
-        el.updateDataArray = function () {
-            var ar, phi, det, p0c, p1c, p2c,
-                sgn = 1,
-                A = this.radiuspoint,
-                B = this.center,
-                C = this.anglepoint,
-                ev_s = Type.evaluate(this.visProp.selection);
-
-            phi = Geometry.rad(A, B, C);
-            if ((ev_s === 'minor' && phi > Math.PI) ||
-                    (ev_s === 'major' && phi < Math.PI)) {
-                sgn = -1;
-            }
-
-            // This is true for circumCircleArcs. In that case there is
-            // a fourth parent element: [center, point1, point3, point2]
-            if (this.useDirection) {
-                p0c = points[1].coords.usrCoords;
-                p1c = points[3].coords.usrCoords;
-                p2c = points[2].coords.usrCoords;
-                det = (p0c[1] - p2c[1]) * (p0c[2] - p1c[2]) - (p0c[2] - p2c[2]) * (p0c[1] - p1c[1]);
-
-                if (det < 0) {
-                    this.radiuspoint = points[1];
-                    this.anglepoint = points[2];
-                } else {
-                    this.radiuspoint = points[2];
-                    this.anglepoint = points[1];
-                }
-            }
-
-            A = A.coords.usrCoords;
-            B = B.coords.usrCoords;
-            C = C.coords.usrCoords;
-
-            ar = Geometry.bezierArc(A, B, C, false, sgn);
-
-            this.dataX = ar[0];
-            this.dataY = ar[1];
-
-            this.bezierDegree = 3;
-
-            this.updateStdform();
-            this.updateQuadraticform();
-        };
-
-        /**
-         * Determines the arc's current radius. I.e. the distance between {@link Arc#center} and {@link Arc#radiuspoint}.
-         * @memberOf Arc.prototype
-         * @name Radius
-         * @function
-         * @returns {Number} The arc's radius
-         */
-        el.Radius = function () {
-            return this.radiuspoint.Dist(this.center);
-        };
-
-        /**
-         * @deprecated Use {@link Arc#Radius}
-         * @memberOf Arc.prototype
-         * @name getRadius
-         * @function
-         * @returns {Number}
-         */
-        el.getRadius = function () {
-            JXG.deprecated('Arc.getRadius()', 'Arc.Radius()');
-            return this.Radius();
-        };
-
-        /**
-         * Returns the length of the arc.
-         * @memberOf Arc.prototype
-         * @name Value
-         * @function
-         * @returns {Number} The arc length
-         */
-        el.Value = function () {
-            return this.Radius() * Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
-        };
-
-        // documented in geometry element
-        el.hasPoint = function (x, y) {
-            var dist, checkPoint,
-                has, angle, alpha, beta,
-                invMat, c,
-                prec,
-                r = this.Radius(),
-                ev_s = Type.evaluate(this.visProp.selection);
-
-            if (Type.evaluate(this.visProp.hasinnerpoints)) {
-                return this.hasPointSector(x, y);
-            }
-
-            prec = this.board.options.precision.hasPoint / Math.min(this.board.unitX, this.board.unitY);
-            checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board);
-
-            if (this.transformations.length > 0) {
-                // Transform the mouse/touch coordinates
-                // back to the original position of the curve.
-                this.updateTransformMatrix();
-                invMat = Mat.inverse(this.transformMat);
-                c = Mat.matVecMult(invMat, checkPoint.usrCoords);
-                checkPoint = new Coords(Const.COORDS_BY_USER, c, this.board);
-            }
-
-            dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint);
-            has = (Math.abs(dist - r) < prec);
-
-            /**
-             * At that point we know that the user has touched the circle line.
-             * Now, we have to check, if the user has hit the arc path.
-             */
-            if (has) {
-                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
-                alpha = 0.0;
-                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
-
-                if ((ev_s === 'minor' && beta > Math.PI) ||
-                        (ev_s === 'major' && beta < Math.PI)) {
-                    alpha = beta;
-                    beta = 2 * Math.PI;
-                }
-                if (angle < alpha || angle > beta) {
-                    has = false;
-                }
-            }
-
-            return has;
-        };
-
-        /**
-         * Checks whether (x,y) is within the sector defined by the arc.
-         * @memberOf Arc.prototype
-         * @name hasPointSector
-         * @function
-         * @param {Number} x Coordinate in x direction, screen coordinates.
-         * @param {Number} y Coordinate in y direction, screen coordinates.
-         * @returns {Boolean} True if (x,y) is within the sector defined by the arc, False otherwise.
-         */
-        el.hasPointSector = function (x, y) {
-            var angle, alpha, beta,
-                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
-                r = this.Radius(),
-                dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint),
-                has = (dist < r),
-                ev_s = Type.evaluate(this.visProp.selection);
-
-            if (has) {
-                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
-                alpha = 0;
-                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
-
-                if ((ev_s === 'minor' && beta > Math.PI) ||
-                        (ev_s === 'major' && beta < Math.PI)) {
-                    alpha = beta;
-                    beta = 2 * Math.PI;
-                }
-                if (angle < alpha || angle > beta) {
-                    has = false;
-                }
-            }
-
-            return has;
-        };
-
-        // documented in geometry element
-        el.getTextAnchor = function () {
-            return this.center.coords;
-        };
-
-        // documented in geometry element
-        el.getLabelAnchor = function () {
-            var coords, vec, vecx, vecy, len,
-                angle = Geometry.rad(this.radiuspoint, this.center, this.anglepoint),
-                dx = 10 / this.board.unitX,
-                dy = 10 / this.board.unitY,
-                p2c = this.point2.coords.usrCoords,
-                pmc = this.center.coords.usrCoords,
-                bxminusax = p2c[1] - pmc[1],
-                byminusay = p2c[2] - pmc[2],
-                ev_s = Type.evaluate(this.visProp.selection),
-                l_vp = this.label ? this.label.visProp : this.visProp.label;
-
-            // If this is uncommented, the angle label can not be dragged
-            //if (Type.exists(this.label)) {
-            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
-            //}
-
-            if ((ev_s === 'minor' && angle > Math.PI) ||
-                    (ev_s === 'major' && angle < Math.PI)) {
-                angle = -(2 * Math.PI - angle);
-            }
-
-            coords = new Coords(Const.COORDS_BY_USER, [
-                pmc[1] + Math.cos(angle * 0.5) * bxminusax - Math.sin(angle * 0.5) * byminusay,
-                pmc[2] + Math.sin(angle * 0.5) * bxminusax + Math.cos(angle * 0.5) * byminusay
-            ], this.board);
-
-            vecx = coords.usrCoords[1] - pmc[1];
-            vecy = coords.usrCoords[2] - pmc[2];
-
-            len = Math.sqrt(vecx * vecx + vecy * vecy);
-            vecx = vecx * (len + dx) / len;
-            vecy = vecy * (len + dy) / len;
-            vec = [pmc[1] + vecx, pmc[2] + vecy];
-
-            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
-
-            return new Coords(Const.COORDS_BY_USER, vec, this.board);
-        };
-
-        // documentation in jxg.circle
-        el.updateQuadraticform = Circle.Circle.prototype.updateQuadraticform;
-
-        // documentation in jxg.circle
-        el.updateStdform = Circle.Circle.prototype.updateStdform;
-
-        el.methodMap = JXG.deepCopy(el.methodMap, {
-            getRadius: 'getRadius',
-            radius: 'Radius',
-            center: 'center',
-            radiuspoint: 'radiuspoint',
-            anglepoint: 'anglepoint',
-            Value: 'Value'
-        });
-
-        el.prepareUpdate().update();
-        return el;
-    };
-
-    JXG.registerElement('arc', JXG.createArc);
-
-    /**
-     * @class A semicircle is a special arc defined by two points. The arc hits both points.
-     * @pseudo
-     * @name Semicircle
-     * @augments Arc
-     * @constructor
-     * @type Arc
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point} p1,p2 The result will be a composition of an arc drawn clockwise from <tt>p1</tt> and
-     * <tt>p2</tt> and the midpoint of <tt>p1</tt> and <tt>p2</tt>.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [4.5, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     *
-     * var a = board.create('semicircle', [p1, p2]);
-     * </pre><div class="jxgbox" id="JXG5385d349-75d7-4078-b732-9ae808db1b0e" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG5385d349-75d7-4078-b732-9ae808db1b0e', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [4.5, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *
-     *       sc = board.create('semicircle', [p1, p2]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createSemicircle = function (board, parents, attributes) {
-        var el, mp, attr, points;
-
-        // we need 2 points
-        points = Type.providePoints(board, parents, attributes, 'point');
-        if (points === false || points.length !== 2) {
-            throw new Error("JSXGraph: Can't create Semicircle with parent types '" +
-                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "'." +
-                "\nPossible parent types: [point,point]");
-        }
-
-        attr = Type.copyAttributes(attributes, board.options, 'semicircle', 'center');
-        mp = board.create('midpoint', points, attr);
-        mp.dump = false;
-
-        attr = Type.copyAttributes(attributes, board.options, 'semicircle');
-        el = board.create('arc', [mp, points[1], points[0]], attr);
-        el.elType = 'semicircle';
-        el.setParents([points[0].id, points[1].id]);
-        el.subs = {
-            midpoint: mp
-        };
-        el.inherits.push(mp);
-
-        /**
-         * The midpoint of the two defining points.
-         * @memberOf Semicircle.prototype
-         * @name midpoint
-         * @type Midpoint
-         */
-        el.midpoint = el.center = mp;
-
-        return el;
-    };
-
-    JXG.registerElement('semicircle', JXG.createSemicircle);
-
-    /**
-     * @class A circumcircle arc is an {@link Arc} defined by three points. All three points lie on the arc.
-     * @pseudo
-     * @name CircumcircleArc
-     * @augments Arc
-     * @constructor
-     * @type Arc
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 The result will be a composition of an arc of the circumcircle of
-     * <tt>p1</tt>, <tt>p2</tt>, and <tt>p3</tt> and the midpoint of the circumcircle of the three points. The arc is drawn
-     * counter-clockwise from <tt>p1</tt> over <tt>p2</tt> to <tt>p3</tt>.
-     * @example
-     * // Create a circum circle arc out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('arc', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG87125fd4-823a-41c1-88ef-d1a1369504e3" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG87125fd4-823a-41c1-88ef-d1a1369504e3', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       cca = board.create('circumcirclearc', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createCircumcircleArc = function (board, parents, attributes) {
-        var el, mp, attr, points;
-
-        // We need three points
-        points = Type.providePoints(board, parents, attributes, 'point');
-        if (points === false || points.length !== 3) {
-            throw new Error("JSXGraph: create Circumcircle Arc with parent types '" +
-                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'." +
-                "\nPossible parent types: [point,point,point]");
-        }
-
-        attr = Type.copyAttributes(attributes, board.options, 'circumcirclearc', 'center');
-        mp = board.create('circumcenter', points, attr);
-        mp.dump = false;
-
-        attr = Type.copyAttributes(attributes, board.options, 'circumcirclearc');
-        attr.usedirection = true;
-        el = board.create('arc', [mp, points[0], points[2], points[1]], attr);
-
-        el.elType = 'circumcirclearc';
-        el.setParents([points[0].id, points[1].id, points[2].id]);
-        el.subs = {
-            center: mp
-        };
-        el.inherits.push(mp);
-
-        /**
-         * The midpoint of the circumcircle of the three points defining the circumcircle arc.
-         * @memberOf CircumcircleArc.prototype
-         * @name center
-         * @type Circumcenter
-         */
-        el.center = mp;
-
-        return el;
-    };
-
-    JXG.registerElement('circumcirclearc', JXG.createCircumcircleArc);
-
-    /**
-     * @class A minor arc is a segment of the circumference of a circle having measure less than or equal to
-     * 180 degrees (pi radians). It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the arc.
-     * @pseudo
-     * @name MinorArc
-     * @augments Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor arc is an arc of a circle around p1 having measure less than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('arc', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG64ba7ca2-8728-45f3-96e5-3c7a4414de2f" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG64ba7ca2-8728-45f3-96e5-3c7a4414de2f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       a = board.create('minorarc', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     */
-
-    JXG.createMinorArc = function (board, parents, attributes) {
-        attributes.selection = 'minor';
-        return JXG.createArc(board, parents, attributes);
-    };
-
-    JXG.registerElement('minorarc', JXG.createMinorArc);
-
-    /**
-     * @class A major arc is a segment of the circumference of a circle having measure greater than or equal to
-     * 180 degrees (pi radians). It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the arc.
-     * @pseudo
-     * @name MajorArc
-     * @augments Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Major arc is an arc of a circle around p1 having measure greater than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('minorarc', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG17a10d38-5629-40a4-b150-f41806edee9f" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG17a10d38-5629-40a4-b150-f41806edee9f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       a = board.create('majorarc', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createMajorArc = function (board, parents, attributes) {
-        attributes.selection = 'major';
-        return JXG.createArc(board, parents, attributes);
-    };
-
-    JXG.registerElement('majorarc', JXG.createMajorArc);
-
-    return {
-        createArc: JXG.createArc,
-        createSemicircle: JXG.createSemicircle,
-        createCircumcircleArc: JXG.createCircumcircleArc,
-        createMinorArc: JXG.createMinorArc,
-        createMajorArc: JXG.createMajorArc
-    };
-});
-
-/*
-    Copyright 2008-2020
-        Matthias Ehmann,
-        Michael Gerhaeuser,
-        Carsten Miller,
-        Bianca Valentin,
-        Alfred Wassermann,
-        Peter Wilfahrt
-
-    This file is part of JSXGraph.
-
-    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
-
-    You can redistribute it and/or modify it under the terms of the
-
-      * GNU Lesser General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version
-      OR
-      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
-
-    JSXGraph is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License and
-    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
-    and <http://opensource.org/licenses/MIT/>.
- */
-
-
-/*global JXG: true, define: true*/
-/*jslint nomen: true, plusplus: true*/
-
-/* depends:
- jxg
- math/geometry
- math/math
- base/coords
- base/constants
- utils/type
-  elements:
-   point
-   curve
-   circumcentre
-   transform
- */
-
-define('element/sector',[
-    'jxg', 'math/geometry', 'math/math', 'math/statistics', 'base/coords', 'base/constants', 'utils/type', 'base/point', 'base/curve',
-    'base/transformation', 'element/composition'
-], function (JXG, Geometry, Mat, Statistics, Coords, Const, Type, Point, Curve, Transform, Compositions) {
-
-    "use strict";
-
-    /**
-     * @class A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc.
-     * @pseudo
-     * @name Sector
-     * @augments JXG.Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     *
-     * First possiblity of input parameters are:
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 A sector is defined by three points: The sector's center <tt>p1</tt>,
-     * a second point <tt>p2</tt> defining the radius and a third point <tt>p3</tt> defining the angle of the sector. The
-     * Sector is always drawn counter clockwise from <tt>p2</tt> to <tt>p3</tt>
-     * <p>
-     * Second possibility of input parameters are:
-     * @param {JXG.Line_JXG.Line_array,number_array,number_number,function} line, line2, coords1 or direction1, coords2 or direction2, radius The sector is defined by two lines.
-     * The two legs which define the sector are given by two coordinates arrays which are project initially two the two lines or by two directions (+/- 1).
-     * The last parameter is the radius of the sector.
-     *
-     *
-     * @example
-     * // Create a sector out of three free points
-     * var p1 = board.create('point', [1.5, 5.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [5.0, 3.0]),
-     *
-     *     a = board.create('sector', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG49f59123-f013-4681-bfd9-338b89893156" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG49f59123-f013-4681-bfd9-338b89893156', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [1.5, 5.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [5.0, 3.0]),
-     *
-     *     a = board.create('sector', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     *
-     * @example
-     * // Create a sector out of two lines, two directions and a radius
-     * var p1 = board.create('point', [-1, 4]),
-     *  p2 = board.create('point', [4, 1]),
-     *  q1 = board.create('point', [-2, -3]),
-     *  q2 = board.create('point', [4,3]),
-     *
-     *  li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
-     *  li2 = board.create('line', [q1,q2], {lastArrow:true}),
-     *
-     *  sec1 = board.create('sector', [li1, li2, [5.5, 0], [4, 3], 3]),
-     *  sec2 = board.create('sector', [li1, li2, 1, -1, 4]);
-     *
-     * </pre><div class="jxgbox" id="JXGbb9e2809-9895-4ff1-adfa-c9c71d50aa53" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXGbb9e2809-9895-4ff1-adfa-c9c71d50aa53', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [-1, 4]),
-     *     p2 = board.create('point', [4, 1]),
-     *     q1 = board.create('point', [-2, -3]),
-     *     q2 = board.create('point', [4,3]),
-     *
-     *     li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
-     *     li2 = board.create('line', [q1,q2], {lastArrow:true}),
-     *
-     *     sec1 = board.create('sector', [li1, li2, [5.5, 0], [4, 3], 3]),
-     *     sec2 = board.create('sector', [li1, li2, 1, -1, 4]);
-     * })();
-     * </script><pre>
-     *
-     * @example
-     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     * var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                 anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
-     *                 fillColor: 'yellow', strokeColor: 'black'});
-     * var s2 = board.create('curve', [s1, t], {fillColor: 'yellow', strokeColor: 'black'});
-     *
-     * </pre><div id="JXG2e70ee14-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     *     (function() {
-     *         var board = JXG.JSXGraph.initBoard('JXG2e70ee14-6339-11e8-9fb9-901b0e1b8723',
-     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     *     var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                     anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
-     *                     fillColor: 'yellow', strokeColor: 'black'});
-     *     var s2 = board.create('curve', [s1, t], {fillColor: 'yellow', strokeColor: 'black'});
-     *
-     *     })();
-     *
-     * </script><pre>
-     *
-     */
-    JXG.createSector = function (board, parents, attributes) {
-        var el, attr,
-            type = 'invalid',
-            s, v,
-            attrPoints = ['center', 'radiuspoint', 'anglepoint'],
-            points;
-
-        // Three points?
-        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE &&
-                parents[1].elementClass === Const.OBJECT_CLASS_LINE &&
-                (Type.isArray(parents[2]) || Type.isNumber(parents[2])) &&
-                (Type.isArray(parents[3]) || Type.isNumber(parents[3])) &&
-                (Type.isNumber(parents[4]) || Type.isFunction(parents[4]))) {
-
-            type = '2lines';
-        } else {
-            points = Type.providePoints(board, parents, attributes, 'sector', attrPoints);
-            if (points === false) {
-                throw new Error("JSXGraph: Can't create Sector with parent types '" +
-                    (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" +
-                    (typeof parents[2]) + "'.");
-            }
-            type = '3points';
-        }
-
-
-        attr = Type.copyAttributes(attributes, board.options, 'sector');
-        el = board.create('curve', [[0], [0]], attr);
-        el.type = Const.OBJECT_TYPE_SECTOR;
-        el.elType = 'sector';
-
-        if (type === '2lines') {
-            el.Radius = function () {
-                return Type.evaluate(parents[4]);
-            };
-
-            el.line1 = board.select(parents[0]);
-            el.line2 = board.select(parents[1]);
-
-            el.line1.addChild(el);
-            el.line2.addChild(el);
-            el.setParents(parents);
-
-            el.point1 = {visProp: {}};
-            el.point2 = {visProp: {}};
-            el.point3 = {visProp: {}};
-
-            /* Intersection point */
-            s = Geometry.meetLineLine(el.line1.stdform, el.line2.stdform, 0, board);
-
-            if (Type.isArray(parents[2])) {
-                /* project p1 to l1 */
-                if (parents[2].length === 2) {
-                    parents[2] = [1].concat(parents[2]);
-                }
-                /*
-                v = [0, el.line1.stdform[1], el.line1.stdform[2]];
-                v = Mat.crossProduct(v, parents[2]);
-                v = Geometry.meetLineLine(v, el.line1.stdform, 0, board);
-                */
-                v = Geometry.projectPointToLine({coords: {usrCoords: parents[2]}}, el.line1, board);
-                v = Statistics.subtract(v.usrCoords, s.usrCoords);
-                el.direction1 = (Mat.innerProduct(v, [0, el.line1.stdform[2], -el.line1.stdform[1]], 3) >= 0) ? +1 : -1;
-            } else {
-                el.direction1 = (parents[2] >= 0) ? 1 : -1;
-            }
-
-            if (Type.isArray(parents[3])) {
-                /* project p2 to l2 */
-                if (parents[3].length === 2) {
-                    parents[3] = [1].concat(parents[3]);
-                }
-                /*
-                v = [0, el.line2.stdform[1], el.line2.stdform[2]];
-                v = Mat.crossProduct(v, parents[3]);
-                v = Geometry.meetLineLine(v, el.line2.stdform, 0, board);
-                */
-                v = Geometry.projectPointToLine({coords: {usrCoords: parents[3]}}, el.line2, board);
-                v = Statistics.subtract(v.usrCoords, s.usrCoords);
-                el.direction2 = (Mat.innerProduct(v, [0, el.line2.stdform[2], -el.line2.stdform[1]], 3) >= 0) ? +1 : -1;
-            } else {
-                el.direction2 = (parents[3] >= 0) ? 1 : -1;
-            }
-
-            el.updateDataArray = function () {
-                var r, l1, l2,
-                    A = [0, 0, 0],
-                    B = [0, 0, 0],
-                    C = [0, 0, 0],
-                    ar;
-
-                l1 = this.line1;
-                l2 = this.line2;
-
-                // Intersection point of the lines
-                B = Mat.crossProduct(l1.stdform, l2.stdform);
-
-                if (Math.abs(B[0]) > Mat.eps * Mat.eps) {
-                    B[1] /= B[0];
-                    B[2] /= B[0];
-                    B[0] /= B[0];
-                }
-                // First point
-                r = this.direction1 * this.Radius();
-                A = Statistics.add(B, [0, r * l1.stdform[2], -r * l1.stdform[1]]);
-
-                // Second point
-                r = this.direction2 * this.Radius();
-                C = Statistics.add(B, [0, r * l2.stdform[2], -r * l2.stdform[1]]);
-
-                this.point2.coords = new Coords(Const.COORDS_BY_USER, A, el.board);
-                this.point1.coords = new Coords(Const.COORDS_BY_USER, B, el.board);
-                this.point3.coords = new Coords(Const.COORDS_BY_USER, C, el.board);
-
-                if (Math.abs(A[0]) < Mat.eps || Math.abs(B[0]) < Mat.eps || Math.abs(C[0]) < Mat.eps) {
-                    this.dataX = [NaN];
-                    this.dataY = [NaN];
-                    return;
-                }
-
-                ar = Geometry.bezierArc(A, B, C, true, 1);
-
-                this.dataX = ar[0];
-                this.dataY = ar[1];
-
-                this.bezierDegree = 3;
-            };
-
-            el.methodMap = JXG.deepCopy(el.methodMap, {
-                radius: 'getRadius',
-                getRadius: 'getRadius',
-                setRadius: 'setRadius'
-            });
-
-            el.prepareUpdate().update();
-
-        // end '2lines'
-
-        } else if (type === '3points') {
-
-            /**
-            * Midpoint of the sector.
-            * @memberOf Sector.prototype
-            * @name point1
-            * @type JXG.Point
-            */
-            el.point1 = points[0];
-
-            /**
-            * This point together with {@link Sector#point1} defines the radius..
-            * @memberOf Sector.prototype
-            * @name point2
-            * @type JXG.Point
-            */
-            el.point2 = points[1];
-
-            /**
-            * Defines the sector's angle.
-            * @memberOf Sector.prototype
-            * @name point3
-            * @type JXG.Point
-            */
-            el.point3 = points[2];
-
-            /* Add arc as child to defining points */
-            el.point1.addChild(el);
-            el.point2.addChild(el);
-            el.point3.addChild(el);
-
-            // useDirection is necessary for circumCircleSectors
-            el.useDirection = attributes.usedirection;
-            el.setParents(points);
-
-            /**
-            * Defines the sectors orientation in case of circumCircleSectors.
-            * @memberOf Sector.prototype
-            * @name point4
-            * @type JXG.Point
-            */
-            if (Type.exists(points[3])) {
-                el.point4 = points[3];
-                el.point4.addChild(el);
-            }
-
-            el.methodMap = JXG.deepCopy(el.methodMap, {
-                arc: 'arc',
-                center: 'center',
-                radiuspoint: 'radiuspoint',
-                anglepoint: 'anglepoint',
-                radius: 'getRadius',
-                getRadius: 'getRadius',
-                setRadius: 'setRadius'
-            });
-
-            /**
-            * documented in JXG.Curve
-            * @ignore
-            */
-            el.updateDataArray = function () {
-                var ar, det, p0c, p1c, p2c,
-                    A = this.point2,
-                    B = this.point1,
-                    C = this.point3,
-                    phi, sgn = 1,
-                    vp_s = Type.evaluate(this.visProp.selection);
-
-                if (!A.isReal || !B.isReal || !C.isReal) {
-                    this.dataX = [NaN];
-                    this.dataY = [NaN];
-                    return;
-                }
-
-                phi = Geometry.rad(A, B, C);
-                if ((vp_s === 'minor' && phi > Math.PI) ||
-                        (vp_s === 'major' && phi < Math.PI)) {
-                    sgn = -1;
-                }
-
-                // This is true for circumCircleSectors. In that case there is
-                // a fourth parent element: [midpoint, point1, point3, point2]
-                if (this.useDirection && Type.exists(this.point4)) {
-                    p0c = this.point2.coords.usrCoords;
-                    p1c = this.point4.coords.usrCoords;
-                    p2c = this.point3.coords.usrCoords;
-                    det = (p0c[1] - p2c[1]) * (p0c[2] - p1c[2]) - (p0c[2] - p2c[2]) * (p0c[1] - p1c[1]);
-
-                    if (det >= 0.0) {
-                        C = this.point2;
-                        A = this.point3;
-                    }
-                }
-
-                A = A.coords.usrCoords;
-                B = B.coords.usrCoords;
-                C = C.coords.usrCoords;
-
-                ar = Geometry.bezierArc(A, B, C, true, sgn);
-
-                this.dataX = ar[0];
-                this.dataY = ar[1];
-                this.bezierDegree = 3;
-            };
-
-            /**
-            * Returns the radius of the sector.
-            * @memberOf Sector.prototype
-            * @name Radius
-            * @function
-            * @returns {Number} The distance between {@link Sector#point1} and {@link Sector#point2}.
-            */
-            el.Radius = function () {
-                return this.point2.Dist(this.point1);
-            };
-
-            attr = Type.copyAttributes(attributes, board.options, 'sector', 'arc');
-            attr.withLabel = false;
-            attr.name += '_arc';
-            el.arc = board.create('arc', [el.point1, el.point2, el.point3], attr);
-            el.addChild(el.arc);
-        }   // end '3points'
-
-        el.center = el.point1;
-        el.radiuspoint = el.point2;
-        el.anglepoint = el.point3;
-
-        // Default hasPoint method. Documented in geometry element
-        el.hasPointCurve = function (x, y) {
-            var angle, alpha, beta,
-                prec,
-                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
-                r = this.Radius(),
-                dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint),
-                has,
-                vp_s = Type.evaluate(this.visProp.selection);
-
-            prec = this.board.options.precision.hasPoint / Math.min(this.board.unitX, this.board.unitY);
-            has = (Math.abs(dist - r) < prec);
-            if (has) {
-                angle = Geometry.rad(this.point2, this.center, checkPoint.usrCoords.slice(1));
-                alpha = 0;
-                beta = Geometry.rad(this.point2, this.center, this.point3);
-
-                if ((vp_s === 'minor' && beta > Math.PI) ||
-                        (vp_s === 'major' && beta < Math.PI)) {
-                    alpha = beta;
-                    beta = 2 * Math.PI;
-                }
-
-                if (angle < alpha || angle > beta) {
-                    has = false;
-                }
-            }
-
-            return has;
-        };
-
-        /**
-        * Checks whether (x,y) is within the area defined by the sector.
-        * @memberOf Sector.prototype
-        * @name hasPointSector
-        * @function
-        * @param {Number} x Coordinate in x direction, screen coordinates.
-        * @param {Number} y Coordinate in y direction, screen coordinates.
-        * @returns {Boolean} True if (x,y) is within the sector defined by the arc, False otherwise.
-        */
-        el.hasPointSector = function (x, y) {
-            var angle,
-                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
-                r = this.Radius(),
-                dist = this.point1.coords.distance(Const.COORDS_BY_USER, checkPoint),
-                alpha,
-                beta,
-                has = (dist < r),
-                vp_s = Type.evaluate(this.visProp.selection);
-
-            if (has) {
-                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
-                alpha = 0.0;
-                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
-
-                if ((vp_s === 'minor' && beta > Math.PI) ||
-                        (vp_s === 'major' && beta < Math.PI)) {
-                    alpha = beta;
-                    beta = 2 * Math.PI;
-                }
-                //if (angle > Geometry.rad(this.point2, this.point1, this.point3)) {
-                if (angle < alpha || angle > beta) {
-                    has = false;
-                }
-            }
-            return has;
-        };
-
-        el.hasPoint = function (x, y) {
-            if (Type.evaluate(this.visProp.highlightonsector) ||
-                    Type.evaluate(this.visProp.hasinnerpoints)) {
-                return this.hasPointSector(x, y);
-            }
-
-            return this.hasPointCurve(x, y);
-        };
-
-        // documented in GeometryElement
-        el.getTextAnchor = function () {
-            return this.point1.coords;
-        };
-
-        // documented in GeometryElement
-        // this method is very similar to arc.getLabelAnchor()
-        // there are some additions in the arc version though, mainly concerning
-        // "major" and "minor" arcs. but maybe these methods can be merged.
-        el.getLabelAnchor = function () {
-            var coords, vec, vecx, vecy, len,
-                angle = Geometry.rad(this.point2, this.point1, this.point3),
-                dx = 13 / this.board.unitX,
-                dy = 13 / this.board.unitY,
-                p2c = this.point2.coords.usrCoords,
-                pmc = this.point1.coords.usrCoords,
-                bxminusax = p2c[1] - pmc[1],
-                byminusay = p2c[2] - pmc[2],
-                vp_s = Type.evaluate(this.visProp.selection),
-                l_vp = this.label ? this.label.visProp : this.visProp.label;
-
-            // If this is uncommented, the angle label can not be dragged
-            //if (Type.exists(this.label)) {
-            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
-            //}
-
-            if ((vp_s === 'minor' && angle > Math.PI) ||
-                    (vp_s === 'major' && angle < Math.PI)) {
-                angle = -(2 * Math.PI - angle);
-            }
-
-            coords = new Coords(Const.COORDS_BY_USER, [
-                pmc[1] + Math.cos(angle * 0.5) * bxminusax - Math.sin(angle * 0.5) * byminusay,
-                pmc[2] + Math.sin(angle * 0.5) * bxminusax + Math.cos(angle * 0.5) * byminusay
-            ], this.board);
-
-            vecx = coords.usrCoords[1] - pmc[1];
-            vecy = coords.usrCoords[2] - pmc[2];
-
-            len = Math.sqrt(vecx * vecx + vecy * vecy);
-            vecx = vecx * (len + dx) / len;
-            vecy = vecy * (len + dy) / len;
-            vec = [pmc[1] + vecx, pmc[2] + vecy];
-
-            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
-
-            return new Coords(Const.COORDS_BY_USER, vec, this.board);
-        };
-
-        /**
-         * Overwrite the Radius method of the sector.
-         * Used in {@link GeometryElement#setAttribute}.
-         * @param {Number, Function} value New radius.
-         */
-        el.setRadius = function (value) {
-            el.Radius = function () {
-                return Type.evaluate(value);
-            };
-        };
-
-        /**
-         * @deprecated
-         * @ignore
-         */
-        el.getRadius = function () {
-            JXG.deprecated('Sector.getRadius()', 'Sector.Radius()');
-            return this.Radius();
-        };
-
-        /**
-         * Moves the sector by the difference of two coordinates.
-         * @param {Number} method The type of coordinates used here. Possible values are {@link JXG.COORDS_BY_USER} and {@link JXG.COORDS_BY_SCREEN}.
-         * @param {Array} coords coordinates in screen/user units
-         * @param {Array} oldcoords previous coordinates in screen/user units
-         * @returns {JXG.Curve} this element
-         */
-        if (type === '3points') {
-            el.setPositionDirectly = function (method, coords, oldcoords) {
-                var dc, t, i,
-                    c = new Coords(method, coords, this.board),
-                    oldc = new Coords(method, oldcoords, this.board);
-
-                if (!el.point1.draggable() || !el.point2.draggable() || !el.point3.draggable()) {
-                    return this;
-                }
-
-                dc = Statistics.subtract(c.usrCoords, oldc.usrCoords);
-                t = this.board.create('transform', dc.slice(1), {type: 'translate'});
-                t.applyOnce([el.point1, el.point2, el.point3]);
-
-                return this;
-            };
-        }
-
-        el.prepareUpdate().update();
-
-        return el;
-    };
-
-    JXG.registerElement('sector', JXG.createSector);
-
-    /**
-     * @class A circumcircle sector is different from a {@link Sector} mostly in the way the parent elements are interpreted.
-     * At first, the circum centre is determined from the three given points. Then the sector is drawn from <tt>p1</tt> through
-     * <tt>p2</tt> to <tt>p3</tt>.
-     * @pseudo
-     * @name CircumcircleSector
-     * @augments Sector
-     * @constructor
-     * @type Sector
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 A circumcircle sector is defined by the circumcircle which is determined
-     * by these three given points. The circumcircle sector is always drawn from <tt>p1</tt> through <tt>p2</tt> to <tt>p3</tt>.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [1.5, 5.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [5.0, 3.0]),
-     *
-     *     a = board.create('circumcirclesector', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG695cf0d6-6d7a-4d4d-bfc9-34c6aa28cd04" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
- *   var board = JXG.JSXGraph.initBoard('JXG695cf0d6-6d7a-4d4d-bfc9-34c6aa28cd04', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
- *     p1 = board.create('point', [1.5, 5.0]),
- *     p2 = board.create('point', [1.0, 0.5]),
- *     p3 = board.create('point', [5.0, 3.0]),
- *
- *     a = board.create('circumcirclesector', [p1, p2, p3]);
- * })();
-     * </script><pre>
-     */
-    JXG.createCircumcircleSector = function (board, parents, attributes) {
-        var el, mp, attr, points, i;
-
-        points = Type.providePoints(board, parents, attributes, 'point');
-        if (points === false) {
-            throw new Error("JSXGraph: Can't create circumcircle sector with parent types '" +
-                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'.");
-        }
-
-        mp = board.create('circumcenter', points.slice(0, 3), attr);
-        mp.dump = false;
-
-        attr = Type.copyAttributes(attributes, board.options, 'circumcirclesector');
-        el = board.create('sector', [mp, points[0], points[2], points[1]], attr);
-
-        el.elType = 'circumcirclesector';
-        el.setParents(points);
-
-        /**
-         * Center of the circumcirclesector
-         * @memberOf CircumcircleSector.prototype
-         * @name center
-         * @type Circumcenter
-         */
-        el.center = mp;
-        el.subs = {
-            center: mp
-        };
-
-        return el;
-    };
-
-    JXG.registerElement('circumcirclesector', JXG.createCircumcircleSector);
-
-    /**
-     * @class A minor sector is a sector of a circle having measure less than or equal to
-     * 180 degrees (pi radians). It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the sector.
-     * @pseudo
-     * @name MinorSector
-     * @augments Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create sector out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('minorsector', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXGaf27ddcc-265f-428f-90dd-d31ace945800" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXGaf27ddcc-265f-428f-90dd-d31ace945800', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       a = board.create('minorsector', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createMinorSector = function (board, parents, attributes) {
-        attributes.selection = 'minor';
-        return JXG.createSector(board, parents, attributes);
-    };
-
-    JXG.registerElement('minorsector', JXG.createMinorSector);
-
-    /**
-     * @class A major sector is a sector of a circle having measure greater than or equal to
-     * 180 degrees (pi radians). It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the sector.
-     * @pseudo
-     * @name MajorSector
-     * @augments Curve
-     * @constructor
-     * @type JXG.Curve
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Major sector is a sector of a circle around p1 having measure greater than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create an arc out of three free points
-     * var p1 = board.create('point', [2.0, 2.0]);
-     * var p2 = board.create('point', [1.0, 0.5]);
-     * var p3 = board.create('point', [3.5, 1.0]);
-     *
-     * var a = board.create('majorsector', [p1, p2, p3]);
-     * </pre><div class="jxgbox" id="JXG83c6561f-7561-4047-b98d-036248a00932" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG83c6561f-7561-4047-b98d-036248a00932', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *       p1 = board.create('point', [2.0, 2.0]),
-     *       p2 = board.create('point', [1.0, 0.5]),
-     *       p3 = board.create('point', [3.5, 1.0]),
-     *
-     *       a = board.create('majorsector', [p1, p2, p3]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createMajorSector = function (board, parents, attributes) {
-        attributes.selection = 'major';
-        return JXG.createSector(board, parents, attributes);
-    };
-
-    JXG.registerElement('majorsector', JXG.createMajorSector);
-
-    /**
-     * @class The angle element is used to denote an angle defined by three points. Visually it is just a {@link Sector}
-     * element with a radius not defined by the parent elements but by an attribute <tt>radius</tt>. As opposed to the sector,
-     * an angle has two angle points and no radius point.
-     * Sector is displayed if type=="sector".
-     * If type=="square", instead of a sector a parallelogram is displayed.
-     * In case of type=="auto", a square is displayed if the angle is near orthogonal.
-     * If no name is provided the angle label is automatically set to a lower greek letter.
-     * @pseudo
-     * @name Angle
-     * @augments Sector
-     * @constructor
-     * @type Sector
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * First possiblity of input parameters are:
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 An angle is always drawn counterclockwise from <tt>p1</tt> to
-     * <tt>p3</tt> around <tt>p2</tt>.
-     *
-     * Second possibility of input parameters are:
-     * @param {JXG.Line_JXG.Line_array|number_array|number} line, line2, coords1 or direction1, coords2 or direction2, radius The angle is defined by two lines.
-     * The two legs which define the angle are given by two coordinate arrays.
-     * The points given by these coordinate arrays are projected initially (i.e. only once) onto the two lines.
-     * The other possibility is to supply directions (+/- 1).
-     *
-     * @example
-     * // Create an angle out of three free points
-     * var p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('angle', [p1, p2, p3]),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * </pre><div class="jxgbox" id="JXGa34151f9-bb26-480a-8d6e-9b8cbf789ae5" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXGa34151f9-bb26-480a-8d6e-9b8cbf789ae5', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('angle', [p1, p2, p3]),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * })();
-     * </script><pre>
-     *
-     * @example
-     * // Create an angle out of two lines and two directions
-     * var p1 = board.create('point', [-1, 4]),
-     *  p2 = board.create('point', [4, 1]),
-     *  q1 = board.create('point', [-2, -3]),
-     *  q2 = board.create('point', [4,3]),
-     *
-     *  li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
-     *  li2 = board.create('line', [q1,q2], {lastArrow:true}),
-     *
-     *  a1 = board.create('angle', [li1, li2, [5.5, 0], [4, 3]], { radius:1 }),
-     *  a2 = board.create('angle', [li1, li2, 1, -1], { radius:2 });
-     *
-     *
-     * </pre><div class="jxgbox" id="JXG3a667ddd-63dc-4594-b5f1-afac969b371f" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXG3a667ddd-63dc-4594-b5f1-afac969b371f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [-1, 4]),
-     *     p2 = board.create('point', [4, 1]),
-     *     q1 = board.create('point', [-2, -3]),
-     *     q2 = board.create('point', [4,3]),
-     *
-     *     li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
-     *     li2 = board.create('line', [q1,q2], {lastArrow:true}),
-     *
-     *     a1 = board.create('angle', [li1, li2, [5.5, 0], [4, 3]], { radius:1 }),
-     *     a2 = board.create('angle', [li1, li2, 1, -1], { radius:2 });
-     * })();
-     * </script><pre>
-     *
-     *
-     * @example
-     * // Display the angle value instead of the name
-     * var p1 = board.create('point', [0,2]);
-     * var p2 = board.create('point', [0,0]);
-     * var p3 = board.create('point', [-2,0.2]);
-     *
-     * var a = board.create('angle', [p1, p2, p3], {
-     * 	 radius: 1,
-     *   name: function() {
-     *   	return JXG.Math.Geometry.trueAngle(p1, p2, p3).toFixed(1) + '°';
-     *   }});
-     *
-     * </pre><div id="JXGc813f601-8dd3-4030-9892-25c6d8671512" class="jxgbox" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     *     (function() {
-     *         var board = JXG.JSXGraph.initBoard('JXGc813f601-8dd3-4030-9892-25c6d8671512',
-     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-     *     const board = JXG.JSXGraph.initBoard('jxgbox', {
-     *         boundingbox: [-5, 5, 5, -5], axis:true
-     *     });
-     *
-     *     var p1 = board.create('point', [0,2]);
-     *     var p2 = board.create('point', [0,0]);
-     *     var p3 = board.create('point', [-2,0.2]);
-     *
-     *     var a = board.create('angle', [p1, p2, p3], {
-     *     	radius: 1,
-     *       name: function() {
-     *       	return JXG.Math.Geometry.trueAngle(p1, p2, p3).toFixed(1) + '°';
-     *       }});
-     *
-     *     })();
-     *
-     * </script><pre>
-     *
-     *
-     * @example
-     * // Apply a transformation to an angle.
-     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     * var an1 = board.create('angle', [[-4,3.9], [-3, 4], [-3, 3]]);
-     * var an2 = board.create('curve', [an1, t]);
-     *
-     * </pre><div id="JXG4c8d9ed8-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     *     (function() {
-     *         var board = JXG.JSXGraph.initBoard('JXG4c8d9ed8-6339-11e8-9fb9-901b0e1b8723',
-     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
-     *     var an1 = board.create('angle', [[-4,3.9], [-3, 4], [-3, 3]]);
-     *     var an2 = board.create('curve', [an1, t]);
-     *
-     *     })();
-     *
-     * </script><pre>
-     *
-     */
-    JXG.createAngle = function (board, parents, attributes) {
-        var el, radius, attr, attrsub,
-            i, points,
-            type = 'invalid';
-
-        // Two lines or three points?
-        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE &&
-                parents[1].elementClass === Const.OBJECT_CLASS_LINE &&
-                (Type.isArray(parents[2]) || Type.isNumber(parents[2])) &&
-                (Type.isArray(parents[3]) || Type.isNumber(parents[3]))) {
-
-            type = '2lines';
-        } else {
-            points = Type.providePoints(board, parents, attributes, 'point');
-            if (points === false) {
-                throw new Error("JSXGraph: Can't create angle with parent types '" +
-                    (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'.");
-            }
-            type = '3points';
-        }
-
-        attr = Type.copyAttributes(attributes, board.options, 'angle');
-
-        //  If empty, create a new name
-        if (!Type.exists(attr.name) || attr.name === '') {
-            attr.name = board.generateName({type: Const.OBJECT_TYPE_ANGLE});
-        }
-
-        if (Type.exists(attr.radius)) {
-            radius = attr.radius;
-        } else {
-            radius = 0;
-        }
-
-        if (type === '2lines') {
-            parents.push(radius);
-            el = board.create('sector', parents, attr);
-            el.updateDataArraySector = el.updateDataArray;
-
-            // TODO
-            el.setAngle = function (val) {};
-            el.free = function (val) {};
-
-        } else {
-            el = board.create('sector', [points[1], points[0], points[2]], attr);
-            el.arc.visProp.priv = true;
-
-            /**
-             * The point defining the radius of the angle element. Alias for {@link Angle.prototype#radiuspoint}.
-             * @type JXG.Point
-             * @name point
-             * @memberOf Angle.prototype
-             */
-            el.point = el.point2 = el.radiuspoint = points[0];
-
-            /**
-             * Helper point for angles of type 'square'.
-             * @type JXG.Point
-             * @name pointsquare
-             * @memberOf Angle.prototype
-             */
-            el.pointsquare = el.point3 = el.anglepoint = points[2];
-
-            el.Radius = function () {
-                return Type.evaluate(radius);
-            };
-
-            el.updateDataArraySector = function () {
-                var A = this.point2,
-                    B = this.point1,
-                    C = this.point3,
-                    r = this.Radius(),
-                    d = B.Dist(A),
-                    ar,
-                    phi,
-                    sgn = 1,
-                    vp_s = Type.evaluate(this.visProp.selection);
-
-                phi = Geometry.rad(A, B, C);
-                if ((vp_s === 'minor' && phi > Math.PI) ||
-                        (vp_s === 'major' && phi < Math.PI)) {
-                    sgn = -1;
-                }
-
-                A = A.coords.usrCoords;
-                B = B.coords.usrCoords;
-                C = C.coords.usrCoords;
-
-                A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
-                C = [1, B[1] + (C[1] - B[1]) * r / d, B[2] + (C[2] - B[2]) * r / d];
-
-                ar = Geometry.bezierArc(A, B, C, true, sgn);
-
-                this.dataX = ar[0];
-                this.dataY = ar[1];
-                this.bezierDegree = 3;
-            };
-
-            /**
-            * Set an angle to a prescribed value given in radians. This is only possible if the third point of the angle, i.e.
-            * the anglepoint is a free point.
-            * @name setAngle
-            * @function
-            * @param {Number|Function} val Number or Function which returns the size of the angle in Radians
-            * @returns {Object} Pointer to the angle element..
-            * @memberOf Angle.prototype
-            *
-            * @example
-            * var p1, p2, p3, c, a, s;
-            *
-            * p1 = board.create('point',[0,0]);
-            * p2 = board.create('point',[5,0]);
-            * p3 = board.create('point',[0,5]);
-            *
-            * c1 = board.create('circle',[p1, p2]);
-            *
-            * a = board.create('angle',[p2, p1, p3], {radius:3});
-            *
-            * a.setAngle(function() {
-            *     return Math.PI / 3;
-            * });
-            * board.update();
-            *
-            * </pre><div id="JXG987c-394f-11e6-af4a-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
-            * <script type="text/javascript">
-            *     (function() {
-            *         var board = JXG.JSXGraph.initBoard('JXG987c-394f-11e6-af4a-901b0e1b8723',
-            *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-            *     var p1, p2, p3, c, a, s;
-            *
-            *     p1 = board.create('point',[0,0]);
-            *     p2 = board.create('point',[5,0]);
-            *     p3 = board.create('point',[0,5]);
-            *
-            *     c1 = board.create('circle',[p1, p2]);
-            *
-            *     a = board.create('angle',[p2, p1, p3], {radius: 3});
-            *
-            *     a.setAngle(function() {
-            *         return Math.PI / 3;
-            *     });
-            *     board.update();
-            *
-            *     })();
-            *
-            * </script><pre>
-            *
-            * @example
-            * var p1, p2, p3, c, a, s;
-            *
-            * p1 = board.create('point',[0,0]);
-            * p2 = board.create('point',[5,0]);
-            * p3 = board.create('point',[0,5]);
-            *
-            * c1 = board.create('circle',[p1, p2]);
-            *
-            * a = board.create('angle',[p2, p1, p3], {radius:3});
-            * s = board.create('slider',[[-2,1], [2,1], [0, Math.PI*0.5, 2*Math.PI]]);
-            *
-            * a.setAngle(function() {
-            *     return s.Value();
-            * });
-            * board.update();
-            *
-            * </pre><div id="JXG99957b1c-394f-11e6-af4a-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
-            * <script type="text/javascript">
-            *     (function() {
-            *         var board = JXG.JSXGraph.initBoard('JXG99957b1c-394f-11e6-af4a-901b0e1b8723',
-            *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
-            *     var p1, p2, p3, c, a, s;
-            *
-            *     p1 = board.create('point',[0,0]);
-            *     p2 = board.create('point',[5,0]);
-            *     p3 = board.create('point',[0,5]);
-            *
-            *     c1 = board.create('circle',[p1, p2]);
-            *
-            *     a = board.create('angle',[p2, p1, p3], {radius: 3});
-            *     s = board.create('slider',[[-2,1], [2,1], [0, Math.PI*0.5, 2*Math.PI]]);
-            *
-            *     a.setAngle(function() {
-            *         return s.Value();
-            *     });
-            *     board.update();
-            *
-            *     })();
-            *
-            * </script><pre>
-            *
-            */
-            el.setAngle = function (val) {
-                var t,
-                    p = this.anglepoint,
-                    q = this.radiuspoint;
-
-                if (p.draggable()) {
-                    t = this.board.create('transform', [val, this.center], {type: 'rotate'});
-                    p.addTransform(q, t);
-                    p.isDraggable = false;
-                    p.setParents(q);
-                }
-                return this;
-            };
-
-            /**
-            * Frees an angle from a prescribed value. This is only relevant if the angle size has been set by
-            * setAngle() previously. The anglepoint is set to a free point.
-            * @name free
-            * @function
-            * @returns {Object} Pointer to the angle element..
-            * @memberOf Angle.prototype
-            */
-            el.free = function () {
-                var p = this.anglepoint;
-                if (p.transformations.length > 0) {
-                    p.transformations.pop();
-                    p.isDraggable = true;
-                    p.parents = [];
-                }
-                return this;
-            };
-
-            el.setParents(points); // Important: This overwrites the parents order in underlying sector
-
-        } // end '3points'
-
-        // GEONExT compatible labels.
-        if (Type.exists(el.visProp.text)) {
-            el.label.setText(Type.evaluate(el.visProp.text));
-        }
-
-        el.elType = 'angle';
-        el.type = Const.OBJECT_TYPE_ANGLE;
-        el.subs = {};
-
-        el.updateDataArraySquare = function () {
-            var A, B, C,
-                r = this.Radius(),
-                d1, d2,
-                v, l1, l2;
-
-
-            if (type === '2lines') {
-                // This is necessary to update this.point1, this.point2, this.point3.
-                this.updateDataArraySector();
-            }
-
-            A = this.point2;
-            B = this.point1;
-            C = this.point3;
-
-            A = A.coords.usrCoords;
-            B = B.coords.usrCoords;
-            C = C.coords.usrCoords;
-
-            d1 = Geometry.distance(A, B, 3);
-            d2 = Geometry.distance(C, B, 3);
-
-            // In case of type=='2lines' this is redundant, because r == d1 == d2
-            A = [1, B[1] + (A[1] - B[1]) * r / d1, B[2] + (A[2] - B[2]) * r / d1];
-            C = [1, B[1] + (C[1] - B[1]) * r / d2, B[2] + (C[2] - B[2]) * r / d2];
-
-            v = Mat.crossProduct(C, B);
-            l1 = [-A[1] * v[1] - A[2] * v[2], A[0] * v[1], A[0] * v[2]];
-            v = Mat.crossProduct(A, B);
-            l2 = [-C[1] * v[1] - C[2] * v[2], C[0] * v[1], C[0] * v[2]];
-
-            v = Mat.crossProduct(l1, l2);
-            v[1] /= v[0];
-            v[2] /= v[0];
-
-            this.dataX = [B[1], A[1], v[1], C[1], B[1]];
-            this.dataY = [B[2], A[2], v[2], C[2], B[2]];
-
-            this.bezierDegree = 1;
-        };
-
-        el.updateDataArrayNone = function () {
-            this.dataX = [NaN];
-            this.dataY = [NaN];
-            this.bezierDegree = 1;
-        };
-
-        el.updateDataArray = function () {
-            var type = Type.evaluate(this.visProp.type),
-                deg = Geometry.trueAngle(this.point2, this.point1, this.point3),
-                vp_s = Type.evaluate(this.visProp.selection);
-
-            if ((vp_s === 'minor' && deg > 180.0) ||
-                    (vp_s === 'major' && deg < 180.0)) {
-                deg = 360.0 - deg;
-            }
-
-            if (Math.abs(deg - 90.0) < Type.evaluate(this.visProp.orthosensitivity) + Mat.eps) {
-                type = Type.evaluate(this.visProp.orthotype);
-            }
-
-            if (type === 'none') {
-                this.updateDataArrayNone();
-            } else if (type === 'square') {
-                this.updateDataArraySquare();
-            } else if (type === 'sector') {
-                this.updateDataArraySector();
-            } else if (type === 'sectordot') {
-                this.updateDataArraySector();
-                if (!this.dot.visProp.visible) {
-                    this.dot.setAttribute({visible: true});
-                }
-            }
-
-            if (!this.visProp.visible || (type !== 'sectordot' && this.dot.visProp.visible)) {
-                this.dot.setAttribute({visible: false});
-            }
-        };
-
-        /**
-         * Indicates a right angle. Invisible by default, use <tt>dot.visible: true</tt> to show.
-         * Though this dot indicates a right angle, it can be visible even if the angle is not a right
-         * one.
-         * @type JXG.Point
-         * @name dot
-         * @memberOf Angle.prototype
-         */
-        attrsub = Type.copyAttributes(attributes, board.options, 'angle', 'dot');
-        el.dot = board.create('point', [function () {
-            var A, B, r, d, a2, co, si, mat,
-                vp_s;
-
-            if (Type.exists(el.dot) && !el.dot.visProp.visible) {
-                return [0, 0];
-            }
-
-            A = el.point2.coords.usrCoords;
-            B = el.point1.coords.usrCoords;
-            r = el.Radius();
-            d = Geometry.distance(A, B, 3);
-            a2 = Geometry.rad(el.point2, el.point1, el.point3);
-
-            vp_s = Type.evaluate(el.visProp.selection);
-            if ((vp_s === 'minor' && a2 > Math.PI) ||
-                    (vp_s === 'major' && a2 < Math.PI)) {
-                a2 = -(2 * Math.PI - a2);
-            }
-            a2 *= 0.5;
-
-            co = Math.cos(a2);
-            si = Math.sin(a2);
-
-            A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
-
-            mat = [
-                [1, 0, 0],
-                [B[1] - 0.5 * B[1] * co + 0.5 * B[2] * si, co * 0.5, -si * 0.5],
-                [B[2] - 0.5 * B[1] * si - 0.5 * B[2] * co, si * 0.5,  co * 0.5]
-            ];
-            return Mat.matVecMult(mat, A);
-        }], attrsub);
-
-        el.dot.dump = false;
-        el.subs.dot = el.dot;
-
-        if (type === '2lines') {
-            for (i = 0; i < 2; i++) {
-                board.select(parents[i]).addChild(el.dot);
-            }
-        } else {
-            for (i = 0; i < 3; i++) {
-                board.select(points[i]).addChild(el.dot);
-            }
-        }
-
-        // documented in GeometryElement
-        el.getLabelAnchor = function () {
-            var vec, dx = 12,
-                A, B, r, d, a2, co, si, mat,
-                vp_s = Type.evaluate(el.visProp.selection),
-                l_vp = this.label ? this.label.visProp : this.visProp.label;
-
-            // If this is uncommented, the angle label can not be dragged
-            //if (Type.exists(this.label)) {
-            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
-            //}
-
-            if (Type.exists(this.label.visProp.fontSize)) {
-                dx = dy = Type.evaluate(this.label.visProp.fontSize);
-            }
-            dx /= this.board.unitX;
-
-            A = el.point2.coords.usrCoords;
-            B = el.point1.coords.usrCoords;
-            r = el.Radius();
-            d = Geometry.distance(A, B, 3);
-            a2 = Geometry.rad(el.point2, el.point1, el.point3);
-            if ((vp_s === 'minor' && a2 > Math.PI) ||
-                    (vp_s === 'major' && a2 < Math.PI)) {
-                a2 = -(2 * Math.PI - a2);
-            }
-            a2 *= 0.5;
-            co = Math.cos(a2);
-            si = Math.sin(a2);
-
-            A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
-
-            mat = [
-                [1, 0, 0],
-                [B[1] - 0.5 * B[1] * co + 0.5 * B[2] * si, co * 0.5, -si * 0.5],
-                [B[2] - 0.5 * B[1] * si - 0.5 * B[2] * co, si * 0.5,  co * 0.5]
-            ];
-            vec = Mat.matVecMult(mat, A);
-            vec[1] /= vec[0];
-            vec[2] /= vec[0];
-            vec[0] /= vec[0];
-
-            d = Geometry.distance(vec, B, 3);
-            vec = [vec[0], B[1] + (vec[1] - B[1]) * (r + dx) / d,  B[2] + (vec[2] - B[2]) * (r + dx) / d];
-
-            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
-
-            return new Coords(Const.COORDS_BY_USER, vec, this.board);
-        };
-
-        /**
-         * Returns the value of the angle in Radians.
-         * @memberOf Angle.prototype
-         * @name Value
-         * @function
-         * @returns {Number} The angle value in Radians
-         */
-        el.Value = function () {
-            return Geometry.rad(this.point2, this.point1, this.point3);
-        };
-
-        el.methodMap = Type.deepCopy(el.methodMap, {
-            Value: 'Value',
-            setAngle: 'setAngle',
-            free: 'free'
-        });
-
-        return el;
-    };
-
-    JXG.registerElement('angle', JXG.createAngle);
-
-    /**
-     * @class A non-reflex angle is the acute or obtuse instance of an angle.
-     * It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the sector.
-     * @pseudo
-     * @name NonReflexAngle
-     * @augments Angle
-     * @constructor
-     * @type Sector
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create a non-reflex angle out of three free points
-     * var p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('nonreflexangle', [p1, p2, p3], {radius: 2}),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * </pre><div class="jxgbox" id="JXGd0ab6d6b-63a7-48b2-8749-b02bb5e744f9" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     *   var board = JXG.JSXGraph.initBoard('JXGd0ab6d6b-63a7-48b2-8749-b02bb5e744f9', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('nonreflexangle', [p1, p2, p3], {radius: 2}),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createNonreflexAngle = function (board, parents, attributes) {
-        var el;
-
-        attributes.selection = 'minor';
-        el = JXG.createAngle(board, parents, attributes);
-
-        el.Value = function () {
-            var v = Geometry.rad(this.point2, this.point1, this.point3);
-            return (v < Math.PI) ? v : 2.0 * Math.PI - v;
-        };
-        return el;
-    };
-
-    JXG.registerElement('nonreflexangle', JXG.createNonreflexAngle);
-
-    /**
-     * @class A reflex angle is the neither acute nor obtuse instance of an angle.
-     * It is defined by a center, one point that
-     * defines the radius, and a third point that defines the angle of the sector.
-     * @pseudo
-     * @name ReflexAngle
-     * @augments Angle
-     * @constructor
-     * @type Sector
-     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
-     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
-     * @example
-     * // Create a non-reflex angle out of three free points
-     * var p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('reflexangle', [p1, p2, p3], {radius: 2}),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * </pre><div class="jxgbox" id="JXGf2a577f2-553d-4f9f-a895-2d6d4b8c60e8" style="width: 300px; height: 300px;"></div>
-     * <script type="text/javascript">
-     * (function () {
-     * var board = JXG.JSXGraph.initBoard('JXGf2a577f2-553d-4f9f-a895-2d6d4b8c60e8', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
-     *     p1 = board.create('point', [5.0, 3.0]),
-     *     p2 = board.create('point', [1.0, 0.5]),
-     *     p3 = board.create('point', [1.5, 5.0]),
-     *
-     *     a = board.create('reflexangle', [p1, p2, p3], {radius: 2}),
-     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
-     * })();
-     * </script><pre>
-     */
-    JXG.createReflexAngle = function (board, parents, attributes) {
-        var el;
-
-        attributes.selection = 'major';
-        el = JXG.createAngle(board, parents, attributes);
-
-        el.Value = function () {
-            var v = Geometry.rad(this.point2, this.point1, this.point3);
-            return (v >= Math.PI) ? v : 2.0 * Math.PI - v;
-        };
-        return el;
-    };
-
-    JXG.registerElement('reflexangle', JXG.createReflexAngle);
-
-    return {
-        createSector: JXG.createSector,
-        createCircumcircleSector: JXG.createCircumcircleSector,
-        createMinorSector: JXG.createMinorSector,
-        createMajorSector: JXG.createMajorSector,
-        createAngle: JXG.createAngle,
-        createReflexAngle: JXG.createReflexAngle,
-        createNonreflexAngle: JXG.createNonreflexAngle
-    };
-});
-
-/*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -44021,12 +47639,12 @@ define('element/sector',[
  */
 
 define('element/composition',[
-    'jxg', 'math/math', 'math/geometry', 'math/numerics', 'math/statistics', 'base/coords',
+    'jxg', 'math/math', 'math/geometry', 'math/numerics', 'base/coords',
     'utils/type', 'base/constants', 'base/point', 'base/line', 'base/circle', 'base/transformation',
-    'base/composition', 'base/curve', 'base/text', 'base/polygon', 'element/arc', 'element/sector'
-], function (JXG, Mat, Geometry, Numerics, Statistics, Coords,
+    'base/composition', 'base/curve', 'base/polygon'
+], function (JXG, Mat, Geometry, Numerics, Coords,
     Type, Const, Point, Line, Circle, Transform,
-    Composition, Curve, Text, Polygon, Arc, Sector) {
+    Composition, Curve, Polygon) {
 
     "use strict";
 
@@ -44675,7 +48293,6 @@ define('element/composition',[
         return p;
     };
 
-
     /**
      * @class A parallel is a line through a given point with the same slope as a given line.
      * @pseudo
@@ -44832,7 +48449,7 @@ define('element/composition',[
      * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
      * @param {JXG.Line,JXG.Circle,JXG.Curve,JXG.Turtle_JXG.Point} o,p The constructed line contains p which lies on the object and is orthogonal
      * to the tangent to the object in the given point.
-     * @param {Glider} p Works like above, however the object is given by {@link Glider#slideObject}.
+     * @param {Glider} p Works like above, however the object is given by {@link JXG.CoordsElement#slideObject}.
      * @example
      * // Create a normal to a circle.
      * var p1 = board.create('point', [2.0, 2.0]);
@@ -45689,7 +49306,7 @@ define('element/composition',[
      *         var a2 = board.create('reflection', [a1, li], {strokeColor: 'red'});
      *
      *         var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                           anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
+     *                           anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
      *                           fillColor: 'yellow', strokeColor: 'black'});
      *         var s2 = board.create('reflection', [s1, li], {fillColor: 'yellow', strokeColor: 'black', fillOpacity: 0.5});
      *
@@ -45723,7 +49340,7 @@ define('element/composition',[
      *         var a2 = board.create('reflection', [a1, li], {strokeColor: 'red'});
      *
      *         var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                           anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
+     *                           anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
      *                           fillColor: 'yellow', strokeColor: 'black'});
      *         var s2 = board.create('reflection', [s1, li], {fillColor: 'yellow', strokeColor: 'black', fillOpacity: 0.5});
      *
@@ -45859,7 +49476,7 @@ define('element/composition',[
      *         var a2 = board.create('mirrorelement', [a1, mirr], {strokeColor: 'red'});
      *
      *         var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                           anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
+     *                           anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
      *                           fillColor: 'yellow', strokeColor: 'black'});
      *         var s2 = board.create('mirrorelement', [s1, mirr], {fillColor: 'yellow', strokeColor: 'black', fillOpacity: 0.5});
      *
@@ -45894,7 +49511,7 @@ define('element/composition',[
      *         var a2 = board.create('mirrorelement', [a1, mirr], {strokeColor: 'red'});
      *
      *         var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
-     *                           anglepoint: {visible:true}, center: {visible: true}, radiuspoint: {visible: true},
+     *                           anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
      *                           fillColor: 'yellow', strokeColor: 'black'});
      *         var s2 = board.create('mirrorelement', [s1, mirr], {fillColor: 'yellow', strokeColor: 'black', fillOpacity: 0.5});
      *
@@ -46191,7 +49808,13 @@ define('element/composition',[
             p.inherits.push(t);
         }
 
-        /** @ignore */
+        /**
+         * Returns the current value of the integral.
+         * @memberOf Integral
+         * @name Value
+         * @function
+         * @returns {Number}
+         */
         p.Value = function () {
             return Numerics.I([pa_on_axis.X(), pb_on_axis.X()], curve.Y);
         };
@@ -46335,7 +49958,7 @@ define('element/composition',[
      * @class Creates a grid to support the user with element placement.
      * @pseudo
      * @description A grid is a set of vertical and horizontal lines to support the user with element placement. This method
-     * draws such a grid on the given board. It uses options given in {@link JXG.Options#grid}. This method does not
+     * draws such a grid on the given board. This method does not
      * take any parent elements. It is usually instantiated on the board's creation via the attribute <tt>grid</tt> set
      * to true.
      * @parameter None.
@@ -46564,14 +50187,14 @@ define('element/composition',[
             };
             a.updateDataArray = function () {
                 var i1, i2,
-                    // this will be the height of the area. We mustn't rely upon the board height because if we pan the view
+                    // This will be the height of the area. We mustn't rely upon the board height because if we pan the view
                     // such that the line is not visible anymore, the borders of the area will get visible in some cases.
                     h,
                     bb = board.getBoundingBox(),
                     factor = attr.inverse ? -1 : 1,
                     expansion = 1.5,
                     w = expansion * Math.max(bb[2] - bb[0], bb[1] - bb[3]),
-                    // fake a point (for Math.Geometry.perpendicular)
+                    // Fake a point (for Math.Geometry.perpendicular)
                     // contains centroid of the board
                     dp = {
                         coords: {
@@ -46591,7 +50214,7 @@ define('element/composition',[
                 //     slope2 = slope1;
                 // }
 
-                // calculate the area height as
+                // Calculate the area height as
                 //  expansion times the distance of the line to the
                 // point in the middle of the top/bottom border.
                 h = expansion * Math.max(Geometry.perpendicular(parents[0], dp, board)[0].distance(Const.COORDS_BY_USER, dp.coords), w);
@@ -46625,46 +50248,100 @@ define('element/composition',[
             parents[0].visProp.curvetype === 'functiongraph') {
 
             a = board.create('curve', [[], []], attr);
+            a.updateDataArray = function() {
+                var bbox = this.board.getBoundingBox(),
+                    points = [],
+                    infty, first, last,
+                    len, i,
+                    mi = parents[0].minX(),
+                    ma = parents[0].maxX(),
+                    curve_mi, curve_ma,
+                    firstx,
+                    lastx,
+                    enlarge = (bbox[1] - bbox[3]) * 0.3, // enlarge the bbox vertically by this amount
+                    inverse = Type.evaluate(this.visProp.inverse);
 
-            a.hasPoint = function () {
-                return false;
-            };
-            a.updateDataArray = function () {
-                var bb = this.board.getBoundingBox(),
-                    expansion = 1.5,
-                    points = parents[0].points,
-                    first, last,
-                    // inverse == true <=> y >= f(x)
-                    hline = expansion * (attr.inverse ? bb[1] : bb[3]),
-                    i, le;
+                // inverse == true <=> Fill area with y >= f(x)
+                infty = (inverse) ? 1 : 3; // we will use either bbox[1] or bbox[3] below
 
                 this.dataX = [];
                 this.dataY = [];
-
-                le = points.length;
-                if (le <= 0) {
+                len = parents[0].points.length;
+                if (len == 0) {
                     return;
                 }
 
-                for (i = 0; i < le; i++) {
-                    first = i;
-                    if (points[i].isReal()) { break; }
-                }
-                for (i = le - 1; i >= first; i--) {
-                    last = i;
-                    if (points[i].isReal()) { break; }
-                }
+                bbox[1] += enlarge;
+                bbox[3] -= enlarge;
 
-                this.dataX.push(points[first].usrCoords[1]);
-                this.dataY.push(hline);
-                for (i = first; i <= last; i++) {
-                    if (points[i].isReal()) {
-                        this.dataX.push(points[i].usrCoords[1]);
-                        this.dataY.push(points[i].usrCoords[2]);
+                last = -1;
+                while (last < len - 1) {
+
+                    // Find the first point with real coordinates on this curve segment
+                    for (i = last + 1, first = len; i < len; i++) {
+                        if (parents[0].points[i].isReal()) {
+                            first = i;
+                            break;
+                        }
                     }
-                }
-                this.dataX.push(points[last].usrCoords[1]);
-                this.dataY.push(hline);
+                    // No real points found -> exit
+                    if (first >= len) {
+                        break;
+                    }
+
+                    // Find the last point with real coordinates on this curve segment
+                    for (i = first, last = len - 1; i < len - 1; i++) {
+                        if (!parents[0].points[i + 1].isReal()) {
+                            last = i;
+                            break;
+                        }
+                    }
+
+                    firstx = parents[0].points[first].usrCoords[1];
+                    lastx = parents[0].points[last].usrCoords[1];
+
+                    // Restrict the plot interval if the function ends inside of the board
+                    curve_mi = (bbox[0] < mi) ? mi : bbox[0];
+                    curve_ma = (bbox[2] > ma) ? ma : bbox[2];
+
+                    // Found NaNs
+                    curve_mi = (first === 0)      ? curve_mi : Math.max(curve_mi, firstx);
+                    curve_ma = (last === len - 1) ? curve_ma : Math.min(curve_ma, lastx);
+
+                    // First and last relevant x-coordinate of the curve
+                    curve_mi = (first === 0)     ? mi: firstx;
+                    curve_ma = (last === len - 1)? ma: lastx;
+
+
+                    // Copy the curve points
+                    points = [];
+
+                    points.push([1, curve_mi, bbox[infty]]);
+                    points.push([1, curve_mi, parents[0].points[first].usrCoords[2]]);
+                    for (i = first; i <= last; i++) {
+                        points.push(parents[0].points[i].usrCoords);
+                    }
+                    points.push([1, curve_ma, parents[0].points[last].usrCoords[2]]);
+                    points.push([1, curve_ma, bbox[infty]]);
+                    points.push(points[0]);
+
+                    for (i = 0; i < points.length; i++) {
+                        this.dataX.push(points[i][1]);
+                        this.dataY.push(points[i][2]);
+                    }
+
+
+                    if (last < len - 1) {
+                        this.dataX.push(NaN);
+                        this.dataY.push(NaN);
+                    }
+              }
+
+            };
+
+            // Previous code:
+            a.hasPoint = function () {
+                return false;
             };
         } else {
             // Not yet practical?
@@ -46730,7 +50407,7 @@ define('element/composition',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -46836,7 +50513,7 @@ define('base/board',[
 
         /**
          * Board is in drag mode, objects aren't highlighted on mouse over and the object referenced in
-         * {JXG.Board#mouse} is updated on mouse movement.
+         * {@link JXG.Board#mouse} is updated on mouse movement.
          * @type Number
          * @constant
          * @see JXG.Board#drag_obj
@@ -46882,7 +50559,7 @@ define('base/board',[
         // this.document = attributes.document || document;
         if (Type.exists(attributes.document) && attributes.document !== false) {
             this.document = attributes.document;
-        } else if (typeof document !== 'undefined' && Type.isObject(document)) {
+        } else if (document !== undefined && Type.isObject(document)) {
             this.document = document;
         }
 
@@ -47018,7 +50695,7 @@ define('base/board',[
 
         /**
          * An array containing all geometric objects on the board in the order of construction.
-         * @type {Array}
+         * @type Array
          */
         this.objectsList = [];
 
@@ -47141,7 +50818,7 @@ define('base/board',[
          * touchStart because Android's Webkit browser fires too much of them.
          * @type Number
          */
-        // this.touchMoveLast = 0;
+        this.touchMoveLast = 0;
 
         /**
          * Contains the last time (epoch, msec) since the last getCoordsTopLeftCorner call which was not thrown away.
@@ -47247,6 +50924,14 @@ define('base/board',[
          */
         this._drag_offset = [0, 0];
 
+        /**
+         * Stores the input device used in the last down or move event.
+         * @type {String}
+         * @private
+         * @default 'mouse'
+         */
+        this._inputDevice = 'mouse';
+
         this._board_touches = [];
 
         /**
@@ -47269,6 +50954,9 @@ define('base/board',[
          * @default [ [0,0], [0,0] ]
          */
         this.selectingBox = [[0, 0], [0, 0]];
+
+        this.mathLib = Math;        // Math or JXG.Math.IntervalArithmetic
+        this.mathLibJXG = JXG.Math; // JXG.Math or JXG.Math.IntervalArithmetic
 
         if (this.attr.registerevents) {
             this.addEventHandlers();
@@ -47454,6 +51142,31 @@ define('base/board',[
          * Event Handler helpers
          *
          **********************************************************/
+
+        /**
+         * Returns false if the event has been triggered faster than the maximum frame rate.
+         *
+         * @param {Event} evt Event object given by the browser (unused)
+         * @returns {Boolean} If the event has been triggered faster than the maximum frame rate, false is returned.
+         * @private
+         * @see JXG.Board#pointerMoveListener
+         * @see JXG.Board#touchMoveListener
+         * @see JXG.Board#mouseMoveListener
+         */
+        checkFrameRate: function(evt) {
+            var time = new Date().getTime();
+
+            if ((time - this.touchMoveLast) * this.attr.maxframerate < 1000) {
+                // this.updateQuality = this.BOARD_QUALITY_HIGH;
+                // this.triggerEventHandlers(['touchmove', 'move'], [evt, this.mode]);
+
+                return false;
+            }
+            // console.log(time - this.touchMoveLast, this.attr.maxframerate);
+
+            this.touchMoveLast = time;
+            return true;
+        },
 
         /**
          * Calculates mouse coordinates relative to the boards container.
@@ -47687,7 +51400,7 @@ define('base/board',[
                 }
             }
 
-            if (collect.length > 0) {
+            if (this.attr.drag.enabled && collect.length > 0) {
                 this.mode = this.BOARD_MODE_DRAG;
             }
 
@@ -47760,7 +51473,7 @@ define('base/board',[
             if (Type.exists(drag.coords)) {
                 drag.setPositionDirectly(Const.COORDS_BY_SCREEN, this.drag_position);
             } else {
-                this.showInfobox(false);
+                this.displayInfobox(false);
                                     // Hide infobox in case the user has touched an intersection point
                                     // and drags the underlying line now.
 
@@ -47883,7 +51596,7 @@ define('base/board',[
                 S[1] /= S[0];
                 S[2] /= S[0];
 
-                if (Type.exists(evt.rotation) && evt.type != 'pointermove') {
+                if (Type.exists(evt.rotation) && evt.type !== 'pointermove') {
                     // iOS touch events contain the angle for free
                     alpha = evt.rotation - this.previousRotation;
                     this.previousRotation = evt.rotation;
@@ -48144,7 +51857,7 @@ define('base/board',[
 
             r = this.attr.pan.enabled &&
                 !this.attr.pan.needtwofingers &&
-                touches.length == 1;
+                touches.length === 1;
 
             if (r) {
                 pos = this.getMousePosition(evt, 0);
@@ -48440,7 +52153,8 @@ define('base/board',[
             var c,
                 dir1 = [],
                 dir2 = [],
-                angle, mi = 10,
+                angle,
+                mi = 10,
                 isPinch = false,
                 // Save zoomFactors
                 zx = this.attr.zoom.factorx,
@@ -48454,14 +52168,27 @@ define('base/board',[
             }
             evt.preventDefault();
 
+            dist = Geometry.distance([evt.touches[0].clientX, evt.touches[0].clientY],
+                [evt.touches[1].clientX, evt.touches[1].clientY], 2);
+
+            // Android pinch to zoom
+            // evt.scale was available in iOS touch events (pre iOS 13)
+            // evt.scale is undefined in Android
+            if (evt.scale === undefined) {
+                evt.scale = dist / this.prevDist;
+            }
+
+            if (!Type.exists(this.prevCoords)) {
+                return false;
+            }
             // Compute the angle of the two finger directions
             dir1 = [evt.touches[0].clientX - this.prevCoords[0][0],
                     evt.touches[0].clientY - this.prevCoords[0][1]];
             dir2 = [evt.touches[1].clientX - this.prevCoords[1][0],
                     evt.touches[1].clientY - this.prevCoords[1][1]];
 
-            if ((Math.abs(dir1[0]) < mi && Math.abs(dir1[1]) < mi) ||
-                (Math.abs(dir2[0]) < mi && Math.abs(dir2[1]) < mi)) {
+            if ((dir1[0] * dir1[0] + dir1[1] * dir1[1] < mi * mi) &&
+                (dir2[0] * dir2[0] + dir2[1] * dir2[1] < mi * mi)) {
                     return false;
             }
 
@@ -48470,15 +52197,6 @@ define('base/board',[
                 Math.abs(angle) > Math.PI * 0.2 &&
                 Math.abs(angle) < Math.PI * 1.8) {
                 isPinch = true;
-            }
-
-            dist = Geometry.distance([evt.touches[0].clientX, evt.touches[0].clientY],
-                            [evt.touches[1].clientX, evt.touches[1].clientY], 2);
-
-            // Android pinch to zoom
-            if (evt.scale === undefined) {
-                // evt.scale is undefined in Android
-                evt.scale = dist / this.prevDist;
             }
 
             if (this.isPreviousGesture !== 'pan' && !isPinch) {
@@ -48703,7 +52421,6 @@ define('base/board',[
         pointerDownListener: function (evt, object) {
             var i, j, k, pos, elements, sel,
                 type = 'mouse', // in case of no browser
-                eps,
                 found, target, result;
 
             // Temporary fix for Firefox pointer events:
@@ -48742,9 +52459,9 @@ define('base/board',[
             }
 
             // Mouse, touch or pen device
-            type = this._getPointerInputDevice(evt);
-            eps = this.options.precision[type];
-            this.options.precision.hasPoint = eps;
+            this._inputDevice = this._getPointerInputDevice(evt);
+            type = this._inputDevice;
+            this.options.precision.hasPoint = this.options.precision[type];
 
             // This should be easier than the touch events. Every pointer device gets its own pointerId, e.g. the mouse
             // always has id 1, fingers and pens get unique ids every time a pointerDown event is fired and they will
@@ -48764,7 +52481,7 @@ define('base/board',[
                 return;     // don't continue as a normal click
             }
 
-            if (object) {
+            if (this.attr.drag.enabled && object) {
                 elements = [ object ];
                 this.mode = this.BOARD_MODE_DRAG;
             } else {
@@ -48867,7 +52584,7 @@ define('base/board',[
          */
         pointerOutListener: function (evt) {
             if (evt.target === this.containerObj ||
-                (this.renderer.type == 'svg' && evt.target === this.renderer.foreignObjLayer)) {
+                (this.renderer.type === 'svg' && evt.target === this.renderer.foreignObjLayer)) {
                 this.pointerUpListener(evt);
             }
             return this.mode === this.BOARD_MODE_NONE;
@@ -48880,18 +52597,22 @@ define('base/board',[
          */
         pointerMoveListener: function (evt) {
             var i, j, pos,
-                type = this._getPointerInputDevice(evt);
+                type = 'mouse'; // in case of no browser
 
-            if (this._getPointerInputDevice(evt) == 'touch' && !this._pointerIsTouchRegistered(evt)) {
+            if (this._getPointerInputDevice(evt) === 'touch' && !this._pointerIsTouchRegistered(evt)) {
                 // Test, if there was a previous down event of this _getPointerId
                 // (in case it is a touch event).
                 // Otherwise this move event is ignored. This is necessary e.g. for sketchometry.
                 return this.BOARD_MODE_NONE;
             }
 
+            if (this.checkFrameRate(evt)) {
+                return false;
+            }
+
             if (this.mode !== this.BOARD_MODE_DRAG) {
                 this.dehighlightAll();
-                this.showInfobox(false);
+                this.displayInfobox(false);
             }
 
             if (this.mode !== this.BOARD_MODE_NONE) {
@@ -48900,6 +52621,10 @@ define('base/board',[
             }
 
             this.updateQuality = this.BOARD_QUALITY_LOW;
+            // Mouse, touch or pen device
+            this._inputDevice = this._getPointerInputDevice(evt);
+            type = this._inputDevice;
+            this.options.precision.hasPoint = this.options.precision[type];
 
             // selection
             if (this.selectingMode) {
@@ -48945,9 +52670,9 @@ define('base/board',[
                         }
                     }
                 } else {
-                    if (this._getPointerInputDevice(evt) == 'touch') {
+                    if (this._getPointerInputDevice(evt) === 'touch') {
                         this._pointerAddBoardTouches(evt);
-                        if (this._board_touches.length == 2) {
+                        if (this._board_touches.length === 2) {
                             evt.touches = this._board_touches;
                             this.gestureChangeListener(evt);
                         }
@@ -48962,7 +52687,7 @@ define('base/board',[
             // Hiding the infobox is commented out, since it prevents showing the infobox
             // on IE 11+ on 'over'
             //if (this.mode !== this.BOARD_MODE_DRAG) {
-                //this.showInfobox(false);
+                //this.displayInfobox(false);
             //}
             this.triggerEventHandlers(['touchmove', 'move', 'pointermove', 'MSPointerMove'], [evt, this.mode]);
             this.updateQuality = this.BOARD_QUALITY_HIGH;
@@ -48979,7 +52704,7 @@ define('base/board',[
             var i, j, found;
 
             this.triggerEventHandlers(['touchend', 'up', 'pointerup', 'MSPointerUp'], [evt]);
-            this.showInfobox(false);
+            this.displayInfobox(false);
 
             if (evt) {
                 for (i = 0; i < this.touches.length; i++) {
@@ -49074,6 +52799,7 @@ define('base/board',[
             }
 
             // multitouch
+            this._inputDevice = 'touch';
             this.options.precision.hasPoint = this.options.precision.touch;
 
             // This is the most critical part. first we should run through the existing touches and collect all targettouches that don't belong to our
@@ -49239,7 +52965,7 @@ define('base/board',[
             // Touch events on empty areas of the board are handled here:
             // 1. case: one finger. If allowed, this triggers pan with one finger
             if (this.mode === this.BOARD_MODE_NONE && this.touchOriginMoveStart(evt)) {
-            } else if (evtTouches.length == 2 &&
+            } else if (evtTouches.length === 2 &&
                         (this.mode === this.BOARD_MODE_NONE ||
                          this.mode === this.BOARD_MODE_MOVE_ORIGIN /*||
                          (this.mode === this.BOARD_MODE_DRAG && this.touches.length == 1) */
@@ -49269,6 +52995,10 @@ define('base/board',[
             var i, pos1, pos2, time,
                 evtTouches = evt[JXG.touchProperty];
 
+            if (this.checkFrameRate(evt)) {
+                return false;
+            }
+
             if (this.mode !== this.BOARD_MODE_NONE) {
                 evt.preventDefault();
                 evt.stopPropagation();
@@ -49276,9 +53006,10 @@ define('base/board',[
 
             if (this.mode !== this.BOARD_MODE_DRAG) {
                 this.dehighlightAll();
-                this.showInfobox(false);
+                this.displayInfobox(false);
             }
 
+            this._inputDevice = 'touch';
             this.options.precision.hasPoint = this.options.precision.touch;
             this.updateQuality = this.BOARD_QUALITY_LOW;
 
@@ -49336,7 +53067,7 @@ define('base/board',[
                             }
                         }
                     } else {
-                        if (evtTouches.length == 2) {
+                        if (evtTouches.length === 2) {
                             this.gestureChangeListener(evt);
                         }
                         // Move event without dragging an element
@@ -49347,9 +53078,8 @@ define('base/board',[
             }
 
             if (this.mode !== this.BOARD_MODE_DRAG) {
-                this.showInfobox(false);
+                this.displayInfobox(false);
             }
-
 
             this.triggerEventHandlers(['touchmove', 'move'], [evt, this.mode]);
             this.options.precision.hasPoint = this.options.precision.mouse;
@@ -49370,7 +53100,7 @@ define('base/board',[
                 evtTouches = evt && evt[JXG.touchProperty];
 
             this.triggerEventHandlers(['touchend', 'up'], [evt]);
-            this.showInfobox(false);
+            this.displayInfobox(false);
 
             // selection
             if (this.selectingMode) {
@@ -49514,6 +53244,8 @@ define('base/board',[
                 return;
             }
 
+            this._inputDevice = 'mouse';
+            this.options.precision.hasPoint = this.options.precision.mouse;
             pos = this.getMousePosition(evt);
 
             // selection
@@ -49577,13 +53309,17 @@ define('base/board',[
         mouseMoveListener: function (evt) {
             var pos;
 
+            if (this.checkFrameRate(evt)) {
+                return false;
+            }
+
             pos = this.getMousePosition(evt);
 
             this.updateQuality = this.BOARD_QUALITY_LOW;
 
             if (this.mode !== this.BOARD_MODE_DRAG) {
                 this.dehighlightAll();
-                this.showInfobox(false);
+                this.displayInfobox(false);
             }
 
             // we have to check for four cases:
@@ -49703,7 +53439,7 @@ define('base/board',[
 
             this.infobox.dump = false;
 
-            this.showInfobox(false);
+            this.displayInfobox(false);
             return this;
         },
 
@@ -49711,12 +53447,18 @@ define('base/board',[
          * Updates and displays a little info box to show coordinates of current selected points.
          * @param {JXG.GeometryElement} el A GeometryElement
          * @returns {JXG.Board} Reference to the board
+         * @see JXG.Board#displayInfobox
+         * @see JXG.Board#showInfobox
+         * @see Point#showInfobox
+         *
          */
         updateInfobox: function (el) {
             var x, y, xc, yc,
-            vpinfoboxdigits;
+            vpinfoboxdigits,
+            vpsi = Type.evaluate(el.visProp.showinfobox);
 
-            if (!Type.evaluate(el.visProp.showinfobox)) {
+            if ((!Type.evaluate(this.attr.showinfobox) &&  vpsi === 'inherit') ||
+                !vpsi) {
                 return this;
             }
 
@@ -49745,7 +53487,7 @@ define('base/board',[
                     this.highlightCustomInfobox(el.infoboxText, el);
                 }
 
-                this.showInfobox(true);
+                this.displayInfobox(true);
             }
             return this;
         },
@@ -49757,14 +53499,22 @@ define('base/board',[
          * In this way, many DOM access can be avoided.
          *
          * @param  {Boolean} val true for visible, false for invisible
-         * @return {JXG.Board} Reference to the board.
+         * @returns {JXG.Board} Reference to the board.
+         * @see JXG.Board#updateInfobox
+         *
          */
-        showInfobox: function(val) {
+        displayInfobox: function(val) {
             if (this.infobox.hiddenByParent == val) {
                 this.infobox.hiddenByParent = !val;
                 this.infobox.prepareUpdate().updateVisibility(val).updateRenderer();
             }
             return this;
+        },
+
+        // Alias for displayInfobox to be backwards compatible.
+        // The method showInfobox clashes with the board attribute showInfobox
+        showInfobox: function(val) {
+            return this.displayInfobox(val);
         },
 
         /**
@@ -50373,9 +54123,9 @@ define('base/board',[
          * Removes object from board and renderer.
          * <p>
          * <b>Performance hints:</b> It is recommended to use the object's id.
-         * If many elements are removed, it is best to call board.suspendUpdate()
+         * If many elements are removed, it is best to call <tt>board.suspendUpdate()</tt>
          * before looping through the elements to be removed and call
-         * board.unsuspendUpdate() after the loop. Further, it is advisable to loop
+         * <tt>board.unsuspendUpdate()</tt> after the loop. Further, it is advisable to loop
          * in reverse order, i.e. remove the object in reverse order of their creation time.
          *
          * @param {JXG.GeometryElement|Array} object The object to remove or array of objects to be removed.
@@ -50407,7 +54157,7 @@ define('base/board',[
             }
 
             try {
-                // // remove all children.
+                // remove all children.
                 for (el in object.childElements) {
                     if (object.childElements.hasOwnProperty(el)) {
                         object.childElements[el].board.removeObject(object.childElements[el]);
@@ -52239,7 +55989,7 @@ define('base/board',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -52452,7 +56202,7 @@ define('renderer/svg',[
             var node2, node3,
                 id = el.id + 'Triangle',
                 type = null,
-                v,
+                v, h,
                 ev_fa = Type.evaluate(el.visProp.firstarrow),
                 ev_la = Type.evaluate(el.visProp.lastarrow);
 
@@ -52472,8 +56222,18 @@ define('renderer/svg',[
             node2.setAttributeNS(null, 'markerUnits', 'strokeWidth'); // 'strokeWidth' 'userSpaceOnUse');
 
             /*
+               Types 1, 2:
                The arrow head is an isosceles triangle with base length 10 and height 10.
-               This 10 units are scaled to strokeWidth * arrowSize pixels, see
+
+               Type 3:
+               A rectangle
+
+               Types 4, 5, 6:
+               Defined by Bezier curves from mp_arrowheads.html
+
+               In any case but type 3 the arrow head is 10 units long,
+               type 3 is 10 unitsb high.
+               These 10 units are scaled to strokeWidth * arrowSize pixels, see
                this._setArrowWidth().
 
                See also abstractRenderer.updateLine() where the line path is shortened accordingly.
@@ -52485,22 +56245,44 @@ define('renderer/svg',[
                Therefore, the offset refX has to be adapted to the path type.
             */
             node3 = this.container.ownerDocument.createElementNS(this.svgNamespace, 'path');
+            h = 5;
             if (idAppendix === 'End') {
                 // First arrow
                 if (JXG.exists(ev_fa.type)) {
                     type = Type.evaluate(ev_fa.type);
                 }
 
+                v = 0;
                 if (type === 2) {
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 4.9 : 0.0;
                     node3.setAttributeNS(null, 'd', 'M 10,0 L 0,5 L 10,10 L 5,5 z');
                 } else if (type === 3) {
-                    //node2.setAttributeNS(null, 'refX', 3.33);
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 3.33 : 1;
                     node3.setAttributeNS(null, 'd', 'M 0,0 L 3.33,0 L 3.33,10 L 0,10 z');
+                } else if (type === 4) {
+                    // insetRatio:0.8 tipAngle:45 wingCurve:15 tailCurve:0
+                    h = 3.31;
+                    node3.setAttributeNS(null, 'd', 'M 0.00,3.31 C 3.53,3.84 7.13,4.50 10.00,6.63 C 9.33,5.52 8.67,4.42 8.00,3.31 C 8.67,2.21 9.33,1.10 10.00,0.00 C 7.13,2.13 3.53,2.79 0.00,3.31');
+                } else if (type === 5) {
+                    // insetRatio:0.9 tipAngle:40 wingCurve:5 tailCurve:15
+                    h = 3.28;
+                    node3.setAttributeNS(null, 'd', 'M 0.00,3.28 C 3.39,4.19 6.81,5.07 10.00,6.55 C 9.38,5.56 9.00,4.44 9.00,3.28 C 9.00,2.11 9.38,0.99 10.00,0.00 C 6.81,1.49 3.39,2.37 0.00,3.28');
+                } else if (type === 6) {
+                    // insetRatio:0.9 tipAngle:35 wingCurve:5 tailCurve:0
+                    h = 2.84;
+                    node3.setAttributeNS(null, 'd', 'M 0.00,2.84 C 3.39,3.59 6.79,4.35 10.00,5.68 C 9.67,4.73 9.33,3.78 9.00,2.84 C 9.33,1.89 9.67,0.95 10.00,0.00 C 6.79,1.33 3.39,2.09 0.00,2.84');
                 } else {
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 9.9 : 0.0;
+                    // type == 1 or > 6
                     node3.setAttributeNS(null, 'd', 'M 10,0 L 0,5 L 10,10 z');
+                }
+                if (/*!Type.exists(el.rendNode.getTotalLength) && */el.elementClass === Const.OBJECT_CLASS_LINE) {
+                    if (type === 2) {
+                        v = 4.9;
+                    } else if (type === 3) {
+                        v = 3.3;
+                    } else if (type === 4 || type === 5 || type === 6) {
+                        v = 6.66;
+                    } else {
+                        v = 10.0;
+                    }
                 }
             } else {
                 // Last arrow
@@ -52508,19 +56290,41 @@ define('renderer/svg',[
                     type = Type.evaluate(ev_la.type);
                 }
 
+                v = 10.0;
                 if (type === 2) {
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 5.1 : 9.9;
                     node3.setAttributeNS(null, 'd', 'M 0,0 L 10,5 L 0,10 L 5,5 z');
                 } else if (type === 3) {
-                    //node2.setAttributeNS(null, 'refX', 0.1);
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 0.1 : 3.33;
+                    v = 3.3;
                     node3.setAttributeNS(null, 'd', 'M 0,0 L 3.33,0 L 3.33,10 L 0,10 z');
+                } else if (type === 4) {
+                    // insetRatio:0.8 tipAngle:45 wingCurve:15 tailCurve:0
+                    h = 3.31;
+                    node3.setAttributeNS(null, 'd', 'M 10.00,3.31 C 6.47,3.84 2.87,4.50 0.00,6.63 C 0.67,5.52 1.33,4.42 2.00,3.31 C 1.33,2.21 0.67,1.10 0.00,0.00 C 2.87,2.13 6.47,2.79 10.00,3.31');
+                } else if (type === 5) {
+                    // insetRatio:0.9 tipAngle:40 wingCurve:5 tailCurve:15
+                    h = 3.28;
+                    node3.setAttributeNS(null, 'd', 'M 10.00,3.28 C 6.61,4.19 3.19,5.07 0.00,6.55 C 0.62,5.56 1.00,4.44 1.00,3.28 C 1.00,2.11 0.62,0.99 0.00,0.00 C 3.19,1.49 6.61,2.37 10.00,3.28');
+                } else if (type === 6) {
+                    // insetRatio:0.9 tipAngle:35 wingCurve:5 tailCurve:0
+                    h = 2.84;
+                    node3.setAttributeNS(null, 'd', 'M 10.00,2.84 C 6.61,3.59 3.21,4.35 0.00,5.68 C 0.33,4.73 0.67,3.78 1.00,2.84 C 0.67,1.89 0.33,0.95 0.00,0.00 C 3.21,1.33 6.61,2.09 10.00,2.84');
                 } else {
-                    v = (el.elementClass === Const.OBJECT_CLASS_LINE) ? 0.1 : 9.9;
+                    // type == 1 or > 6
                     node3.setAttributeNS(null, 'd', 'M 0,0 L 10,5 L 0,10 z');
                 }
+                if (/*!Type.exists(el.rendNode.getTotalLength) &&*/ el.elementClass === Const.OBJECT_CLASS_LINE) {
+                    if (type === 2) {
+                        v = 5.1;
+                    } else if (type === 3) {
+                        v = 0.02;
+                    } else if (type === 4 || type === 5 || type === 6) {
+                        v = 3.33;
+                    } else {
+                        v = 0.05;
+                    }
+                }
             }
-            node2.setAttributeNS(null, 'refY', 5);
+            node2.setAttributeNS(null, 'refY', h);
             node2.setAttributeNS(null, 'refX', v);
 
             node2.appendChild(node3);
@@ -52557,20 +56361,35 @@ define('renderer/svg',[
             var s, d;
 
             if (node) {
-                if (width === 0) {
-                    node.setAttributeNS(null, 'display', 'none');
-                } else {
+                // if (width === 0) {
+                //     // display:none does not work well in webkit
+                //     node.setAttributeNS(null, 'display', 'none');
+                // } else {
                     s = width;
                     d = s * size;
                     node.setAttributeNS(null, 'viewBox', (0) + ' ' + (0) + ' ' + (s * 10) + ' ' + (s * 10));
                     node.setAttributeNS(null, 'markerHeight', d);
                     node.setAttributeNS(null, 'markerWidth', d);
                     node.setAttributeNS(null, 'display', 'inherit');
-                }
+                // }
 
                 if (this.isIE) {
                     parentNode.parentNode.insertBefore(parentNode, parentNode);
                 }
+            }
+        },
+
+        // already documented in JXG.AbstractRenderer
+        shortenPath: function(node, offFirst, offLast) {
+            var le, stroke;
+
+            if (!(offFirst === 0 && offLast === 0) && Type.exists(node.getTotalLength)) {
+                try {
+                    le = node.getTotalLength();
+                    stroke = le - offFirst - offLast;
+                    node.style.strokeDasharray = stroke + ' ' + offFirst + ' ' + stroke + ' ' + offLast;
+                    node.style.strokeDashoffset = stroke;
+                } catch (err) {}
             }
         },
 
@@ -52627,6 +56446,8 @@ define('renderer/svg',[
 
             node.setAttributeNS(null, 'stroke', Type.evaluate(ticks.visProp.strokecolor));
             node.setAttributeNS(null, 'fill', 'none');
+            // node.setAttributeNS(null, 'fill', Type.evaluate(ticks.visProp.fillcolor));
+            // node.setAttributeNS(null, 'fill-opacity', Type.evaluate(ticks.visProp.fillopacity));
             node.setAttributeNS(null, 'stroke-opacity', Type.evaluate(ticks.visProp.strokeopacity));
             node.setAttributeNS(null, 'stroke-width', Type.evaluate(ticks.visProp.strokewidth));
             this.updatePathPrim(node, tickStr, ticks.board);
@@ -52760,7 +56581,15 @@ define('renderer/svg',[
         updateImageURL: function (el) {
             var url = Type.evaluate(el.url);
 
-            el.rendNode.setAttributeNS(this.xlinkNamespace, 'xlink:href', url);
+            if (el._src !== url) {
+                el.imgIsLoaded = false;
+                el.rendNode.setAttributeNS(this.xlinkNamespace, 'xlink:href', url);
+                el._src = url;
+
+                return true;
+            }
+
+            return false;
         },
 
         // already documented in JXG.AbstractRenderer
@@ -52807,11 +56636,23 @@ define('renderer/svg',[
         },
 
         // already documented in JXG.AbstractRenderer
+        setLayer: function (el, level) {
+            if (!Type.exists(level)) {
+                level = 0;
+            } else if (level >= Options.layer.numlayers) {
+                level = Options.layer.numlayers - 1;
+            }
+
+            this.layer[level].appendChild(el.rendNode);
+        },
+
+        // already documented in JXG.AbstractRenderer
         makeArrows: function (el) {
             var node2,
                 ev_fa = Type.evaluate(el.visProp.firstarrow),
                 ev_la = Type.evaluate(el.visProp.lastarrow);
 
+            // Test if the arrow heads already exist
             if (el.visPropOld.firstarrow === ev_fa &&
                 el.visPropOld.lastarrow === ev_la) {
                 if (this.isIE && el.visPropCalc.visible &&
@@ -53332,7 +57173,7 @@ define('renderer/svg',[
          * If "testAttribute" is the empty string, the function
          * is called immediately, otherwise it is called in a timeOut.
          *
-         * This is necessary to realize smooth transitions buit avoid transistions
+         * This is necessary to realize smooth transitions but avoid transitions
          * when first creating the objects.
          *
          * Usually, the string in testAttribute is the visPropOld attribute
@@ -53699,7 +57540,13 @@ define('renderer/svg',[
         },
 
         /**
+         * Return a data URI of the SVG code representeing the construction.
+         * The SVG code of the construction is base64 encoded. The return string starts
+         * with "data:image/svg+xml;base64,...".
          *
+         * @param {Boolean} ignoreTexts If true, the foreignObject tag is taken out from the SVG root.
+         * This is necessary for older versions of Safari. Default: false
+         * @returns {String}  data URI string
          */
         dumpToDataURI: function (ignoreTexts) {
             var svgRoot = this.svgRoot,
@@ -53921,11 +57768,10 @@ define('renderer/svg',[
                 node.style.height = (h) + 'px';
                 node.style.zIndex = this.container.style.zIndex + 120;
 
-                // Position the div exactly over the JSXGraph board
-                cPos = board.getCoordsTopLeftCorner();
+                // Try to position the div exactly over the JSXGraph board
                 node.style.position = 'absolute';
-                node.style.left = (cPos[0]) + 'px';
-                node.style.top = (cPos[1]) + 'px';
+                node.style.top = this.container.offsetTop + 'px';
+                node.style.left = this.container.offsetLeft + 'px';
             }
 
             if (!isDebug) {
@@ -53959,7 +57805,7 @@ define('renderer/svg',[
                 // Add all nodes
                 node.appendChild(img);
                 node.appendChild(button);
-                parent.appendChild(node);
+                parent.insertBefore(node, this.container.nextSibling);
             }
 
             // Hide navigation bar in board
@@ -54002,7 +57848,7 @@ define('renderer/svg',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -55045,7 +58891,7 @@ define('renderer/vml',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -55160,20 +59006,26 @@ define('renderer/canvas',[
          * @see JXG.AbstractRenderer#drawArrows
          * @private
          */
-        _drawFilledPolygon: function (shape) {
+        _drawFilledPolygon: function (shape, degree) {
             var i, len = shape.length,
                 context = this.context;
 
             if (len > 0) {
                 context.beginPath();
                 context.moveTo(shape[0][0], shape[0][1]);
-                for (i = 0; i < len; i++) {
-                    if (i > 0) {
+                if (degree == 1) {
+                    for (i = 1; i < len; i++) {
                         context.lineTo(shape[i][0], shape[i][1]);
+                    }
+                } else {
+                    for (i = 1; i < len; i += 3) {
+                        context.bezierCurveTo(shape[i][0], shape[i][1], shape[i + 1][0], shape[i + 1][1], shape[i + 2][0], shape[i + 2][1]);
                     }
                 }
                 context.lineTo(shape[0][0], shape[0][1]);
+                context.closePath();
                 context.fill();
+                context.stroke();
             }
         },
 
@@ -55594,14 +59446,16 @@ define('renderer/canvas',[
          * @private
          */
         drawArrows: function (el, scr1, scr2, hl) {
-             // not done yet for curves and arcs.
              var x1, y1, x2, y2,
                  w0, w,
                  arrowHead,
                  arrowTail,
                  context = this.context,
-                 size = 3,
+                 size = 6,
                  type = 1,
+                 degree_fa = 1,
+                 degree_la = 1,
+                 i, len,
                  d1x, d1y, d2x, d2y, last,
                  ang1, ang2,
                  ev_fa = Type.evaluate(el.visProp.firstarrow),
@@ -55643,7 +59497,7 @@ define('renderer/canvas',[
                 w0 = Type.evaluate(el.visProp[hl + 'strokewidth']);
 
                 if (ev_fa) {
-                    size = 3;
+                    size = 6;
                     if (Type.exists(ev_fa.size)) {
                         size = Type.evaluate(ev_fa.size);
                     }
@@ -55669,6 +59523,81 @@ define('renderer/canvas',[
                                  [ 0.0,        w * 0.5],
                                  [ w / 3.0,    w * 0.5]
                              ];
+                    } else if (type === 4) {
+                        w /= 10;
+                        degree_fa = 3;
+                        arrowTail = [
+                            [10.00, 3.31],
+                            [6.47, 3.84],
+                            [2.87, 4.50],
+                            [0.00, 6.63],
+                            [0.67, 5.52],
+                            [1.33, 4.42],
+                            [2.00, 3.31],
+                            [1.33, 2.21],
+                            [0.67, 1.10],
+                            [0.00, 0.00],
+                            [2.87, 2.13],
+                            [6.47, 2.79],
+                            [10.00, 3.31]
+                        ];
+                        len = arrowTail.length;
+                        for (i = 0; i < len; i++) {
+                            arrowTail[i][0] *= -w;
+                            arrowTail[i][1] *= w;
+                            arrowTail[i][0] += 10 * w;
+                            arrowTail[i][1] -= 3.31 * w;
+                        }
+                    } else if (type === 5) {
+                        w /= 10;
+                        degree_fa = 3;
+                        arrowTail = [
+                            [10.00,3.28],
+                            [6.61,4.19],
+                            [3.19,5.07],
+                            [0.00,6.55],
+                            [0.62,5.56],
+                            [1.00,4.44],
+                            [1.00,3.28],
+                            [1.00,2.11],
+                            [0.62,0.99],
+                            [0.00,0.00],
+                            [3.19,1.49],
+                            [6.61,2.37],
+                            [10.00,3.28]
+                        ];
+                        len = arrowTail.length;
+                        for (i = 0; i < len; i++) {
+                            arrowTail[i][0] *= -w;
+                            arrowTail[i][1] *= w;
+                            arrowTail[i][0] += 10 * w;
+                            arrowTail[i][1] -= 3.28 * w;
+                        }
+                    } else if (type === 6) {
+                        w /= 10;
+                        degree_fa = 3;
+                        arrowTail = [
+                            [10.00,2.84],
+                            [6.61,3.59],
+                            [3.21,4.35],
+                            [0.00,5.68],
+                            [0.33,4.73],
+                            [0.67,3.78],
+                            [1.00,2.84],
+                            [0.67,1.89],
+                            [0.33,0.95],
+                            [0.00,0.00],
+                            [3.21,1.33],
+                            [6.61,2.09],
+                            [10.00,2.84]
+                        ];
+                        len = arrowTail.length;
+                        for (i = 0; i < len; i++) {
+                            arrowTail[i][0] *= -w;
+                            arrowTail[i][1] *= w;
+                            arrowTail[i][0] += 10 * w;
+                            arrowTail[i][1] -= 2.84 * w;
+                        }
                     } else {
                         arrowTail = [
                              [ w,   -w * 0.5],
@@ -55679,7 +59608,7 @@ define('renderer/canvas',[
                 }
 
                 if (ev_la) {
-                    size = 3;
+                    size = 6;
                     if (Type.exists(ev_la.size)) {
                         size = Type.evaluate(ev_la.size);
                     }
@@ -55705,6 +59634,85 @@ define('renderer/canvas',[
                                  [ 0.0,        w * 0.5],
                                  [-w / 3.0,    w * 0.5]
                              ];
+                    } else if (type === 4) {
+                        w /= 10;
+                        degree_la = 3;
+                        arrowHead = [
+                            [10.00, 3.31],
+                            [6.47, 3.84],
+                            [2.87, 4.50],
+                            [0.00, 6.63],
+                            [0.67, 5.52],
+                            [1.33, 4.42],
+                            [2.00, 3.31],
+                            [1.33, 2.21],
+                            [0.67, 1.10],
+                            [0.00, 0.00],
+                            [2.87, 2.13],
+                            [6.47, 2.79],
+                            [10.00, 3.31]
+                        ];
+                        len = arrowHead.length;
+                        for (i = 0; i < len; i++) {
+                            arrowHead[i][0] *= w;
+                            arrowHead[i][1] *= w;
+                            arrowHead[i][0] -= 10 * w;
+                            arrowHead[i][1] -= 3.31 * w;
+
+                        }
+                    } else if (type === 5) {
+                        w /= 10;
+                        degree_la = 3;
+                        arrowHead = [
+                            [10.00,3.28],
+                            [6.61,4.19],
+                            [3.19,5.07],
+                            [0.00,6.55],
+                            [0.62,5.56],
+                            [1.00,4.44],
+                            [1.00,3.28],
+                            [1.00,2.11],
+                            [0.62,0.99],
+                            [0.00,0.00],
+                            [3.19,1.49],
+                            [6.61,2.37],
+                            [10.00,3.28]
+                        ];
+                        len = arrowHead.length;
+                        for (i = 0; i < len; i++) {
+                            arrowHead[i][0] *= w;
+                            arrowHead[i][1] *= w;
+                            arrowHead[i][0] -= 10 * w;
+                            arrowHead[i][1] -= 3.28 * w;
+
+                        }
+                    } else if (type === 6) {
+                        w /= 10;
+                        degree_la = 3;
+                        arrowHead = [
+                            [10.00,2.84],
+                            [6.61,3.59],
+                            [3.21,4.35],
+                            [0.00,5.68],
+                            [0.33,4.73],
+                            [0.67,3.78],
+                            [1.00,2.84],
+                            [0.67,1.89],
+                            [0.33,0.95],
+                            [0.00,0.00],
+                            [3.21,1.33],
+                            [6.61,2.09],
+                            [10.00,2.84]
+                        ];
+                        len = arrowHead.length;
+                        for (i = 0; i < len; i++) {
+                            arrowHead[i][0] *= w;
+                            arrowHead[i][1] *= w;
+                            arrowHead[i][0] -= 10 * w;
+                            arrowHead[i][1] -= 2.84 * w;
+
+                        }
+
                     } else {
                         arrowHead = [
                              [ -w, -w * 0.5],
@@ -55716,11 +59724,12 @@ define('renderer/canvas',[
 
                 context.save();
                 if (this._setColor(el, 'stroke', 'fill')) {
+                    this._setColor(el, 'stroke');
                     if (ev_fa) {
-                        this._drawFilledPolygon(this._translateShape(this._rotateShape(arrowTail, ang1), x1, y1));
+                        this._drawFilledPolygon(this._translateShape(this._rotateShape(arrowTail, ang1), x1, y1), degree_fa);
                     }
                     if (ev_la) {
-                        this._drawFilledPolygon(this._translateShape(this._rotateShape(arrowHead, ang2), x2, y2));
+                        this._drawFilledPolygon(this._translateShape(this._rotateShape(arrowHead, ang2), x2, y2), degree_la);
                     }
                 }
                 context.restore();
@@ -55729,35 +59738,38 @@ define('renderer/canvas',[
 
         // documented in AbstractRenderer
         drawLine: function (el) {
-            var obj,
+            var c1_org, c2_org,
                 c1 = new Coords(Const.COORDS_BY_USER, el.point1.coords.usrCoords, el.board),
                 c2 = new Coords(Const.COORDS_BY_USER, el.point2.coords.usrCoords, el.board),
                 margin = null,
-                hl,
-                ev_fa = Type.evaluate(el.visProp.firstarrow),
-                ev_la = Type.evaluate(el.visProp.lastarrow);
+                hl, w, arrowData;
 
             if (!el.visPropCalc.visible) {
                 return;
             }
 
-            if (ev_fa || ev_la) {
+            hl = this._getHighlighted(el);
+            w = Type.evaluate(el.visProp[hl + 'strokewidth']);
+            arrowData = this.getArrowHeadData(el, w, hl);
+
+            if (arrowData.evFirst || arrowData.evLast) {
                 margin = -4;
             }
             Geometry.calcStraight(el, c1, c2, margin);
+            c1_org = new Coords(Const.COORDS_BY_USER, c1.usrCoords, el.board);
+            c2_org = new Coords(Const.COORDS_BY_USER, c2.usrCoords, el.board);
 
-            hl = this._getHighlighted(el);
-            obj = this.getPositionArrowHead(el, c1, c2, Type.evaluate(el.visProp[hl + 'strokewidth']), hl);
+            this.getPositionArrowHead(el, c1, c2, arrowData);
 
             this.context.beginPath();
-            this.context.moveTo(obj.c1.scrCoords[1] + obj.d1x, obj.c1.scrCoords[2] + obj.d1y);
-            this.context.lineTo(obj.c2.scrCoords[1] - obj.d2x, obj.c2.scrCoords[2] - obj.d2y);
+            this.context.moveTo(c1.scrCoords[1], c1.scrCoords[2]);
+            this.context.lineTo(c2.scrCoords[1], c2.scrCoords[2]);
             this._stroke(el);
 
-            if ((ev_fa && obj.sFirst > 0) ||
-                (ev_la && obj.sLast > 0)) {
+            if ((arrowData.evFirst/* && obj.sFirst > 0*/) ||
+                (arrowData.evLast/* && obj.sLast > 0*/)) {
 
-                this.drawArrows(el, obj.c1, obj.c2, hl);
+                this.drawArrows(el, c1_org, c2_org, hl);
             }
         },
 
@@ -56369,7 +60381,7 @@ define('renderer/canvas',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -57032,7 +61044,7 @@ define('renderer/no',['jxg', 'renderer/abstract'], function (JXG, AbstractRender
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -57205,8 +61217,113 @@ define('jsxgraph',[
         },
 
         /**
+         * Merge the user supplied attributes with the attributes in options.js
+         *
+         * @param {Object} attributes User supplied attributes
+         * @returns {Object} Merged attributes for the board
+         *
+         * @private
+         */
+        _setAttributes: function(attributes) {
+            // merge attributes
+            var attr = Type.copyAttributes(attributes, Options, 'board');
+
+            // The attributes which are objects have to be copied separately
+            attr.zoom = Type.copyAttributes(attr, Options, 'board', 'zoom');
+            attr.pan = Type.copyAttributes(attr, Options, 'board', 'pan');
+            attr.drag = Type.copyAttributes(attr, Options, 'board', 'drag');
+            attr.selection = Type.copyAttributes(attr, Options, 'board', 'selection');
+            attr.navbar = Type.copyAttributes(attr.navbar, Options, 'navbar');
+
+            return attr;
+        },
+
+        /**
+         * Further initialization of the board. Set some properties from attribute values.
+         *
+         * @param {JXG.Board} board
+         * @param {Object} attr attributes object
+         * @param {Object} dimensions Object containing dimensions of the canvas
+         *
+         * @private
+         */
+        _fillBoard: function(board, attr, dimensions) {
+            board.initInfobox();
+            board.maxboundingbox = attr.maxboundingbox;
+            board.resizeContainer(dimensions.width, dimensions.height, true, true);
+            board._createSelectionPolygon(attr);
+            board.renderer.drawZoomBar(board, attr.navbar);
+            JXG.boards[board.id] = board;
+        },
+
+        /**
+         *
+         * @param {String} container HTML-ID to the HTML-element in which the board is painted.
+         * @param {*} attr An object that sets some of the board properties.
+         *
+         * @private
+         */
+        _setARIA: function(container, attr) {
+            var doc = attr.document || document,
+                node_jsx, newNode, parent,
+                id_label, id_description;
+
+            if (typeof doc !== 'object') {
+                return;
+            }
+
+            node_jsx = doc.getElementById(container);
+            parent = node_jsx.parentNode;
+
+            id_label = container + '_ARIAlabel';
+            id_description = container + '_ARIAdescription';
+
+            newNode = doc.createElement('div');
+            newNode.innerHTML = attr.title;
+            newNode.setAttribute('id', id_label);
+            newNode.style.display = 'none';
+            parent.insertBefore(newNode, node_jsx);
+
+            newNode = doc.createElement('div');
+            newNode.innerHTML = attr.description;
+            newNode.setAttribute('id', id_description);
+            newNode.style.display = 'none';
+            parent.insertBefore(newNode, node_jsx);
+
+            node_jsx.setAttribute('aria-labelledby', id_label);
+            node_jsx.setAttribute('aria-describedby', id_description);
+        },
+
+        /**
+         * Remove the two corresponding ARIA divs when freeing a board
+         *
+         * @param {JXG.Board} board
+         *
+         * @private
+         */
+        _removeARIANodes: function(board) {
+            var node, id, doc;
+
+            doc = board.document || document;
+            if (typeof doc !== 'object') {
+                return;
+            }
+
+            id = board.containerObj.getAttribute('aria-labelledby');
+            node = document.getElementById(id);
+            if (node && node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+            id = board.containerObj.getAttribute('aria-describedby');
+            node = document.getElementById(id);
+            if (node && node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+        },
+
+        /**
          * Initialise a new board.
-         * @param {String} box Html-ID to the Html-element in which the board is painted.
+         * @param {String} box HTML-ID to the HTML-element in which the board is painted.
          * @param {Object} attributes An object that sets some of the board properties. Most of these properties can be set via JXG.Options.
          * @param {Array} [attributes.boundingbox=[-5, 5, 5, -5]] An array containing four numbers describing the left, top, right and bottom boundary of the board in user coordinates
          * @param {Boolean} [attributes.keepaspectratio=false] If <tt>true</tt>, the bounding box is adjusted to the same aspect ratio as the aspect ratio of the div containing the board.
@@ -57227,14 +61344,7 @@ define('jsxgraph',[
                 board;
 
             attributes = attributes || {};
-
-            // merge attributes
-            attr = Type.copyAttributes(attributes, Options, 'board');
-            // The attributes which are objects have to be copied separately
-            attr.zoom = Type.copyAttributes(attr, Options, 'board', 'zoom');
-            attr.pan = Type.copyAttributes(attr, Options, 'board', 'pan');
-            attr.selection = Type.copyAttributes(attr, Options, 'board', 'selection');
-            attr.navbar = Type.copyAttributes(attr.navbar, Options, 'navbar');
+            attr = this._setAttributes(attributes);
 
             dimensions = Env.getDimensions(box, attr.document);
 
@@ -57276,6 +61386,7 @@ define('jsxgraph',[
             }
 
             renderer = this.initRenderer(box, dimensions, attr.document, attr.renderer);
+            this._setARIA(box, attr);
 
             // create the board
             board = new Board(box, renderer, attr.id, [originX, originY],
@@ -57285,16 +61396,12 @@ define('jsxgraph',[
                         dimensions.width, dimensions.height,
                         attr);
 
-            JXG.boards[board.id] = board;
-
             board.keepaspectratio = attr.keepaspectratio;
-            board.maxboundingbox = attr.maxboundingbox;
-            board.resizeContainer(dimensions.width, dimensions.height, true, true);
+
+            this._fillBoard(board, attr, dimensions);
 
             // create elements like axes, grid, navigation, ...
             board.suspendUpdate();
-            board.initInfobox();
-
             if (attr.axis) {
                 axattr = typeof attr.axis === 'object' ? attr.axis : {};
 
@@ -57313,20 +61420,9 @@ define('jsxgraph',[
                 board.defaultAxes.x = board.create('axis', [[0, 0], [1, 0]], axattr_x);
                 board.defaultAxes.y = board.create('axis', [[0, 0], [0, 1]], axattr_y);
             }
-
             if (attr.grid) {
                 board.create('grid', [], (typeof attr.grid === 'object' ? attr.grid : {}));
             }
-
-            board._createSelectionPolygon(attr);
-            /*
-            selectionattr = Type.copyAttributes(attr, Options, 'board', 'selection');
-            if (selectionattr.enabled === true) {
-                board.selectionPolygon = board.create('polygon', [[0, 0], [0, 0], [0, 0], [0, 0]], selectionattr);
-            }
-            */
-
-            board.renderer.drawZoomBar(board, attr.navbar);
             board.unsuspendUpdate();
 
             return board;
@@ -57338,43 +61434,51 @@ define('jsxgraph',[
          * @param {String} box HTML-ID to the HTML-element in which the board is painted.
          * @param {String} file base64 encoded string.
          * @param {String} format containing the file format: 'Geonext' or 'Intergeo'.
-         * @param {Object} [attributes]
+         * @param {Object} attributes Attributes for the board and 'encoding'.
+         *  Compressed files need encoding 'iso-8859-1'. Otherwise it probably is 'utf-8'.
+         * @param {Function} callback
          * @returns {JXG.Board} Reference to the created board.
          * @see JXG.FileReader
          * @see JXG.GeonextReader
          * @see JXG.GeogebraReader
          * @see JXG.IntergeoReader
          * @see JXG.CinderellaReader
+         *
+         * @example
+         * // Uncompressed file
+         * var board = JXG.JSXGraph.loadBoardFromFile('jxgbox', 'filename', 'geonext',
+         *      {encoding: 'utf-8'},
+         *      function (board) { console.log("Done loading"); }
+         * );
+         * // Compressed file
+         * var board = JXG.JSXGraph.loadBoardFromFile('jxgbox', 'filename', 'geonext',
+         *      {encoding: 'iso-8859-1'},
+         *      function (board) { console.log("Done loading"); }
+         * );
+         *
+         * @example
+         * // From <input type="file" id="localfile" />
+         * var file = document.getElementById('localfile').files[0];
+         * JXG.JSXGraph.loadBoardFromFile('jxgbox', file, 'geonext',
+         *      {encoding: 'utf-8'},
+         *      function (board) { console.log("Done loading"); }
+         * );
          */
         loadBoardFromFile: function (box, file, format, attributes, callback) {
-            var attr, renderer, board, dimensions,
-                selectionattr;
+            var attr, renderer, board, dimensions, encoding;
 
             attributes = attributes || {};
-
-            // merge attributes
-            attr = Type.copyAttributes(attributes, Options, 'board');
-            // The attributes which are objects have to be copied separately
-            attr.zoom = Type.copyAttributes(attributes, Options, 'board', 'zoom');
-            attr.pan = Type.copyAttributes(attributes, Options, 'board', 'pan');
-            attr.selection = Type.copyAttributes(attr, Options, 'board', 'selection');
-            attr.navbar = Type.copyAttributes(attr.navbar, Options, 'navbar');
+            attr = this._setAttributes(attributes);
 
             dimensions = Env.getDimensions(box, attr.document);
             renderer = this.initRenderer(box, dimensions, attr.document, attr.renderer);
+            this._setARIA(box, attr);
 
             /* User default parameters, in parse* the values in the gxt files are submitted to board */
             board = new Board(box, renderer, '', [150, 150], 1, 1, 50, 50, dimensions.width, dimensions.height, attr);
-            board.initInfobox();
-            board.resizeContainer(dimensions.width, dimensions.height, true, true);
-
-            FileReader.parseFileContent(file, board, format, true, callback);
-
-            selectionattr = Type.copyAttributes(attr, Options, 'board', 'selection');
-	        board.selectionPolygon = board.create('polygon', [[0, 0], [0, 0], [0, 0], [0, 0]], selectionattr);
-
-            board.renderer.drawZoomBar(board, attr.navbar);
-            JXG.boards[board.id] = board;
+            this._fillBoard(board, attr, dimensions);
+            encoding = attr.encoding || 'iso-8859-1';
+            FileReader.parseFileContent(file, board, format, true, encoding, callback);
 
             return board;
         },
@@ -57384,8 +61488,10 @@ define('jsxgraph',[
          * Intergeo, Geogebra, or Cinderella.
          * @param {String} box HTML-ID to the HTML-element in which the board is painted.
          * @param {String} string base64 encoded string.
-         * @param {String} format containing the file format: 'Geonext' or 'Intergeo'.
-         * @param {Object} [attributes]
+         * @param {String} format containing the file format: 'Geonext', 'Intergeo', 'Geogebra'.
+         * @param {Object} attributes Attributes for the board and 'encoding'.
+         *  Compressed files need encoding 'iso-8859-1'. Otherwise it probably is 'utf-8'.
+         * @param {Function} callback
          * @returns {JXG.Board} Reference to the created board.
          * @see JXG.FileReader
          * @see JXG.GeonextReader
@@ -57394,34 +61500,19 @@ define('jsxgraph',[
          * @see JXG.CinderellaReader
          */
         loadBoardFromString: function (box, string, format, attributes, callback) {
-            var attr, renderer, dimensions, board,
-                selectionattr;
+            var attr, renderer, board, dimensions;
 
             attributes = attributes || {};
-
-            // merge attributes
-            attr = Type.copyAttributes(attributes, Options, 'board');
-            // The attributes which are objects have to be copied separately
-            attr.zoom = Type.copyAttributes(attributes, Options, 'board', 'zoom');
-            attr.pan = Type.copyAttributes(attributes, Options, 'board', 'pan');
-            attr.selection = Type.copyAttributes(attr, Options, 'board', 'selection');
-            attr.navbar = Type.copyAttributes(attr.navbar, Options, 'navbar');
+            attr = this._setAttributes(attributes);
 
             dimensions = Env.getDimensions(box, attr.document);
             renderer = this.initRenderer(box, dimensions, attr.document);
+            this._setARIA(box, attr);
 
             /* User default parameters, in parse* the values in the gxt files are submitted to board */
             board = new Board(box, renderer, '', [150, 150], 1.0, 1.0, 50, 50, dimensions.width, dimensions.height, attr);
-            board.initInfobox();
-            board.resizeContainer(dimensions.width, dimensions.height, true, true);
-
+            this._fillBoard(board, attr, dimensions);
             FileReader.parseString(string, board, format, true, callback);
-
-            selectionattr = Type.copyAttributes(attr, Options, 'board', 'selection');
-	        board.selectionPolygon = board.create('polygon', [[0, 0], [0, 0], [0, 0], [0, 0]], selectionattr);
-
-            board.renderer.drawZoomBar(board, attr.navbar);
-            JXG.boards[board.id] = board;
 
             return board;
         },
@@ -57437,6 +61528,7 @@ define('jsxgraph',[
                 board = JXG.boards[board];
             }
 
+            this._removeARIANodes(board);
             board.removeEventHandlers();
             board.suspendUpdate();
 
@@ -57570,7 +61662,7 @@ define('jsxgraph',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -58522,7 +62614,2058 @@ define('base/group',[
 });
 
 /*
- Copyright 2008-2020
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Bianca Valentin,
+        Alfred Wassermann,
+        Peter Wilfahrt
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+ */
+
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ jxg
+ math/geometry
+ math/math
+ base/coords
+ base/circle
+ utils/type
+ base/constants
+  elements:
+   curve
+   midpoint
+   circumcenter
+ */
+
+/**
+ * @fileoverview In this file the geometry object Arc is defined. Arc stores all
+ * style and functional properties that are required to draw an arc on a board.
+ */
+
+define('element/arc',[
+    'jxg', 'math/geometry', 'math/math', 'base/coords', 'base/circle', 'utils/type', 'base/constants'
+], function (JXG, Geometry, Mat, Coords, Circle, Type, Const) {
+
+    "use strict";
+
+    /**
+     * @class An arc is a segment of the circumference of a circle. It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the arc.
+     *
+     * @pseudo
+     * @name Arc
+     * @augments Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 The result will be an arc of a circle around p1 through p2. The arc is drawn
+     * counter-clockwise from p2 to p3.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('arc', [p1, p2, p3]);
+     * board.create('text',[1,6,function(){return 'arclength: '+Math.round(a.Value()*100)/100}])
+     * </pre><div class="jxgbox" id="JXG114ef584-4a5e-4686-8392-c97501befb5b" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG114ef584-4a5e-4686-8392-c97501befb5b', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       a = board.create('arc', [p1, p2, p3]);
+     *       board.create('text',[1,6,function(){return 'arclength: '+Math.round(a.Value()*100)/100}])
+     * })();
+     * </script><pre>
+     *
+     * @example
+     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     * var a1 = board.create('arc', [[1, 1], [0, 1], [1, 0]], {strokeColor: 'red'});
+     * var a2 = board.create('curve', [a1, t], {strokeColor: 'red'});
+     *
+     * </pre><div id="JXG1949da46-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     *     (function() {
+     *         var board = JXG.JSXGraph.initBoard('JXG1949da46-6339-11e8-9fb9-901b0e1b8723',
+     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     *     var a1 = board.create('arc', [[1, 1], [0, 1], [1, 0]], {strokeColor: 'red'});
+     *     var a2 = board.create('curve', [a1, t], {strokeColor: 'red'});
+     *
+     *     })();
+     *
+     * </script><pre>
+     *
+     */
+    JXG.createArc = function (board, parents, attributes) {
+        var el, attr, points;
+
+        points = Type.providePoints(board, parents, attributes, 'arc', ['center', 'radiuspoint', 'anglepoint']);
+        if (points === false || points.length < 3) {
+            throw new Error("JSXGraph: Can't create Arc with parent types '" +
+                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" +
+                (typeof parents[2]) + "'." +
+                "\nPossible parent types: [point,point,point], [arc, transformation]");
+        }
+
+        attr = Type.copyAttributes(attributes, board.options, 'arc');
+        el = board.create('curve', [[0], [0]], attr);
+
+        el.elType = 'arc';
+        el.setParents(points);
+
+        /**
+         * documented in JXG.GeometryElement
+         * @ignore
+         */
+        el.type = Const.OBJECT_TYPE_ARC;
+
+        /**
+         * Center of the arc.
+         * @memberOf Arc.prototype
+         * @name center
+         * @type JXG.Point
+         */
+        el.center = points[0];
+
+        /**
+         * Point defining the arc's radius.
+         * @memberOf Arc.prototype
+         * @name radiuspoint
+         * @type JXG.Point
+         */
+        el.radiuspoint = points[1];
+        el.point2 = el.radiuspoint;
+
+        /**
+         * The point defining the arc's angle.
+         * @memberOf Arc.prototype
+         * @name anglepoint
+         * @type JXG.Point
+         */
+        el.anglepoint = points[2];
+        el.point3 = el.anglepoint;
+
+        // Add arc as child to defining points
+        el.center.addChild(el);
+        el.radiuspoint.addChild(el);
+        el.anglepoint.addChild(el);
+
+        // should be documented in options
+        el.useDirection = attr.usedirection;
+
+        // documented in JXG.Curve
+        el.updateDataArray = function () {
+            var ar, phi, det, p0c, p1c, p2c,
+                sgn = 1,
+                A = this.radiuspoint,
+                B = this.center,
+                C = this.anglepoint,
+                ev_s = Type.evaluate(this.visProp.selection);
+
+            phi = Geometry.rad(A, B, C);
+            if ((ev_s === 'minor' && phi > Math.PI) ||
+                    (ev_s === 'major' && phi < Math.PI)) {
+                sgn = -1;
+            }
+
+            // This is true for circumCircleArcs. In that case there is
+            // a fourth parent element: [center, point1, point3, point2]
+            if (this.useDirection) {
+                p0c = points[1].coords.usrCoords;
+                p1c = points[3].coords.usrCoords;
+                p2c = points[2].coords.usrCoords;
+                det = (p0c[1] - p2c[1]) * (p0c[2] - p1c[2]) - (p0c[2] - p2c[2]) * (p0c[1] - p1c[1]);
+
+                if (det < 0) {
+                    this.radiuspoint = points[1];
+                    this.anglepoint = points[2];
+                } else {
+                    this.radiuspoint = points[2];
+                    this.anglepoint = points[1];
+                }
+            }
+
+            A = A.coords.usrCoords;
+            B = B.coords.usrCoords;
+            C = C.coords.usrCoords;
+
+            ar = Geometry.bezierArc(A, B, C, false, sgn);
+
+            this.dataX = ar[0];
+            this.dataY = ar[1];
+
+            this.bezierDegree = 3;
+
+            this.updateStdform();
+            this.updateQuadraticform();
+        };
+
+        /**
+         * Determines the arc's current radius. I.e. the distance between {@link Arc#center} and {@link Arc#radiuspoint}.
+         * @memberOf Arc.prototype
+         * @name Radius
+         * @function
+         * @returns {Number} The arc's radius
+         */
+        el.Radius = function () {
+            return this.radiuspoint.Dist(this.center);
+        };
+
+        /**
+         * @deprecated Use {@link Arc#Radius}
+         * @memberOf Arc.prototype
+         * @name getRadius
+         * @function
+         * @returns {Number}
+         */
+        el.getRadius = function () {
+            JXG.deprecated('Arc.getRadius()', 'Arc.Radius()');
+            return this.Radius();
+        };
+
+        /**
+         * Returns the length of the arc.
+         * @memberOf Arc.prototype
+         * @name Value
+         * @function
+         * @returns {Number} The arc length
+         */
+        el.Value = function () {
+            return this.Radius() * Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
+        };
+
+        // documented in geometry element
+        el.hasPoint = function (x, y) {
+            var dist, checkPoint,
+                has, angle, alpha, beta,
+                invMat, c,
+                prec, type,
+                r = this.Radius(),
+                ev_s = Type.evaluate(this.visProp.selection);
+
+            if (Type.evaluate(this.visProp.hasinnerpoints)) {
+                return this.hasPointSector(x, y);
+            }
+
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
+            prec /= Math.min(this.board.unitX, this.board.unitY);
+            checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board);
+
+            if (this.transformations.length > 0) {
+                // Transform the mouse/touch coordinates
+                // back to the original position of the curve.
+                this.updateTransformMatrix();
+                invMat = Mat.inverse(this.transformMat);
+                c = Mat.matVecMult(invMat, checkPoint.usrCoords);
+                checkPoint = new Coords(Const.COORDS_BY_USER, c, this.board);
+            }
+
+            dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint);
+            has = (Math.abs(dist - r) < prec);
+
+            /**
+             * At that point we know that the user has touched the circle line.
+             * Now, we have to check, if the user has hit the arc path.
+             */
+            if (has) {
+                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
+                alpha = 0.0;
+                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
+
+                if ((ev_s === 'minor' && beta > Math.PI) ||
+                        (ev_s === 'major' && beta < Math.PI)) {
+                    alpha = beta;
+                    beta = 2 * Math.PI;
+                }
+                if (angle < alpha || angle > beta) {
+                    has = false;
+                }
+            }
+
+            return has;
+        };
+
+        /**
+         * Checks whether (x,y) is within the sector defined by the arc.
+         * @memberOf Arc.prototype
+         * @name hasPointSector
+         * @function
+         * @param {Number} x Coordinate in x direction, screen coordinates.
+         * @param {Number} y Coordinate in y direction, screen coordinates.
+         * @returns {Boolean} True if (x,y) is within the sector defined by the arc, False otherwise.
+         */
+        el.hasPointSector = function (x, y) {
+            var angle, alpha, beta,
+                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
+                r = this.Radius(),
+                dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint),
+                has = (dist < r),
+                ev_s = Type.evaluate(this.visProp.selection);
+
+            if (has) {
+                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
+                alpha = 0;
+                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
+
+                if ((ev_s === 'minor' && beta > Math.PI) ||
+                        (ev_s === 'major' && beta < Math.PI)) {
+                    alpha = beta;
+                    beta = 2 * Math.PI;
+                }
+                if (angle < alpha || angle > beta) {
+                    has = false;
+                }
+            }
+
+            return has;
+        };
+
+        // documented in geometry element
+        el.getTextAnchor = function () {
+            return this.center.coords;
+        };
+
+        // documented in geometry element
+        el.getLabelAnchor = function () {
+            var coords, vec, vecx, vecy, len,
+                angle = Geometry.rad(this.radiuspoint, this.center, this.anglepoint),
+                dx = 10 / this.board.unitX,
+                dy = 10 / this.board.unitY,
+                p2c = this.point2.coords.usrCoords,
+                pmc = this.center.coords.usrCoords,
+                bxminusax = p2c[1] - pmc[1],
+                byminusay = p2c[2] - pmc[2],
+                ev_s = Type.evaluate(this.visProp.selection),
+                l_vp = this.label ? this.label.visProp : this.visProp.label;
+
+            // If this is uncommented, the angle label can not be dragged
+            //if (Type.exists(this.label)) {
+            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
+            //}
+
+            if ((ev_s === 'minor' && angle > Math.PI) ||
+                    (ev_s === 'major' && angle < Math.PI)) {
+                angle = -(2 * Math.PI - angle);
+            }
+
+            coords = new Coords(Const.COORDS_BY_USER, [
+                pmc[1] + Math.cos(angle * 0.5) * bxminusax - Math.sin(angle * 0.5) * byminusay,
+                pmc[2] + Math.sin(angle * 0.5) * bxminusax + Math.cos(angle * 0.5) * byminusay
+            ], this.board);
+
+            vecx = coords.usrCoords[1] - pmc[1];
+            vecy = coords.usrCoords[2] - pmc[2];
+
+            len = Math.sqrt(vecx * vecx + vecy * vecy);
+            vecx = vecx * (len + dx) / len;
+            vecy = vecy * (len + dy) / len;
+            vec = [pmc[1] + vecx, pmc[2] + vecy];
+
+            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
+
+            return new Coords(Const.COORDS_BY_USER, vec, this.board);
+        };
+
+        // documentation in jxg.circle
+        el.updateQuadraticform = Circle.Circle.prototype.updateQuadraticform;
+
+        // documentation in jxg.circle
+        el.updateStdform = Circle.Circle.prototype.updateStdform;
+
+        el.methodMap = JXG.deepCopy(el.methodMap, {
+            getRadius: 'getRadius',
+            radius: 'Radius',
+            center: 'center',
+            radiuspoint: 'radiuspoint',
+            anglepoint: 'anglepoint',
+            Value: 'Value'
+        });
+
+        el.prepareUpdate().update();
+        return el;
+    };
+
+    JXG.registerElement('arc', JXG.createArc);
+
+    /**
+     * @class A semicircle is a special arc defined by two points. The arc hits both points.
+     * @pseudo
+     * @name Semicircle
+     * @augments Arc
+     * @constructor
+     * @type Arc
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point} p1,p2 The result will be a composition of an arc drawn clockwise from <tt>p1</tt> and
+     * <tt>p2</tt> and the midpoint of <tt>p1</tt> and <tt>p2</tt>.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [4.5, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     *
+     * var a = board.create('semicircle', [p1, p2]);
+     * </pre><div class="jxgbox" id="JXG5385d349-75d7-4078-b732-9ae808db1b0e" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG5385d349-75d7-4078-b732-9ae808db1b0e', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [4.5, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *
+     *       sc = board.create('semicircle', [p1, p2]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createSemicircle = function (board, parents, attributes) {
+        var el, mp, attr, points;
+
+        // we need 2 points
+        points = Type.providePoints(board, parents, attributes, 'point');
+        if (points === false || points.length !== 2) {
+            throw new Error("JSXGraph: Can't create Semicircle with parent types '" +
+                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "'." +
+                "\nPossible parent types: [point,point]");
+        }
+
+        attr = Type.copyAttributes(attributes, board.options, 'semicircle', 'center');
+        mp = board.create('midpoint', points, attr);
+        mp.dump = false;
+
+        attr = Type.copyAttributes(attributes, board.options, 'semicircle');
+        el = board.create('arc', [mp, points[1], points[0]], attr);
+        el.elType = 'semicircle';
+        el.setParents([points[0].id, points[1].id]);
+        el.subs = {
+            midpoint: mp
+        };
+        el.inherits.push(mp);
+
+        /**
+         * The midpoint of the two defining points.
+         * @memberOf Semicircle.prototype
+         * @name midpoint
+         * @type Midpoint
+         */
+        el.midpoint = el.center = mp;
+
+        return el;
+    };
+
+    JXG.registerElement('semicircle', JXG.createSemicircle);
+
+    /**
+     * @class A circumcircle arc is an {@link Arc} defined by three points. All three points lie on the arc.
+     * @pseudo
+     * @name CircumcircleArc
+     * @augments Arc
+     * @constructor
+     * @type Arc
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 The result will be a composition of an arc of the circumcircle of
+     * <tt>p1</tt>, <tt>p2</tt>, and <tt>p3</tt> and the midpoint of the circumcircle of the three points. The arc is drawn
+     * counter-clockwise from <tt>p1</tt> over <tt>p2</tt> to <tt>p3</tt>.
+     * @example
+     * // Create a circum circle arc out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('circumcirclearc', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG87125fd4-823a-41c1-88ef-d1a1369504e3" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG87125fd4-823a-41c1-88ef-d1a1369504e3', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       cca = board.create('circumcirclearc', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createCircumcircleArc = function (board, parents, attributes) {
+        var el, mp, attr, points;
+
+        // We need three points
+        points = Type.providePoints(board, parents, attributes, 'point');
+        if (points === false || points.length !== 3) {
+            throw new Error("JSXGraph: create Circumcircle Arc with parent types '" +
+                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'." +
+                "\nPossible parent types: [point,point,point]");
+        }
+
+        attr = Type.copyAttributes(attributes, board.options, 'circumcirclearc', 'center');
+        mp = board.create('circumcenter', points, attr);
+        mp.dump = false;
+
+        attr = Type.copyAttributes(attributes, board.options, 'circumcirclearc');
+        attr.usedirection = true;
+        el = board.create('arc', [mp, points[0], points[2], points[1]], attr);
+
+        el.elType = 'circumcirclearc';
+        el.setParents([points[0].id, points[1].id, points[2].id]);
+        el.subs = {
+            center: mp
+        };
+        el.inherits.push(mp);
+
+        /**
+         * The midpoint of the circumcircle of the three points defining the circumcircle arc.
+         * @memberOf CircumcircleArc.prototype
+         * @name center
+         * @type Circumcenter
+         */
+        el.center = mp;
+
+        return el;
+    };
+
+    JXG.registerElement('circumcirclearc', JXG.createCircumcircleArc);
+
+    /**
+     * @class A minor arc is a segment of the circumference of a circle having measure less than or equal to
+     * 180 degrees (pi radians). It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the arc.
+     * @pseudo
+     * @name MinorArc
+     * @augments Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor arc is an arc of a circle around p1 having measure less than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('arc', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG64ba7ca2-8728-45f3-96e5-3c7a4414de2f" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG64ba7ca2-8728-45f3-96e5-3c7a4414de2f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       a = board.create('minorarc', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     */
+
+    JXG.createMinorArc = function (board, parents, attributes) {
+        attributes.selection = 'minor';
+        return JXG.createArc(board, parents, attributes);
+    };
+
+    JXG.registerElement('minorarc', JXG.createMinorArc);
+
+    /**
+     * @class A major arc is a segment of the circumference of a circle having measure greater than or equal to
+     * 180 degrees (pi radians). It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the arc.
+     * @pseudo
+     * @name MajorArc
+     * @augments Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Major arc is an arc of a circle around p1 having measure greater than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('minorarc', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG17a10d38-5629-40a4-b150-f41806edee9f" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG17a10d38-5629-40a4-b150-f41806edee9f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       a = board.create('majorarc', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createMajorArc = function (board, parents, attributes) {
+        attributes.selection = 'major';
+        return JXG.createArc(board, parents, attributes);
+    };
+
+    JXG.registerElement('majorarc', JXG.createMajorArc);
+
+    return {
+        createArc: JXG.createArc,
+        createSemicircle: JXG.createSemicircle,
+        createCircumcircleArc: JXG.createCircumcircleArc,
+        createMinorArc: JXG.createMinorArc,
+        createMajorArc: JXG.createMajorArc
+    };
+});
+
+/*
+    Copyright 2008-2021
+        Matthias Ehmann,
+        Michael Gerhaeuser,
+        Carsten Miller,
+        Bianca Valentin,
+        Alfred Wassermann,
+        Peter Wilfahrt
+
+    This file is part of JSXGraph.
+
+    JSXGraph is free software dual licensed under the GNU LGPL or MIT License.
+
+    You can redistribute it and/or modify it under the terms of the
+
+      * GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version
+      OR
+      * MIT License: https://github.com/jsxgraph/jsxgraph/blob/master/LICENSE.MIT
+
+    JSXGraph is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License and
+    the MIT License along with JSXGraph. If not, see <http://www.gnu.org/licenses/>
+    and <http://opensource.org/licenses/MIT/>.
+ */
+
+
+/*global JXG: true, define: true*/
+/*jslint nomen: true, plusplus: true*/
+
+/* depends:
+ jxg
+ math/geometry
+ math/math
+ base/coords
+ base/constants
+ utils/type
+  elements:
+   point
+   curve
+   circumcentre
+   transform
+ */
+
+define('element/sector',[
+    'jxg', 'math/geometry', 'math/math', 'math/statistics', 'base/coords', 'base/constants', 'utils/type', 'base/point', 'base/curve',
+    'base/transformation', 'element/composition'
+], function (JXG, Geometry, Mat, Statistics, Coords, Const, Type, Point, Curve, Transform, Compositions) {
+
+    "use strict";
+
+    /**
+     * @class A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc.
+     * @pseudo
+     * @name Sector
+     * @augments JXG.Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     *
+     * First possiblity of input parameters are:
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 A sector is defined by three points: The sector's center <tt>p1</tt>,
+     * a second point <tt>p2</tt> defining the radius and a third point <tt>p3</tt> defining the angle of the sector. The
+     * Sector is always drawn counter clockwise from <tt>p2</tt> to <tt>p3</tt>
+     * <p>
+     * Second possibility of input parameters are:
+     * @param {JXG.Line_JXG.Line_array,number_array,number_number,function} line, line2, coords1 or direction1, coords2 or direction2, radius The sector is defined by two lines.
+     * The two legs which define the sector are given by two coordinates arrays which are project initially two the two lines or by two directions (+/- 1).
+     * The last parameter is the radius of the sector.
+     *
+     *
+     * @example
+     * // Create a sector out of three free points
+     * var p1 = board.create('point', [1.5, 5.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [5.0, 3.0]),
+     *
+     *     a = board.create('sector', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG49f59123-f013-4681-bfd9-338b89893156" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG49f59123-f013-4681-bfd9-338b89893156', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [1.5, 5.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [5.0, 3.0]),
+     *
+     *     a = board.create('sector', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     *
+     * @example
+     * // Create a sector out of two lines, two directions and a radius
+     * var p1 = board.create('point', [-1, 4]),
+     *  p2 = board.create('point', [4, 1]),
+     *  q1 = board.create('point', [-2, -3]),
+     *  q2 = board.create('point', [4,3]),
+     *
+     *  li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
+     *  li2 = board.create('line', [q1,q2], {lastArrow:true}),
+     *
+     *  sec1 = board.create('sector', [li1, li2, [5.5, 0], [4, 3], 3]),
+     *  sec2 = board.create('sector', [li1, li2, 1, -1, 4]);
+     *
+     * </pre><div class="jxgbox" id="JXGbb9e2809-9895-4ff1-adfa-c9c71d50aa53" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXGbb9e2809-9895-4ff1-adfa-c9c71d50aa53', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [-1, 4]),
+     *     p2 = board.create('point', [4, 1]),
+     *     q1 = board.create('point', [-2, -3]),
+     *     q2 = board.create('point', [4,3]),
+     *
+     *     li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
+     *     li2 = board.create('line', [q1,q2], {lastArrow:true}),
+     *
+     *     sec1 = board.create('sector', [li1, li2, [5.5, 0], [4, 3], 3]),
+     *     sec2 = board.create('sector', [li1, li2, 1, -1, 4]);
+     * })();
+     * </script><pre>
+     *
+     * @example
+     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     * var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
+     *                 anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
+     *                 fillColor: 'yellow', strokeColor: 'black'});
+     * var s2 = board.create('curve', [s1, t], {fillColor: 'yellow', strokeColor: 'black'});
+     *
+     * </pre><div id="JXG2e70ee14-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     *     (function() {
+     *         var board = JXG.JSXGraph.initBoard('JXG2e70ee14-6339-11e8-9fb9-901b0e1b8723',
+     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     *     var s1 = board.create('sector', [[-3.5,-3], [-3.5, -2], [-3.5,-4]], {
+     *                     anglePoint: {visible:true}, center: {visible: true}, radiusPoint: {visible: true},
+     *                     fillColor: 'yellow', strokeColor: 'black'});
+     *     var s2 = board.create('curve', [s1, t], {fillColor: 'yellow', strokeColor: 'black'});
+     *
+     *     })();
+     *
+     * </script><pre>
+     *
+     */
+    JXG.createSector = function (board, parents, attributes) {
+        var el, attr,
+            type = 'invalid',
+            s, v,
+            attrPoints = ['center', 'radiuspoint', 'anglepoint'],
+            points;
+
+        // Three points?
+        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE &&
+                parents[1].elementClass === Const.OBJECT_CLASS_LINE &&
+                (Type.isArray(parents[2]) || Type.isNumber(parents[2])) &&
+                (Type.isArray(parents[3]) || Type.isNumber(parents[3])) &&
+                (Type.isNumber(parents[4]) || Type.isFunction(parents[4]))) {
+
+            type = '2lines';
+        } else {
+            points = Type.providePoints(board, parents, attributes, 'sector', attrPoints);
+            if (points === false) {
+                throw new Error("JSXGraph: Can't create Sector with parent types '" +
+                    (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" +
+                    (typeof parents[2]) + "'.");
+            }
+            type = '3points';
+        }
+
+
+        attr = Type.copyAttributes(attributes, board.options, 'sector');
+        el = board.create('curve', [[0], [0]], attr);
+        el.type = Const.OBJECT_TYPE_SECTOR;
+        el.elType = 'sector';
+
+        if (type === '2lines') {
+            el.Radius = function () {
+                return Type.evaluate(parents[4]);
+            };
+
+            el.line1 = board.select(parents[0]);
+            el.line2 = board.select(parents[1]);
+
+            el.line1.addChild(el);
+            el.line2.addChild(el);
+            el.setParents(parents);
+
+            el.point1 = {visProp: {}};
+            el.point2 = {visProp: {}};
+            el.point3 = {visProp: {}};
+
+            /* Intersection point */
+            s = Geometry.meetLineLine(el.line1.stdform, el.line2.stdform, 0, board);
+
+            if (Type.isArray(parents[2])) {
+                /* project p1 to l1 */
+                if (parents[2].length === 2) {
+                    parents[2] = [1].concat(parents[2]);
+                }
+                /*
+                v = [0, el.line1.stdform[1], el.line1.stdform[2]];
+                v = Mat.crossProduct(v, parents[2]);
+                v = Geometry.meetLineLine(v, el.line1.stdform, 0, board);
+                */
+                v = Geometry.projectPointToLine({coords: {usrCoords: parents[2]}}, el.line1, board);
+                v = Statistics.subtract(v.usrCoords, s.usrCoords);
+                el.direction1 = (Mat.innerProduct(v, [0, el.line1.stdform[2], -el.line1.stdform[1]], 3) >= 0) ? +1 : -1;
+            } else {
+                el.direction1 = (parents[2] >= 0) ? 1 : -1;
+            }
+
+            if (Type.isArray(parents[3])) {
+                /* project p2 to l2 */
+                if (parents[3].length === 2) {
+                    parents[3] = [1].concat(parents[3]);
+                }
+                /*
+                v = [0, el.line2.stdform[1], el.line2.stdform[2]];
+                v = Mat.crossProduct(v, parents[3]);
+                v = Geometry.meetLineLine(v, el.line2.stdform, 0, board);
+                */
+                v = Geometry.projectPointToLine({coords: {usrCoords: parents[3]}}, el.line2, board);
+                v = Statistics.subtract(v.usrCoords, s.usrCoords);
+                el.direction2 = (Mat.innerProduct(v, [0, el.line2.stdform[2], -el.line2.stdform[1]], 3) >= 0) ? +1 : -1;
+            } else {
+                el.direction2 = (parents[3] >= 0) ? 1 : -1;
+            }
+
+            el.updateDataArray = function () {
+                var r, l1, l2,
+                    A = [0, 0, 0],
+                    B = [0, 0, 0],
+                    C = [0, 0, 0],
+                    ar;
+
+                l1 = this.line1;
+                l2 = this.line2;
+
+                // Intersection point of the lines
+                B = Mat.crossProduct(l1.stdform, l2.stdform);
+
+                if (Math.abs(B[0]) > Mat.eps * Mat.eps) {
+                    B[1] /= B[0];
+                    B[2] /= B[0];
+                    B[0] /= B[0];
+                }
+                // First point
+                r = this.direction1 * this.Radius();
+                A = Statistics.add(B, [0, r * l1.stdform[2], -r * l1.stdform[1]]);
+
+                // Second point
+                r = this.direction2 * this.Radius();
+                C = Statistics.add(B, [0, r * l2.stdform[2], -r * l2.stdform[1]]);
+
+                this.point2.coords = new Coords(Const.COORDS_BY_USER, A, el.board);
+                this.point1.coords = new Coords(Const.COORDS_BY_USER, B, el.board);
+                this.point3.coords = new Coords(Const.COORDS_BY_USER, C, el.board);
+
+                if (Math.abs(A[0]) < Mat.eps || Math.abs(B[0]) < Mat.eps || Math.abs(C[0]) < Mat.eps) {
+                    this.dataX = [NaN];
+                    this.dataY = [NaN];
+                    return;
+                }
+
+                ar = Geometry.bezierArc(A, B, C, true, 1);
+
+                this.dataX = ar[0];
+                this.dataY = ar[1];
+
+                this.bezierDegree = 3;
+            };
+
+            el.methodMap = JXG.deepCopy(el.methodMap, {
+                radius: 'getRadius',
+                getRadius: 'getRadius',
+                setRadius: 'setRadius'
+            });
+
+            el.prepareUpdate().update();
+
+        // end '2lines'
+
+        } else if (type === '3points') {
+
+            /**
+            * Midpoint of the sector.
+            * @memberOf Sector.prototype
+            * @name point1
+            * @type JXG.Point
+            */
+            el.point1 = points[0];
+
+            /**
+            * This point together with {@link Sector#point1} defines the radius..
+            * @memberOf Sector.prototype
+            * @name point2
+            * @type JXG.Point
+            */
+            el.point2 = points[1];
+
+            /**
+            * Defines the sector's angle.
+            * @memberOf Sector.prototype
+            * @name point3
+            * @type JXG.Point
+            */
+            el.point3 = points[2];
+
+            /* Add arc as child to defining points */
+            el.point1.addChild(el);
+            el.point2.addChild(el);
+            el.point3.addChild(el);
+
+            // useDirection is necessary for circumCircleSectors
+            el.useDirection = attributes.usedirection;
+            el.setParents(points);
+
+            /**
+            * Defines the sectors orientation in case of circumCircleSectors.
+            * @memberOf Sector.prototype
+            * @name point4
+            * @type JXG.Point
+            */
+            if (Type.exists(points[3])) {
+                el.point4 = points[3];
+                el.point4.addChild(el);
+            }
+
+            el.methodMap = JXG.deepCopy(el.methodMap, {
+                arc: 'arc',
+                center: 'center',
+                radiuspoint: 'radiuspoint',
+                anglepoint: 'anglepoint',
+                radius: 'getRadius',
+                getRadius: 'getRadius',
+                setRadius: 'setRadius'
+            });
+
+            /**
+            * documented in JXG.Curve
+            * @ignore
+            */
+            el.updateDataArray = function () {
+                var ar, det, p0c, p1c, p2c,
+                    A = this.point2,
+                    B = this.point1,
+                    C = this.point3,
+                    phi, sgn = 1,
+                    vp_s = Type.evaluate(this.visProp.selection);
+
+                if (!A.isReal || !B.isReal || !C.isReal) {
+                    this.dataX = [NaN];
+                    this.dataY = [NaN];
+                    return;
+                }
+
+                phi = Geometry.rad(A, B, C);
+                if ((vp_s === 'minor' && phi > Math.PI) ||
+                        (vp_s === 'major' && phi < Math.PI)) {
+                    sgn = -1;
+                }
+
+                // This is true for circumCircleSectors. In that case there is
+                // a fourth parent element: [midpoint, point1, point3, point2]
+                if (this.useDirection && Type.exists(this.point4)) {
+                    p0c = this.point2.coords.usrCoords;
+                    p1c = this.point4.coords.usrCoords;
+                    p2c = this.point3.coords.usrCoords;
+                    det = (p0c[1] - p2c[1]) * (p0c[2] - p1c[2]) - (p0c[2] - p2c[2]) * (p0c[1] - p1c[1]);
+
+                    if (det >= 0.0) {
+                        C = this.point2;
+                        A = this.point3;
+                    }
+                }
+
+                A = A.coords.usrCoords;
+                B = B.coords.usrCoords;
+                C = C.coords.usrCoords;
+
+                ar = Geometry.bezierArc(A, B, C, true, sgn);
+
+                this.dataX = ar[0];
+                this.dataY = ar[1];
+                this.bezierDegree = 3;
+            };
+
+            /**
+            * Returns the radius of the sector.
+            * @memberOf Sector.prototype
+            * @name Radius
+            * @function
+            * @returns {Number} The distance between {@link Sector#point1} and {@link Sector#point2}.
+            */
+            el.Radius = function () {
+                return this.point2.Dist(this.point1);
+            };
+
+            attr = Type.copyAttributes(attributes, board.options, 'sector', 'arc');
+            attr.withLabel = false;
+            attr.name += '_arc';
+            el.arc = board.create('arc', [el.point1, el.point2, el.point3], attr);
+            el.addChild(el.arc);
+        }   // end '3points'
+
+        el.center = el.point1;
+        el.radiuspoint = el.point2;
+        el.anglepoint = el.point3;
+
+        // Default hasPoint method. Documented in geometry element
+        el.hasPointCurve = function (x, y) {
+            var angle, alpha, beta,
+                prec, type,
+                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
+                r = this.Radius(),
+                dist = this.center.coords.distance(Const.COORDS_BY_USER, checkPoint),
+                has,
+                vp_s = Type.evaluate(this.visProp.selection);
+
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                prec = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                prec = this.board.options.precision.hasPoint;
+            }
+            prec /= Math.min(this.board.unitX, this.board.unitY);
+            has = (Math.abs(dist - r) < prec);
+            if (has) {
+                angle = Geometry.rad(this.point2, this.center, checkPoint.usrCoords.slice(1));
+                alpha = 0;
+                beta = Geometry.rad(this.point2, this.center, this.point3);
+
+                if ((vp_s === 'minor' && beta > Math.PI) ||
+                        (vp_s === 'major' && beta < Math.PI)) {
+                    alpha = beta;
+                    beta = 2 * Math.PI;
+                }
+
+                if (angle < alpha || angle > beta) {
+                    has = false;
+                }
+            }
+
+            return has;
+        };
+
+        /**
+        * Checks whether (x,y) is within the area defined by the sector.
+        * @memberOf Sector.prototype
+        * @name hasPointSector
+        * @function
+        * @param {Number} x Coordinate in x direction, screen coordinates.
+        * @param {Number} y Coordinate in y direction, screen coordinates.
+        * @returns {Boolean} True if (x,y) is within the sector defined by the arc, False otherwise.
+        */
+        el.hasPointSector = function (x, y) {
+            var angle,
+                checkPoint = new Coords(Const.COORDS_BY_SCREEN, [x, y], this.board),
+                r = this.Radius(),
+                dist = this.point1.coords.distance(Const.COORDS_BY_USER, checkPoint),
+                alpha,
+                beta,
+                has = (dist < r),
+                vp_s = Type.evaluate(this.visProp.selection);
+
+            if (has) {
+                angle = Geometry.rad(this.radiuspoint, this.center, checkPoint.usrCoords.slice(1));
+                alpha = 0.0;
+                beta = Geometry.rad(this.radiuspoint, this.center, this.anglepoint);
+
+                if ((vp_s === 'minor' && beta > Math.PI) ||
+                        (vp_s === 'major' && beta < Math.PI)) {
+                    alpha = beta;
+                    beta = 2 * Math.PI;
+                }
+                //if (angle > Geometry.rad(this.point2, this.point1, this.point3)) {
+                if (angle < alpha || angle > beta) {
+                    has = false;
+                }
+            }
+            return has;
+        };
+
+        el.hasPoint = function (x, y) {
+            if (Type.evaluate(this.visProp.highlightonsector) ||
+                    Type.evaluate(this.visProp.hasinnerpoints)) {
+                return this.hasPointSector(x, y);
+            }
+
+            return this.hasPointCurve(x, y);
+        };
+
+        // documented in GeometryElement
+        el.getTextAnchor = function () {
+            return this.point1.coords;
+        };
+
+        // documented in GeometryElement
+        // this method is very similar to arc.getLabelAnchor()
+        // there are some additions in the arc version though, mainly concerning
+        // "major" and "minor" arcs. but maybe these methods can be merged.
+        el.getLabelAnchor = function () {
+            var coords, vec, vecx, vecy, len,
+                angle = Geometry.rad(this.point2, this.point1, this.point3),
+                dx = 13 / this.board.unitX,
+                dy = 13 / this.board.unitY,
+                p2c = this.point2.coords.usrCoords,
+                pmc = this.point1.coords.usrCoords,
+                bxminusax = p2c[1] - pmc[1],
+                byminusay = p2c[2] - pmc[2],
+                vp_s = Type.evaluate(this.visProp.selection),
+                l_vp = this.label ? this.label.visProp : this.visProp.label;
+
+            // If this is uncommented, the angle label can not be dragged
+            //if (Type.exists(this.label)) {
+            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
+            //}
+
+            if ((vp_s === 'minor' && angle > Math.PI) ||
+                    (vp_s === 'major' && angle < Math.PI)) {
+                angle = -(2 * Math.PI - angle);
+            }
+
+            coords = new Coords(Const.COORDS_BY_USER, [
+                pmc[1] + Math.cos(angle * 0.5) * bxminusax - Math.sin(angle * 0.5) * byminusay,
+                pmc[2] + Math.sin(angle * 0.5) * bxminusax + Math.cos(angle * 0.5) * byminusay
+            ], this.board);
+
+            vecx = coords.usrCoords[1] - pmc[1];
+            vecy = coords.usrCoords[2] - pmc[2];
+
+            len = Math.sqrt(vecx * vecx + vecy * vecy);
+            vecx = vecx * (len + dx) / len;
+            vecy = vecy * (len + dy) / len;
+            vec = [pmc[1] + vecx, pmc[2] + vecy];
+
+            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
+
+            return new Coords(Const.COORDS_BY_USER, vec, this.board);
+        };
+
+        /**
+         * Overwrite the Radius method of the sector.
+         * Used in {@link GeometryElement#setAttribute}.
+         * @param {Number, Function} value New radius.
+         */
+        el.setRadius = function (value) {
+            el.Radius = function () {
+                return Type.evaluate(value);
+            };
+        };
+
+        /**
+         * @deprecated
+         * @ignore
+         */
+        el.getRadius = function () {
+            JXG.deprecated('Sector.getRadius()', 'Sector.Radius()');
+            return this.Radius();
+        };
+
+        /**
+         * Moves the sector by the difference of two coordinates.
+         * @param {Number} method The type of coordinates used here. Possible values are {@link JXG.COORDS_BY_USER} and {@link JXG.COORDS_BY_SCREEN}.
+         * @param {Array} coords coordinates in screen/user units
+         * @param {Array} oldcoords previous coordinates in screen/user units
+         * @returns {JXG.Curve} this element
+         */
+        if (type === '3points') {
+            el.setPositionDirectly = function (method, coords, oldcoords) {
+                var dc, t, i,
+                    c = new Coords(method, coords, this.board),
+                    oldc = new Coords(method, oldcoords, this.board);
+
+                if (!el.point1.draggable() || !el.point2.draggable() || !el.point3.draggable()) {
+                    return this;
+                }
+
+                dc = Statistics.subtract(c.usrCoords, oldc.usrCoords);
+                t = this.board.create('transform', dc.slice(1), {type: 'translate'});
+                t.applyOnce([el.point1, el.point2, el.point3]);
+
+                return this;
+            };
+        }
+
+        el.prepareUpdate().update();
+
+        return el;
+    };
+
+    JXG.registerElement('sector', JXG.createSector);
+
+    /**
+     * @class A circumcircle sector is different from a {@link Sector} mostly in the way the parent elements are interpreted.
+     * At first, the circum centre is determined from the three given points. Then the sector is drawn from <tt>p1</tt> through
+     * <tt>p2</tt> to <tt>p3</tt>.
+     * @pseudo
+     * @name CircumcircleSector
+     * @augments Sector
+     * @constructor
+     * @type Sector
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 A circumcircle sector is defined by the circumcircle which is determined
+     * by these three given points. The circumcircle sector is always drawn from <tt>p1</tt> through <tt>p2</tt> to <tt>p3</tt>.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [1.5, 5.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [5.0, 3.0]),
+     *
+     *     a = board.create('circumcirclesector', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG695cf0d6-6d7a-4d4d-bfc9-34c6aa28cd04" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+ *   var board = JXG.JSXGraph.initBoard('JXG695cf0d6-6d7a-4d4d-bfc9-34c6aa28cd04', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+ *     p1 = board.create('point', [1.5, 5.0]),
+ *     p2 = board.create('point', [1.0, 0.5]),
+ *     p3 = board.create('point', [5.0, 3.0]),
+ *
+ *     a = board.create('circumcirclesector', [p1, p2, p3]);
+ * })();
+     * </script><pre>
+     */
+    JXG.createCircumcircleSector = function (board, parents, attributes) {
+        var el, mp, attr, points, i;
+
+        points = Type.providePoints(board, parents, attributes, 'point');
+        if (points === false) {
+            throw new Error("JSXGraph: Can't create circumcircle sector with parent types '" +
+                (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'.");
+        }
+
+        mp = board.create('circumcenter', points.slice(0, 3), attr);
+        mp.dump = false;
+
+        attr = Type.copyAttributes(attributes, board.options, 'circumcirclesector');
+        el = board.create('sector', [mp, points[0], points[2], points[1]], attr);
+
+        el.elType = 'circumcirclesector';
+        el.setParents(points);
+
+        /**
+         * Center of the circumcirclesector
+         * @memberOf CircumcircleSector.prototype
+         * @name center
+         * @type Circumcenter
+         */
+        el.center = mp;
+        el.subs = {
+            center: mp
+        };
+
+        return el;
+    };
+
+    JXG.registerElement('circumcirclesector', JXG.createCircumcircleSector);
+
+    /**
+     * @class A minor sector is a sector of a circle having measure less than or equal to
+     * 180 degrees (pi radians). It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the sector.
+     * @pseudo
+     * @name MinorSector
+     * @augments Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create sector out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('minorsector', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXGaf27ddcc-265f-428f-90dd-d31ace945800" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXGaf27ddcc-265f-428f-90dd-d31ace945800', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       a = board.create('minorsector', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createMinorSector = function (board, parents, attributes) {
+        attributes.selection = 'minor';
+        return JXG.createSector(board, parents, attributes);
+    };
+
+    JXG.registerElement('minorsector', JXG.createMinorSector);
+
+    /**
+     * @class A major sector is a sector of a circle having measure greater than or equal to
+     * 180 degrees (pi radians). It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the sector.
+     * @pseudo
+     * @name MajorSector
+     * @augments Curve
+     * @constructor
+     * @type JXG.Curve
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Major sector is a sector of a circle around p1 having measure greater than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create an arc out of three free points
+     * var p1 = board.create('point', [2.0, 2.0]);
+     * var p2 = board.create('point', [1.0, 0.5]);
+     * var p3 = board.create('point', [3.5, 1.0]);
+     *
+     * var a = board.create('majorsector', [p1, p2, p3]);
+     * </pre><div class="jxgbox" id="JXG83c6561f-7561-4047-b98d-036248a00932" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG83c6561f-7561-4047-b98d-036248a00932', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *       p1 = board.create('point', [2.0, 2.0]),
+     *       p2 = board.create('point', [1.0, 0.5]),
+     *       p3 = board.create('point', [3.5, 1.0]),
+     *
+     *       a = board.create('majorsector', [p1, p2, p3]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createMajorSector = function (board, parents, attributes) {
+        attributes.selection = 'major';
+        return JXG.createSector(board, parents, attributes);
+    };
+
+    JXG.registerElement('majorsector', JXG.createMajorSector);
+
+    /**
+     * @class The angle element is used to denote an angle defined by three points. Visually it is just a {@link Sector}
+     * element with a radius not defined by the parent elements but by an attribute <tt>radius</tt>. As opposed to the sector,
+     * an angle has two angle points and no radius point.
+     * Sector is displayed if type=="sector".
+     * If type=="square", instead of a sector a parallelogram is displayed.
+     * In case of type=="auto", a square is displayed if the angle is near orthogonal.
+     * If no name is provided the angle label is automatically set to a lower greek letter.
+     * @pseudo
+     * @name Angle
+     * @augments Sector
+     * @constructor
+     * @type Sector
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * First possiblity of input parameters are:
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p1 An angle is always drawn counterclockwise from <tt>p1</tt> to
+     * <tt>p3</tt> around <tt>p2</tt>.
+     *
+     * Second possibility of input parameters are:
+     * @param {JXG.Line_JXG.Line_array|number_array|number} line, line2, coords1 or direction1, coords2 or direction2, radius The angle is defined by two lines.
+     * The two legs which define the angle are given by two coordinate arrays.
+     * The points given by these coordinate arrays are projected initially (i.e. only once) onto the two lines.
+     * The other possibility is to supply directions (+/- 1).
+     *
+     * @example
+     * // Create an angle out of three free points
+     * var p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('angle', [p1, p2, p3]),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * </pre><div class="jxgbox" id="JXGa34151f9-bb26-480a-8d6e-9b8cbf789ae5" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXGa34151f9-bb26-480a-8d6e-9b8cbf789ae5', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('angle', [p1, p2, p3]),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * })();
+     * </script><pre>
+     *
+     * @example
+     * // Create an angle out of two lines and two directions
+     * var p1 = board.create('point', [-1, 4]),
+     *  p2 = board.create('point', [4, 1]),
+     *  q1 = board.create('point', [-2, -3]),
+     *  q2 = board.create('point', [4,3]),
+     *
+     *  li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
+     *  li2 = board.create('line', [q1,q2], {lastArrow:true}),
+     *
+     *  a1 = board.create('angle', [li1, li2, [5.5, 0], [4, 3]], { radius:1 }),
+     *  a2 = board.create('angle', [li1, li2, 1, -1], { radius:2 });
+     *
+     *
+     * </pre><div class="jxgbox" id="JXG3a667ddd-63dc-4594-b5f1-afac969b371f" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXG3a667ddd-63dc-4594-b5f1-afac969b371f', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [-1, 4]),
+     *     p2 = board.create('point', [4, 1]),
+     *     q1 = board.create('point', [-2, -3]),
+     *     q2 = board.create('point', [4,3]),
+     *
+     *     li1 = board.create('line', [p1,p2], {strokeColor:'black', lastArrow:true}),
+     *     li2 = board.create('line', [q1,q2], {lastArrow:true}),
+     *
+     *     a1 = board.create('angle', [li1, li2, [5.5, 0], [4, 3]], { radius:1 }),
+     *     a2 = board.create('angle', [li1, li2, 1, -1], { radius:2 });
+     * })();
+     * </script><pre>
+     *
+     *
+     * @example
+     * // Display the angle value instead of the name
+     * var p1 = board.create('point', [0,2]);
+     * var p2 = board.create('point', [0,0]);
+     * var p3 = board.create('point', [-2,0.2]);
+     *
+     * var a = board.create('angle', [p1, p2, p3], {
+     * 	 radius: 1,
+     *   name: function() {
+     *   	return JXG.Math.Geometry.trueAngle(p1, p2, p3).toFixed(1) + '°';
+     *   }});
+     *
+     * </pre><div id="JXGc813f601-8dd3-4030-9892-25c6d8671512" class="jxgbox" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     *     (function() {
+     *         var board = JXG.JSXGraph.initBoard('JXGc813f601-8dd3-4030-9892-25c6d8671512',
+     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+     *
+     *     var p1 = board.create('point', [0,2]);
+     *     var p2 = board.create('point', [0,0]);
+     *     var p3 = board.create('point', [-2,0.2]);
+     *
+     *     var a = board.create('angle', [p1, p2, p3], {
+     *     	radius: 1,
+     *       name: function() {
+     *       	return JXG.Math.Geometry.trueAngle(p1, p2, p3).toFixed(1) + '°';
+     *       }});
+     *
+     *     })();
+     *
+     * </script><pre>
+     *
+     *
+     * @example
+     * // Apply a transformation to an angle.
+     * var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     * var an1 = board.create('angle', [[-4,3.9], [-3, 4], [-3, 3]]);
+     * var an2 = board.create('curve', [an1, t]);
+     *
+     * </pre><div id="JXG4c8d9ed8-6339-11e8-9fb9-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     *     (function() {
+     *         var board = JXG.JSXGraph.initBoard('JXG4c8d9ed8-6339-11e8-9fb9-901b0e1b8723',
+     *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+     *     var t = board.create('transform', [2, 1.5], {type: 'scale'});
+     *     var an1 = board.create('angle', [[-4,3.9], [-3, 4], [-3, 3]]);
+     *     var an2 = board.create('curve', [an1, t]);
+     *
+     *     })();
+     *
+     * </script><pre>
+     *
+     */
+    JXG.createAngle = function (board, parents, attributes) {
+        var el, radius, attr, attrsub,
+            i, points,
+            type = 'invalid';
+
+        // Two lines or three points?
+        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE &&
+                parents[1].elementClass === Const.OBJECT_CLASS_LINE &&
+                (Type.isArray(parents[2]) || Type.isNumber(parents[2])) &&
+                (Type.isArray(parents[3]) || Type.isNumber(parents[3]))) {
+
+            type = '2lines';
+        } else {
+            points = Type.providePoints(board, parents, attributes, 'point');
+            if (points === false) {
+                throw new Error("JSXGraph: Can't create angle with parent types '" +
+                    (typeof parents[0]) + "' and '" + (typeof parents[1]) + "' and '" + (typeof parents[2]) + "'.");
+            }
+            type = '3points';
+        }
+
+        attr = Type.copyAttributes(attributes, board.options, 'angle');
+
+        //  If empty, create a new name
+        if (!Type.exists(attr.name) || attr.name === '') {
+            attr.name = board.generateName({type: Const.OBJECT_TYPE_ANGLE});
+        }
+
+        if (Type.exists(attr.radius)) {
+            radius = attr.radius;
+        } else {
+            radius = 0;
+        }
+
+        if (type === '2lines') {
+            parents.push(radius);
+            el = board.create('sector', parents, attr);
+            el.updateDataArraySector = el.updateDataArray;
+
+            // TODO
+            el.setAngle = function (val) {};
+            el.free = function (val) {};
+
+        } else {
+            el = board.create('sector', [points[1], points[0], points[2]], attr);
+            el.arc.visProp.priv = true;
+
+            /**
+             * The point defining the radius of the angle element.
+             * Alias for {@link Sector#radiuspoint}.
+             * @type JXG.Point
+             * @name point
+             * @memberOf Angle.prototype
+             *
+             */
+            el.point = el.point2 = el.radiuspoint = points[0];
+
+            /**
+             * Helper point for angles of type 'square'.
+             * @type JXG.Point
+             * @name pointsquare
+             * @memberOf Angle.prototype
+             */
+            el.pointsquare = el.point3 = el.anglepoint = points[2];
+
+            el.Radius = function () {
+                return Type.evaluate(radius);
+            };
+
+            el.updateDataArraySector = function () {
+                var A = this.point2,
+                    B = this.point1,
+                    C = this.point3,
+                    r = this.Radius(),
+                    d = B.Dist(A),
+                    ar,
+                    phi,
+                    sgn = 1,
+                    vp_s = Type.evaluate(this.visProp.selection);
+
+                phi = Geometry.rad(A, B, C);
+                if ((vp_s === 'minor' && phi > Math.PI) ||
+                        (vp_s === 'major' && phi < Math.PI)) {
+                    sgn = -1;
+                }
+
+                A = A.coords.usrCoords;
+                B = B.coords.usrCoords;
+                C = C.coords.usrCoords;
+
+                A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
+                C = [1, B[1] + (C[1] - B[1]) * r / d, B[2] + (C[2] - B[2]) * r / d];
+
+                ar = Geometry.bezierArc(A, B, C, true, sgn);
+
+                this.dataX = ar[0];
+                this.dataY = ar[1];
+                this.bezierDegree = 3;
+            };
+
+            /**
+            * Set an angle to a prescribed value given in radians. This is only possible if the third point of the angle, i.e.
+            * the anglepoint is a free point.
+            * @name setAngle
+            * @function
+            * @param {Number|Function} val Number or Function which returns the size of the angle in Radians
+            * @returns {Object} Pointer to the angle element..
+            * @memberOf Angle.prototype
+            *
+            * @example
+            * var p1, p2, p3, c, a, s;
+            *
+            * p1 = board.create('point',[0,0]);
+            * p2 = board.create('point',[5,0]);
+            * p3 = board.create('point',[0,5]);
+            *
+            * c1 = board.create('circle',[p1, p2]);
+            *
+            * a = board.create('angle',[p2, p1, p3], {radius:3});
+            *
+            * a.setAngle(function() {
+            *     return Math.PI / 3;
+            * });
+            * board.update();
+            *
+            * </pre><div id="JXG987c-394f-11e6-af4a-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
+            * <script type="text/javascript">
+            *     (function() {
+            *         var board = JXG.JSXGraph.initBoard('JXG987c-394f-11e6-af4a-901b0e1b8723',
+            *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+            *     var p1, p2, p3, c, a, s;
+            *
+            *     p1 = board.create('point',[0,0]);
+            *     p2 = board.create('point',[5,0]);
+            *     p3 = board.create('point',[0,5]);
+            *
+            *     c1 = board.create('circle',[p1, p2]);
+            *
+            *     a = board.create('angle',[p2, p1, p3], {radius: 3});
+            *
+            *     a.setAngle(function() {
+            *         return Math.PI / 3;
+            *     });
+            *     board.update();
+            *
+            *     })();
+            *
+            * </script><pre>
+            *
+            * @example
+            * var p1, p2, p3, c, a, s;
+            *
+            * p1 = board.create('point',[0,0]);
+            * p2 = board.create('point',[5,0]);
+            * p3 = board.create('point',[0,5]);
+            *
+            * c1 = board.create('circle',[p1, p2]);
+            *
+            * a = board.create('angle',[p2, p1, p3], {radius:3});
+            * s = board.create('slider',[[-2,1], [2,1], [0, Math.PI*0.5, 2*Math.PI]]);
+            *
+            * a.setAngle(function() {
+            *     return s.Value();
+            * });
+            * board.update();
+            *
+            * </pre><div id="JXG99957b1c-394f-11e6-af4a-901b0e1b8723" class="jxgbox" style="width: 300px; height: 300px;"></div>
+            * <script type="text/javascript">
+            *     (function() {
+            *         var board = JXG.JSXGraph.initBoard('JXG99957b1c-394f-11e6-af4a-901b0e1b8723',
+            *             {boundingbox: [-8, 8, 8,-8], axis: true, showcopyright: false, shownavigation: false});
+            *     var p1, p2, p3, c, a, s;
+            *
+            *     p1 = board.create('point',[0,0]);
+            *     p2 = board.create('point',[5,0]);
+            *     p3 = board.create('point',[0,5]);
+            *
+            *     c1 = board.create('circle',[p1, p2]);
+            *
+            *     a = board.create('angle',[p2, p1, p3], {radius: 3});
+            *     s = board.create('slider',[[-2,1], [2,1], [0, Math.PI*0.5, 2*Math.PI]]);
+            *
+            *     a.setAngle(function() {
+            *         return s.Value();
+            *     });
+            *     board.update();
+            *
+            *     })();
+            *
+            * </script><pre>
+            *
+            */
+            el.setAngle = function (val) {
+                var t,
+                    p = this.anglepoint,
+                    q = this.radiuspoint;
+
+                if (p.draggable()) {
+                    t = this.board.create('transform', [val, this.center], {type: 'rotate'});
+                    p.addTransform(q, t);
+                    p.isDraggable = false;
+                    p.setParents(q);
+                }
+                return this;
+            };
+
+            /**
+            * Frees an angle from a prescribed value. This is only relevant if the angle size has been set by
+            * setAngle() previously. The anglepoint is set to a free point.
+            * @name free
+            * @function
+            * @returns {Object} Pointer to the angle element..
+            * @memberOf Angle.prototype
+            */
+            el.free = function () {
+                var p = this.anglepoint;
+                if (p.transformations.length > 0) {
+                    p.transformations.pop();
+                    p.isDraggable = true;
+                    p.parents = [];
+                }
+                return this;
+            };
+
+            el.setParents(points); // Important: This overwrites the parents order in underlying sector
+
+        } // end '3points'
+
+        // GEONExT compatible labels.
+        if (Type.exists(el.visProp.text)) {
+            el.label.setText(Type.evaluate(el.visProp.text));
+        }
+
+        el.elType = 'angle';
+        el.type = Const.OBJECT_TYPE_ANGLE;
+        el.subs = {};
+
+        el.updateDataArraySquare = function () {
+            var A, B, C,
+                r = this.Radius(),
+                d1, d2,
+                v, l1, l2;
+
+
+            if (type === '2lines') {
+                // This is necessary to update this.point1, this.point2, this.point3.
+                this.updateDataArraySector();
+            }
+
+            A = this.point2;
+            B = this.point1;
+            C = this.point3;
+
+            A = A.coords.usrCoords;
+            B = B.coords.usrCoords;
+            C = C.coords.usrCoords;
+
+            d1 = Geometry.distance(A, B, 3);
+            d2 = Geometry.distance(C, B, 3);
+
+            // In case of type=='2lines' this is redundant, because r == d1 == d2
+            A = [1, B[1] + (A[1] - B[1]) * r / d1, B[2] + (A[2] - B[2]) * r / d1];
+            C = [1, B[1] + (C[1] - B[1]) * r / d2, B[2] + (C[2] - B[2]) * r / d2];
+
+            v = Mat.crossProduct(C, B);
+            l1 = [-A[1] * v[1] - A[2] * v[2], A[0] * v[1], A[0] * v[2]];
+            v = Mat.crossProduct(A, B);
+            l2 = [-C[1] * v[1] - C[2] * v[2], C[0] * v[1], C[0] * v[2]];
+
+            v = Mat.crossProduct(l1, l2);
+            v[1] /= v[0];
+            v[2] /= v[0];
+
+            this.dataX = [B[1], A[1], v[1], C[1], B[1]];
+            this.dataY = [B[2], A[2], v[2], C[2], B[2]];
+
+            this.bezierDegree = 1;
+        };
+
+        el.updateDataArrayNone = function () {
+            this.dataX = [NaN];
+            this.dataY = [NaN];
+            this.bezierDegree = 1;
+        };
+
+        el.updateDataArray = function () {
+            var type = Type.evaluate(this.visProp.type),
+                deg = Geometry.trueAngle(this.point2, this.point1, this.point3),
+                vp_s = Type.evaluate(this.visProp.selection);
+
+            if ((vp_s === 'minor' && deg > 180.0) ||
+                    (vp_s === 'major' && deg < 180.0)) {
+                deg = 360.0 - deg;
+            }
+
+            if (Math.abs(deg - 90.0) < Type.evaluate(this.visProp.orthosensitivity) + Mat.eps) {
+                type = Type.evaluate(this.visProp.orthotype);
+            }
+
+            if (type === 'none') {
+                this.updateDataArrayNone();
+            } else if (type === 'square') {
+                this.updateDataArraySquare();
+            } else if (type === 'sector') {
+                this.updateDataArraySector();
+            } else if (type === 'sectordot') {
+                this.updateDataArraySector();
+                if (!this.dot.visProp.visible) {
+                    this.dot.setAttribute({visible: true});
+                }
+            }
+
+            if (!this.visProp.visible || (type !== 'sectordot' && this.dot.visProp.visible)) {
+                this.dot.setAttribute({visible: false});
+            }
+        };
+
+        /**
+         * Indicates a right angle. Invisible by default, use <tt>dot.visible: true</tt> to show.
+         * Though this dot indicates a right angle, it can be visible even if the angle is not a right
+         * one.
+         * @type JXG.Point
+         * @name dot
+         * @memberOf Angle.prototype
+         */
+        attrsub = Type.copyAttributes(attributes, board.options, 'angle', 'dot');
+        el.dot = board.create('point', [function () {
+            var A, B, r, d, a2, co, si, mat,
+                vp_s;
+
+            if (Type.exists(el.dot) && !el.dot.visProp.visible) {
+                return [0, 0];
+            }
+
+            A = el.point2.coords.usrCoords;
+            B = el.point1.coords.usrCoords;
+            r = el.Radius();
+            d = Geometry.distance(A, B, 3);
+            a2 = Geometry.rad(el.point2, el.point1, el.point3);
+
+            vp_s = Type.evaluate(el.visProp.selection);
+            if ((vp_s === 'minor' && a2 > Math.PI) ||
+                    (vp_s === 'major' && a2 < Math.PI)) {
+                a2 = -(2 * Math.PI - a2);
+            }
+            a2 *= 0.5;
+
+            co = Math.cos(a2);
+            si = Math.sin(a2);
+
+            A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
+
+            mat = [
+                [1, 0, 0],
+                [B[1] - 0.5 * B[1] * co + 0.5 * B[2] * si, co * 0.5, -si * 0.5],
+                [B[2] - 0.5 * B[1] * si - 0.5 * B[2] * co, si * 0.5,  co * 0.5]
+            ];
+            return Mat.matVecMult(mat, A);
+        }], attrsub);
+
+        el.dot.dump = false;
+        el.subs.dot = el.dot;
+
+        if (type === '2lines') {
+            for (i = 0; i < 2; i++) {
+                board.select(parents[i]).addChild(el.dot);
+            }
+        } else {
+            for (i = 0; i < 3; i++) {
+                board.select(points[i]).addChild(el.dot);
+            }
+        }
+
+        // documented in GeometryElement
+        el.getLabelAnchor = function () {
+            var vec, dx = 12,
+                A, B, r, d, a2, co, si, mat,
+                vp_s = Type.evaluate(el.visProp.selection),
+                l_vp = this.label ? this.label.visProp : this.visProp.label;
+
+            // If this is uncommented, the angle label can not be dragged
+            //if (Type.exists(this.label)) {
+            //    this.label.relativeCoords = new Coords(Const.COORDS_BY_SCREEN, [0, 0], this.board);
+            //}
+
+            if (Type.exists(this.label.visProp.fontSize)) {
+                dx = Type.evaluate(this.label.visProp.fontSize);
+            }
+            dx /= this.board.unitX;
+
+            A = el.point2.coords.usrCoords;
+            B = el.point1.coords.usrCoords;
+            r = el.Radius();
+            d = Geometry.distance(A, B, 3);
+            a2 = Geometry.rad(el.point2, el.point1, el.point3);
+            if ((vp_s === 'minor' && a2 > Math.PI) ||
+                    (vp_s === 'major' && a2 < Math.PI)) {
+                a2 = -(2 * Math.PI - a2);
+            }
+            a2 *= 0.5;
+            co = Math.cos(a2);
+            si = Math.sin(a2);
+
+            A = [1, B[1] + (A[1] - B[1]) * r / d, B[2] + (A[2] - B[2]) * r / d];
+
+            mat = [
+                [1, 0, 0],
+                [B[1] - 0.5 * B[1] * co + 0.5 * B[2] * si, co * 0.5, -si * 0.5],
+                [B[2] - 0.5 * B[1] * si - 0.5 * B[2] * co, si * 0.5,  co * 0.5]
+            ];
+            vec = Mat.matVecMult(mat, A);
+            vec[1] /= vec[0];
+            vec[2] /= vec[0];
+            vec[0] /= vec[0];
+
+            d = Geometry.distance(vec, B, 3);
+            vec = [vec[0], B[1] + (vec[1] - B[1]) * (r + dx) / d,  B[2] + (vec[2] - B[2]) * (r + dx) / d];
+
+            l_vp.position = Geometry.calcLabelQuadrant(Geometry.rad([1,0],[0,0],vec));
+
+            return new Coords(Const.COORDS_BY_USER, vec, this.board);
+        };
+
+        /**
+         * Returns the value of the angle in Radians.
+         * @memberOf Angle.prototype
+         * @name Value
+         * @function
+         * @returns {Number} The angle value in Radians
+         */
+        el.Value = function () {
+            return Geometry.rad(this.point2, this.point1, this.point3);
+        };
+
+        el.methodMap = Type.deepCopy(el.methodMap, {
+            Value: 'Value',
+            setAngle: 'setAngle',
+            free: 'free'
+        });
+
+        return el;
+    };
+
+    JXG.registerElement('angle', JXG.createAngle);
+
+    /**
+     * @class A non-reflex angle is the acute or obtuse instance of an angle.
+     * It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the sector.
+     * @pseudo
+     * @name NonReflexAngle
+     * @augments Angle
+     * @constructor
+     * @type Sector
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create a non-reflex angle out of three free points
+     * var p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('nonreflexangle', [p1, p2, p3], {radius: 2}),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * </pre><div class="jxgbox" id="JXGd0ab6d6b-63a7-48b2-8749-b02bb5e744f9" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     *   var board = JXG.JSXGraph.initBoard('JXGd0ab6d6b-63a7-48b2-8749-b02bb5e744f9', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('nonreflexangle', [p1, p2, p3], {radius: 2}),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createNonreflexAngle = function (board, parents, attributes) {
+        var el;
+
+        attributes.selection = 'minor';
+        el = JXG.createAngle(board, parents, attributes);
+
+        // Documented in createAngle
+        el.Value = function () {
+            var v = Geometry.rad(this.point2, this.point1, this.point3);
+            return (v < Math.PI) ? v : 2.0 * Math.PI - v;
+        };
+        return el;
+    };
+
+    JXG.registerElement('nonreflexangle', JXG.createNonreflexAngle);
+
+    /**
+     * @class A reflex angle is the neither acute nor obtuse instance of an angle.
+     * It is defined by a center, one point that
+     * defines the radius, and a third point that defines the angle of the sector.
+     * @pseudo
+     * @name ReflexAngle
+     * @augments Angle
+     * @constructor
+     * @type Sector
+     * @throws {Error} If the element cannot be constructed with the given parent objects an exception is thrown.
+     * @param {JXG.Point_JXG.Point_JXG.Point} p1,p2,p3 . Minor sector is a sector of a circle around p1 having measure less than or equal to
+     * 180 degrees (pi radians) and starts at p2. The radius is determined by p2, the angle by p3.
+     * @example
+     * // Create a non-reflex angle out of three free points
+     * var p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('reflexangle', [p1, p2, p3], {radius: 2}),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * </pre><div class="jxgbox" id="JXGf2a577f2-553d-4f9f-a895-2d6d4b8c60e8" style="width: 300px; height: 300px;"></div>
+     * <script type="text/javascript">
+     * (function () {
+     * var board = JXG.JSXGraph.initBoard('JXGf2a577f2-553d-4f9f-a895-2d6d4b8c60e8', {boundingbox: [-1, 7, 7, -1], axis: true, showcopyright: false, shownavigation: false}),
+     *     p1 = board.create('point', [5.0, 3.0]),
+     *     p2 = board.create('point', [1.0, 0.5]),
+     *     p3 = board.create('point', [1.5, 5.0]),
+     *
+     *     a = board.create('reflexangle', [p1, p2, p3], {radius: 2}),
+     *     t = board.create('text', [4, 4, function() { return JXG.toFixed(a.Value(), 2); }]);
+     * })();
+     * </script><pre>
+     */
+    JXG.createReflexAngle = function (board, parents, attributes) {
+        var el;
+
+        attributes.selection = 'major';
+        el = JXG.createAngle(board, parents, attributes);
+
+        // Documented in createAngle
+        el.Value = function () {
+            var v = Geometry.rad(this.point2, this.point1, this.point3);
+            return (v >= Math.PI) ? v : 2.0 * Math.PI - v;
+        };
+        return el;
+    };
+
+    JXG.registerElement('reflexangle', JXG.createReflexAngle);
+
+    return {
+        createSector: JXG.createSector,
+        createCircumcircleSector: JXG.createCircumcircleSector,
+        createMinorSector: JXG.createMinorSector,
+        createMajorSector: JXG.createMajorSector,
+        createAngle: JXG.createAngle,
+        createReflexAngle: JXG.createReflexAngle,
+        createNonreflexAngle: JXG.createNonreflexAngle
+    };
+});
+
+/*
+ Copyright 2008-2021
  Matthias Ehmann,
  Michael Gerhaeuser,
  Carsten Miller,
@@ -58578,8 +64721,8 @@ define('base/group',[
  */
 
 define('element/locus',[
-    'jxg', 'math/symbolic', 'utils/type', 'base/constants', 'base/curve'
-], function (JXG, Symbolic, Type, Const, Curve) {
+    'jxg', 'math/symbolic', 'utils/type'
+], function (JXG, Symbolic, Type) {
 
     "use strict";
 
@@ -58703,7 +64846,7 @@ define('element/locus',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -58752,8 +64895,8 @@ define('element/locus',[
  */
 
 define('base/image',[
-    'jxg', 'base/constants', 'base/coords', 'base/element', 'math/math', 'math/statistics', 'utils/type', 'base/coordselement'
-], function (JXG, Const, Coords, GeometryElement, Mat, Statistics, Type, CoordsElement) {
+    'jxg', 'base/constants', 'base/coords', 'base/element', 'math/math', 'utils/type', 'base/coordselement'
+], function (JXG, Const, Coords, GeometryElement, Mat, Type, CoordsElement) {
 
     "use strict";
 
@@ -58833,15 +64976,23 @@ define('base/image',[
          * @returns {Boolean} True if (x,y) is over the image, False otherwise.
          */
         hasPoint: function (x, y) {
-            var dx, dy, r,
+            var dx, dy, r, type, prec,
                 c, v, p, dot,
                 len = this.transformations.length;
+
+                if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                    type = this.board._inputDevice;
+                    prec = Type.evaluate(this.visProp.precision[type]);
+                } else {
+                    // 'inherit'
+                    prec = this.board.options.precision.hasPoint;
+                }
 
             // Easy case: no transformation
             if (len === 0) {
                 dx = x - this.coords.scrCoords[1];
                 dy = this.coords.scrCoords[2] - y;
-                r = this.board.options.precision.hasPoint;
+                r = prec;
 
                 return dx >= -r && dx - this.size[0] <= r &&
                     dy >= -r && dy - this.size[1] <= r;
@@ -59116,7 +65267,7 @@ define('base/image',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -59170,8 +65321,8 @@ define('base/image',[
  */
 
 define('base/ticks',[
-    'jxg', 'math/math', 'math/geometry', 'base/constants', 'base/element', 'base/coords', 'utils/type', 'base/text'
-], function (JXG, Mat, Geometry, Const, GeometryElement, Coords, Type, Text) {
+    'jxg', 'math/math', 'math/geometry', 'math/numerics', 'base/constants', 'base/element', 'base/coords', 'utils/type', 'base/text'
+], function (JXG, Mat, Geometry, Numerics, Const, GeometryElement, Coords, Type, Text) {
 
     "use strict";
 
@@ -59321,6 +65472,7 @@ define('base/ticks',[
 
         /**
          * Checks whether (x,y) is near the line.
+         * Only available for line elements,  not for ticks on curves.
          * @param {Number} x Coordinate in x direction, screen coordinates.
          * @param {Number} y Coordinate in y direction, screen coordinates.
          * @returns {Boolean} True if (x,y) is near the line, False otherwise.
@@ -59328,10 +65480,18 @@ define('base/ticks',[
         hasPoint: function (x, y) {
             var i, t,
                 len = (this.ticks && this.ticks.length) || 0,
-                r = this.board.options.precision.hasPoint +
-                        Type.evaluate(this.visProp.strokewidth) * 0.5;
+                r, type;
 
-            if (!Type.evaluate(this.line.visProp.scalable)) {
+            if (Type.isObject(Type.evaluate(this.visProp.precision))) {
+                type = this.board._inputDevice;
+                r = Type.evaluate(this.visProp.precision[type]);
+            } else {
+                // 'inherit'
+                r = this.board.options.precision.hasPoint;
+            }
+            r += Type.evaluate(this.visProp.strokewidth) * 0.5;
+            if (!Type.evaluate(this.line.visProp.scalable) ||
+                this.line.elementClass === Const.OBJECT_CLASS_CURVE) {
                 return false;
             }
 
@@ -59416,19 +65576,31 @@ define('base/ticks',[
             var coordsZero, bounds,
                 r_max, bb;
 
-            // Calculate Ticks width and height in Screen and User Coordinates
-            this.setTicksSizeVariables();
-            // If the parent line is not finite, we can stop here.
-            if (Math.abs(this.dx) < Mat.eps &&
-                Math.abs(this.dy) < Mat.eps) {
-                return;
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                // Calculate Ticks width and height in Screen and User Coordinates
+                this.setTicksSizeVariables();
+
+                // If the parent line is not finite, we can stop here.
+                if (Math.abs(this.dx) < Mat.eps &&
+                    Math.abs(this.dy) < Mat.eps) {
+                    return;
+                }
             }
 
-            // Get Zero
+            // Get Zero (coords element for lines , number for curves)
             coordsZero = this.getZeroCoordinates();
 
-            // Calculate lower bound and upper bound limits based on distance between p1 and centre and p2 and center
-            bounds = this.getLowerAndUpperBounds(coordsZero);
+            // Calculate lower bound and upper bound limits based on distance
+            // between p1 and center and p2 and center
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                bounds = this.getLowerAndUpperBounds(coordsZero);
+            } else {
+                bounds = {
+                    lower: this.line.minX(),
+                    upper: this.line.maxX()
+                };
+            }
+
             if (Type.evaluate(this.visProp.type) === 'polar') {
                 bb = this.board.getBoundingBox();
                 r_max = Math.max(Math.sqrt(bb[0] * bb[0] + bb[1] * bb[1]),
@@ -59454,14 +65626,34 @@ define('base/ticks',[
          *
          * @private
          */
-        setTicksSizeVariables: function () {
-            var d,
+        setTicksSizeVariables: function (pos) {
+            var d, mi, ma, len,
                 distMaj = Type.evaluate(this.visProp.majorheight) * 0.5,
                 distMin = Type.evaluate(this.visProp.minorheight) * 0.5;
 
-            // ticks width and height in screen units
-            this.dxMaj = this.line.stdform[1];
-            this.dyMaj = this.line.stdform[2];
+            // For curves:
+            if (Type.exists(pos)) {
+                mi = this.line.minX();
+                ma = this.line.maxX();
+                len = this.line.points.length;
+                if (len < 2) {
+                    this.dxMaj = 0;
+                    this.dyMaj = 0;
+                } else if (Mat.relDif(pos, mi) < Mat.eps) {
+                    this.dxMaj = this.line.points[0].usrCoords[2] - this.line.points[1].usrCoords[2];
+                    this.dyMaj = this.line.points[1].usrCoords[1] - this.line.points[0].usrCoords[1];
+                } else if (Mat.relDif(pos, ma) < Mat.eps) {
+                    this.dxMaj = this.line.points[len - 2].usrCoords[2] - this.line.points[len - 1].usrCoords[2];
+                    this.dyMaj = this.line.points[len - 1].usrCoords[1] - this.line.points[len - 2].usrCoords[1];
+                } else {
+                    this.dxMaj = -Numerics.D(this.line.Y)(pos);
+                    this.dyMaj = Numerics.D(this.line.X)(pos);
+                }
+            } else {
+                // ticks width and height in screen units
+                this.dxMaj = this.line.stdform[1];
+                this.dyMaj = this.line.stdform[2];
+            }
             this.dxMin = this.dxMaj;
             this.dyMin = this.dyMaj;
 
@@ -59489,47 +65681,63 @@ define('base/ticks',[
          *
          * If the line is an {@link Axis}, the coordinates of the projection of the board's zero point is returned
          *
-         * Otherwise, the coordinates of the point that acts as zero are established depending on the value of {@link JXG.Ticks#anchor}
+         * Otherwise, the coordinates of the point that acts as zero are
+         * established depending on the value of {@link JXG.Ticks#anchor}
          *
-         * @returns {JXG.Coords} Coords object for the Zero point on the line
+         * @returns {JXG.Coords} Coords object for the zero point on the line
          * @private
          */
         getZeroCoordinates: function () {
-            var c1x, c1y, c1z, c2x, c2y, c2z,
+            var c1x, c1y, c1z, c2x, c2y, c2z, t, mi, ma,
                 ev_a = Type.evaluate(this.visProp.anchor);
 
-            if (this.line.type === Const.OBJECT_TYPE_AXIS) {
-                return Geometry.projectPointToLine({
-                    coords: {
-                        usrCoords: [1, 0, 0]
-                    }
-                }, this.line, this.board);
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                if (this.line.type === Const.OBJECT_TYPE_AXIS) {
+                    return Geometry.projectPointToLine({
+                        coords: {
+                            usrCoords: [1, 0, 0]
+                        }
+                    }, this.line, this.board);
+                }
+                c1z = this.line.point1.coords.usrCoords[0];
+                c1x = this.line.point1.coords.usrCoords[1];
+                c1y = this.line.point1.coords.usrCoords[2];
+                c2z = this.line.point2.coords.usrCoords[0];
+                c2x = this.line.point2.coords.usrCoords[1];
+                c2y = this.line.point2.coords.usrCoords[2];
+
+                if (ev_a === 'right') {
+                    return this.line.point2.coords;
+                }
+                if (ev_a === 'middle') {
+                    return new Coords(Const.COORDS_BY_USER, [
+                        (c1z + c2z) * 0.5,
+                        (c1x + c2x) * 0.5,
+                        (c1y + c2y) * 0.5
+                    ], this.board);
+                }
+                if (Type.isNumber(ev_a)) {
+                    return new Coords(Const.COORDS_BY_USER, [
+                        c1z + (c2z - c1z) * ev_a,
+                        c1x + (c2x - c1x) * ev_a,
+                        c1y + (c2y - c1y) * ev_a
+                    ], this.board);
+                }
+                return this.line.point1.coords;
             }
-
-            c1z = this.line.point1.coords.usrCoords[0];
-            c1x = this.line.point1.coords.usrCoords[1];
-            c1y = this.line.point1.coords.usrCoords[2];
-            c2z = this.line.point2.coords.usrCoords[0];
-            c2x = this.line.point2.coords.usrCoords[1];
-            c2y = this.line.point2.coords.usrCoords[2];
-
+            mi = this.line.minX();
+            ma = this.line.maxX();
             if (ev_a === 'right') {
-                return this.line.point2.coords;
+                t = ma;
             } else if (ev_a === 'middle') {
-                return new Coords(Const.COORDS_BY_USER, [
-                    (c1z + c2z) * 0.5,
-                    (c1x + c2x) * 0.5,
-                    (c1y + c2y) * 0.5
-                ], this.board);
+                t = (mi + ma) * 0.5;
             } else if (Type.isNumber(ev_a)) {
-                return new Coords(Const.COORDS_BY_USER, [
-                    c1z + (c2z - c1z) * ev_a,
-                    c1x + (c2x - c1x) * ev_a,
-                    c1y + (c2y - c1y) * ev_a
-                ], this.board);
+                t = mi * (1 - ev_a) + ma * ev_a;
+                // t = ev_a;
+            } else {
+                t = mi;
             }
-
-            return this.line.point1.coords;
+            return t;
         },
 
         /**
@@ -59549,22 +65757,30 @@ define('base/ticks',[
         getLowerAndUpperBounds: function (coordsZero, type) {
             var lowerBound, upperBound,
                 fA, lA,
-                // The line's defining points that will be adjusted to be within the board limits
-                point1 = new Coords(Const.COORDS_BY_USER, this.line.point1.coords.usrCoords, this.board),
-                point2 = new Coords(Const.COORDS_BY_USER, this.line.point2.coords.usrCoords, this.board),
-                // Are the original defining points within the board?
-                isPoint1inBoard = (Math.abs(point1.usrCoords[0]) >= Mat.eps &&
-                    point1.scrCoords[1] >= 0.0 && point1.scrCoords[1] <= this.board.canvasWidth &&
-                    point1.scrCoords[2] >= 0.0 && point1.scrCoords[2] <= this.board.canvasHeight),
-                isPoint2inBoard = (Math.abs(point2.usrCoords[0]) >= Mat.eps &&
-                    point2.scrCoords[1] >= 0.0 && point2.scrCoords[1] <= this.board.canvasWidth &&
-                    point2.scrCoords[2] >= 0.0 && point2.scrCoords[2] <= this.board.canvasHeight),
+                point1, point2, isPoint1inBoard, isPoint2inBoard,
                 // We use the distance from zero to P1 and P2 to establish lower and higher points
                 dZeroPoint1, dZeroPoint2,
                 ev_sf = Type.evaluate(this.line.visProp.straightfirst),
                 ev_sl = Type.evaluate(this.line.visProp.straightlast),
-                ev_i = Type.evaluate(this.visProp.includeboundaries),
-                obj;
+                ev_i = Type.evaluate(this.visProp.includeboundaries);
+
+            // The line's defining points that will be adjusted to be within the board limits
+            if (this.line.elementClass === Const.OBJECT_CLASS_CURVE) {
+                return {
+                    lower: this.line.minX(),
+                    upper: this.line.maxX()
+                };
+            }
+
+            point1 = new Coords(Const.COORDS_BY_USER, this.line.point1.coords.usrCoords, this.board);
+            point2 = new Coords(Const.COORDS_BY_USER, this.line.point2.coords.usrCoords, this.board);
+            // Are the original defining points within the board?
+            isPoint1inBoard = (Math.abs(point1.usrCoords[0]) >= Mat.eps &&
+                point1.scrCoords[1] >= 0.0 && point1.scrCoords[1] <= this.board.canvasWidth &&
+                point1.scrCoords[2] >= 0.0 && point1.scrCoords[2] <= this.board.canvasHeight);
+            isPoint2inBoard = (Math.abs(point2.usrCoords[0]) >= Mat.eps &&
+                point2.scrCoords[1] >= 0.0 && point2.scrCoords[1] <= this.board.canvasWidth &&
+                point2.scrCoords[2] >= 0.0 && point2.scrCoords[2] <= this.board.canvasHeight);
 
             // Adjust line limit points to be within the board
             if (Type.exists(type) || type === 'tickdistance') {
@@ -59581,23 +65797,35 @@ define('base/ticks',[
             fA = Type.evaluate(this.line.visProp.firstarrow);
             lA = Type.evaluate(this.line.visProp.lastarrow);
             if (fA || lA) {
-
-                obj = this.board.renderer.getPositionArrowHead(this.line, point1, point2,
+                this.board.renderer.getPositionArrowHead(this.line, point1, point2,
                         Type.evaluate(this.line.visProp.strokewidth));
 
                 if (fA) {
                     point1.setCoordinates(Const.COORDS_BY_SCREEN, [
-                        point1.scrCoords[1] - obj.d1x,
-                        point1.scrCoords[2] - obj.d1y
+                        point1.scrCoords[1],
+                        point1.scrCoords[2]
                     ]);
                 }
                 if (lA) {
                     point2.setCoordinates(Const.COORDS_BY_SCREEN, [
-                        point2.scrCoords[1] - obj.d2x,
-                        point2.scrCoords[2] - obj.d2y
+                        point2.scrCoords[1],
+                        point2.scrCoords[2]
                     ]);
                 }
+                // if (fA) {
+                //     point1.setCoordinates(Const.COORDS_BY_SCREEN, [
+                //         point1.scrCoords[1] - obj.d1x,
+                //         point1.scrCoords[2] - obj.d1y
+                //     ]);
+                // }
+                // if (lA) {
+                //     point2.setCoordinates(Const.COORDS_BY_SCREEN, [
+                //         point2.scrCoords[1] - obj.d2x,
+                //         point2.scrCoords[2] - obj.d2y
+                //     ]);
+                // }
             }
+
 
             // Calculate (signed) distance from Zero to P1 and to P2
             dZeroPoint1 = this.getDistanceFromZero(coordsZero, point1);
@@ -59646,31 +65874,25 @@ define('base/ticks',[
          * @private
          */
         getDistanceFromZero: function (zero, point) {
-            var eps = Mat.eps,
-                distance = zero.distance(Const.COORDS_BY_USER, point);
+            var p1, p2,
+                dirLine, dirPoint,
+                distance;
+
+            p1 = this.line.point1.coords;
+            p2 = this.line.point2.coords;
+            distance = zero.distance(Const.COORDS_BY_USER, point);
 
             // Establish sign
-
-            // Why are axes treated different from lines?
-            // if (this.line.type === Const.OBJECT_TYPE_AXIS) {
-            //     var a, b;
-            //     a = (Mat.relDif(zero.usrCoords[1], point.usrCoords[1]) > eps &&
-            //                       zero.usrCoords[1] - point.usrCoords[1] > eps);
-            //     b = (Mat.relDif(zero.usrCoords[2], point.usrCoords[2]) > eps &&
-            //                       zero.usrCoords[2] - point.usrCoords[2] > eps);
-            //     if ( a || b ){
-            //         distance *= -1;
-            //     }
-            // } else
-            if (Type.evaluate(this.visProp.anchor) === 'right') {
-                if (Geometry.isSameDirection(zero, this.line.point1.coords, point)) {
-                    distance *= -1;
-                }
-            } else {
-                if (!Geometry.isSameDirection(zero, this.line.point2.coords, point)) {
-                    distance *= -1;
-                }
+            dirLine = [p2.usrCoords[0] - p1.usrCoords[0],
+                p2.usrCoords[1] - p1.usrCoords[1],
+                p2.usrCoords[2] - p1.usrCoords[2]];
+            dirPoint = [point.usrCoords[0] - zero.usrCoords[0],
+                point.usrCoords[1] - zero.usrCoords[1],
+                point.usrCoords[2] - zero.usrCoords[2]];
+            if (Mat.innerProduct(dirLine, dirPoint, 3) < 0) {
+                distance *= -1;
             }
+
             return distance;
         },
 
@@ -59685,12 +65907,16 @@ define('base/ticks',[
         generateEquidistantTicks: function (coordsZero, bounds) {
             var tickPosition,
                 eps2 = Mat.eps,
-                // Calculate X and Y distance between two major ticks
-                deltas = this.getXandYdeltas(),
+                deltas,
                 // Distance between two major ticks in user coordinates
                 ticksDelta = (this.equidistant ? this.ticksFunction(1) : this.ticksDelta),
                 ev_it = Type.evaluate(this.visProp.insertticks),
                 ev_mt = Type.evaluate(this.visProp.minorticks);
+
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                // Calculate X and Y distance between two major ticks
+                deltas = this.getXandYdeltas();
+            }
 
             // adjust ticks distance
             ticksDelta *= Type.evaluate(this.visProp.scale);
@@ -59746,12 +65972,15 @@ define('base/ticks',[
                 sgn = 1,
                 ev_minti = Type.evaluate(this.visProp.minorticks);
 
+            if (this.line.elementClass === Const.OBJECT_CLASS_CURVE) {
+                return ticksDelta;
+            }
             bounds = this.getLowerAndUpperBounds(coordsZero, 'ticksdistance');
             nx = coordsZero.usrCoords[1] + deltas.x * ticksDelta;
             ny = coordsZero.usrCoords[2] + deltas.y * ticksDelta;
             distScr = coordsZero.distance(Const.COORDS_BY_SCREEN, new Coords(Const.COORDS_BY_USER, [nx, ny], this.board));
 
-            if (ticksDelta == 0.0) {
+            if (ticksDelta === 0.0) {
                 return 0.0;
             }
 
@@ -59781,12 +66010,23 @@ define('base/ticks',[
          * @private
          */
         processTickPosition: function (coordsZero, tickPosition, ticksDelta, deltas) {
-            var x, y, tickCoords, ti;
+            var x, y, tickCoords, ti,
+                labelVal = null;
 
             // Calculates tick coordinates
-            x = coordsZero.usrCoords[1] + tickPosition * deltas.x;
-            y = coordsZero.usrCoords[2] + tickPosition * deltas.y;
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                x = coordsZero.usrCoords[1] + tickPosition * deltas.x;
+                y = coordsZero.usrCoords[2] + tickPosition * deltas.y;
+            } else {
+                x = this.line.X(coordsZero + tickPosition);
+                y = this.line.Y(coordsZero + tickPosition);
+            }
             tickCoords = new Coords(Const.COORDS_BY_USER, [x, y], this.board);
+            if (this.line.elementClass === Const.OBJECT_CLASS_CURVE) {
+                labelVal = coordsZero + tickPosition;
+                this.setTicksSizeVariables(labelVal);
+
+            }
 
             // Test if tick is a major tick.
             // This is the case if tickPosition/ticksDelta is
@@ -59802,7 +66042,7 @@ define('base/ticks',[
                     // major tick label
                     this.labelsData.push(
                         this.generateLabelData(
-                            this.generateLabelText(tickCoords, coordsZero),
+                            this.generateLabelText(tickCoords, coordsZero, labelVal),
                             tickCoords,
                             this.ticks.length
                         )
@@ -59824,28 +66064,42 @@ define('base/ticks',[
         generateFixedTicks: function (coordsZero, bounds) {
             var tickCoords, labelText, i, ti,
                 x, y,
-                eps2 = Mat.eps,
+                eps2 = Mat.eps, fixedTick,
                 hasLabelOverrides = Type.isArray(this.visProp.labels),
-                // Calculate X and Y distance between two major points in the line
-                deltas = this.getXandYdeltas(),
+                deltas,
                 ev_dl = Type.evaluate(this.visProp.drawlabels);
 
+            // Calculate X and Y distance between two major points in the line
+            if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                deltas = this.getXandYdeltas();
+            }
             for (i = 0; i < this.fixedTicks.length; i++) {
-                x = coordsZero.usrCoords[1] + this.fixedTicks[i] * deltas.x;
-                y = coordsZero.usrCoords[2] + this.fixedTicks[i] * deltas.y;
+                if (this.line.elementClass === Const.OBJECT_CLASS_LINE) {
+                    fixedTick = this.fixedTicks[i];
+                    x = coordsZero.usrCoords[1] + fixedTick * deltas.x;
+                    y = coordsZero.usrCoords[2] + fixedTick * deltas.y;
+                } else {
+                    fixedTick = coordsZero + this.fixedTicks[i];
+                    x = this.line.X(fixedTick);
+                    y = this.line.Y(fixedTick);
+                }
                 tickCoords = new Coords(Const.COORDS_BY_USER, [x, y], this.board);
+
+                if (this.line.elementClass === Const.OBJECT_CLASS_CURVE) {
+                    this.setTicksSizeVariables(fixedTick);
+                }
 
                 // Compute the start position and the end position of a tick.
                 // If tick is out of the canvas, ti is empty.
                 ti = this.createTickPath(tickCoords, true);
-                if (ti.length === 3 && this.fixedTicks[i] >= bounds.lower - eps2 &&
-                    this.fixedTicks[i] <= bounds.upper + eps2) {
+                if (ti.length === 3 && fixedTick >= bounds.lower - eps2 &&
+                    fixedTick <= bounds.upper + eps2) {
                     this.ticks.push(ti);
 
                     if (ev_dl &&
                             (hasLabelOverrides || Type.exists(this.visProp.labels[i]))) {
                         labelText = hasLabelOverrides ?
-                                        Type.evaluate(this.visProp.labels[i]) : this.fixedTicks[i];
+                                        Type.evaluate(this.visProp.labels[i]) : fixedTick;
                         this.labelsData.push(
                             this.generateLabelData(
                                 this.generateLabelText(tickCoords, coordsZero, labelText),
@@ -59886,7 +66140,7 @@ define('base/ticks',[
                     point1UsrCoords = this.line.point2.coords.usrCoords;
                     point2UsrCoords = this.line.point1.coords.usrCoords;
                 }
-            } else {
+            } else /* if (this.line.elementClass === Const.OBJECT_CLASS_LINE)*/ {
                 // line direction is always from P1 to P2 for non Axis types
                 point1UsrCoords = this.line.point1.coords.usrCoords;
                 point2UsrCoords = this.line.point2.coords.usrCoords;
@@ -59928,7 +66182,8 @@ define('base/ticks',[
                 dxs, dys, dxr, dyr, alpha,
                 style,
                 x = [-2000000, -2000000],
-                y = [-2000000, -2000000];
+                y = [-2000000, -2000000],
+                i, r, r_max, bb, full, delta;
 
             c = coords.scrCoords;
             if (major) {
@@ -59945,13 +66200,12 @@ define('base/ticks',[
             // For all ticks regardless if of finite or infinite
             // tick length the intersection with the canvas border is
             // computed.
-            if (major && Type.evaluate(this.visProp.type) == 'polar') {
+            if (major && Type.evaluate(this.visProp.type) === 'polar') {
                 // polar style
-                var i, r, r_max,
-                    bb = this.board.getBoundingBox(),
-                    full = 2.0 * Math.PI,
-                    delta = full / 180,
-                    ratio = this.board.unitY / this.board.X;
+                bb = this.board.getBoundingBox();
+                full = 2.0 * Math.PI;
+                delta = full / 180;
+                //ratio = this.board.unitY / this.board.X;
 
                 // usrCoords: Test if 'circle' is inside of the canvas
                 c = coords.usrCoords;
@@ -59979,9 +66233,9 @@ define('base/ticks',[
                     y[0] = intersection[0].scrCoords[2];
                     y[1] = intersection[1].scrCoords[2];
                 } else {
-                    if (Type.evaluate(this.visProp.face) == '>') {
+                    if (Type.evaluate(this.visProp.face) === '>') {
                         alpha = Math.PI/4;
-                    } else if (Type.evaluate(this.visProp.face) == '<') {
+                    } else if (Type.evaluate(this.visProp.face) === '<') {
                             alpha = -Math.PI/4;
                     } else {
                         alpha = 0;
@@ -60028,6 +66282,11 @@ define('base/ticks',[
                         labelText.indexOf('e') !== -1) {
                     labelText = value.toPrecision(Type.evaluate(this.visProp.precision)).toString();
                 }
+
+                if (Type.evaluate(this.visProp.beautifulscientificticklabels)) {
+                    labelText = this.beautifyScientificNotationLabel(labelText);
+                }
+
                 if (labelText.indexOf('.') > -1 && labelText.indexOf('e') === -1) {
                     // trim trailing zeros
                     labelText = labelText.replace(/0+$/, '');
@@ -60053,6 +66312,50 @@ define('base/ticks',[
         },
 
         /**
+         * Formats label texts to make labels displayed in scientific notation look beautiful.
+         * For example, label 5.00e+6 will become 5•10⁶, label -1.00e-7 will become into -1•10⁻⁷
+         * @param {String} labelText - The label that we want to convert
+         * @returns {String} If labelText was not in scientific notation, return labelText without modifications.
+         * Otherwise returns beautified labelText with proper superscript notation.
+         */
+        beautifyScientificNotationLabel: function(labelText) {
+            var returnString;
+
+            if (labelText.indexOf('e') === -1) {
+                return labelText;
+            }
+
+            // Clean up trailing 0's, so numbers like 5.00e+6.0 for example become into 5e+6
+            returnString = parseFloat(labelText.substring(0, labelText.indexOf('e'))) +
+                            labelText.substring(labelText.indexOf('e'));
+
+            // Replace symbols like -,0,1,2,3,4,5,6,7,8,9 with their superscript version.
+            // Gets rid of + symbol since there is no need for it anymore.
+            returnString = returnString.replace(/e(.*)$/g, function(match,$1){
+                var temp = '\u2022' + '10';
+                // Note: Since board ticks do not support HTTP elements like <sub>, we need to replace
+                // all the numbers with superscript Unicode characters.
+                temp +=  $1
+                    .replace(/-/g, "\u207B")
+                    .replace(/\+/g, '')
+                    .replace(/0/g,'\u2070')
+                    .replace(/1/g,'\u00B9')
+                    .replace(/2/g,'\u00B2')
+                    .replace(/3/g,'\u00B3')
+                    .replace(/4/g,'\u2074')
+                    .replace(/5/g,'\u2075')
+                    .replace(/6/g,'\u2076')
+                    .replace(/7/g,'\u2077')
+                    .replace(/8/g,'\u2078')
+                    .replace(/9/g,'\u2079');
+
+                return temp;
+            });
+
+            return returnString;
+        },
+
+        /**
          * Creates the label text for a given tick. A value for the text can be provided as a number or string
          *
          * @param  {JXG.Coords}    tick  The Coords-object of the tick to create a label for
@@ -60062,19 +66365,17 @@ define('base/ticks',[
          * @private
          */
         generateLabelText: function (tick, zero, value) {
-            var labelText,
+            var labelText, distance;
+
+            // No value provided, equidistant, so assign distance as value
+            if (!Type.exists(value)) { // could be null or undefined
                 distance = this.getDistanceFromZero(zero, tick);
-
-            if (Math.abs(distance) < Mat.eps) { // Point is zero
-                labelText = '0';
-            } else {
-                // No value provided, equidistant, so assign distance as value
-                if (!Type.exists(value)) { // could be null or undefined
-                    value = distance / Type.evaluate(this.visProp.scale);
+                if (Math.abs(distance) < Mat.eps) { // Point is zero
+                    return '0';
                 }
-
-                labelText = this.formatLabelText(value);
+                value = distance / Type.evaluate(this.visProp.scale);
             }
+            labelText = this.formatLabelText(value);
 
             return labelText;
         },
@@ -60280,24 +66581,30 @@ define('base/ticks',[
     });
 
     /**
-     * @class Ticks are used as distance markers on a line.
+     * @class Ticks are used as distance markers on a line or curve.
+     * They are
+     * mainly used for axis elements and slider elements. Ticks may stretch infinitely
+     * or finitely, which can be set with {@link Ticks#majorHeight} and {@link Ticks#minorHeight}.
+     *
      * @pseudo
-     * @description
+     * @description Ticks are markers on straight line elements or curves.
      * @name Ticks
      * @augments JXG.Ticks
      * @constructor
      * @type JXG.Ticks
      * @throws {Exception} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Line} line The parents consist of the line the ticks are going to be attached to.
-     * @param {Number} distance Number defining the distance between two major ticks or an
-     * array defining static ticks. Alternatively, the distance can be specified with the attribute
+     * @param {JXG.Line|JXG.Curve} line The parents consist of the line or curve the ticks are going to be attached to.
+     * @param {Number|Array} distance Number defining the distance between two major ticks or an
+     * array defining static ticks. In case a number is specified, the ticks are <i>equidistant</i>,
+     * in case of an array, a fixed number of static ticks is created at user-supplied positions.
+     * Alternatively, the distance can be specified with the attribute
      * "ticksDistance". For arbitrary lines (and not axes) a "zero coordinate" is determined
      * which defines where the first tick is positioned. This zero coordinate
      * can be altered with the attribute "anchor". Possible values are "left", "middle", "right" or a number.
-     * The default value is "middle".
+     * The default value is "left".
      *
      * @example
-     * // Create an axis providing two coord pairs.
+     * // Create an axis providing two coordinate pairs.
      *   var p1 = board.create('point', [0, 3]);
      *   var p2 = board.create('point', [1, 3]);
      *   var l1 = board.create('line', [p1, p2]);
@@ -60323,7 +66630,8 @@ define('base/ticks',[
             dist = parents[1];
         }
 
-        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE) {
+        if (parents[0].elementClass === Const.OBJECT_CLASS_LINE ||
+            parents[0].elementClass === Const.OBJECT_CLASS_CURVE) {
             el = new JXG.Ticks(parents[0], dist, attr);
         } else {
             throw new Error("JSXGraph: Can't create Ticks with parent types '" + (typeof parents[0]) + "'.");
@@ -60345,7 +66653,7 @@ define('base/ticks',[
     };
 
     /**
-     * @class Hatches can be used to mark congruent lines.
+     * @class Hatches can be used to mark congruent lines or curves.
      * @pseudo
      * @description
      * @name Hatch
@@ -60353,7 +66661,7 @@ define('base/ticks',[
      * @constructor
      * @type JXG.Ticks
      * @throws {Exception} If the element cannot be constructed with the given parent objects an exception is thrown.
-     * @param {JXG.Line} line The line the hatch marks are going to be attached to.
+     * @param {JXG.Line|JXG.curve} line The line or curve the hatch marks are going to be attached to.
      * @param {Number} numberofhashes Number of dashes.
      * @example
      * // Create an axis providing two coords pairs.
@@ -60425,7 +66733,8 @@ define('base/ticks',[
             pos = [],
             attr = Type.copyAttributes(attributes, board.options, 'hatch');
 
-        if (parents[0].elementClass !== Const.OBJECT_CLASS_LINE || typeof parents[1] !== 'number') {
+        if ((parents[0].elementClass !== Const.OBJECT_CLASS_LINE &&
+            parents[0].elementClass !== Const.OBJECT_CLASS_CURVE) || typeof parents[1] !== 'number') {
             throw new Error("JSXGraph: Can't create Hatch mark with parent types '" + (typeof parents[0]) + "' and '" + (typeof parents[1]) + " and ''" + (typeof parents[2]) + "'.");
         }
 
@@ -60457,7 +66766,7 @@ define('base/ticks',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -60603,7 +66912,7 @@ define('element/slider',[
     JXG.createSlider = function (board, parents, attributes) {
         var pos0, pos1, smin, start, smax, sdiff,
             p1, p2, l1, ticks, ti, startx, starty, p3, l2, t,
-            withText, withTicks, snapWidth, attr, precision;
+            withText, withTicks, snapWidth, sw, s, attr, precision;
 
         attr = Type.copyAttributes(attributes, board.options, 'slider');
         withTicks = attr.withticks;
@@ -60634,8 +66943,10 @@ define('element/slider',[
         smax = parents[2][2];
         sdiff = smax - smin;
 
-        startx = pos0[0] + (pos1[0] - pos0[0]) * (start - smin) / (smax - smin);
-        starty = pos0[1] + (pos1[1] - pos0[1]) * (start - smin) / (smax - smin);
+        sw = Type.evaluate(snapWidth);
+        s = (sw == -1) ? start : Math.round(start / sw) * sw;
+        startx = pos0[0] + (pos1[0] - pos0[0]) * (s - smin) / (smax - smin);
+        starty = pos0[1] + (pos1[1] - pos0[1]) * (s - smin) / (smax - smin);
 
         // glider point
         attr = Type.copyAttributes(attributes, board.options, 'slider');
@@ -60654,6 +66965,7 @@ define('element/slider',[
          * Returns the current slider value.
          * @memberOf Slider.prototype
          * @name Value
+         * @function
          * @returns {Number}
          */
         p3.Value = function () {
@@ -60899,7 +67211,7 @@ define('element/slider',[
         p3.baseline.on('up', function(evt) {
             var pos, c;
 
-            if (Type.evaluate(p3.visProp.moveonup)) {
+            if (Type.evaluate(p3.visProp.moveonup) && !Type.evaluate(p3.visProp.fixed) ) {
                 pos = l1.board.getMousePosition(evt, 0);
                 c = new Coords(Const.COORDS_BY_SCREEN, pos, this.board);
                 p3.moveTo([c.usrCoords[1], c.usrCoords[2]]);
@@ -60934,6 +67246,21 @@ define('element/slider',[
 //             }
 //         };
 
+
+
+        // This is necessary to show baseline, highline and ticks
+        // when opening the board in case the visible attributes are set
+        // to 'inherit'.
+        p3.prepareUpdate().update();
+        if (!board.isSuspendedUpdate) {
+            p3.updateVisibility().updateRenderer();
+            p3.baseline.updateVisibility().updateRenderer();
+            p3.highline.updateVisibility().updateRenderer();
+            if (withTicks) {
+                p3.ticks.updateVisibility().updateRenderer();
+            }
+        }
+
         return p3;
     };
 
@@ -60945,7 +67272,7 @@ define('element/slider',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -61092,7 +67419,13 @@ define('element/measure',[
             GeometryElement.prototype.remove.call(this);
         };
 
-        /** @ignore */
+        /**
+         * Returns the length of the tape measure.
+         * @name Value
+         * @memberOf Tapemeasure.prototype
+         * @function
+         * @returns {Number} length of tape measure.
+         */
         li.Value = function () {
             return p1.Dist(p2);
         };
@@ -61137,7 +67470,7 @@ define('element/measure',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -61380,7 +67713,7 @@ define('parser/datasource',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -62756,7 +69089,7 @@ define('base/chart',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -63577,7 +69910,7 @@ define('base/turtle',[
 /*
  JessieCode Computer algebra algorithms
 
-    Copyright 2011-2020
+    Copyright 2011-2021
         Michael Gerhaeuser,
         Alfred Wassermann
 
@@ -64930,7 +71263,7 @@ define('base/turtle',[
  });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -65325,7 +71658,7 @@ define('utils/dump',['jxg', 'utils/type'], function (JXG, Type) {
 });
 
 /*
-    Copyright 2018-2020
+    Copyright 2018-2021
         Alfred Wassermann,
         Tigran Saluev
 
@@ -65564,7 +71897,7 @@ define('element/comb',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -65727,6 +72060,13 @@ define('element/slopetriangle',[
         attr.borders = Type.copyAttributes(attr.borders, board.options, 'slopetriangle', 'borders');
         el = board.create('polygon', [tglide, glider, toppoint], attr);
 
+        /**
+         * Returns the value of the slope triangle, that is the slope of the tangent.
+         * @name Value
+         * @memberOf Slopetriangle.prototype
+         * @function
+         * @returns {Number} slope of the tangent.
+         */
         el.Value = priv.Value;
         el.tangent = tangent;
         el._isPrivateTangent = isPrivateTangent;
@@ -65786,7 +72126,7 @@ define('element/slopetriangle',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -65963,6 +72303,14 @@ define('element/checkbox',[
         t.rendNodeCheckbox.checked = attr.checked;
 
         t._value = attr.checked;
+
+        /**
+         * Returns the value of the checkbox element
+         * @name Value
+         * @memberOf Checkbox.prototype
+         * @function
+         * @returns {String} value of the checkbox.
+         */
         t.Value = function () {
             return this._value;
         };
@@ -65988,7 +72336,7 @@ define('element/checkbox',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -66149,8 +72497,31 @@ define('element/input',[
             }
             return this;
         };
+
+        /**
+         * Returns the value (content) of the input element
+         * @name Value
+         * @memberOf Input.prototype
+         * @function
+         * @returns {String} content of the input field.
+         */
         t.Value = function () {
             return this._value;
+        };
+        /**
+         * Sets value of the input element.
+         * @name set
+         * @memberOf Input.prototype
+         * @function
+         *
+         * @param {String} val
+         * @returns {JXG.GeometryElement} Reference to the element.
+         *
+         */
+        t.set = function (val) {
+            this._value = val;
+            this.rendNodeInput.value = val;
+            return this;
         };
 
         Env.addEvent(t.rendNodeInput, 'input', priv.InputInputEventHandler, t);
@@ -66173,7 +72544,7 @@ define('element/input',[
 });
 
 /*
-    Copyright 2008-2020
+    Copyright 2008-2021
         Matthias Ehmann,
         Michael Gerhaeuser,
         Carsten Miller,
@@ -66350,8 +72721,12 @@ define('../build/core.deps.js',[
     'utils/event',
     'utils/expect',
     'math/math',
+    'math/ia',
+    'math/extrapolate',
     'math/qdt',
     'math/numerics',
+    'math/plot',
+    'math/metapost',
     'math/statistics',
     'math/symbolic',
     'math/geometry',
