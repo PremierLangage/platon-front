@@ -64,7 +64,7 @@
     "jsplumb": "^2.14.6",
     "jsxgraph": "^1.1.0",
     "katex": "^0.12.0",
-    "marked": "^1.1.1",
+    "marked": "^2.0.0",
     "materialize-css": "^1.0.0-rc.2",
     "mathlive": "^0.59.0",
     "monaco-editor": "^0.21.2",
