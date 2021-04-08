@@ -1,8 +1,18 @@
 {
   "recommendations": [
+    "eamodio.gitlens",
+    "mrmlnc.vscode-scss",
+    "angular.ng-template",
     "nrwl.angular-console",
-    "ms-vscode.vscode-typescript-tslint-plugin",
+    "eg2.vscode-npm-script",
     "esbenp.prettier-vscode",
-    "angular.ng-template"
+    "cipchk.ng-zorro-vscode",
+    "mikael.angular-beastcode",
+    "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
+    "wendell.ng-zorro-essentials",
+    "johnpapa.angular-essentials",
+    "alexiv.vscode-angular2-files",
+    "vivaxy.vscode-conventional-commits",
   ]
 }

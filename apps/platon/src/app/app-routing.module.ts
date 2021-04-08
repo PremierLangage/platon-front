@@ -61,7 +61,7 @@ const routes: Routes = [
             './pages/workspace/workspace.module'
         ).then(m => m.WorkspaceModule)
     },
-    { path: '**', redirectTo: 'login', pathMatch: 'full' }
+    { path: '**', redirectTo: '/login', pathMatch: 'full' }
 ];
 
 @NgModule({
