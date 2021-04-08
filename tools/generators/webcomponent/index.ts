@@ -10,8 +10,9 @@ import {
     SchematicsException
 } from '@angular-devkit/schematics';
 import { strings } from '@angular-devkit/core';
-import { findNodes, insertImport } from '@schematics/angular/utility/ast-utils';
-import { Change, InsertChange } from '@schematics/angular/utility/change';
+import { Change, findNodes, InsertChange, insertImport } from '@nrwl/workspace/src/utils/ast-utils';
+
+// import { Change, InsertChange } from '@schematics/angular/utility/change';
 import { getWorkspace } from '@schematics/angular/utility/config';
 import { join } from 'path';
 import * as ts from 'typescript';
@@ -141,7 +142,7 @@ export default function (schema: SchematicOptions): Rule {
 
     return (tree: Tree) => {
         const workspace = getWorkspace(tree);
-        const components = workspace.projects['features-web-components'];
+        const components = workspace.projects['feature-web-component'];
         const sourceRoot = components.sourceRoot as string;
 
         schema.name = strings.dasherize(schema.name);
@@ -150,8 +151,9 @@ export default function (schema: SchematicOptions): Rule {
         }
 
         schema.modulePath = `./${schema.type}s/${schema.name}/${schema.name}`;
-        schema.registryFilePath = 'libs/features/web-components/src/lib/web-components-registry.ts';
+        schema.registryFilePath = 'libs/feature/web-component/src/lib/web-component-registry.ts';
 
+        console.log(schema);
         const sources = apply(url('./files'), [
             template({
                 ...strings,
