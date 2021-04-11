@@ -28,7 +28,8 @@ module.exports = () => {
     colors: true,
     logLevel: constants.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCustom'],
     singleRun: true,
+    failOnEmptyTestSuite: false,
   };
 };
