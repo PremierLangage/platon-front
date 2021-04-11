@@ -69,9 +69,10 @@ Want to report a bug, contribute some code, or improve the platform? Read up on 
 - [Angular Reactive Forms](https://www.youtube.com/watch?v=JeeUY6WaXiA)
 - [Sharing data between components](https://www.youtube.com/watch?v=I317BhehZKM)
 
+- [Angular guide in french](https://guide-angular.wishtack.io)
+- [Angular from scratch](https://angular-templates.io/tutorials/about/learn-angular-from-scratch-step-by-step)
+
 #### Nx
 
 - [10-minute video showing all Nx features](https://nx.dev/angular/getting-started/what-is-nx)
 - [Nx Interactive Tutorial](https://nx.dev/angular/tutorial/01-create-application)
-- [Angular guide in french](https://guide-angular.wishtack.io)
-- [Angular from scratch](https://angular-templates.io/tutorials/about/learn-angular-from-scratch-step-by-step)
