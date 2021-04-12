@@ -11,10 +11,10 @@ Frontend of <a href="https://github.com/PremierLangage/platon">PLaTon</a> writte
 </p>
 
 <p align="center">
-    <a href="https://codecov.io/gh/PremierLangage/platon-front">
+    <a href="https://github.com/PremierLangage/platon-front/actions/">
         <img src="https://github.com/PremierLangage/platon-front/workflows/Tests/badge.svg" alt="Tests">
     </a>
-    <a href="https://github.com/PremierLangage/platon-front/actions/">
+    <a href="https://codecov.io/gh/PremierLangage/platon-front">
         <img src="https://codecov.io/gh/PremierLangage/platon-front/branch/master/graph/badge.svg" alt="codecov">
     </a>
     <a href="https://www.codefactor.io/repository/github/premierlangage/platon-front/overview/master">
