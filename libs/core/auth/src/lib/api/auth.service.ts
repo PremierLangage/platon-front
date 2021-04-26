@@ -1,12 +1,10 @@
 import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { DynamicInjectorService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
 import { shareReplay, take } from 'rxjs/operators';
 import { AuthObserver, AUTH_OBSERVER } from '../models/auth';
 import { AuthProvider } from '../models/auth-provider';
 import { AuthUser } from '../models/auth-user';
-import { AuthUserService } from './auth-user.service';
 
 /**
  * Facade class that will provide access to the authentification api of the platform.
@@ -15,10 +13,6 @@ import { AuthUserService } from './auth-user.service';
 export class AuthService {
     private user?: AuthUser;
     private request?: Observable<AuthUser | undefined>;
-
-    private get provider() {
-        return this.dynamicInjector.get<AuthProvider>(AuthProvider);
-    }
 
     private get observers(): AuthObserver[] {
         return this.injector.get<Function[]>(AUTH_OBSERVER, []).map(type => {
@@ -29,8 +23,7 @@ export class AuthService {
     constructor(
         private readonly router: Router,
         private readonly injector: Injector,
-        private readonly userService: AuthUserService,
-        private readonly dynamicInjector: DynamicInjectorService,
+        private readonly authProvider: AuthProvider,
     ) { }
 
     /**
@@ -46,45 +39,39 @@ export class AuthService {
             return this.request.toPromise();
         }
 
-        let uid: number | undefined;
-        try {
-            uid = await this.uid();
-        } finally {
-            if (!uid) {
-                this.redirect('/login');
-                return undefined;
-            }
+        if (this.user) {
+            return Promise.resolve(this.user);
         }
 
-        if (!this.user) {
-            if (!this.request) {
-                this.request = new Observable<AuthUser|undefined>(observer => {
-                    // tslint:disable-next-line: no-non-null-assertion
-                    this.connect(uid!).then((user) => {
-                        observer.next(user);
-                        observer.complete();
-                        this.request = undefined;
-                    }).catch(error => {
-                        observer.error(error);
-                        observer.complete();
-                        this.request = undefined;
-                    });
-                }).pipe(
-                    take(1),
-                    shareReplay(1)
-                );
-            }
-            return this.request?.toPromise();
+        if (!this.request) {
+            this.request = new Observable<AuthUser|undefined>(observer => {
+                // tslint:disable-next-line: no-non-null-assertion
+                this.connect().then((user) => {
+                    observer.next(user);
+                    observer.complete();
+                    this.request = undefined;
+                }).catch(error => {
+                    console.error(error);
+                    observer.next(undefined);
+                    observer.complete();
+                    this.request = undefined;
+                });
+            }).pipe(
+                take(1),
+                shareReplay(1)
+            );
         }
-        return this.user;
+
+        return this.request?.toPromise();
     }
 
     /**
-     * Gets the unique ID of the current user
-     * or null if there is no logged user.
+     * Sign in an user using userName and password.
+     * @param userName the userName of the user
+     * @param password the password of the user
      */
-    uid(): Promise<number | undefined> {
-        return this.provider.uid();
+    signIn(userName: string, password: string): Promise<AuthUser> {
+        return this.authProvider.signIn(userName, password);
     }
 
     /**
@@ -96,6 +83,7 @@ export class AuthService {
      **/
     async signOut(): Promise<void> {
         await this.router.navigateByUrl('/login', { replaceUrl: true });
+
         if (this.user) {
             for (const observer of this.observers) {
                 await observer.onChangeAuth({
@@ -105,32 +93,15 @@ export class AuthService {
             }
             this.user = undefined;
         }
-        if (await this.uid()) {
-            await this.provider.signOut();
-        }
+
+        await this.authProvider.signOut();
     }
 
-    /**
-     * Signs in an user using email and password.
-     * @param email the email of the user
-     * @param password the password of the user
-     */
-    async signInWithEmailAndPassword(email: string, password: string): Promise<void> {
-        await this.provider.signInWithEmailAndPassword(email, password);
-        await this.ready();
-    }
 
-    private redirect(url: string) {
-        this.router.navigate([url], {
-            replaceUrl: true,
-            queryParams: { next: this.router.url }
-        });
-    }
-
-    private async connect(uid: number) {
-        const user = this.user = await this.userService.findById(uid).toPromise();
+    private async connect(): Promise<AuthUser> {
+        const user = await this.authProvider.current();
         if (user == null) {
-            throw new Error('There is no user record found for ' + uid);
+            throw new Error('auth/not-connected');
         }
 
         for (const observer of this.observers) {
@@ -139,7 +110,7 @@ export class AuthService {
                 type: 'connection',
             });
         }
+
         return user;
     }
-
 }

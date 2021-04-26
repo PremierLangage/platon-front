@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { DynamicInjectorService } from '@platon/shared/utils';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AuthUser } from '../models/auth-user';
@@ -10,18 +9,15 @@ import { AuthUserFilters, AuthUserProvider } from '../models/auth-user-provider'
  */
 @Injectable({providedIn: 'root'})
 export class AuthUserService {
-    private users = new Map<number, AuthUser>();
+    private users = new Map<string, AuthUser>();
 
-    private get provider() {
-        return this.dynamicInjector.get<AuthUserProvider>(AuthUserProvider);
-    }
 
     constructor(
-        private readonly dynamicInjector: DynamicInjectorService
+        private readonly authUserProvider: AuthUserProvider
     ) { }
 
     search(filters: AuthUserFilters): Observable<AuthUser[]> {
-        return this.provider.search(filters);
+        return this.authUserProvider.search(filters);
     }
 
     /**
@@ -33,15 +29,16 @@ export class AuthUserService {
      * @param uid The identifier of the user to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findById(uid: number): Observable<AuthUser | undefined> {
-        const cache = this.users.get(uid);
+    findByUserName(userName: string): Observable<AuthUser | undefined> {
+        const cache = this.users.get(userName);
         if (cache != null) {
             return of(cache);
         }
-        return this.provider.findById(uid).pipe(
+    
+        return this.authUserProvider.findByUserName(userName).pipe(
             tap(user => {
                 if (user != null) {
-                    this.users.set(uid, user);
+                    this.users.set(userName, user);
                 }
             })
         );
@@ -56,26 +53,26 @@ export class AuthUserService {
      * @param uid An array of user identifiers to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findAll(uids: number[]): Observable<AuthUser[]> {
-        const notCached: number[]  = [];
-        const cacheElements = uids.map(uid => {
-            const user =  this.users.get(uid);
+    findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {
+        const notCached: string[]  = [];
+        const cacheElements = userNames.map(userName => {
+            const user =  this.users.get(userName);
             if (user == null) {
-                notCached.push(uid);
+                notCached.push(userName);
             }
             return user;
         }).filter(e => e != null) as AuthUser[];
+        
         return combineLatest([
             of(cacheElements),
-            this.provider.findAll(notCached),
+            this.authUserProvider.findAllByUserNames(notCached),
         ]).pipe(
             map(([fromCache, fromServer]) => {
                 fromServer.forEach(e => {
-                    this.users.set(e.id, e);
+                    this.users.set(e.userName, e);
                 });
                 return fromCache.concat(fromServer);
             })
         );
     }
-
 }

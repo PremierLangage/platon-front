@@ -5,7 +5,6 @@ import {
     AuthUser,
     InMemoryUserDb
 } from '@platon/core/auth';
-import { ConfigService } from '@platon/core/config';
 import { array_sample } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -188,20 +187,12 @@ export class InMemoryResourceProvider extends ResourceProvider
     private loggedUser?: AuthUser;
 
     constructor(
-        private readonly config: ConfigService,
         private readonly inMemoryUserDb: InMemoryUserDb
     ) {
         super();
     }
 
-    injectable(): boolean {
-        return !this.config.isServerRunning;
-    }
-
     async onChangeAuth(change: AuthChange) {
-        if (!this.injectable()) {
-            return; // perf does not create cache in production mode
-        }
         this.loggedUser = undefined;
         if (change.type === 'connection') {
             this.loggedUser = change.user;

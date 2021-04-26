@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/core/config';
 import Fuse from 'fuse.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,15 +8,11 @@ import { InMemoryUserDb } from './in-memory-user-db';
 
 @Injectable()
 export class InMemoryUserProvider extends AuthUserProvider {
+
     constructor(
-        private readonly config: ConfigService,
         private readonly userDb: InMemoryUserDb,
     ) {
         super();
-    }
-
-    injectable(): boolean {
-        return !this.config.isServerRunning;
     }
 
     search(filters: AuthUserFilters): Observable<AuthUser[]> {
@@ -46,15 +41,15 @@ export class InMemoryUserProvider extends AuthUserProvider {
     }
 
 
-    findById(uid: number): Observable<AuthUser | undefined> {
+    findByUserName(username: string): Observable<AuthUser | undefined> {
         return this.userDb.read().pipe(
-            map(arr => arr.find(e => e.id === uid))
+            map(arr => arr.find(e => e.userName === username))
         );
     }
 
-    findAll(uid: number[]): Observable<AuthUser[]> {
+    findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {
         return this.userDb.read().pipe(
-            map(arr => arr.filter(e => uid.includes(e.id)))
+            map(arr => arr.filter(e => userNames.includes(e.userName)))
         );
     }
 

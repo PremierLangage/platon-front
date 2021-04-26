@@ -1,30 +1,33 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '@platon/core/config';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { from, Observable, of } from 'rxjs';
+
 import { AuthUser } from '../models/auth-user';
 import { AuthUserProvider, AuthUserFilters } from '../models/auth-user-provider';
+import { mergeMap, toArray } from 'rxjs/operators';
+
 
 @Injectable()
 export class RemoteUserProvider extends AuthUserProvider {
     constructor(
-        private readonly config: ConfigService
+        private readonly http: HttpClient,
     ) {
         super();
-    }
-
-    injectable(): boolean {
-        return this.config.isServerRunning;
     }
 
     search(filters: AuthUserFilters): Observable<AuthUser[]> {
         return of([]);
     }
 
-    findById(uid: number): Observable<AuthUser | undefined> {
-        throw new Error('Method not implemented.');
+    findByUserName(userName: string): Observable<AuthUser | undefined> {
+        return this.http.get<AuthUser>(`/api/auth/users/${userName}`);
     }
 
-    findAll(uid: number[]): Observable<AuthUser[]> {
-        throw new Error('Method not implemented.');
+    findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {
+        const merge = from(userNames).pipe(
+            mergeMap(userName => this.findByUserName(userName)),
+            toArray()
+        );
+        return merge as Observable<AuthUser[]>;
     }
 }

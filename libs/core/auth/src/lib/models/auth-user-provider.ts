@@ -1,28 +1,25 @@
-import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
 import { AuthUser, UserRole } from './auth-user';
 
 /**
  * Provides an api to query user objects.
  */
-export abstract class AuthUserProvider implements IDynamicService {
-    abstract injectable(): boolean;
-
+export abstract class AuthUserProvider{
     abstract search(filters: AuthUserFilters): Observable<AuthUser[]>;
 
     /**
-     * Finds the user identified by `uid`.
-     * @param uid The identifier of the user to find.
+     * Finds the user identified by `userName`.
+     * @param uid The userName of the user to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    abstract findById(uid: number): Observable<AuthUser | undefined>;
+    abstract findByUserName(userName: string): Observable<AuthUser | undefined>;
 
     /**
-     * Finds ALl the users listed in the `uids` array.
-     * @param uid An array of user identifiers to find.
+     * Finds ALl the users listed in the `userNames` array.
+     * @param uid An array of user names to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    abstract findAll(uids: number[]): Observable<AuthUser[]>;
+    abstract findAllByUserNames(userNames: string[]): Observable<AuthUser[]>;
 }
 
 

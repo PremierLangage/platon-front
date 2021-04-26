@@ -1,10 +1,8 @@
 import { AuthChange, AuthObserver } from '@platon/core/auth';
-import { IDynamicService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
 import { ResourceEvent, Member, Resource, ResourceStatus, ResourceTypes, Circle } from './resource';
 
-export abstract class ResourceProvider implements AuthObserver, IDynamicService {
-    abstract injectable(): boolean;
+export abstract class ResourceProvider implements AuthObserver {
     abstract onChangeAuth(change: AuthChange): void | Promise<void>;
 
     abstract suggestions(): Observable<Record<ResourceTypes, string[]>>;

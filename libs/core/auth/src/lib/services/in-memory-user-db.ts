@@ -7,9 +7,11 @@ import { AuthUser } from '../models/auth-user';
 @Injectable({ providedIn: 'root' })
 export class InMemoryUserDb {
     private request?: Observable<AuthUser[]>;
+
     constructor(
         private readonly http: HttpClient,
     ) {}
+
     read(): Observable<AuthUser[]> {
         if (this.request) {
             return this.request;

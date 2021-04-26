@@ -1,7 +1,7 @@
-import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpErrorInterceptor } from './http/http-error-interceptor.service';
+import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpParamEncoderInterceptor } from './http/http-param-encoder-interceptor.service';
+
 
 @NgModule({
   declarations: [],
@@ -16,7 +16,6 @@ import { HttpParamEncoderInterceptor } from './http/http-param-encoder-intercept
     HttpClientModule,
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: HttpParamEncoderInterceptor, multi: true },
   ]
 })

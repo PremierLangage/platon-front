@@ -6,5 +6,5 @@ import { InMemoryResourceProvider } from './services/in-memory-resource-provider
 
 export const WORKSPACE_PROVIDERS: Provider[] = [
     { provide: AUTH_OBSERVER, multi: true, useValue: ResourceService },
-    { provide: ResourceProvider, multi: true, useClass: InMemoryResourceProvider },
+    { provide: ResourceProvider, useClass: InMemoryResourceProvider },
 ];

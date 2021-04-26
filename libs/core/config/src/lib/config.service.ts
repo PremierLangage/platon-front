@@ -6,6 +6,6 @@ import { Injectable } from '@angular/core';
 @Injectable({providedIn: 'root'})
 export class ConfigService {
     get isServerRunning(): boolean {
-        return document.body.getAttribute('platon-api-version') != null;
+        return true; // document.body.getAttribute('platon-api-version') != null;
     }
 }

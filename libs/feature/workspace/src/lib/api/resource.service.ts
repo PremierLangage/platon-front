@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AuthChange, AuthObserver } from '@platon/core/auth';
-import { DynamicInjectorService } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
 import { ResourceEvent, Member, Resource, Circle } from '../models/resource';
 import {
@@ -14,12 +13,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ResourceService implements AuthObserver {
-    private get provider() {
-        return this.dynamicInjector.get<ResourceProvider>(ResourceProvider);
-    }
 
     constructor(
-        private readonly dynamicInjector: DynamicInjectorService
+        private readonly provider: ResourceProvider
     ) {}
 
     /**

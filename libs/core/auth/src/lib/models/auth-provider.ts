@@ -1,21 +1,22 @@
-import { IDynamicService } from '@platon/shared/utils';
+import { AuthUser } from "./auth-user";
 
-export abstract class AuthProvider implements IDynamicService {
-    abstract injectable(): boolean;
-
+export abstract class AuthProvider {
     /**
-     * Gets the unique ID of the current user
-     * or null if there is no logged user.
+     * Gets the current logged user.
+     * @returns A promise that will resolves with the user found or `undefined` once the server will response.
      */
-    abstract uid(): Promise<number | undefined>;
-
-    /** Sign out the current user */
-    abstract signOut(): Promise<void>;
+    abstract current(): Promise<AuthUser | undefined>;
 
     /**
      * Signs in an user using email and password.
-     * @param email the email of the user
-     * @param password the password of the user
+     * @param userName the userName of the user.
+     * @param password the password of the user.
+     * @returns A promise that resolves with an authentification token.
      */
-    abstract signInWithEmailAndPassword(email: string, password: string): Promise<void>;
+    abstract signIn(userName: string, password: string): Promise<AuthUser>;
+
+    /**
+     * Sign out the current user
+     */
+    abstract signOut(): Promise<void>;
 }

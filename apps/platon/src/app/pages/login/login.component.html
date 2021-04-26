@@ -3,14 +3,6 @@
     <img class="logo" src="assets/images/logo/platon.svg" alt="Logo PLaTon"/>
     <span>PLaTon</span>
     <div class="spacer"></div>
-    <ng-container *ngIf="!isServerRunning">
-      <div id="intro-demo">
-        <a mat-button (click)="showDemoForm()" [disabled]="connecting">
-          <mat-icon>explore</mat-icon>
-          Démonstration
-        </a>
-      </div>
-    </ng-container>
     <a mat-button [routerLink]="'/doc'" target="_blank" [disabled]="connecting">
       <mat-icon>local_library</mat-icon>
       Documentation
@@ -21,13 +13,11 @@
       <mat-card>
         <mat-card-content>
           <mat-form-field appearance="fill">
-            <mat-icon matPrefix>email</mat-icon>
-            <mat-label>Email</mat-label>
-            <input name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" [(ngModel)]="email" type="email" required matInput>
-            <mat-error>Une adresse email valide est requise !</mat-error>
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input name="username" [(ngModel)]="username" type="text" required matInput>
+            <mat-error>Une nom d'utilisateur valide est requise !</mat-error>
           </mat-form-field>
           <mat-form-field appearance="fill">
-            <mat-icon matPrefix>lock</mat-icon>
             <mat-label>Mot de passe</mat-label>
             <input name="password" [(ngModel)]="password" type="password" required matInput>
             <mat-error>Un mot de passe est requis !</mat-error>
@@ -42,7 +32,6 @@
           <button *ngIf="!connecting" type="submit" mat-raised-button color="primary" [disabled]="!form.valid">SE CONNECTER</button>
         </mat-card-actions>
       </mat-card>
-      <button type="button" mat-button>Vous n'avez pas de compte?</button>
     </form>
 </section>
 <section>

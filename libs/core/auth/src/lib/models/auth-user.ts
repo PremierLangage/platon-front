@@ -11,7 +11,7 @@ export interface AuthUser {
     userName: string;
     lastName: string;
     firstName: string;
-    isAdmin: boolean;
     picture: string;
+    isAdmin: boolean;
 }
 
