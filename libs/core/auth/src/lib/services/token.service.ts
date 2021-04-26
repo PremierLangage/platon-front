@@ -59,7 +59,7 @@ export class TokenService {
             await this.storage.set(KEY, token).toPromise();
 
             return token;
-        } catch {
+        } catch (error) {
             await this.remove();
             throw error;
         }
