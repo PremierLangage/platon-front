@@ -1,4 +1,4 @@
-import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-components';
+import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
 
 export interface <%= classify(name) %>State extends IWebComponent {
   myproperty: string;

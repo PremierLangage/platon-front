@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
-import { WebComponent, WebComponentHooks } from '../../web-components';
+import { WebComponent, WebComponentHooks } from '../../web-component';
 import { <%= classify(name) %>ComponentDefinition, <%= classify(name) %>State } from './<%= name %>';
 
 @Component({
@@ -30,7 +30,7 @@ export class <%= classify(name) %>Component implements WebComponentHooks<<%= cla
      * @param state The state that will be returned by the getter.
      * @returns the state or a computed version of the state.
      */
-    onGetState(state: <%= classify(name) %>) {
+    onGetState(state: <%= classify(name) %>State) {
         return state;
     }
 
