@@ -9,8 +9,8 @@ import {
 import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
 import { catchError, filter, finalize, switchMap, take } from 'rxjs/operators';
 
-import { TokenService } from '../services/token.service';
 import { AuthToken } from '../models/auth-token';
+import { RemoteTokenProvider } from '../services/remote-token-provider';
 
 
 /**
@@ -22,14 +22,14 @@ export class AuthInterceptor implements HttpInterceptor {
     private readonly token$ = new BehaviorSubject<AuthToken | undefined> (undefined);
 
     constructor(
-        private readonly tokenService: TokenService
+        private readonly tokenProvider: RemoteTokenProvider
     ) { }
 
     intercept(
         req: HttpRequest<any>,
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
-        return from(this.tokenService.token()).pipe(
+        return from(this.tokenProvider.token()).pipe(
             switchMap(token => {
                 if (token != null) {
                     return next.handle(this.addAuthorization(req, token)).pipe(
@@ -58,7 +58,7 @@ export class AuthInterceptor implements HttpInterceptor {
             // future requests will wait until the refresh token is resolved
             this.token$.next(undefined);
 
-            return from(this.tokenService.refresh()).pipe(
+            return from(this.tokenProvider.refresh()).pipe(
                 switchMap(token => {
                     return next.handle(this.addAuthorization(req, token));
                 }),

@@ -20,7 +20,7 @@ export class RemoteUserProvider extends AuthUserProvider {
     }
 
     findByUserName(userName: string): Observable<AuthUser | undefined> {
-        return this.http.get<AuthUser>(`/api/auth/users/${userName}`);
+        return this.http.get<AuthUser>(`/api/v1/auth/users/${userName}`);
     }
 
     findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {

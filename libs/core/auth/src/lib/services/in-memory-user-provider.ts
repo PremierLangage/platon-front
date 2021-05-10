@@ -40,7 +40,6 @@ export class InMemoryUserProvider extends AuthUserProvider {
         )
     }
 
-
     findByUserName(username: string): Observable<AuthUser | undefined> {
         return this.userDb.read().pipe(
             map(arr => arr.find(e => e.userName === username))
@@ -52,5 +51,4 @@ export class InMemoryUserProvider extends AuthUserProvider {
             map(arr => arr.filter(e => userNames.includes(e.userName)))
         );
     }
-
 }

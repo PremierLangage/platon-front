@@ -6,30 +6,44 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 
 const KEY = "auth-token";
 
+/**
+ * Handles JWT token generation/storage/refresh.
+ */
 @Injectable({providedIn: 'root'})
-export class TokenService {
+export class RemoteTokenProvider {
 
     constructor(
         private readonly http: HttpClient,
         private readonly storage: StorageService,
     ) { }
 
-
-    set(token: AuthToken): Promise<any> {
-        return this.storage.set(KEY, token).toPromise();
-    }
-
+    /**
+     * Gets the current auth token if it exists.
+     * @returns A promise that resolves with an auth token or `undefined`.
+     */
     token(): Promise<AuthToken | undefined> {
         return this.storage.get<AuthToken>(KEY).toPromise();
     }
 
+    /** Deletes the current auth token */
     remove(): Promise<any> {
        return this.storage.remove(KEY).toPromise();
     }
 
-    async obtain(username: string, password: string) {
-        const token = await this.http.post<AuthToken>('/api/auth/signin/', {
-            username, password
+    /**
+     * Generates new auth token for the identified by `username`.
+     *
+     * Once the token is generared, it will be stored to the browser localStorage.
+     * You must call `remove()` method to delete it.
+     *
+     * @param userName An user name.
+     * @param password An user password.
+     * @returns A promise that resolves with an auth token.
+     */
+    async obtain(userName: string, password: string): Promise<AuthToken> {
+        const token = await this.http.post<AuthToken>('/api/v1/auth/sign-in/', {
+            username: userName,
+            password
         }).toPromise();
 
         await this.storage.set(KEY, token).toPromise();
@@ -37,6 +51,10 @@ export class TokenService {
         return token;
     }
 
+    /**
+     * Refreshs the current auth token.
+     * @returns A promise that resolves with an auth token.
+     */
     async refresh(): Promise<AuthToken> {
         const token = await this.token();
         if (!token) {
@@ -50,7 +68,7 @@ export class TokenService {
         }
 
         try {
-            const newToken = await this.http.post<AuthToken>('/api/auth/refresh/', {
+            const newToken = await this.http.post<AuthToken>('/api/v1/auth/refresh/', {
                 refresh: token.refresh
             }).toPromise();
 
