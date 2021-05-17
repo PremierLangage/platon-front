@@ -25,7 +25,14 @@ Frontend of <a href="https://github.com/PremierLangage/platon">PLaTon</a> writte
     </a>
 </p>
 
+
+##  Demonstration site
+
+https://premierlangage.github.io/platon-front/login?next=%2Flogin
+
+
 ## Development
+
 
 ### Prerequisites
 
