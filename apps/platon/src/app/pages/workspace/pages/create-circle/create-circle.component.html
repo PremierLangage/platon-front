@@ -72,7 +72,7 @@
     <ui-list
       [items]="members"
       [idField]="'id'"
-      [filterBy]="['userName', 'lastName', 'firstName']"
+      [filterBy]="['username', 'lastName', 'firstName']"
       [filter]="input.value">
       <ui-list-template slot="row">
         <ng-template let-item="item">
@@ -86,7 +86,7 @@
               nzOkText="Retirer"
               nzCancelText="Annuler"
               nzOkType="danger"
-              [nzPopconfirmTitle]=" 'Voulez-vous vraiment retirer “' + item.userName + '” des membres du cercle?'"
+              [nzPopconfirmTitle]=" 'Voulez-vous vraiment retirer “' + item.username + '” des membres du cercle?'"
               nzPopconfirmPlacement="top"
               (nzOnConfirm)="removeMember(item)"
               mat-icon-button>

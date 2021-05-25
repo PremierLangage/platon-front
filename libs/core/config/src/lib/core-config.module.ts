@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpParamEncoderInterceptor } from './http/http-param-encoder-interceptor.service';
+import { HttpParamEncoderInterceptor } from './http/http-param-encoder.interceptor';
+import { HttpCaseConverterInterceptor } from './http/http-case-converter.interceptor';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import { HttpParamEncoderInterceptor } from './http/http-param-encoder-intercept
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: HttpParamEncoderInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HttpCaseConverterInterceptor, multi: true },
   ]
 })
 export class CoreConfigModule {}

@@ -21,7 +21,7 @@ export class RemoteAuthProvider extends AuthProvider {
         const token = await this.tokenProvider.token();
         if (token) {
             try {
-                return await this.http.get<AuthUser>('/api/v1/auth/user/').toPromise();
+                return await this.http.get<AuthUser>('/api/v1/users/me').toPromise();
             } catch {
                 await this.tokenProvider.remove();
             }
@@ -30,7 +30,7 @@ export class RemoteAuthProvider extends AuthProvider {
 
     async signIn(username: string, password: string): Promise<AuthUser> {
         await this.tokenProvider.obtain(username, password);
-        return this.http.get<AuthUser>('/api/v1/auth/user/').toPromise();
+        return this.http.get<AuthUser>('/api/v1/users/me').toPromise();
     }
 
     async signOut(): Promise<void> {

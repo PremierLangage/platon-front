@@ -32,7 +32,7 @@ export class SearchModalComponent {
         filterer: {
             run: this.search.bind(this),
         },
-        complete: item => item.userName,
+        complete: item => item.username,
         onSelect: user => {
             this.selections.push(user);
             this.searchBar.value = '';

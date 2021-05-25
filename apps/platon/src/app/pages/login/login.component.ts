@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     }
 
     signIn(): void {
-        if (this.user && this.user.userName === this.username) {
+        if (this.user && this.user.username === this.username) {
             this.router.navigateByUrl('/dashboard', { replaceUrl: true });
             return;
         }

@@ -66,12 +66,12 @@ export class AuthService {
     }
 
     /**
-     * Sign in an user using userName and password.
-     * @param userName the userName of the user
+     * Sign in an user using username and password.
+     * @param username the username of the user
      * @param password the password of the user
      */
-    signIn(userName: string, password: string): Promise<AuthUser> {
-        return this.authProvider.signIn(userName, password);
+    signIn(username: string, password: string): Promise<AuthUser> {
+        return this.authProvider.signIn(username, password);
     }
 
     /**

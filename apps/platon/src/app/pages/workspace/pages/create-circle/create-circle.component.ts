@@ -112,8 +112,7 @@ export class CreateCircleComponent implements OnInit {
             users.map((e) => {
                 return {
                     id: e.id,
-                    picture: e.picture,
-                    userName: e.userName,
+                    username: e.username,
                     lastName: e.lastName,
                     firstName: e.firstName,
                     isAdmin: e.isAdmin,

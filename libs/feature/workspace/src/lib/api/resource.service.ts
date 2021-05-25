@@ -89,6 +89,5 @@ export class ResourceService implements AuthObserver {
     }
 
     onChangeAuth(change: AuthChange) {
-        this.provider.onChangeAuth(change);
     }
 }

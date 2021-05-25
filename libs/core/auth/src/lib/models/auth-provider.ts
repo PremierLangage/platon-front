@@ -9,11 +9,11 @@ export abstract class AuthProvider {
 
     /**
      * Signs in an user using email and password.
-     * @param userName the userName of the user.
+     * @param username the username of the user.
      * @param password the password of the user.
      * @returns A promise that resolves with an authentification token.
      */
-    abstract signIn(userName: string, password: string): Promise<AuthUser>;
+    abstract signIn(username: string, password: string): Promise<AuthUser>;
 
     /**
      * Sign out the current user

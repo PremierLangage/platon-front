@@ -19,13 +19,13 @@ export class RemoteUserProvider extends AuthUserProvider {
         return of([]);
     }
 
-    findByUserName(userName: string): Observable<AuthUser | undefined> {
-        return this.http.get<AuthUser>(`/api/v1/auth/users/${userName}`);
+    findByUserName(username: string): Observable<AuthUser | undefined> {
+        return this.http.get<AuthUser>(`/api/v1/auth/users/${username}`);
     }
 
     findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {
         const merge = from(userNames).pipe(
-            mergeMap(userName => this.findByUserName(userName)),
+            mergeMap(username => this.findByUserName(username)),
             toArray()
         );
         return merge as Observable<AuthUser[]>;

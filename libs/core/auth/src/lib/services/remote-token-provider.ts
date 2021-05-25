@@ -36,13 +36,13 @@ export class RemoteTokenProvider {
      * Once the token is generared, it will be stored to the browser localStorage.
      * You must call `remove()` method to delete it.
      *
-     * @param userName An user name.
+     * @param username An user name.
      * @param password An user password.
      * @returns A promise that resolves with an auth token.
      */
-    async obtain(userName: string, password: string): Promise<AuthToken> {
+    async obtain(username: string, password: string): Promise<AuthToken> {
         const token = await this.http.post<AuthToken>('/api/v1/auth/sign-in/', {
-            username: userName,
+            username: username,
             password
         }).toPromise();
 

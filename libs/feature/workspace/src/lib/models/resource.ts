@@ -70,8 +70,7 @@ export interface ResourceEvent {
 export interface Member {
     id: number;
     circleId: number;
-    picture: string;
-    userName: string;
+    username: string;
     lastName: string;
     firstName: string;
     isAdmin: boolean;

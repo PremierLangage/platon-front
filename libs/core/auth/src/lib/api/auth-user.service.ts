@@ -21,24 +21,24 @@ export class AuthUserService {
     }
 
     /**
-     * Finds the user identified by `uid`.
+     * Finds the user identified by `username`.
      *
      * Note:
      * This method will make an http request only if the user is not cached in the memory.
      *
-     * @param uid The identifier of the user to find.
+     * @param username The name of the user to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findByUserName(userName: string): Observable<AuthUser | undefined> {
-        const cache = this.users.get(userName);
+    findByUserName(username: string): Observable<AuthUser | undefined> {
+        const cache = this.users.get(username);
         if (cache != null) {
             return of(cache);
         }
-    
-        return this.authUserProvider.findByUserName(userName).pipe(
+
+        return this.authUserProvider.findByUserName(username).pipe(
             tap(user => {
                 if (user != null) {
-                    this.users.set(userName, user);
+                    this.users.set(username, user);
                 }
             })
         );
@@ -53,23 +53,23 @@ export class AuthUserService {
      * @param uid An array of user identifiers to find.
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
-    findAllByUserNames(userNames: string[]): Observable<AuthUser[]> {
+    findAllByUserNames(usernames: string[]): Observable<AuthUser[]> {
         const notCached: string[]  = [];
-        const cacheElements = userNames.map(userName => {
-            const user =  this.users.get(userName);
+        const cacheElements = usernames.map(username => {
+            const user =  this.users.get(username);
             if (user == null) {
-                notCached.push(userName);
+                notCached.push(username);
             }
             return user;
         }).filter(e => e != null) as AuthUser[];
-        
+
         return combineLatest([
             of(cacheElements),
             this.authUserProvider.findAllByUserNames(notCached),
         ]).pipe(
             map(([fromCache, fromServer]) => {
                 fromServer.forEach(e => {
-                    this.users.set(e.userName, e);
+                    this.users.set(e.username, e);
                 });
                 return fromCache.concat(fromServer);
             })
