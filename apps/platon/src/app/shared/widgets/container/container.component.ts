@@ -1,29 +1,45 @@
-import { AfterContentInit, Component, ContentChild, Input, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { AfterContentInit, Component, ContentChild, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
+import { Subscription } from 'rxjs';
 import { DrawerComponent } from '../drawer/drawer.component';
 
 @Component({
-  selector: 'app-container',
-  templateUrl: './container.component.html',
-  styleUrls: ['./container.component.scss']
+    selector: 'app-container',
+    templateUrl: './container.component.html',
+    styleUrls: ['./container.component.scss']
 })
-export class ContainerComponent implements OnInit, AfterContentInit {
-    @Input() showDrawer = true;
+export class ContainerComponent implements OnInit, OnDestroy, AfterContentInit {
+    private readonly subscriptions: Subscription[] = [];
     @ContentChild(DrawerComponent) drawer?: DrawerComponent;
 
     user?: AuthUser;
-    drawerOpened = true;
+
+    drawerEnabled = true;
+    drawerVisible = true;
 
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly breakpointObserver: BreakpointObserver,
     ) { }
 
     async ngOnInit() {
         this.user = await this.authService.ready();
+        this.subscriptions.push(this.breakpointObserver.observe([
+            Breakpoints.XSmall,
+            Breakpoints.Small
+        ]).subscribe(result => {
+            const { breakpoints } = result;
+            const isSmallScreen = breakpoints[Breakpoints.XSmall] || breakpoints[Breakpoints.Small];
+            this.drawerEnabled = isSmallScreen;
+        }));
+    }
+
+    ngOnDestroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
     ngAfterContentInit() {
-        this.drawerOpened = this.drawer != null;
+        this.drawerVisible = this.drawer != null;
     }
-
 }

@@ -1,9 +1,9 @@
 <mat-toolbar>
-  <app-logo *ngIf="!small"></app-logo>
-  <button mat-icon-button (click)="menu.emit()">
+  <app-logo *ngIf="!drawerEnabled || !drawerVisible"></app-logo>
+  <button mat-icon-button *ngIf="drawerEnabled" (click)="drawerVisibleChange.next(!drawerVisible)">
     <mat-icon>menu</mat-icon>
   </button>
-  <app-nav></app-nav>
+  <app-nav *ngIf="!drawerEnabled"></app-nav>
   <div class="spacer"></div>
   <button mat-icon-button [matMenuTriggerFor]="notifMenu">
     <mat-icon matBadge="0">notifications</mat-icon>

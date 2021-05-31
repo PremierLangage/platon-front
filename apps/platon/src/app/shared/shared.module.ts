@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+import { LayoutModule } from '@angular/cdk/layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -39,6 +40,7 @@ const DECLARATIONS = [
         CommonModule,
         RouterModule,
 
+        LayoutModule,
         MatIconModule,
         MatMenuModule,
         MatBadgeModule,

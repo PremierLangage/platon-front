@@ -1,10 +1,10 @@
 <ng-container *ngIf="user != null">
   <app-header
-    [small]="drawerOpened"
-    (menu)="drawerOpened = !drawerOpened">
+    [drawerEnabled]="drawerEnabled"
+    [(drawerVisible)]="drawerVisible">
   </app-header>
   <mat-drawer-container>
-    <mat-drawer mode="side" [opened]="drawerOpened">
+    <mat-drawer mode="side" [opened]="drawerVisible">
       <ng-container *ngIf="drawer; else: nodrawer">
         <ng-content select="app-drawer"></ng-content>
       </ng-container>

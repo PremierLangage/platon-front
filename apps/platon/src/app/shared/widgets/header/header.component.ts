@@ -2,14 +2,21 @@ import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild 
 import { AuthService, AuthUser } from '@platon/core/auth';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-    @Input() small = true;
-    @Output() menu = new EventEmitter();
-    @ViewChild('navigation') navigationTemplate!: TemplateRef<any>;
+    @Input()
+    drawerVisible = false;
+    @Input()
+    drawerEnabled = true;
+
+    @Output()
+    drawerVisibleChange = new EventEmitter<boolean>();
+
+    @ViewChild('navigation')
+    navigationTemplate!: TemplateRef<any>;
 
     user?: AuthUser;
 
