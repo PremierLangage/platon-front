@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { AuthUser, UserRole } from './auth-user';
+import { AuthUser } from './auth-user';
 
 /**
  * Provides an api to query user objects.
@@ -24,6 +24,6 @@ export abstract class AuthUserProvider{
 
 
 export interface AuthUserFilters {
-    role: 'ALL' | UserRole;
+    role: 'ALL';
     query?: string;
 }

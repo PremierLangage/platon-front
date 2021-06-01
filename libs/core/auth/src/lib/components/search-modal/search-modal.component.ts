@@ -3,11 +3,7 @@ import { SearchBar } from '@platon/shared/ui/search';
 import Fuse from 'fuse.js';
 import { map } from 'rxjs/operators';
 import { AuthUserService } from '../../api/auth-user.service';
-import {
-    AuthUser,
-    AuthUserSearchIndexes,
-    UserRole
-} from '../../models/auth-user';
+import { AuthUser, AuthUserSearchIndexes } from '../../models/auth-user';
 
 @Component({
     selector: 'auth-search-modal',
@@ -19,7 +15,7 @@ export class SearchModalComponent {
     isVisible = false;
 
     @Input() searchTitle = '';
-    @Input() searchRole: 'ALL' | UserRole = 'ALL';
+    @Input() searchRole: 'ALL' = 'ALL';
     @Input() searchOkTitle = 'OK';
     @Input() searchNoTitle = 'Annuler';
     @Input() searchMulti = true;
@@ -50,7 +46,7 @@ export class SearchModalComponent {
     constructor(
         private readonly api: AuthUserService,
         private readonly changeDetector: ChangeDetectorRef
-    ) {}
+    ) { }
 
     open() {
         this.isVisible = true;
@@ -59,7 +55,7 @@ export class SearchModalComponent {
 
     close() {
         this.searchBar.value = '',
-        this.isVisible = false;
+            this.isVisible = false;
         this.changeDetector.markForCheck();
     }
 
@@ -95,6 +91,6 @@ export class SearchModalComponent {
 
     private isSelectable(user: AuthUser) {
         return !this.selections.find(e => e.id === user.id) &&
-               !this.searchExcludes.find(e => e.id === user.id);
+            !this.searchExcludes.find(e => e.id === user.id);
     }
 }

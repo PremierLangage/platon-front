@@ -1,5 +1,5 @@
 <nz-badge [nzCount]="user?.isAdmin ? nzCount : undefined" [nzOffset]="[0, -6]">
-  <nz-avatar [nzSize]="avatarSize" nzIcon="user"></nz-avatar>
+  <nz-avatar [nzSize]="avatarSize" [nzSrc]="user?.avatar" nzIcon="user"></nz-avatar>
 </nz-badge>
 <div>
   <span>{{user?.firstName}} {{user?.lastName}}</span>
