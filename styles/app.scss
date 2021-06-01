@@ -1,10 +1,8 @@
 @import 'normalize';
 @import 'fonts';
 @import 'variables';
-@import 'material';
 @import 'components';
 
-@import "~ng-zorro-antd/ng-zorro-antd.min.css";
 
 html {
   width: 100vw;
@@ -20,7 +18,6 @@ html {
   --brand-text-color: #000000;
   --brand-border-color: #dddddd;
   --brand-box-shadow-color: rgba(0, 0, 0, 0.12);
-  @include angular-material-theme($mat-light-theme);
 }
 
 .dark-theme {
@@ -28,5 +25,4 @@ html {
   --brand-text-color: #ffffff;
   --brand-border-color: #15202b;
   --brand-box-shadow-color: rgba(255, 255, 255, 0.12);
-  @include angular-material-theme($mat-dark-theme);
 }

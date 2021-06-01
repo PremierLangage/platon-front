@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NzIconService } from 'ng-zorro-antd/icon';
+import { ThemeService } from '@platon/core/config';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -7,10 +8,12 @@ import { NzIconService } from 'ng-zorro-antd/icon';
 })
 export class AppComponent implements OnInit {
     constructor(
-        private readonly nzIconService: NzIconService
+        private readonly themeService: ThemeService,
+        private readonly nzIconService: NzIconService,
     ) {}
 
     ngOnInit() {
+        this.themeService.loadTheme().catch(console.error);
         this.nzIconService.changeAssetsSource('assets/@ant-design');
     }
 }

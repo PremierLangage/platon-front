@@ -95,7 +95,14 @@
                 "output": "./assets/vendors/viz/"
               }
             ],
-            "styles": ["apps/platon/src/styles.scss"],
+            "styles": [
+              "styles/app.scss",
+              "apps/platon/src/styles.scss",
+              { "input": "styles/ng-zorro/dark.less", "bundleName": "styles.ng-zorro.dark", "inject": false },
+              { "input": "styles/ng-zorro/light.less", "bundleName": "styles.ng-zorro.light", "inject": false },
+              { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark", "inject": false },
+              { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
+            ],
             "scripts": [
               {
                 "bundleName": "polyfill-webcomp-es5",

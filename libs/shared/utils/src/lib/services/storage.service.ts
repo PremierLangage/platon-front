@@ -15,14 +15,14 @@ export class StorageService {
         @Inject(STORAGE_PREFIX)
         private readonly prefix: string,
         private readonly storageMap: StorageMap
-    ) {}
+    ) { }
 
-    set<T>(key: string, value: T) {
+    set<T>(key: string, value: T): Observable<any> {
         return this.storageMap.set(this.addPrefix(key), value);
     }
 
     get<T>(key: string, defaultValue?: T): Observable<T> {
-         return this.storageMap.get(this.addPrefix(key)).pipe(
+        return this.storageMap.get(this.addPrefix(key)).pipe(
             map(e => e == null ? defaultValue : e)
         ) as Observable<T>;
     }
@@ -45,16 +45,16 @@ export class StorageService {
         );
     }
 
-    remove(key: string) {
-       return this.storageMap.delete(this.addPrefix(key));
+    remove(key: string): Observable<any> {
+        return this.storageMap.delete(this.addPrefix(key));
     }
 
-    clear() {
+    clear(): Observable<any> {
         return this.storageMap.clear();
     }
 
-    watch<T>(key: string) {
-        return this.storageMap.watch<T>(this.addPrefix(key))
+    watch<T>(key: string): Observable<T> {
+        return this.storageMap.watch(this.addPrefix(key)) as Observable<T>;
     }
 
     addPrefix(key: string) {
