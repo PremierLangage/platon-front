@@ -26,7 +26,7 @@ $input: mat-typography-level(inherit, 1.125, 400)
 //#region LIGHT THEME
 
 // FOREGROUND
-$dark-text: #000000;
+$dark-text: #24292e;
 $dark-primary-text: rgba($dark-text, 0.87);
 $dark-accent-text: rgba($dark-primary-text, 0.54);
 $dark-disabled-text: rgba($dark-primary-text, 0.38);
@@ -34,13 +34,13 @@ $dark-dividers: rgba($dark-primary-text, 0.12);
 $dark-focused: rgba($dark-primary-text, 0.12);
 
 $mat-light-theme-foreground: (
-  base: black,
+  base: $dark-text,
   divider: $dark-dividers,
   dividers: $dark-dividers,
   disabled: $dark-disabled-text,
   disabled-button: rgba($dark-text, 0.26),
   disabled-text: $dark-disabled-text,
-  elevation: black,
+  elevation: $dark-text,
   secondary-text: $dark-accent-text,
   hint-text: $dark-disabled-text,
   accent-text: $dark-accent-text,
@@ -85,7 +85,7 @@ $mat-light-theme-background: (
 //#region DARK THEME
 
 // FOREGROUND
-$light-text: #FFFFFF;
+$light-text: #adbac7;
 $light-primary-text: $light-text;
 $light-accent-text: rgba($light-primary-text, 0.7);
 $light-disabled-text: rgba($light-primary-text, 0.5);
@@ -112,7 +112,7 @@ $mat-dark-theme-foreground: (
 );
 
 // BACKGROUND
-$dark-background: #141414;
+$dark-background: #22272e;
 $dark-bg-lighter-5: lighten($dark-background, 5%);
 $dark-bg-lighter-10: lighten($dark-background, 10%);
 $dark-bg-lighter-20: lighten($dark-background, 20%);

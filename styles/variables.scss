@@ -20,10 +20,13 @@
   --brand-color-tertiary-shade: #633ce0;
   --brand-color-tertiary-tint: #7e57ff;
 
-  --brand-text-color: #000000;
+  --brand-background-overlay: #fff;
+  --brand-background-primary: #fff;
+  --brand-background-secondary: #fafbfc;
+
+  --brand-text-primary: #24292e;
+  --brand-text-secondary: #586069;
   --brand-border-color: #dddddd;
-  --brand-background-color: #FFFFFF;
-  --brand-box-shadow-color: rgba(0, 0, 0, 0.12);
 
   // https://www.smashingmagazine.com/2015/11/using-system-ui-fonts-practical-guide/
   --brand-font: 'Source Sans Pro', system-ui, -apple-system, BlinkMacSystemFont,

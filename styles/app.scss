@@ -3,26 +3,31 @@
 @import 'variables';
 @import 'components';
 
-
 html {
   width: 100vw;
   height: 100vh;
   overflow: auto;
-  color: var(--brand-text-color);
+  color: var(--brand-text-primary);
   background-color: var(--brand-background-color);
   font-family: var(--brand-font);
 }
 
 .light-theme {
-  --brand-background-color: #FFFFFF;
-  --brand-text-color: #000000;
+  --brand-background-overlay: #fff;
+  --brand-background-primary: #fff;
+  --brand-background-secondary: #fafbfc;
+
+  --brand-text-primary: #24292e;
+  --brand-text-secondary: #586069;
   --brand-border-color: #dddddd;
-  --brand-box-shadow-color: rgba(0, 0, 0, 0.12);
 }
 
 .dark-theme {
-  --brand-background-color: #000000;
-  --brand-text-color: #ffffff;
+  --brand-background-overlay: #323941;
+  --brand-background-primary: #22272e;
+  --brand-background-secondary: #22272e;
+
+  --brand-text-primary: #adbac7;
+  --brand-text-secondary: #768390;
   --brand-border-color: #15202b;
-  --brand-box-shadow-color: rgba(255, 255, 255, 0.12);
 }
