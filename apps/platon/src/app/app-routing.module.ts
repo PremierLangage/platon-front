@@ -62,6 +62,14 @@ const routes: Routes = [
         ).then(m => m.CircleModule)
     },
     {
+        path: 'resource',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "resource" */
+            './pages/resource/resource.module'
+        ).then(m => m.ResourceModule)
+    },
+    {
         path: 'workspace',
         canActivate: [AuthGuard],
         loadChildren: () => import(
