@@ -20,7 +20,7 @@ import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
 // MODULE
 import { LoginComponent } from './login.component';
 import { LoginRoutingModule } from './login-routing.module';
-import { FormDemoComponent } from './form-demo/form-demo.component';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -41,6 +41,6 @@ import { FormDemoComponent } from './form-demo/form-demo.component';
 
     LoginRoutingModule,
   ],
-  declarations: [LoginComponent, FormDemoComponent]
+  declarations: [LoginComponent]
 })
 export class LoginModule { }
