@@ -46,12 +46,12 @@ const routes: Routes = [
         ).then(m => m.ProfileModule)
     },
     {
-        path: 'admin-panel',
+        path: 'admin',
         canActivate: [AuthGuard],
         loadChildren: () => import(
-            /* webpackChunkName: "admin-panel" */
-            './pages/admin-panel/admin-panel.module'
-        ).then(m => m.AdminPanelModule)
+            /* webpackChunkName: "admin" */
+            './pages/admin/admin.module'
+        ).then(m => m.AdminModule)
     },
     {
         path: 'workspace',

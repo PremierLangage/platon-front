@@ -23,6 +23,14 @@
   <mat-menu #profileMenu="matMenu">
     <ng-template matMenuContent>
       <button mat-menu-item [routerLink]="'/profile'">Mon profil</button>
+      <button mat-menu-item (click)="switchTheme()">
+        <ng-container *ngIf="(theme|async) as activeTheme">
+          <ng-container [ngSwitch]="activeTheme">
+            <ng-container *ngSwitchCase="'dark'">Mode jour</ng-container>
+            <ng-container *ngSwitchCase="'light'">Mode nuit</ng-container>
+          </ng-container>
+        </ng-container>
+      </button>
       <button mat-menu-item (click)="signOut()">Se déconnecter</button>
     </ng-template>
   </mat-menu>

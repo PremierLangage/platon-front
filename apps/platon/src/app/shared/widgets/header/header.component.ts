@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
+import { ThemeService } from '@platon/core/config';
 
 @Component({
     selector: 'app-header',
@@ -20,16 +21,23 @@ export class HeaderComponent implements OnInit {
 
     user?: AuthUser;
 
+    theme = this.themeService.themeChange;
+
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly themeService: ThemeService,
     ) { }
 
-    async ngOnInit() {
+    async ngOnInit(): Promise<void> {
         this.user = await this.authService.ready();
     }
 
-    signOut() {
+    signOut(): void {
         this.authService.signOut();
+    }
+
+    switchTheme(): void {
+        this.themeService.switchTheme();
     }
 
 }
