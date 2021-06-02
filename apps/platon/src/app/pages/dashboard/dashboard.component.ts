@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
 
     async ngOnInit() {
         this.user = await this.authService.ready();
+        /*
         setTimeout(async () => {
             const intro = await this.introService.create();
             intro.setOptions({
@@ -68,6 +69,7 @@ export class DashboardComponent implements OnInit {
             intro.addHints()
             intro.start();
         });
+        */
     }
 
 }
