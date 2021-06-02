@@ -20,10 +20,8 @@
     <p class="article-description">
       {{articleDescription}}
     </p>
-    <div class="article-tags" *ngIf="articleTags">
-      <div class="article-tag"
-        *ngFor="let tag of articleTags"
-        (click)="didClickTag.emit(tag)">
+    <div class="article-tags" [class.clickable]="isTagsCliclable" *ngIf="articleTags">
+      <div class="article-tag" *ngFor="let tag of articleTags" (click)="didClickTag.emit(tag)">
         {{tag}}
       </div>
     </div>

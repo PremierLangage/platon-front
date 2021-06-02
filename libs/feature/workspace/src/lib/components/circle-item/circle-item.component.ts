@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Circle } from '../../models/resource';
 
 @Component({
   selector: 'ws-circle-item',
@@ -7,6 +6,6 @@ import { Circle } from '../../models/resource';
   styleUrls: ['./circle-item.component.scss']
 })
 export class CircleItemComponent {
-    @Input() item!: Circle;
+    @Input() item!: any;
     @Output() didFilterByTag = new EventEmitter<string>();
 }

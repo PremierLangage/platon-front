@@ -1,0 +1,29 @@
+<ng-container *ngIf="isCircle(item); else: isResource">
+  <ws-circle-item
+    [item]="item"
+    (didFilterByTag)="didFilterByTag.emit($event)">
+  </ws-circle-item>
+</ng-container>
+<ng-template #isResource>
+  <ng-container [ngSwitch]="item.type">
+    <ng-container *ngSwitchCase="'MODEL'">
+      <ws-model-item
+        [item]="$any(item)"
+        (didFilterByTag)="didFilterByTag.emit($event)">
+      </ws-model-item>
+    </ng-container>
+    <ng-container *ngSwitchCase="'ACTIVITY'">
+      <ws-activity-item
+        [item]="$any(item)"
+        (didFilterByTag)="didFilterByTag.emit($event)">
+      </ws-activity-item>
+    </ng-container>
+    <ng-container *ngSwitchCase="'EXERCISE'">
+      <ws-exercise-item
+        [item]="$any(item)"
+        (didFilterByTag)="didFilterByTag.emit($event)">
+      </ws-exercise-item>
+    </ng-container>
+    <ng-container *ngSwitchDefault>Unknown resource type</ng-container>
+  </ng-container>
+</ng-template>

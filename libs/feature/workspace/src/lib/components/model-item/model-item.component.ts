@@ -2,11 +2,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Resource } from '@platon/feature/workspace';
 
 @Component({
-  selector: 'ws-activity-item',
-  templateUrl: './activity-item.component.html',
-  styleUrls: ['./activity-item.component.scss']
+  selector: 'ws-model-item',
+  templateUrl: './model-item.component.html',
+  styleUrls: ['./model-item.component.scss']
 })
-export class ActivityItemComponent {
+export class ModelItemComponent {
     @Input() item!: Resource;
     @Output() didFilterByTag = new EventEmitter<string>();
 }

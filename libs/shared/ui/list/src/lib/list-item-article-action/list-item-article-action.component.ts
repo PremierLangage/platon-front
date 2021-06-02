@@ -9,5 +9,5 @@ export class ListItemArticleActionComponent {
     @Input() actionTitle?: string | number | boolean | null;
     @Input()
     @HostBinding('class.clickable')
-    clickable = true;
+    clickable = false;
 }

@@ -34,6 +34,15 @@ const camelCase = (obj: any): any => {
     if (obj == null) {
         return obj;
     }
+
+    if (Array.isArray(obj)) {
+        return obj.map(e => camelCase(e));
+    }
+
+    if (typeof obj !== 'object') {
+        return obj;
+    }
+
     return Object.entries(obj).reduce((acc, [key, val]) => {
         const modifiedKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
         const modifiedVal =

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Exercise } from '../../models/resource';
+import { Resource } from '@platon/feature/workspace';
 
 @Component({
   selector: 'ws-exercise-item',
@@ -7,6 +7,6 @@ import { Exercise } from '../../models/resource';
   styleUrls: ['./exercise-item.component.scss']
 })
 export class ExerciseItemComponent {
-    @Input() item!: Exercise;
+    @Input() item!: Resource;
     @Output() didFilterByTag = new EventEmitter<string>();
 }

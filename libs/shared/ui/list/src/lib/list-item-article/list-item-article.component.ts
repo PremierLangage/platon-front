@@ -20,4 +20,9 @@ export class ListItemArticleComponent {
 
     @Output() didClickTag = new EventEmitter<string>();
     @Output() didClickTitle = new EventEmitter();
+
+
+    get isTagsCliclable(): boolean {
+        return !!this.didClickTag?.observers.length;
+    }
 }

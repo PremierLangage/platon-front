@@ -1,10 +1,7 @@
 import { Provider } from '@angular/core';
-import { AUTH_OBSERVER } from '@platon/core/auth';
-import { ResourceService } from './api/resource.service';
-import { ResourceProvider } from './models/resource-provider';
-import { RemoteResourceProvider } from './services/remote-resource-provider';
+import { CircleProvider } from './models/circle-provider';
+import { RemoteCircleProvider } from './services/remote-circle-provider';
 
 export const WORKSPACE_PROVIDERS: Provider[] = [
-    { provide: AUTH_OBSERVER, multi: true, useValue: ResourceService },
-    { provide: ResourceProvider, useClass: RemoteResourceProvider },
+    { provide: CircleProvider, useClass: RemoteCircleProvider }
 ];

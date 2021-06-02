@@ -1,16 +1,31 @@
 <ui-list-item-article
   [articleTitle]="item.name"
-  [articleTags]="item.tags"
+  [articleTags]="item.topics"
   [articleIconTemplate]="image"
-  [articleDescription]="item.description"
-  [articleUrl]="['/workspace/circle', item.id]"
+  [articleDescription]="item.desc"
+  [articleUrl]="['/circle', item.id]"
   (didClickTag)="didFilterByTag.emit($event)">
   <ng-template #image>
     <mat-icon>group_work</mat-icon>
   </ng-template>
   <ui-list-item-article-action
-    [actionTitle]="$any(item.date * 1000|date:'dd/MM/yyyy')"
+    [actionTitle]="$any(item.updatedAt|date:'dd/MM/yyyy')"
     matTooltip="Date de mise à jour">
     <mat-icon>update</mat-icon>
+  </ui-list-item-article-action>
+  <ui-list-item-article-action
+    [actionTitle]="item.watchersCount"
+    [matTooltip]="'Suivi par '  + item.watchersCount + ' personne(s)'">
+    <mat-icon>visibility</mat-icon>
+  </ui-list-item-article-action>
+  <ui-list-item-article-action
+    [actionTitle]="item.watchersCount"
+    [matTooltip]="'Contient '  + item.membersCount + ' membre(s)'">
+    <mat-icon>people</mat-icon>
+  </ui-list-item-article-action>
+  <ui-list-item-article-action
+    [actionTitle]="item.resourcesCount"
+    [matTooltip]="'Contient '  + item.resourcesCount + ' ressource(s)'">
+    <mat-icon>article</mat-icon>
   </ui-list-item-article-action>
 </ui-list-item-article>
