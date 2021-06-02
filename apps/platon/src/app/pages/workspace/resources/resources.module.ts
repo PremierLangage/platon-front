@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // Libs
 import { MatIconModule } from '@angular/material/icon';
@@ -12,13 +13,11 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
-import { FeatureWorkspaceModule } from '@platon/feature/workspace';
-
-import { SharedModule } from '../../shared/shared.module';
+import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
-import { WorkspaceComponent } from './workspace.component';
-import { WorkspaceRoutingModule } from './workspace-routing.module';
+import { ResourcesComponent } from './resources.component';
+
 
 @NgModule({
     imports: [
@@ -34,13 +33,15 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
         NzSkeletonModule,
         NzNotificationModule,
 
-        SharedModule,
+        FeatureWorkspaceModule,
 
-        FeatureWorkspaceModule,
-        WorkspaceRoutingModule,
+        RouterModule.forChild([
+            {
+                path: '',
+                component: ResourcesComponent
+            }
+        ])
     ],
-    declarations: [
-        WorkspaceComponent,
-    ],
+    declarations: [ResourcesComponent]
 })
-export class WorkspaceModule { }
+export class ResourcesModule { }

@@ -1,0 +1,50 @@
+<div nz-row [nzGutter]="[24, 24]" nzAlign="top">
+  <div nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
+    <!-- CIRCLE TREE -->
+    <nz-divider nzText="Arbre des cercles" nzOrientation="left"></nz-divider>
+    <nz-skeleton [nzActive]="true" [nzLoading]="loading">
+      <ng-container *ngIf="circleTree">
+        <ws-circle-tree [tree]="circleTree"></ws-circle-tree>
+      </ng-container>
+    </nz-skeleton>
+    <nz-divider nzText="Votre cercle" nzOrientation="left"></nz-divider>
+    <nz-skeleton [nzActive]="true" [nzLoading]="loading">
+      <ng-container *ngIf="personalCircle">
+        <ws-list-item [item]="personalCircle"></ws-list-item>
+      </ng-container>
+      <!-- CIRCLES -->
+      <nz-divider [nzText]="title1" nzOrientation="left">
+        <ng-template #title1>
+          <div class="divider-title" matTooltip="Afficher plus">
+            <div>Vos cercles suivis</div>
+            <button mat-icon-button [routerLink]="['/workspace/circles']">
+              <mat-icon>read_more</mat-icon>
+            </button>
+          </div>
+        </ng-template>
+      </nz-divider>
+      <ws-list [items]="watchedCircles">Vous n'avez pas de cercles dans votre liste de suivie</ws-list>
+    </nz-skeleton>
+  </div>
+  <div nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
+      <!-- RESOURCES -->
+      <nz-divider [nzText]="title2" nzOrientation="left">
+        <ng-template #title2>
+          <div class="divider-title" matTooltip="Afficher plus">
+            <div>Vos ressources suivies</div>
+            <button mat-icon-button [routerLink]="['/workspace/resources']">
+              <mat-icon>read_more</mat-icon>
+            </button>
+          </div>
+        </ng-template>
+      </nz-divider>
+      <nz-skeleton [nzActive]="true" [nzLoading]="loading">
+        <ws-list [items]="watchedResources">Vous n'avez pas de resources dans votre liste de suivie</ws-list>
+      </nz-skeleton>
+    <!-- RECENTLY VIEWIED -->
+    <nz-divider nzText="Vos ressources récemment vues" nzOrientation="left"></nz-divider>
+    <nz-skeleton [nzActive]="true" [nzLoading]="loading">
+      <ws-list [items]="recentlyViewedResources"> Vous n'avez vu aucune ressource récemment</ws-list>
+    </nz-skeleton>
+  </div>
+</div>

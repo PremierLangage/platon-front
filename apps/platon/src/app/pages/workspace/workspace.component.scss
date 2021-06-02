@@ -1,0 +1,12 @@
+.tab-title {
+  display: flex;
+  align-items: center;
+}
+
+:host {
+  ::ng-deep {
+    .ant-tabs-content-holder {
+      padding: 0 12px 12px 12px;
+    }
+  }
+}

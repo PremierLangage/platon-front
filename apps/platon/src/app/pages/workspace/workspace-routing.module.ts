@@ -2,65 +2,34 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WorkspaceComponent } from './workspace.component';
-import { DetailPageData } from './pages/detail/detail.service';
 
 const routes: Routes = [
-    {
-        path: 'create-circle',
-        loadChildren: () => import(
-            /* webpackChunkName: "workspace-create-circle" */
-            './pages/create-circle/create-circle.module'
-        ).then(m => m.CreateCircleModule)
-    },
-    {
-        path: 'editor',
-        loadChildren: () => import(
-            /* webpackChunkName: "workspace-editor" */
-            './pages/editor/editor.module'
-        ).then(m => m.EditorModule)
-    },
     {
         path: '',
         component: WorkspaceComponent,
         children: [
             {
-                path: 'search',
+                path: 'overview',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-search" */
-                    './pages/search/search.module'
-                ).then(m => m.SearchModule)
+                    /* webpackChunkName: "worksapce-overview" */
+                    './overview/overview.module'
+                ).then(m => m.OverviewModule)
             },
             {
-                path: 'activity',
-                data: {
-                    resourceType: 'ACTIVITY'
-                } as DetailPageData,
+                path: 'circles',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-detail" */
-                './pages/detail/detail.module'
-                ).then(m => m.DetailModule)
+                    /* webpackChunkName: "workspace-circles" */
+                    './circles/circles.module'
+                ).then(m => m.CirclesModule)
             },
             {
-                path: 'circle',
-                data: {
-                    resourceType: 'CIRCLE'
-                } as DetailPageData,
+                path: 'resources',
                 loadChildren: () => import(
-                    /* webpackChunkName: "workspace-detail" */
-                    './pages/detail/detail.module'
-                ).then(m => m.DetailModule)
+                    /* webpackChunkName: "workspace-resources" */
+                    './resources/resources.module'
+                ).then(m => m.ResourcesModule)
             },
-            {
-                path: 'exercise',
-                data: {
-                    resourceType: 'EXERCISE'
-                } as DetailPageData,
-                loadChildren: () => import(
-                    /* webpackChunkName: "workspace-detail" */
-                    './pages/detail/detail.module'
-                ).then(m => m.DetailModule)
-            },
-            { path: '**', redirectTo: 'search', pathMatch: 'full' }
+            { path: '**', redirectTo: 'overview', pathMatch: 'full' }
         ]
     },
     { path: '**', redirectTo: '', pathMatch: 'full' }
@@ -70,4 +39,4 @@ const routes: Routes = [
     imports: [CommonModule, RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class WorkspaceRoutingModule {}
+export class WorkspaceRoutingModule { }
