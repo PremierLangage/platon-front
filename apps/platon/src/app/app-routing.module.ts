@@ -54,6 +54,14 @@ const routes: Routes = [
         ).then(m => m.AdminModule)
     },
     {
+        path: 'circle',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "circle" */
+            './pages/circle/circle.module'
+        ).then(m => m.CircleModule)
+    },
+    {
         path: 'workspace',
         canActivate: [AuthGuard],
         loadChildren: () => import(
