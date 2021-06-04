@@ -1,11 +1,11 @@
 import { Component, Input, TemplateRef } from '@angular/core';
 import { SearchBar } from '@platon/shared/ui/search';
 @Component({
-  selector: 'app-banner',
-  templateUrl: './banner.component.html',
-  styleUrls: ['./banner.component.scss']
+  selector: 'ui-search-banner',
+  templateUrl: './search-banner.component.html',
+  styleUrls: ['./search-banner.component.scss']
 })
-export class BannerComponent {
+export class SearchBannerComponent {
     @Input() bannerTitle!: string;
     @Input() bannerImage!: string;
     @Input() bannerActions?: TemplateRef<any>;

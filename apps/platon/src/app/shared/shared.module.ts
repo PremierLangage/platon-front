@@ -13,16 +13,13 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 import { CoreAuthModule } from '@platon/core/auth';
-import { SharedUiSearchModule } from '@platon/shared/ui/search';
 
 import { NavComponent } from './widgets/nav/nav.component';
 import { LogoComponent } from './widgets/logo/logo.component';
 import { HeaderComponent } from './widgets/header/header.component';
 import { DrawerComponent } from './widgets/drawer/drawer.component';
-import { BannerComponent } from './widgets/banner/banner.component';
 import { ContentComponent } from './widgets/content/content.component';
 import { ContainerComponent } from './widgets/container/container.component';
-
 
 
 const DECLARATIONS = [
@@ -30,7 +27,6 @@ const DECLARATIONS = [
     LogoComponent,
     HeaderComponent,
     DrawerComponent,
-    BannerComponent,
     ContentComponent,
     ContainerComponent,
 ];
@@ -51,7 +47,6 @@ const DECLARATIONS = [
         NzEmptyModule,
 
         CoreAuthModule,
-        SharedUiSearchModule,
     ],
     exports: [
         ...DECLARATIONS,
