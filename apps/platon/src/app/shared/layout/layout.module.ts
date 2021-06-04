@@ -14,12 +14,12 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 import { CoreAuthModule } from '@platon/core/auth';
 
-import { NavComponent } from './widgets/nav/nav.component';
-import { LogoComponent } from './widgets/logo/logo.component';
-import { HeaderComponent } from './widgets/header/header.component';
-import { DrawerComponent } from './widgets/drawer/drawer.component';
-import { ContentComponent } from './widgets/content/content.component';
-import { ContainerComponent } from './widgets/container/container.component';
+import { NavComponent } from './nav/nav.component';
+import { LogoComponent } from './logo/logo.component';
+import { HeaderComponent } from './header/header.component';
+import { DrawerComponent } from './drawer/drawer.component';
+import { ContentComponent } from './content/content.component';
+import { ContainerComponent } from './container/container.component';
 
 
 const DECLARATIONS = [
@@ -55,4 +55,4 @@ const DECLARATIONS = [
         ...DECLARATIONS,
     ]
 })
-export class SharedModule { }
+export class SharedLayoutModule { }
