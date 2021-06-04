@@ -1,11 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import { ThemeService } from '@platon/core/config';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss']
+    styleUrls: ['./header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit {
     @Input()
@@ -25,11 +26,13 @@ export class HeaderComponent implements OnInit {
 
     constructor(
         private readonly authService: AuthService,
+        private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly themeService: ThemeService,
     ) { }
 
     async ngOnInit(): Promise<void> {
         this.user = await this.authService.ready();
+        this.changeDetectorRef.markForCheck();
     }
 
     signOut(): void {

@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterContentInit, Component, ContentChild, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import { Subscription } from 'rxjs';
 import { DrawerComponent } from '../drawer/drawer.component';
@@ -7,7 +7,8 @@ import { DrawerComponent } from '../drawer/drawer.component';
 @Component({
     selector: 'app-container',
     templateUrl: './container.component.html',
-    styleUrls: ['./container.component.scss']
+    styleUrls: ['./container.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContainerComponent implements OnInit, OnDestroy, AfterContentInit {
     private readonly subscriptions: Subscription[] = [];
@@ -20,6 +21,7 @@ export class ContainerComponent implements OnInit, OnDestroy, AfterContentInit {
 
     constructor(
         private readonly authService: AuthService,
+        private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly breakpointObserver: BreakpointObserver,
     ) { }
 
@@ -32,6 +34,7 @@ export class ContainerComponent implements OnInit, OnDestroy, AfterContentInit {
             const { breakpoints } = result;
             const isSmallScreen = breakpoints[Breakpoints.XSmall] || breakpoints[Breakpoints.Small];
             this.drawerEnabled = isSmallScreen;
+            this.changeDetectorRef.markForCheck();
         }));
     }
 
