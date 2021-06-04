@@ -1,0 +1,39 @@
+:host {
+  ::ng-deep {
+    .ant-tabs-nav {
+      margin: 0;
+    }
+    .ant-tabs-content-holder {
+      padding: 0;
+    }
+  }
+}
+
+nz-breadcrumb {
+  font-size: 1.5em;
+  &::ng-deep {
+    .ant-breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      mat-icon {
+        margin: 0 8px;
+      }
+    }
+  }
+}
+
+.fab {
+  background-color: #15181f !important;
+  color: white !important;
+  margin-bottom: 12px;
+}
+
+.description {
+  margin: 12px 0;
+}
+
+@media (min-width: 720px) {
+  .description {
+    width: 50%;
+  }
+}

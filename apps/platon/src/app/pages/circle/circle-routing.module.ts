@@ -4,7 +4,34 @@ import { RouterModule, Routes } from '@angular/router';
 import { CircleComponent } from './circle.component';
 
 const routes: Routes = [
-    { path: ':id', component: CircleComponent },
+    {
+        path: ':id',
+        component: CircleComponent,
+        children: [
+            {
+                path: 'overview',
+                loadChildren: () => import(
+                    /* webpackChunkName: "circle-overview" */
+                    './overview/overview.module'
+                ).then(m => m.OverviewModule)
+            },
+            {
+                path: 'resources',
+                loadChildren: () => import(
+                    /* webpackChunkName: "circle-resources" */
+                    './resources/resources.module'
+                ).then(m => m.ResourcesModule)
+            },
+            {
+                path: 'settings',
+                loadChildren: () => import(
+                    /* webpackChunkName: "circle-settings" */
+                    './settings/settings.module'
+                ).then(m => m.SettingsModule)
+            },
+            { path: '**', redirectTo: 'overview', pathMatch: 'full' }
+        ]
+    },
 ];
 
 @NgModule({
@@ -14,4 +41,4 @@ const routes: Routes = [
     ],
     exports: [RouterModule]
 })
-export class CircleRoutingModule {}
+export class CircleRoutingModule { }
