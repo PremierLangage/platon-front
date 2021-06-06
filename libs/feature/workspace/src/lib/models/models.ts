@@ -70,6 +70,20 @@ export interface CircleEvent {
     data: Record<string, any>;
 }
 
+export interface CircleMember {
+    url: string;
+    status: MemberStatus;
+    username: string;
+    circleUrl: string;
+    dateJoined: string;
+}
+
+export interface CircleWatcher {
+    url: string;
+    username: string;
+    circleUrl: string;
+}
+
 export interface Resource {
     id: number;
     type: ResourceTypes;
@@ -87,14 +101,6 @@ export interface Resource {
     filesUrl: string;
     circleUrl: string;
     versionsUrl: string;
-}
-
-export interface Member {
-    url: string;
-    status: MemberStatus;
-    username: string;
-    circleUrl: string;
-    dateJoined: string;
 }
 
 export interface Invitation {
