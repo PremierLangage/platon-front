@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from '@platon/core/auth';
-import { CircleService } from '@platon/feature/workspace';
 import { Subscription } from 'rxjs';
-
+import { CirclePresenter } from './circle.presenter';
 @Component({
     selector: 'app-circle',
     templateUrl: './circle.component.html',
     styleUrls: ['./circle.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [CirclePresenter],
 })
 export class CircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
@@ -31,45 +30,45 @@ export class CircleComponent implements OnInit, OnDestroy {
         },
     ];
 
-    readonly actions: MenuAction[] = [
-        {
-            id: 'menu-create-exercise',
-            title: 'Créer un exercice',
-            icon: 'article',
-            link: ['/workspace', 'create-exercise']
-        },
-        {
-            id: 'menu-create-activity',
-            title: 'Créer une activité',
-            icon: 'assessment',
-            link: ['/workspace', 'create-activity']
-        },
-    ];
+    state = this.presenter.loadingState;
 
     constructor(
-        private readonly authService: AuthService,
-        private readonly circleService: CircleService,
+        private readonly presenter: CirclePresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
-
-    ngOnInit() {}
+    ngOnInit(): void {
+        this.subscriptions.push(
+            this.presenter.stateChange.subscribe(context => {
+                this.state = context;
+                this.changeDetectorRef.markForCheck();
+            })
+        );
+    }
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    async acceptInvitation(): Promise<void> {
+        await this.presenter.acceptInvitation();
+    }
+
+    async declineInvitation(): Promise<void> {
+        await this.presenter.declineInvitation();
+    }
+
+    async changeWatchingState(): Promise<void> {
+        if (this.state.watcher) {
+            await this.presenter.unwatch();
+        } else {
+            await this.presenter.watch();
+        }
     }
 }
 
 interface Tab {
     id: string;
-    title: string;
-    link: string | any[];
-}
-
-
-interface MenuAction {
-    id: string;
-    icon: string;
     title: string;
     link: string | any[];
 }

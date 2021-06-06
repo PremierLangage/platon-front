@@ -1,33 +1,18 @@
 <app-container>
   <app-content>
-    <section>
-      <nz-breadcrumb>
-        <nz-breadcrumb-item>
-          Général <mat-icon>group_work</mat-icon>
-        </nz-breadcrumb-item>
-      </nz-breadcrumb>
-      <p class="description">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero excepturi
-        incidunt eos maxime deleniti cupiditate ea commodi itaque eaque repellendus
-        voluptates vel sunt cumque sed asperiores numquam, consectetur corporis eum.
-      </p>
-      <button class="fab" mat-fab [matMenuTriggerFor]="menu">
-        <mat-icon>add</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
-        <ng-container *ngFor="let action of actions">
-          <a
-            mat-menu-item
-            [disabled]="false"
-            [id]="action.id"
-            [routerLink]="action.link">
-            <mat-icon>{{ action.icon }}</mat-icon>
-            <span>{{ action.title }}</span>
-          </a>
-        </ng-container>
-      </mat-menu>
-    </section>
-    <section>
+    <!-- HEADER -->
+    <nz-skeleton [nzActive]="state.state !== 'READY'" [nzLoading]="state.state === 'LOADING'">
+      <section *ngIf="state.state === 'READY'">
+        <app-circle-header
+          [state]="state"
+          (didAcceptInvitation)="acceptInvitation()"
+          (didDeclineInvitation)="declineInvitation()"
+          (didChangeWatchingState)="changeWatchingState()">
+        </app-circle-header>
+      </section>
+    </nz-skeleton>
+    <!-- TABS -->
+    <section >
       <nz-tabset nzLinkRouter nzSize="default" nzType="card">
         <ng-container *ngFor="let tab of tabs">
           <nz-tab>
@@ -38,8 +23,24 @@
         </ng-container>
       </nz-tabset>
     </section>
-    <section>
-      <router-outlet></router-outlet>
-    </section>
+    <!-- ACTIVE TAB CONTENT -->
+    <nz-skeleton [nzActive]="state.state !== 'READY'" [nzLoading]="state.state === 'LOADING'">
+      <section>
+        <ng-container [ngSwitch]="state.state">
+          <ng-container *ngSwitchCase="'READY'">
+            <router-outlet></router-outlet>
+          </ng-container>
+          <ng-container *ngSwitchCase="'SERVER_ERROR'">
+            <app-error-500></app-error-500>
+          </ng-container>
+          <ng-container *ngSwitchCase="'UNAUTHORIZED'">
+            <app-error-403></app-error-403>
+          </ng-container>
+          <ng-container *ngSwitchCase="'NOT_FOUND'">
+            <app-error-404></app-error-404>
+          </ng-container>
+        </ng-container>
+      </section>
+    </nz-skeleton>
   </app-content>
 </app-container>

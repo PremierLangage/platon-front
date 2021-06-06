@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 // Libs
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,17 +15,20 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
+import { PieChartModule } from '@swimlane/ngx-charts';
+
+import { SharedUiListModule } from '@platon/shared/ui/list';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
 import { OverviewComponent } from './overview.component';
-import { SharedUiListModule } from '@platon/shared/ui/list';
 
 
 @NgModule({
     imports: [
         CommonModule,
 
+        MatCardModule,
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
@@ -36,9 +40,10 @@ import { SharedUiListModule } from '@platon/shared/ui/list';
         NzSkeletonModule,
         NzNotificationModule,
 
-        FeatureWorkspaceModule,
+        PieChartModule,
 
         SharedUiListModule,
+        FeatureWorkspaceModule,
 
         RouterModule.forChild([
             {
