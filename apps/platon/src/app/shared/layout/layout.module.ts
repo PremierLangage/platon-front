@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { LayoutModule } from '@angular/cdk/layout';
+import { LayoutModule as CdkLayoutModule } from '@angular/cdk/layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -36,7 +36,7 @@ const DECLARATIONS = [
         CommonModule,
         RouterModule,
 
-        LayoutModule,
+        CdkLayoutModule,
         MatIconModule,
         MatMenuModule,
         MatBadgeModule,
@@ -55,4 +55,4 @@ const DECLARATIONS = [
         ...DECLARATIONS,
     ]
 })
-export class SharedLayoutModule { }
+export class AppSharedLayoutModule { }
