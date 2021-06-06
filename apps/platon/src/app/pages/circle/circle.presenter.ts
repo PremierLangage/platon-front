@@ -1,7 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleMember, CircleService, CircleWatcher, Invitation } from '@platon/feature/workspace';
+import { Circle, CircleEvent, CircleMember, CircleService, CircleWatcher, Invitation } from '@platon/feature/workspace';
+import { PageResult } from '@platon/shared/utils';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { BehaviorSubject, forkJoin, Observable, Subscription } from 'rxjs';
 
@@ -86,6 +87,17 @@ export class CirclePresenter implements OnDestroy {
                 'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
             );
         }
+    }
+
+    async listEvents(): Promise<PageResult<CircleEvent>> {
+        const { circle } = this.state.value as Required<PresenterState>;
+        if (!circle) {
+            return {
+                count: 0,
+                results: []
+            };
+        }
+        return this.circleService.listEvents(circle).toPromise();
     }
 
     private async refreshState(circleId: number) {

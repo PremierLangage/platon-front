@@ -1,14 +1,13 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { CircleFilters, PageResult, CircleProvider, InvitationForm } from '../models/circle-provider';
-import { Circle, CircleMember, CircleTree, CircleWatcher, Invitation } from '../models/models';
+import { PageResult } from '@platon/shared/utils';
+import { Observable } from 'rxjs';
+import { CircleFilters, CircleProvider, InvitationForm } from '../models/circle-provider';
+import { Circle, CircleEvent, CircleMember, CircleTree, CircleWatcher, Invitation } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class CircleService {
 
     constructor(
-        private readonly http: HttpClient,
         private readonly provider: CircleProvider,
     ) { }
 
@@ -79,5 +78,14 @@ export class CircleService {
     }
     listInvitations(circle: Circle): Observable<PageResult<Invitation>> {
         return this.provider.listInvitations(circle);
+    }
+
+    // Events
+    listEvents(circle: Circle): Observable<PageResult<CircleEvent>> {
+        return this.provider.listEvents(circle);
+    }
+
+    deleteEvent(event: CircleEvent): Observable<any> {
+        return this.provider.deleteEvent(event);
     }
 }

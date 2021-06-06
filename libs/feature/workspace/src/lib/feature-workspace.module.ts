@@ -27,8 +27,10 @@ import { CircleItemComponent } from './components/circle-item/circle-item.compon
 import { ActivityItemComponent } from './components/activity-item/activity-item.component';
 import { ExerciseItemComponent } from './components/exercise-item/exercise-item.component';
 
+
 import { ListComponent } from './components/list/list.component';
 import { ListItemComponent } from './components/list-item/list-item.component';
+import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 
 
@@ -60,6 +62,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
 
         ListComponent,
         ListItemComponent,
+        EventListComponent,
         CircleTreeComponent,
     ],
     declarations: [
@@ -68,6 +71,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
 
         ListComponent,
         ListItemComponent,
+        EventListComponent,
         CircleTreeComponent,
 
         ModelItemComponent,

@@ -1,6 +1,6 @@
+import { PageResult } from '@platon/shared/utils';
 import { Observable } from "rxjs";
-import { Circle, CircleMember, CircleTree, CircleWatcher, Invitation, MemberStatus } from "./models";
-
+import { Circle, CircleEvent, CircleMember, CircleTree, CircleWatcher, Invitation, MemberStatus } from "./models";
 export abstract class CircleProvider {
     abstract tree(): Observable<CircleTree>;
     abstract search(filters?: CircleFilters): Observable<PageResult<Circle>>;
@@ -27,6 +27,10 @@ export abstract class CircleProvider {
     abstract acceptInvitation(invitation: Invitation): Observable<any>;
     abstract findInvitation(circle: Circle, username: string): Observable<Invitation | undefined>;
     abstract listInvitations(circle: Circle): Observable<PageResult<Invitation>>;
+
+    // Events
+    abstract listEvents(circle: Circle): Observable<PageResult<CircleEvent>>;
+    abstract deleteEvent(event: CircleEvent): Observable<any>;
 }
 
 export interface CircleFilters {
@@ -41,12 +45,6 @@ export interface CircleFilters {
     offset?: number;
     limit?: number;
     orderBy?: 'name' | 'updateAt' | 'membersCount' | 'watchersCount' | 'resourcesCount';
-}
-export interface PageResult<T> {
-    count: number;
-    next: string;
-    previous: string;
-    results: T[];
 }
 
 export interface InvitationForm {

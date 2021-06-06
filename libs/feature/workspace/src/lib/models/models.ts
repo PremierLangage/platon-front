@@ -65,6 +65,7 @@ export interface CircleTree {
 
 export interface CircleEvent {
     id: number;
+    url: string;
     type: string;
     date: string;
     data: Record<string, any>;
@@ -74,14 +75,12 @@ export interface CircleMember {
     url: string;
     status: MemberStatus;
     username: string;
-    circleUrl: string;
     dateJoined: string;
 }
 
 export interface CircleWatcher {
     url: string;
     username: string;
-    circleUrl: string;
 }
 
 export interface Resource {

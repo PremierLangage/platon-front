@@ -4,3 +4,4 @@ export * from './functions';
 export * from './numbers';
 export * from './objects';
 export * from './stack';
+export * from './types';

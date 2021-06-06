@@ -1,6 +1,13 @@
 <nz-breadcrumb>
   <nz-breadcrumb-item>
-    {{state.circle!.name}} <mat-icon>group_work</mat-icon>
+    {{state.circle!.name}}
+    <mat-icon>group_work</mat-icon>
+    <i
+      nz-icon
+      [nzType]="state.circle?.opened ? 'unlock' : 'lock'"
+      [matTooltip]="state.circle?.opened ? 'Vous devez être membre pour publier' : 'Vous pouvez publier sans être membre'"
+      nzTheme="twotone">
+    </i>
   </nz-breadcrumb-item>
 </nz-breadcrumb>
 <p class="description">{{state.circle!.desc}}</p>

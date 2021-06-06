@@ -1,9 +1,10 @@
-import { HttpClient, HttpParams,  } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { PageResult } from '@platon/shared/utils';
 import { Observable, of } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { CircleFilters, CircleProvider, InvitationForm, PageResult } from "../models/circle-provider";
-import { Circle, CircleMember, CircleTree, CircleWatcher, Invitation } from "../models/models";
+import { CircleFilters, CircleProvider, InvitationForm } from "../models/circle-provider";
+import { Circle, CircleEvent, CircleMember, CircleTree, CircleWatcher, Invitation } from "../models/models";
 
 @Injectable()
 export class RemoteCircleProvider extends CircleProvider {
@@ -114,5 +115,15 @@ export class RemoteCircleProvider extends CircleProvider {
 
     listInvitations(circle: Circle): Observable<PageResult<Invitation>> {
         return this.http.get<PageResult<Invitation>>(circle.invitationsUrl);
+    }
+
+
+    // Events
+    listEvents(circle: Circle): Observable<PageResult<CircleEvent>> {
+        return this.http.get<PageResult<CircleEvent>>(circle.eventsUrl);
+    }
+
+    deleteEvent(event: CircleEvent): Observable<any> {
+        return this.http.delete(event.url);
     }
 }

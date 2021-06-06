@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -39,6 +40,7 @@ import { CircleRoutingModule } from './circle-routing.module';
         MatMenuModule,
         MatButtonModule,
         MatSelectModule,
+        MatTooltipModule,
         MatFormFieldModule,
 
         NzTagModule,

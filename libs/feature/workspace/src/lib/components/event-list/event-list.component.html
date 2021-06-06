@@ -1,0 +1,20 @@
+<ng-container *ngIf="items.length; else: noevent;">
+  <h3>Événements récents</h3>
+  <!-- TODO extract to event-item component -->
+  <nz-timeline>
+    <ng-container *ngFor="let event of items; trackBy:trackById">
+      <nz-timeline-item>
+        <div style="display: inline-block;" [innerHTML]="event.type"></div>
+        -
+        {{event.date|date:'dd/MM/yyyy à HH:mm'}}
+      </nz-timeline-item>
+    </ng-container>
+  </nz-timeline>
+</ng-container>
+<ng-template #noevent>
+  <nz-empty [nzNotFoundContent]="content">
+    <ng-template #content>
+      Aucun événement important n'est à signaler !
+    </ng-template>
+  </nz-empty>
+</ng-template>
