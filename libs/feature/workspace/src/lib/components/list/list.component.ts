@@ -8,5 +8,5 @@ import { Circle, Resource } from '@platon/feature/workspace';
 })
 export class ListComponent {
     @Input() items!: (Circle | Resource)[];
-    @Output() didFilterByTag = new EventEmitter<string>();
+    @Output() didTapTag = new EventEmitter<string>();
 }

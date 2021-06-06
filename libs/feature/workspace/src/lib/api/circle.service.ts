@@ -1,8 +1,18 @@
 import { Injectable } from '@angular/core';
 import { PageResult } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { CircleFilters, CircleProvider, InvitationForm } from '../models/circle-provider';
-import { Circle, CircleEvent, CircleMember, CircleTree, CircleWatcher, Invitation } from '../models/models';
+import { CircleProvider } from '../models/circle-provider';
+import {
+    Circle,
+    CircleCompletion,
+    CircleEvent,
+    CircleFilters,
+    CircleMember,
+    CircleTree,
+    CircleWatcher,
+    Invitation,
+    InvitationForm
+} from "../models/models";
 
 @Injectable({ providedIn: 'root' })
 export class CircleService {
@@ -10,6 +20,10 @@ export class CircleService {
     constructor(
         private readonly provider: CircleProvider,
     ) { }
+
+    circleCompletion(): Observable<CircleCompletion> {
+        return this.provider.circleCompletion();
+    }
 
     tree(): Observable<CircleTree> {
         return this.provider.tree();

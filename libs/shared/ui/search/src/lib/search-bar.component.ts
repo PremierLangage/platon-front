@@ -77,6 +77,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
     }
 
+    onComplete(item: any) {
+        if (this.searchBar.complete) {
+            return this.searchBar.complete(item);
+        }
+        return item;
+    }
+
     private stopFiltering() {
         this.subscriptions.forEach((s, i) => {
             if (i > 0) {

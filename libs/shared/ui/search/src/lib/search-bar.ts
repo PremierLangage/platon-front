@@ -35,5 +35,5 @@ export interface SearchBar<T> {
      * Function called to gets the value to add to the searchbox
      * when an item is selected inside the suggestion list
      */
-    complete(suggestion: T): string;
+    complete?(suggestion: T): string;
 }

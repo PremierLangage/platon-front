@@ -8,5 +8,5 @@ import { Resource } from '@platon/feature/workspace';
 })
 export class ActivityItemComponent {
     @Input() item!: Resource;
-    @Output() didFilterByTag = new EventEmitter<string>();
+    @Output() didTapTag = new EventEmitter<string>();
 }

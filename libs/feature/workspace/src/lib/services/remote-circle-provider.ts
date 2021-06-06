@@ -3,8 +3,18 @@ import { Injectable } from "@angular/core";
 import { PageResult } from '@platon/shared/utils';
 import { Observable, of } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { CircleFilters, CircleProvider, InvitationForm } from "../models/circle-provider";
-import { Circle, CircleEvent, CircleMember, CircleTree, CircleWatcher, Invitation } from "../models/models";
+import { CircleProvider } from "../models/circle-provider";
+import {
+    Circle,
+    CircleCompletion,
+    CircleEvent,
+    CircleFilters,
+    CircleMember,
+    CircleTree,
+    CircleWatcher,
+    Invitation,
+    InvitationForm
+} from "../models/models";
 
 @Injectable()
 export class RemoteCircleProvider extends CircleProvider {
@@ -14,6 +24,10 @@ export class RemoteCircleProvider extends CircleProvider {
         super();
     }
 
+    circleCompletion(): Observable<CircleCompletion> {
+        return this.http.get<CircleCompletion>('/api/v1/circles/completion/');
+    }
+
     tree(): Observable<CircleTree> {
         return this.http.get<CircleTree>('/api/v1/circles/tree/');
     }
@@ -21,12 +35,46 @@ export class RemoteCircleProvider extends CircleProvider {
     search(filters?: CircleFilters): Observable<PageResult<Circle>> {
         filters = filters || {};
         let params = new HttpParams();
+        if (filters.search) {
+            params = params.append('search', filters.search);
+        }
+
+        // type
+        if (filters.opened) {
+            params = params.append('opened', 'true');
+        }
+
         if (filters.watchers) {
             filters.watchers.forEach(e => {
                 params = params.append('watcher', e);
             });
         }
 
+        if (filters.members) {
+            filters.members.forEach(e => {
+                params = params.append('member', e);
+            });
+        }
+
+        // order
+
+        if (filters.orderBy) {
+            const ordering = ({
+                'name': 'name',
+                'date': '-updated_at',
+                'members': '-members_count',
+                'watchers': '-watchers_count',
+                'resources': '-resources_count',
+            } as any)[filters.orderBy];
+            params = params.append('ordering', ordering);
+        }
+
+        // date
+        if (filters.updatedAt) {
+            params = params.append('updated_at', filters.updatedAt.toString());
+        }
+
+        // pagination
         if (filters.limit) {
             params = params.append('limit', filters.limit.toString());
         }
@@ -34,7 +82,6 @@ export class RemoteCircleProvider extends CircleProvider {
         if (filters.offset) {
             params = params.append('offset', filters.offset.toString());
         }
-
         return this.http.get<PageResult<Circle>>(`/api/v1/circles/`, {
             params,
         });

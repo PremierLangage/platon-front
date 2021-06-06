@@ -7,5 +7,5 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class CircleItemComponent {
     @Input() item!: any;
-    @Output() didFilterByTag = new EventEmitter<string>();
+    @Output() didTapTag = new EventEmitter<string>();
 }

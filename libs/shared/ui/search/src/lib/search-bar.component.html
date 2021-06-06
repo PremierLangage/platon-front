@@ -18,7 +18,7 @@
       <nz-auto-option
         *ngFor="let suggestion of suggestions"
         (selectionChange)="onSelect($event, suggestion)"
-        [nzValue]="searchBar.complete(suggestion)">
+        [nzValue]="onComplete(suggestion)">
         <ng-container *ngIf="suggestionTemplate; else: defaultTemplate">
           <ng-container *ngTemplateOutlet="suggestionTemplate; context: { $implicit: suggestion }"></ng-container>
         </ng-container>

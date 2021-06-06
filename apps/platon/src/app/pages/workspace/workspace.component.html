@@ -2,21 +2,11 @@
   <app-content>
     <section>
       <h1>Espace de travail</h1>
-    </section>
-    <section>
-    <nz-tabset nzLinkRouter nzSize="default" nzType="card" [nzTabBarExtraContent]="tabExtra">
-      <ng-container *ngFor="let tab of tabs">
-        <nz-tab>
-          <a class="tab-title" *nzTabLink nz-tab-link [routerLink]="tab.link">
-            {{tab.title}}
-          </a>
-        </nz-tab>
-      </ng-container>
-    </nz-tabset>
-    <ng-template #tabExtra>
-      <button mat-button [matMenuTriggerFor]="menu">
-        <mat-icon>add</mat-icon>
-      </button>
+      <nz-button-group *ngIf="actions.length">
+        <button nz-button nzType="primary" [matMenuTriggerFor]="menu">
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+        </button>
+      </nz-button-group>
       <mat-menu #menu="matMenu">
         <ng-container *ngFor="let action of actions">
           <a
@@ -29,8 +19,18 @@
           </a>
         </ng-container>
       </mat-menu>
-    </ng-template>
-  </section>
+    </section>
+    <section>
+      <nz-tabset nzLinkRouter [nzLinkExact]="false" nzSize="default" nzType="card">
+        <ng-container *ngFor="let tab of tabs">
+          <nz-tab>
+            <a class="tab-title" *nzTabLink nz-tab-link [routerLink]="tab.link">
+              {{tab.title}}
+            </a>
+          </nz-tab>
+        </ng-container>
+      </nz-tabset>
+    </section>
   <section>
     <router-outlet></router-outlet>
   </section>

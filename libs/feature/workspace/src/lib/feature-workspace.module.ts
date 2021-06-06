@@ -1,12 +1,18 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { MatRadioModule } from '@angular/material/radio';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { SharedUiListModule } from '@platon/shared/ui/list';
 
@@ -32,18 +38,27 @@ import { ListComponent } from './components/list/list.component';
 import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
+import { CircleFiltersComponent } from './components/circle-filters/circle-filters.component';
+import { ResourceFiltersComponent } from './components/resource-filters/resource-filters.component';
 
 
 @NgModule({
     imports: [
         CommonModule,
         RouterModule,
+        FormsModule,
+        ReactiveFormsModule,
 
         MatIconModule,
         MatCardModule,
         MatTabsModule,
         MatButtonModule,
         MatTooltipModule,
+
+        MatRadioModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
 
         NzTagModule,
         NzIconModule,
@@ -64,6 +79,8 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         ListItemComponent,
         EventListComponent,
         CircleTreeComponent,
+        CircleFiltersComponent,
+        ResourceFiltersComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -78,6 +95,9 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         CircleItemComponent,
         ActivityItemComponent,
         ExerciseItemComponent,
+
+        CircleFiltersComponent,
+        ResourceFiltersComponent,
     ],
 })
-export class FeatureWorkspaceModule {}
+export class FeatureWorkspaceModule { }

@@ -8,7 +8,7 @@ import { Circle, Resource } from '@platon/feature/workspace';
 })
 export class ListItemComponent {
     @Input() item!: (Circle | Resource);
-    @Output() didFilterByTag = new EventEmitter<string>();
+    @Output() didTapTag = new EventEmitter<string>();
 
     isCircle(item: any): boolean {
         return !('status' in item);

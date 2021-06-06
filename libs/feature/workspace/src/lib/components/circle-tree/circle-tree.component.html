@@ -1,8 +1,9 @@
-<nz-tree-view [nzTreeControl]="treeControl" [nzDataSource]="dataSource" [trackBy]="trackBy">
+<nz-tree-view
+  [nzTreeControl]="treeControl"
+  [nzDataSource]="dataSource"
+  [trackBy]="trackBy">
   <nz-tree-node *nzTreeNodeDef="let node" nzTreeNodeIndentLine>
-    <nz-tree-node-option
-      [nzDisabled]="node.disabled"
-      [routerLink]="['/circle', node.id]">
+    <nz-tree-node-option [routerLink]="['/circle', node.id]">
       {{ node.name }}
     </nz-tree-node-option>
   </nz-tree-node>
@@ -10,9 +11,8 @@
     <nz-tree-node-toggle>
       <i nz-icon nzType="caret-down" nzTreeNodeToggleRotateIcon></i>
     </nz-tree-node-toggle>
-    {{ node.name }}
-    <button nz-button nzType="text" nzSize="small" (click)="addNewNode(node)">
-      <i nz-icon nzType="plus" nzTheme="outline"></i>
-    </button>
+    <nz-tree-node-option [routerLink]="['/circle', node.id]">
+      {{ node.name }}
+    </nz-tree-node-option>
   </nz-tree-node>
 </nz-tree-view>

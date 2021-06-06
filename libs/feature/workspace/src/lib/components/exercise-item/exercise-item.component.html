@@ -5,7 +5,7 @@
   [articleIconTemplate]="image"
   [articleDescription]="item.desc"
   [articleUrl]="['/resources/', item.id]"
-  (didClickTag)="didFilterByTag.emit($event)">
+  (didClickTag)="didTapTag.emit($event)">
   <ng-template #image>
     <mat-icon>article</mat-icon>
   </ng-template>

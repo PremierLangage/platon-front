@@ -52,7 +52,6 @@ export class CircleTreeComponent implements OnInit {
         this.dataSource.setData([
             this.tree
         ]);
-        this.treeControl.expandAll();
     }
 
     addNewNode(node: FlatNode) {}

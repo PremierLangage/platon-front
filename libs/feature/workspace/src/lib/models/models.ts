@@ -78,6 +78,12 @@ export interface CircleMember {
     dateJoined: string;
 }
 
+export interface CircleCompletion {
+    names: string[];
+    topics: string[];
+    levels: string[];
+}
+
 export interface CircleWatcher {
     url: string;
     username: string;
@@ -126,4 +132,32 @@ export const STATUS_LABELS: Record<ResourceStatus, string> = {
     NOT_TESTED: "Besoin d'être tester",
     DEPRECATED: 'Ne pas utiliser'
 };
+
+
+export interface CircleFilters {
+    name?: string;
+    search?: string;
+    parent?: number;
+    opened?: boolean;
+    topics?: string[];
+    levels?: string[];
+    updatedAt?: number;
+    members?: string[];
+    watchers?: string[];
+    offset?: number;
+    limit?: number;
+    orderBy?:
+    'name' |
+    'date' |
+    'members' |
+    'watchers' |
+    'resources'
+    ;
+}
+
+export interface InvitationForm {
+    circle: Circle;
+    invitee: string;
+    status: MemberStatus;
+}
 

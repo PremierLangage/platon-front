@@ -1,7 +1,7 @@
 <ui-list [items]="items" idField="id">
   <ui-list-template slot="row">
     <ng-template let-item="item">
-      <ws-list-item [item]="item" (didFilterByTag)="(null)"></ws-list-item>
+      <ws-list-item [item]="item" (didTapTag)="didTapTag.emit($event)"></ws-list-item>
     </ng-template>
   </ui-list-template>
   <ui-list-template slot="empty">
