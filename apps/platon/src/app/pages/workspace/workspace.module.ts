@@ -14,7 +14,7 @@ import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
-import { SharedModule } from '../../shared/shared.module';
+import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 
 // Module
 import { WorkspaceComponent } from './workspace.component';
@@ -34,7 +34,7 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
         NzSkeletonModule,
         NzNotificationModule,
 
-        SharedModule,
+        AppSharedLayoutModule,
 
         FeatureWorkspaceModule,
         WorkspaceRoutingModule,

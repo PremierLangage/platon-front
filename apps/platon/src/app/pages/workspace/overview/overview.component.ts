@@ -28,6 +28,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         const user = await this.authService.ready();
         if (!user) {
+            this.changeDetectorRef.markForCheck();
             return;
         }
 
