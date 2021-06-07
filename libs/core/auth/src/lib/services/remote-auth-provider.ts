@@ -34,9 +34,7 @@ export class RemoteAuthProvider extends AuthProvider {
     }
 
     async signOut(): Promise<void> {
-        await Promise.all([
-            this.tokenProvider.remove(),
-            this.http.post('/api/v1/auth/sign-out/', {}).toPromise()
-        ]);
+        await this.http.post('/api/v1/auth/sign-out/', {}).toPromise();
+        await this.tokenProvider.remove();
     }
 }
