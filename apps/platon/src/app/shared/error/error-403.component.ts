@@ -4,9 +4,9 @@ import { Component, OnInit } from '@angular/core';
     selector: 'app-error-403',
     template: `
         <nz-result
-        nzTitle="403"
-        nzStatus="403"
-        nzSubTitle="Désolé, vous n’êtes pas autorisé à accéder à cette page.">
+            nzTitle="403"
+            nzStatus="403"
+            nzSubTitle="Désolé, vous n’êtes pas autorisé à accéder à cette page.">
         </nz-result>
     `
 })

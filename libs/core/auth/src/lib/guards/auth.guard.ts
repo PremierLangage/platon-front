@@ -6,19 +6,41 @@ import { AuthService } from '../api/auth.service';
 export class AuthGuard implements CanActivate {
 
     constructor(
-        private readonly auth: AuthService,
         private readonly router: Router,
+        private readonly authService: AuthService,
     ) { }
 
     async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        if (await this.auth.ready()) {
+        const user = await this.authService.ready();
+
+        if (user) {
+            const roles: ('admin' | 'editor' | 'all')[] = route.data.roles;
+            if (roles.includes('all')) {
+                return true;
+            }
+
+            if (roles.includes('editor') && !user.isEditor && !user.isAdmin) {
+                this.redirect403();
+                return false;
+            }
+
+            if (roles.includes('admin') && !user.isAdmin) {
+                this.redirect403();
+                return false;
+            }
+
             return true;
         }
-        this.router.navigate(['/login'], {
+
+        return this.router.createUrlTree(['/login'], {
             queryParams: { next: state.url },
             queryParamsHandling: 'merge',
-            replaceUrl: true
         });
-        return false;
+    }
+
+    private redirect403() {
+        this.router.navigate(['/error/403'], {
+            skipLocationChange: true,
+        });
     }
 }

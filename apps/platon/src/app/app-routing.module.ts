@@ -4,6 +4,14 @@ import { CommonModule } from '@angular/common';
 import { AuthGuard } from '@platon/core/auth';
 
 const routes: Routes = [
+    {
+        path: 'error',
+        loadChildren: () => import(
+            /* webpackChunkName: "error" */
+            './shared/error/error.module'
+        ).then(m => m.AppSharedErrorModule)
+    },
+
     // PUBLIC PAGES
     {
         path: 'login',
@@ -20,18 +28,31 @@ const routes: Routes = [
         ).then(m => m.DocModule)
     },
 
-    // PROTECTED PAGES
+    // PROTECTED ADMIN PAGES
+    {
+        path: 'admin',
+        canActivate: [AuthGuard],
+        data: { roles: ['admin'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "admin" */
+            './pages/admin/admin.module'
+        ).then(m => m.AdminModule)
+    },
+
+    // PROTECTED PUBLIC PAGES
     {
         path: 'dashboard',
         canActivate: [AuthGuard],
+        data: { roles: ['all'] },
         loadChildren: () => import(
-            /* webpackChunkName: "doc" */
+            /* webpackChunkName: "dashboard" */
             './pages/dashboard/dashboard.module'
         ).then(m => m.DashboardModule)
     },
     {
         path: 'forum',
         canActivate: [AuthGuard],
+        data: { roles: ['all'] },
         loadChildren: () => import(
             /* webpackChunkName: "forum" */
             './pages/forum/forum.module'
@@ -40,22 +61,19 @@ const routes: Routes = [
     {
         path: 'profile',
         canActivate: [AuthGuard],
+        data: { roles: ['all'] },
         loadChildren: () => import(
             /* webpackChunkName: "profile" */
             './pages/profile/profile.module'
         ).then(m => m.ProfileModule)
     },
-    {
-        path: 'admin',
-        canActivate: [AuthGuard],
-        loadChildren: () => import(
-            /* webpackChunkName: "admin" */
-            './pages/admin/admin.module'
-        ).then(m => m.AdminModule)
-    },
+
+    // PROTECTED EDITOR PAGES
+
     {
         path: 'circle',
         canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
         loadChildren: () => import(
             /* webpackChunkName: "circle" */
             './pages/circle/circle.module'
@@ -64,14 +82,51 @@ const routes: Routes = [
     {
         path: 'resource',
         canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
         loadChildren: () => import(
             /* webpackChunkName: "resource" */
             './pages/resource/resource.module'
         ).then(m => m.ResourceModule)
     },
     {
+        path: 'create-activity',
+        canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "create-activity" */
+            './pages/create-activity/create-activity.module'
+        ).then(m => m.CreateActivityModule)
+    },
+    {
+        path: 'create-circle',
+        canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "create-circle" */
+            './pages/create-circle/create-circle.module'
+        ).then(m => m.CreateCircleModule)
+    },
+    {
+        path: 'create-exercise',
+        canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "create-exercise" */
+            './pages/create-exercise/create-exercise.module'
+        ).then(m => m.CreateExerciseModule)
+    },
+    {
+        path: 'create-model',
+        canActivate: [AuthGuard],
+        loadChildren: () => import(
+            /* webpackChunkName: "create-model" */
+            './pages/create-model/create-model.module'
+        ).then(m => m.CreateModelModule)
+    },
+    {
         path: 'workspace',
         canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
         loadChildren: () => import(
             /* webpackChunkName: "workspace" */
             './pages/workspace/workspace.module'

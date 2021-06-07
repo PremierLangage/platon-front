@@ -29,22 +29,28 @@ export class WorkspaceComponent {
 
     readonly actions: MenuAction[] = [
         {
-            id: 'tab-resources',
+            id: 'menu-create-circle',
             title: 'Créer un cercle',
             icon: 'group_work',
-            link: ['/workspace', 'create-circle']
+            link: ['/create-cercle']
+        },
+        {
+            id: 'menu-create-model',
+            title: 'Créer un modèle',
+            icon: 'widgets',
+            link: ['/create-resource']
         },
         {
             id: 'menu-create-exercise',
             title: 'Créer un exercice',
             icon: 'article',
-            link: ['/workspace', 'create-exercise']
+            link: ['/create-resource']
         },
         {
             id: 'menu-create-activity',
             title: 'Créer une activité',
             icon: 'assessment',
-            link: ['/workspace', 'create-activity']
+            link: ['/create-resource']
         },
     ];
 }
