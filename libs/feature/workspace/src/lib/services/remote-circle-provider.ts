@@ -9,28 +9,38 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
+    CircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
-    InvitationForm
+    InvitationForm,
+    Level,
+    Topic
 } from "../models/circle";
 
 @Injectable()
 export class RemoteCircleProvider extends CircleProvider {
-    constructor(
-        private readonly http: HttpClient,
-    ) {
+    constructor(private readonly http: HttpClient) {
         super();
+    }
+
+    tree(): Observable<CircleTree> {
+        return this.http.get<CircleTree>('/api/v1/circles/tree/');
+    }
+
+    topics(): Observable<Topic[]> {
+        return this.http.get<Topic[]>('/api/v1/topics/?no_page');
+    }
+
+    levels(): Observable<Level[]> {
+        return this.http.get<Level[]>('/api/v1/levels/');
     }
 
     completion(): Observable<CircleCompletion> {
         return this.http.get<CircleCompletion>('/api/v1/circles/completion/');
     }
 
-    tree(): Observable<CircleTree> {
-        return this.http.get<CircleTree>('/api/v1/circles/tree/');
-    }
 
     search(filters?: CircleFilters): Observable<PageResult<Circle>> {
         filters = filters || {};
@@ -93,6 +103,13 @@ export class RemoteCircleProvider extends CircleProvider {
 
     findUserPersonal(): Observable<Circle> {
         return this.http.get<Circle>('/api/v1/circles/me/');
+    }
+
+    createCircle(form: CircleForm): Observable<Circle> {
+        return this.http.post<Circle>('/api/v1/circles/', {
+            ...form,
+            type: 'PUBLIC'
+        });
     }
 
     // Members

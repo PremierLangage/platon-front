@@ -5,20 +5,28 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
+    CircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
-    InvitationForm
+    InvitationForm,
+    Level,
+    Topic
 } from "./circle";
 
 export abstract class CircleProvider {
+    abstract tree(): Observable<CircleTree>;
+    abstract topics(): Observable<Topic[]>;
+    abstract levels(): Observable<Level[]>;
+
     abstract completion(): Observable<CircleCompletion>;
 
-    abstract tree(): Observable<CircleTree>;
     abstract search(filters?: CircleFilters): Observable<PageResult<Circle>>;
     abstract findById(id: number): Observable<Circle>;
     abstract findUserPersonal(): Observable<Circle>;
+
+    abstract createCircle(form: CircleForm): Observable<Circle>;
 
     // Members
 

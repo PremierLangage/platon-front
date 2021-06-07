@@ -7,11 +7,14 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
+    CircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
-    InvitationForm
+    InvitationForm,
+    Level,
+    Topic
 } from "../models/circle";
 
 @Injectable({ providedIn: 'root' })
@@ -21,13 +24,22 @@ export class CircleService {
         private readonly provider: CircleProvider,
     ) { }
 
+    tree(): Observable<CircleTree> {
+        return this.provider.tree();
+    }
+
+    topics(): Observable<Topic[]> {
+        return this.provider.topics();
+    }
+
+    levels(): Observable<Level[]> {
+        return this.provider.levels();
+    }
+
     completion(): Observable<CircleCompletion> {
         return this.provider.completion();
     }
 
-    tree(): Observable<CircleTree> {
-        return this.provider.tree();
-    }
 
     search(filters?: CircleFilters): Observable<PageResult<Circle>> {
         return this.provider.search(filters);
@@ -36,14 +48,20 @@ export class CircleService {
     findById(id: number): Observable<Circle> {
         return this.provider.findById(id);
     }
+
     findUserPersonal(): Observable<Circle> {
         return this.provider.findUserPersonal();
     }
+
     findWatchedBy(username: string): Observable<PageResult<Circle>> {
         return this.provider.search({
             limit: 5,
             watchers: [username]
         });
+    }
+
+    createCircle(form: CircleForm): Observable<Circle> {
+        return this.provider.createCircle(form);
     }
 
 
@@ -52,9 +70,11 @@ export class CircleService {
     findMember(circle: Circle, username: string): Observable<CircleMember | undefined> {
         return this.provider.findMember(circle, username);
     }
+
     deleteMember(member: CircleMember): Observable<any> {
         return this.provider.deleteMember(member);
     }
+
     listMembers(circle: Circle): Observable<PageResult<CircleMember>> {
         return this.provider.listMembers(circle);
     }
@@ -64,12 +84,15 @@ export class CircleService {
     findWatcher(circle: Circle, username: string): Observable<CircleWatcher | undefined> {
         return this.provider.findWatcher(circle, username);
     }
+
     createWatcher(circle: Circle): Observable<CircleWatcher> {
         return this.provider.createWatcher(circle);
     }
+
     deleteWatcher(watcher: CircleWatcher): Observable<any> {
         return this.provider.deleteWatcher(watcher);
     }
+
     listWatchers(circle: Circle): Observable<PageResult<CircleWatcher>> {
         return this.provider.listWatchers(circle);
     }
@@ -79,15 +102,19 @@ export class CircleService {
     createInvitation(form: InvitationForm): Observable<Invitation> {
         return this.provider.createInvitation(form);
     }
+
     deleteInvitation(invitation: Invitation): Observable<any> {
         return this.provider.deleteInvitation(invitation);
     }
+
     acceptInvitation(invitation: Invitation): Observable<any> {
         return this.provider.acceptInvitation(invitation);
     }
+
     findInvitation(circle: Circle, username: string): Observable<Invitation | undefined> {
         return this.provider.findInvitation(circle, username);
     }
+
     listInvitations(circle: Circle): Observable<PageResult<Invitation>> {
         return this.provider.listInvitations(circle);
     }

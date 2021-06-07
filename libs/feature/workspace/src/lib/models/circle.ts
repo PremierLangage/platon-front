@@ -101,9 +101,25 @@ export interface CircleFilters {
 }
 
 
+export interface CircleForm {
+    name: string;
+    desc: string;
+    parent: number;
+    opened: boolean;
+    topics: string[];
+    levels: string[];
+}
+
 export interface InvitationForm {
     circle: Circle;
     invitee: string;
     status: MemberStatus;
 }
 
+export interface Topic {
+    name: string;
+    desc: string;
+    references: number;
+}
+
+export declare type Level = string;
