@@ -32,6 +32,15 @@ export interface Resource {
     versionsUrl: string;
 }
 
+export interface ResourceForm {
+    type: ResourceTypes;
+    name: string;
+    desc: string;
+    circle: number;
+    topics: string[];
+    levels: string[];
+}
+
 export interface ResourceVersion {
     number: number;
     author: string;
@@ -65,7 +74,6 @@ export interface ResourceFilters {
     circle?: number;
     updatedAt?: number;
     authors?: string[];
-    watchers?: string[];
     types?: ResourceTypes[];
     status?: ResourceStatus;
     offset?: number;

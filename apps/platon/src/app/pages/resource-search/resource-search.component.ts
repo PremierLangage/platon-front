@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { CircleCompletion, CircleFilters, CircleService, CircleTree, Resource, ResourceFilters } from '@platon/feature/workspace';
+import {  ResourceService, Resource, ResourceFilters, ResourceCompletion } from '@platon/feature/workspace';
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
@@ -16,14 +16,13 @@ import { of, Subscription } from 'rxjs';
 export class ResourceSearchComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    tree?: CircleTree;
     user?: AuthUser;
     filter: ResourceFilters = {};
     page: PageResult<Resource> = {
         count: 0,
         results: []
     };
-    completion: CircleCompletion = {
+    completion: ResourceCompletion = {
         names: [],
         topics: [],
         levels: []
@@ -54,16 +53,20 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
     constructor(
         private readonly router: Router,
         private readonly authService: AuthService,
-        private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
+        private readonly resourceService: ResourceService,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
     async ngOnInit(): Promise<void> {
-        const [user] = await Promise.all([
+        const [user, completion] = await Promise.all([
             this.authService.ready(),
+            this.resourceService.completion().toPromise()
         ]);
+
         this.user = user;
+        this.completion = completion;
+
         this.changeDetectorRef.detectChanges();
     }
 
@@ -72,9 +75,7 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
     }
 
     async search(query?: string) {
-        if (query != null) {
-            this.filter.search = query;
-        }
+        this.filter.search = query;
 
         const queryParams: Params = {
             q: this.filter.search,
@@ -96,8 +97,9 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
         });
 
         this.searching = true;
-        //this.page = await this.circleService.search(this.filter).toPromise();
+        this.page = await this.resourceService.search(this.filter).toPromise();
         this.searching = false;
+
         this.changeDetectorRef.markForCheck();
     }
 
@@ -105,7 +107,7 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
         this.searchBar.value = tag;
     }
 
-    onChangeFilter(filter: CircleFilters) {
+    onChangeFilter(filter: ResourceFilters) {
         if (this.initialRequest || this.searchBar.value !== filter.search) {
             this.initialRequest = false;
             this.searchBar.value = filter.search; // will trigger search()

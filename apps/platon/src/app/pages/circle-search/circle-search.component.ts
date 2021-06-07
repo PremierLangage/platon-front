@@ -75,9 +75,7 @@ export class CircleSearchComponent implements OnInit, OnDestroy {
     }
 
     async search(query?: string) {
-        if (query != null) {
-            this.filter.search = query;
-        }
+        this.filter.search = query;
 
         const queryParams: Params = {
             q: this.filter.search,

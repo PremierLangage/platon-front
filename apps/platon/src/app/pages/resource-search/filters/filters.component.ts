@@ -77,7 +77,7 @@ export class ResourceFiltersComponent implements OnInit, OnDestroy {
                 const types = e.types || '';
                 this.form.patchValue({
                     date: Number.parseInt(e.date, 10) || this.filter.updatedAt || 0,
-                    order: e.order || this.filter.orderBy || 'watchers',
+                    order: e.order || this.filter.orderBy || 'name',
                     status: e.status ?? 'all',
                     visibility: e.visibility ?? 'all',
                     models: types.includes('model'),
