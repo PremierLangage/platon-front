@@ -58,6 +58,9 @@
     },
     "shared-ui-search": {
       "tags": ["scope:shared", "type:ui"]
+    },
+    "shared-ui-stepper": {
+      "tags": ["scope:shared", "type:ui"]
     }
   },
   "affected": {

@@ -30,6 +30,7 @@
       "@platon/shared/ui/list": ["libs/shared/ui/list/src/index.ts"],
       "@platon/shared/ui/dialog": ["libs/shared/ui/dialog/src/index.ts"],
       "@platon/shared/ui/search": ["libs/shared/ui/search/src/index.ts"],
+      "@platon/shared/ui/stepper": ["libs/shared/ui/stepper/src/index.ts"],
       "@platon/feature/web-component": ["libs/feature/web-component/src/index.ts"],
       "@platon/feature/workspace": ["libs/feature/workspace/src/index.ts"]
     }

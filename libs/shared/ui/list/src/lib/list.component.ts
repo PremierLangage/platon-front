@@ -2,13 +2,11 @@ import {
     AfterContentInit,
     Component,
     ContentChildren,
-    ElementRef,
     EventEmitter,
     Input,
     OnChanges,
     Output,
     QueryList,
-    SimpleChanges,
     TemplateRef,
 } from '@angular/core';
 import { ListContext, ListTemplateSlots } from './list';
