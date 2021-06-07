@@ -7,7 +7,7 @@
   [articleUrl]="['/resources/', item.id]"
   (didClickTag)="didTapTag.emit($event)">
   <ng-template #image>
-    <mat-icon>article</mat-icon>
+    <mat-icon>widgets</mat-icon>
   </ng-template>
   <ui-list-item-article-action
     [actionTitle]="$any(item.updatedAt|date:'dd/MM/yyyy')"

@@ -1,16 +1,17 @@
 <form [formGroup]="form">
-  <!-- Visibility -->
-  <div class="form-group">
-    <mat-label id="type-label">Quels cercles voulez-vous afficher?</mat-label>
-    <mat-radio-group formControlName="type" class="radio-group" aria-labelledby="type-label">
+  <!-- VISIBILITY -->
+  <section>
+    <mat-label id="visibility-label">Quels cercles voulez-vous afficher?</mat-label>
+    <mat-radio-group formControlName="visibility" class="radio-group" aria-labelledby="visibility-label">
       <mat-radio-button value="all">Tout</mat-radio-button>
       <mat-radio-button value="opened">Les cercles ouverts</mat-radio-button>
       <mat-radio-button value="watching">Les cercles que vous suivez</mat-radio-button>
       <mat-radio-button value="belonging">Les cercles où vous êtes membre</mat-radio-button>
     </mat-radio-group>
-  </div>
+  </section>
+
   <!-- ORDER -->
-  <div class="form-group">
+  <section>
     <mat-label id="order-label">Comment voulez-vous trier les résultats ?</mat-label>
     <mat-radio-group formControlName="order" class="radio-group" aria-labelledby="order-label">
       <mat-radio-button value="name">Nom</mat-radio-button>
@@ -19,9 +20,10 @@
       <mat-radio-button value="watchers">Nombre de watchers</mat-radio-button>
       <mat-radio-button value="resources">Nombre de ressources</mat-radio-button>
     </mat-radio-group>
-  </div>
+  </section>
+
   <!-- DATE -->
-  <div class="form-group">
+  <section>
     <mat-label id="date-label">Souhaitez-vous limiter les résultats à une certaine période ?</mat-label>
     <mat-radio-group formControlName="date" class="radio-group" aria-labelledby="date-label">
       <mat-radio-button [value]="0">Tout</mat-radio-button>
@@ -31,5 +33,5 @@
       <mat-radio-button [value]="180">6 mois</mat-radio-button>
       <mat-radio-button [value]="365">1 an</mat-radio-button>
     </mat-radio-group>
-    </div>
+  </section>
 </form>

@@ -49,9 +49,8 @@ export class CircleTreeComponent implements OnInit {
     trackBy = (_: number, node: FlatNode) => `${node.id}-${node.name}`;
 
     ngOnInit() {
-        this.dataSource.setData([
-            this.tree
-        ]);
+        this.dataSource.setData([this.tree]);
+        this.treeControl.expand(this.treeControl.dataNodes[0]);
     }
 
     addNewNode(node: FlatNode) {}

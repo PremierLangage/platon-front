@@ -16,8 +16,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     personalCircle?: Circle;
     circleTree?: CircleTree;
     watchedCircles: Circle[] = [];
-    watchedResources: Resource[] = [];
-    recentlyViewedResources: Resource[] = [];
+    resources: Resource[] = [];
     loading = true;
 
     constructor(

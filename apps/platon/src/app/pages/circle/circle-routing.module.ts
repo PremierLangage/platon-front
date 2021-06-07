@@ -19,8 +19,8 @@ const routes: Routes = [
                 path: 'resources',
                 loadChildren: () => import(
                     /* webpackChunkName: "circle-resources" */
-                    './resources/resources.module'
-                ).then(m => m.ResourcesModule)
+                    '../resource-search/resource-search.module'
+                ).then(m => m.ResourceSearchModule)
             },
             {
                 path: 'settings',

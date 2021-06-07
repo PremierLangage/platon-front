@@ -135,12 +135,8 @@ export const STATUS_LABELS: Record<ResourceStatus, string> = {
 
 
 export interface CircleFilters {
-    name?: string;
     search?: string;
-    parent?: number;
     opened?: boolean;
-    topics?: string[];
-    levels?: string[];
     updatedAt?: number;
     members?: string[];
     watchers?: string[];
@@ -152,6 +148,22 @@ export interface CircleFilters {
     'members' |
     'watchers' |
     'resources'
+    ;
+}
+
+export interface ResourceFilters {
+    search?: string;
+    circle?: number;
+    updatedAt?: number;
+    authors?: string[];
+    watchers?: string[];
+    types?: ResourceTypes[];
+    status?: ResourceStatus;
+    offset?: number;
+    limit?: number;
+    orderBy?:
+    'name' |
+    'date'
     ;
 }
 

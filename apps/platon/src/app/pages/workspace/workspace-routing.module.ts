@@ -19,15 +19,15 @@ const routes: Routes = [
                 path: 'circles',
                 loadChildren: () => import(
                     /* webpackChunkName: "workspace-circles" */
-                    './circles/circles.module'
-                ).then(m => m.CirclesModule)
+                    '../circle-search/circle-search.module'
+                ).then(m => m.CircleSearchModule)
             },
             {
                 path: 'resources',
                 loadChildren: () => import(
                     /* webpackChunkName: "workspace-resources" */
-                    './resources/resources.module'
-                ).then(m => m.ResourcesModule)
+                    '../resource-search/resource-search.module'
+                ).then(m => m.ResourceSearchModule)
             },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' }
         ]

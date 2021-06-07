@@ -1,39 +1,39 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { CircleCompletion, CircleService, CircleTree, CircleFilters, Circle } from '@platon/feature/workspace';
+import { CircleCompletion, CircleFilters, CircleService, CircleTree, Resource, ResourceFilters } from '@platon/feature/workspace';
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
 import { of, Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-workspace-circles',
-    templateUrl: './circles.component.html',
-    styleUrls: ['./circles.component.scss'],
+    selector: 'app-resource-search',
+    templateUrl: './resource-search.component.html',
+    styleUrls: ['./resource-search.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CirclesComponent implements OnInit, OnDestroy {
+export class ResourceSearchComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     tree?: CircleTree;
     user?: AuthUser;
-    filter: CircleFilters = {};
+    filter: ResourceFilters = {};
+    page: PageResult<Resource> = {
+        count: 0,
+        results: []
+    };
     completion: CircleCompletion = {
         names: [],
         topics: [],
         levels: []
     };
 
-    page: PageResult<Circle> = {
-        count: 0,
-        results: []
-    };
     searching = true;
     initialRequest = true;
 
     readonly searchBar: SearchBar<string> = {
-        placeholder: 'Essayez une matière, une notion...',
+        placeholder: 'Essayez un nom, un topic, un niveau...',
         filterer: {
             run: (query) => {
                 const suggestions = new Set<string>([
@@ -60,16 +60,10 @@ export class CirclesComponent implements OnInit, OnDestroy {
     ) { }
 
     async ngOnInit(): Promise<void> {
-        const [user, tree, completion] = await Promise.all([
+        const [user] = await Promise.all([
             this.authService.ready(),
-            this.circleService.tree().toPromise(),
-            this.circleService.circleCompletion().toPromise()
         ]);
-
         this.user = user;
-        this.tree = tree;
-        this.completion = completion;
-
         this.changeDetectorRef.detectChanges();
     }
 
@@ -86,15 +80,13 @@ export class CirclesComponent implements OnInit, OnDestroy {
             q: this.filter.search,
             date: this.filter.updatedAt,
             order: this.filter.orderBy,
-            type: 'all'
+            status: this.filter.status,
+            visibility: 'all',
+            types: (this.filter.types || []).map(e => e.toLowerCase()).join('|'),
         };
 
-        if (this.filter.opened) {
-            queryParams['type'] = 'opened';
-        } else if (this.filter.watchers) {
-            queryParams['type'] = 'watching';
-        } else if (this.filter.members) {
-            queryParams['type'] = 'belonging';
+        if (this.filter.authors) {
+            queryParams['visibility'] = 'authored';
         }
 
         this.router.navigate([], {
@@ -104,7 +96,7 @@ export class CirclesComponent implements OnInit, OnDestroy {
         });
 
         this.searching = true;
-        this.page = await this.circleService.search(this.filter).toPromise();
+        //this.page = await this.circleService.search(this.filter).toPromise();
         this.searching = false;
         this.changeDetectorRef.markForCheck();
     }

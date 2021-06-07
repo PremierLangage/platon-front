@@ -11,6 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 
+import { MatRadioModule } from '@angular/material/radio';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
 
 import { NzSpinModule } from 'ng-zorro-antd/spin'
 import { NzGridModule } from 'ng-zorro-antd/grid'
@@ -24,7 +29,8 @@ import { SharedUiSearchModule } from '@platon/shared/ui/search';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
-import { CirclesComponent } from './circles.component';
+import { CircleSearchComponent } from './circle-search.component';
+import { CircleFiltersComponent } from './filters/filters.component';
 
 
 @NgModule({
@@ -40,6 +46,11 @@ import { CirclesComponent } from './circles.component';
         MatDividerModule,
         MatExpansionModule,
 
+        MatRadioModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+
         NzSpinModule,
         NzGridModule,
         NzTabsModule,
@@ -54,10 +65,13 @@ import { CirclesComponent } from './circles.component';
         RouterModule.forChild([
             {
                 path: '',
-                component: CirclesComponent
+                component: CircleSearchComponent
             }
         ])
     ],
-    declarations: [CirclesComponent]
+    declarations: [
+        CircleSearchComponent,
+        CircleFiltersComponent,
+    ]
 })
-export class CirclesModule { }
+export class CircleSearchModule { }
