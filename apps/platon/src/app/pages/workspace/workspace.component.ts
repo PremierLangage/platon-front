@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AuthService } from '@platon/core/auth';
 
 
 @Component({
@@ -27,32 +28,43 @@ export class WorkspaceComponent {
         },
     ];
 
-    readonly actions: MenuAction[] = [
-        {
-            id: 'menu-create-circle',
-            title: 'Créer un cercle',
-            icon: 'group_work',
-            link: ['/create-cercle']
-        },
-        {
-            id: 'menu-create-model',
-            title: 'Créer un modèle',
-            icon: 'widgets',
-            link: ['/create-resource']
-        },
-        {
-            id: 'menu-create-exercise',
-            title: 'Créer un exercice',
-            icon: 'article',
-            link: ['/create-resource']
-        },
-        {
-            id: 'menu-create-activity',
-            title: 'Créer une activité',
-            icon: 'assessment',
-            link: ['/create-resource']
-        },
-    ];
+    readonly actions: MenuAction[] = [];
+
+    constructor(private readonly authService: AuthService) { }
+
+    async ngOnInit() {
+        const user = (await this.authService.ready())!;
+
+        if (user.isAdmin) {
+            this.actions.push({
+                id: 'menu-create-circle',
+                title: 'Créer un cercle',
+                icon: 'group_work',
+                link: ['/create-circle']
+            });
+        }
+
+        this.actions.push(
+            {
+                id: 'menu-create-model',
+                title: 'Créer un modèle',
+                icon: 'widgets',
+                link: ['/create-model']
+            },
+            {
+                id: 'menu-create-exercise',
+                title: 'Créer un exercice',
+                icon: 'article',
+                link: ['/create-exercise']
+            },
+            {
+                id: 'menu-create-activity',
+                title: 'Créer une activité',
+                icon: 'assessment',
+                link: ['/create-activity']
+            },
+        );
+    }
 }
 
 interface Tab {

@@ -118,6 +118,7 @@ const routes: Routes = [
     {
         path: 'create-model',
         canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
         loadChildren: () => import(
             /* webpackChunkName: "create-model" */
             './pages/create-model/create-model.module'
