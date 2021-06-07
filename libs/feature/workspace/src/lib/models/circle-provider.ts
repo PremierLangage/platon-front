@@ -10,10 +10,10 @@ import {
     CircleWatcher,
     Invitation,
     InvitationForm
-} from "./models";
+} from "./circle";
 
 export abstract class CircleProvider {
-    abstract circleCompletion(): Observable<CircleCompletion>;
+    abstract completion(): Observable<CircleCompletion>;
 
     abstract tree(): Observable<CircleTree>;
     abstract search(filters?: CircleFilters): Observable<PageResult<Circle>>;

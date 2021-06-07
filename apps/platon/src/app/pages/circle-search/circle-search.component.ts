@@ -61,7 +61,7 @@ export class CircleSearchComponent implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         const [user, completion] = await Promise.all([
             this.authService.ready(),
-            this.circleService.circleCompletion().toPromise()
+            this.circleService.completion().toPromise()
         ]);
 
         this.user = user;

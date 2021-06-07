@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ResourceStatus, STATUS_COLORS } from '../models/models';
+import { ResourceStatus, STATUS_COLORS } from '../models/resource';
 
 @Pipe({
     name: 'statusColor',

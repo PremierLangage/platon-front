@@ -22,6 +22,12 @@ export class CircleHeaderComponent implements OnInit {
         if (this.state.isMember) {
             this.actions.push(
                 {
+                    id: 'menu-create-model',
+                    title: 'Créer un modèle',
+                    icon: 'widgets',
+                    link: ['/workspace', 'create-model']
+                },
+                {
                     id: 'menu-create-exercise',
                     title: 'Créer un exercice',
                     icon: 'article',

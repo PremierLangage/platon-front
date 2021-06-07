@@ -14,7 +14,7 @@ import {
     CircleWatcher,
     Invitation,
     InvitationForm
-} from "../models/models";
+} from "../models/circle";
 
 @Injectable()
 export class RemoteCircleProvider extends CircleProvider {
@@ -24,7 +24,7 @@ export class RemoteCircleProvider extends CircleProvider {
         super();
     }
 
-    circleCompletion(): Observable<CircleCompletion> {
+    completion(): Observable<CircleCompletion> {
         return this.http.get<CircleCompletion>('/api/v1/circles/completion/');
     }
 

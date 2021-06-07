@@ -13,7 +13,7 @@
     </nz-skeleton>
     <!-- TABS -->
     <section >
-      <nz-tabset nzLinkRouter nzSize="default" nzType="card">
+      <nz-tabset nzLinkRouter [nzLinkExact]="false" nzSize="default" nzType="card">
         <ng-container *ngFor="let tab of tabs">
           <nz-tab>
             <a *nzTabLink nz-tab-link class="tab-title" [routerLink]="tab.link">

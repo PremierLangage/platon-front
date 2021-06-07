@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CircleEvent } from '../../models/models';
+import { CircleEvent } from '../../models/circle';
 
 @Component({
     selector: 'ws-event-list',

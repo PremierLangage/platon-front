@@ -12,7 +12,7 @@ import {
     CircleWatcher,
     Invitation,
     InvitationForm
-} from "../models/models";
+} from "../models/circle";
 
 @Injectable({ providedIn: 'root' })
 export class CircleService {
@@ -21,8 +21,8 @@ export class CircleService {
         private readonly provider: CircleProvider,
     ) { }
 
-    circleCompletion(): Observable<CircleCompletion> {
-        return this.provider.circleCompletion();
+    completion(): Observable<CircleCompletion> {
+        return this.provider.completion();
     }
 
     tree(): Observable<CircleTree> {
@@ -36,11 +36,9 @@ export class CircleService {
     findById(id: number): Observable<Circle> {
         return this.provider.findById(id);
     }
-
     findUserPersonal(): Observable<Circle> {
         return this.provider.findUserPersonal();
     }
-
     findWatchedBy(username: string): Observable<PageResult<Circle>> {
         return this.provider.search({
             limit: 5,
