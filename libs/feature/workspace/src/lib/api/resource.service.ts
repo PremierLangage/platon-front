@@ -7,7 +7,8 @@ import {
     ResourceCompletion,
     ResourceFilters,
     CreateResourceForm,
-    ResourceVersion
+    ResourceVersion,
+    UpdateResourceForm
 } from "../models/resource";
 
 @Injectable({ providedIn: 'root' })
@@ -35,6 +36,14 @@ export class ResourceService {
 
     createResource(form: CreateResourceForm): Observable<Resource> {
         return this.provider.createResource(form);
+    }
+
+    updateResource(form: UpdateResourceForm): Observable<Resource> {
+        return this.provider.updateResource(form);
+    }
+
+    deleteResource(resource: Resource): Observable<any> {
+        return this.provider.deleteResource(resource);
     }
 
     findVersion(resource: Resource, version: number): Observable<ResourceVersion> {

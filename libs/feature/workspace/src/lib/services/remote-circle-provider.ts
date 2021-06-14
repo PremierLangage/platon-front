@@ -9,14 +9,15 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
-    CircleForm,
+    CreateCircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
     InvitationForm,
     Level,
-    Topic
+    Topic,
+    UpdateCircleForm
 } from "../models/circle";
 
 @Injectable()
@@ -105,11 +106,19 @@ export class RemoteCircleProvider extends CircleProvider {
         return this.http.get<Circle>('/api/v1/circles/me/');
     }
 
-    createCircle(form: CircleForm): Observable<Circle> {
+    createCircle(form: CreateCircleForm): Observable<Circle> {
         return this.http.post<Circle>('/api/v1/circles/', {
             ...form,
             type: 'PUBLIC'
         });
+    }
+
+    updateCircle(form: UpdateCircleForm): Observable<Circle> {
+        return this.http.patch<Circle>(form.circle.url, form);
+    }
+
+    deleteCircle(circle: Circle): Observable<any> {
+        return this.http.delete<any>(circle.url);
     }
 
     // Members

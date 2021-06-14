@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 @Component({
     selector: 'app-circle-settings',
@@ -12,7 +12,8 @@ export class SettingsComponent implements OnInit {
         { title: 'Membres', link: ['members'] }
     ];
 
-    constructor() { }
+    constructor(
+    ) { }
 
     ngOnInit() {
     }

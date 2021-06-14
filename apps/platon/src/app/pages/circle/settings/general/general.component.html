@@ -10,17 +10,16 @@
       <textarea cdkTextareaAutosize formControlName="desc" matInput></textarea>
     </mat-form-field>
 
-    <mat-checkbox formControlName="opened">Autoriser la création de ressource par tout le monde?</mat-checkbox>
-
     <mat-label>Topics</mat-label>
     <nz-select
       nzAllowClear
       nzShowSearch
       nzSize="large"
       nzMode="multiple"
-      nzPlaceHolder="Selectionnez une liste de topics"
-      formControlName="topics">
-      <!-- <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option> -->
+      nzPlaceHolder="Cliquez pour selectionner"
+      formControlName="topics"
+      [nzDisabled]="!canEdit">
+      <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option>
     </nz-select>
 
     <mat-label>Niveaux</mat-label>
@@ -29,16 +28,22 @@
       nzShowSearch
       nzSize="large"
       nzMode="multiple"
-      nzPlaceHolder="Selectionnez une liste de niveaux"
-      formControlName="topics">
-      <!-- <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option> -->
+      nzPlaceHolder="Cliquez pour selectionner"
+      formControlName="levels"
+      [nzDisabled]="!canEdit">
+      <nz-option *ngFor="let item of levels; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option>
     </nz-select>
 
-    <button
-      mat-raised-button
-      type="submit"
-      color="primary"
-      [disabled]="!canSubmit">
-      Sauvegarder
-    </button>
+    <ng-container *ngIf="saving; else: actions">
+      <nz-spin nzTip="Modification des informations cercle..."></nz-spin>
+    </ng-container>
+    <ng-template #actions>
+      <button
+        mat-raised-button
+        type="submit"
+        color="primary"
+        [disabled]="!canSubmit">
+        Sauvegarder
+      </button>
+    </ng-template>
   </form>

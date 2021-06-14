@@ -104,11 +104,19 @@ export interface CircleFilters {
 }
 
 
-export interface CircleForm {
+export interface CreateCircleForm {
     name: string;
     desc: string;
     parent: number;
     opened: boolean;
+    topics: string[];
+    levels: string[];
+}
+
+export interface UpdateCircleForm {
+    circle: Circle;
+    name: string;
+    desc: string;
     topics: string[];
     levels: string[];
 }

@@ -5,14 +5,15 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
-    CircleForm,
+    CreateCircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
     InvitationForm,
     Level,
-    Topic
+    Topic,
+    UpdateCircleForm
 } from "./circle";
 
 export abstract class CircleProvider {
@@ -26,7 +27,9 @@ export abstract class CircleProvider {
     abstract findById(id: number): Observable<Circle>;
     abstract findUserPersonal(): Observable<Circle>;
 
-    abstract createCircle(form: CircleForm): Observable<Circle>;
+    abstract createCircle(form: CreateCircleForm): Observable<Circle>;
+    abstract updateCircle(form: UpdateCircleForm): Observable<Circle>;
+    abstract deleteCircle(circle: Circle): Observable<any>;
 
     // Members
 

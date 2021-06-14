@@ -74,6 +74,14 @@ export interface CreateResourceForm {
     levels: string[];
 }
 
+export interface UpdateResourceForm {
+    resource: Resource;
+    name: string;
+    desc: string;
+    topics: string[];
+    levels: string[];
+}
+
 
 export const STATUS_COLORS: Record<ResourceStatus, string> = {
     DRAFT: 'blue',

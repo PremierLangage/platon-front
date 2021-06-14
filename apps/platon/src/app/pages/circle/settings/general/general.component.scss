@@ -4,6 +4,11 @@
   padding: 0 12px;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+}
+
 nz-select,
 mat-checkbox,
 mat-form-field {
@@ -14,4 +19,14 @@ mat-label,
 nz-select,
 mat-checkbox {
   margin-bottom: 12px;
+}
+
+button {
+  width: auto;
+  align-self: center;
+  max-width: 50%;
+}
+
+nz-spin {
+  margin: 2rem 0;
 }

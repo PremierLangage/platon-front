@@ -8,7 +8,8 @@ import {
     ResourceCompletion,
     ResourceFilters,
     CreateResourceForm,
-    ResourceVersion
+    ResourceVersion,
+    UpdateResourceForm
 } from "../models/resource";
 import { ResourceProvider } from "../models/resource-provider";
 
@@ -91,6 +92,14 @@ export class RemoteResourceProvider extends ResourceProvider {
 
     createResource(form: CreateResourceForm): Observable<Resource> {
         return this.http.post<Resource>('api/v1/resources/', form);
+    }
+
+    updateResource(form: UpdateResourceForm): Observable<Resource> {
+        return this.http.patch<Resource>(form.resource.url, form);
+    }
+
+    deleteResource(resource: Resource): Observable<any> {
+        return this.http.delete<any>(resource.url);
     }
 
     findVersion(resource: Resource, version: number): Observable<ResourceVersion> {

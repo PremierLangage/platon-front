@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleEvent, CircleMember, CircleService, CircleWatcher, Invitation } from '@platon/feature/workspace';
+import { Circle, CircleEvent, CircleMember, CircleService, CircleWatcher, Invitation, UpdateCircleForm } from '@platon/feature/workspace';
 import { PageResult } from '@platon/shared/utils';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { BehaviorSubject, forkJoin, Observable, Subscription } from 'rxjs';
@@ -46,9 +46,7 @@ export class CirclePresenter implements OnDestroy {
             await this.circleService.createWatcher(circle).toPromise();
             await this.refreshState(circle.id);
         } catch {
-            this.notificationService.error('',
-                'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
-            );
+            this.alertError();
         }
     }
 
@@ -59,9 +57,7 @@ export class CirclePresenter implements OnDestroy {
             await this.circleService.deleteWatcher(watcher).toPromise();
             await this.refreshState(circle.id);
         } catch {
-            this.notificationService.error('',
-                'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
-            );
+            this.alertError();
         }
     }
 
@@ -71,9 +67,7 @@ export class CirclePresenter implements OnDestroy {
             await this.circleService.acceptInvitation(invitation).toPromise();
             await this.refreshState(circle.id);
         } catch {
-            this.notificationService.error('',
-                'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
-            );
+            this.alertError();
         }
     }
 
@@ -83,9 +77,7 @@ export class CirclePresenter implements OnDestroy {
             await this.circleService.deleteInvitation(invitation).toPromise();
             await this.refreshState(circle.id);
         } catch {
-            this.notificationService.error('',
-                'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
-            );
+            this.alertError();
         }
     }
 
@@ -98,6 +90,27 @@ export class CirclePresenter implements OnDestroy {
             };
         }
         return this.circleService.listEvents(circle).toPromise();
+    }
+
+    async updateCircle(form: Omit<UpdateCircleForm, 'circle'>) {
+        const { circle } = this.state.value as Required<PresenterState>;;
+        try {
+            const newCircle = await this.circleService.updateCircle({
+                circle,
+                ...form
+            }).toPromise();
+
+            this.state.next({
+                ...this.state.value,
+                circle: newCircle,
+            });
+            this.notificationService.success(
+                'Les informations du cercle ont bien été modifiées !',
+                ''
+            );
+        } catch {
+            this.alertError();
+        }
     }
 
     private async refreshState(circleId: number) {
@@ -136,6 +149,13 @@ export class CirclePresenter implements OnDestroy {
                 this.state.next({ state: 'SERVER_ERROR' });
             }
         }
+    }
+
+    private alertError() {
+        this.notificationService.error(
+            'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !',
+            '',
+        );
     }
 }
 

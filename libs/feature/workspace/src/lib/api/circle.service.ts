@@ -7,14 +7,15 @@ import {
     CircleCompletion,
     CircleEvent,
     CircleFilters,
-    CircleForm,
+    CreateCircleForm,
     CircleMember,
     CircleTree,
     CircleWatcher,
     Invitation,
     InvitationForm,
     Level,
-    Topic
+    Topic,
+    UpdateCircleForm
 } from "../models/circle";
 
 @Injectable({ providedIn: 'root' })
@@ -60,10 +61,18 @@ export class CircleService {
         });
     }
 
-    createCircle(form: CircleForm): Observable<Circle> {
+    createCircle(form: CreateCircleForm): Observable<Circle> {
         return this.provider.createCircle(form);
     }
 
+
+    updateCircle(form: UpdateCircleForm): Observable<Circle> {
+        return this.provider.updateCircle(form);
+    }
+
+    deleteCircle(circle: Circle): Observable<any> {
+        return this.provider.deleteCircle(circle);
+    }
 
     // Members
 

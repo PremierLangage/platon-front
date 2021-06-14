@@ -53,6 +53,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         ListComponent,
         EventListComponent,
         CircleTreeComponent,
+        CircleItemComponent,
         ResourceItemComponent,
     ],
     declarations: [

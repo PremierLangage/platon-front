@@ -34,8 +34,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(context => {
-                this.state = context;
+            this.presenter.stateChange.subscribe(state => {
+                this.state = state;
                 this.changeDetectorRef.markForCheck();
 
                 this.presenter.listEvents().then((events) => {
