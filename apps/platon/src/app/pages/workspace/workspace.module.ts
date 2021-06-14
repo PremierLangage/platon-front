@@ -6,10 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
@@ -27,10 +24,7 @@ import { WorkspaceRoutingModule } from './workspace-routing.module';
         MatMenuModule,
 
         NzIconModule,
-        NzTabsModule,
         NzButtonModule,
-        NzSkeletonModule,
-        NzNotificationModule,
 
         AppSharedLayoutModule,
 

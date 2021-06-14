@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AuthService } from '@platon/core/auth';
+import { LayoutTab } from '../../shared/layout';
 
 
 @Component({
@@ -9,7 +10,7 @@ import { AuthService } from '@platon/core/auth';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkspaceComponent {
-    readonly tabs: Tab[] = [
+    readonly tabs: LayoutTab[] = [
         {
             id: 'tab-overview',
             title: "Vue d'ensemble",
@@ -61,11 +62,6 @@ export class WorkspaceComponent {
     }
 }
 
-interface Tab {
-    id: string;
-    title: string;
-    link: string | any[];
-}
 
 interface MenuAction {
     id: string;

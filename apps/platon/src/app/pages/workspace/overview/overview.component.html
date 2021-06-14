@@ -3,7 +3,7 @@
     <nz-divider nzText="Votre cercle" nzOrientation="left"></nz-divider>
     <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
       <ng-container *ngIf="circle">
-        <ws-list-item [item]="circle"></ws-list-item>
+        <ws-circle-item [item]="circle"></ws-circle-item>
       </ng-container>
       <!-- CIRCLES -->
       <nz-divider [nzText]="title1" nzOrientation="left">

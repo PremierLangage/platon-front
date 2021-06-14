@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { LayoutTab } from '../../shared/layout/index';
+import { LayoutTab } from '../../shared/layout';
 import { CirclePresenter } from './circle.presenter';
 @Component({
     selector: 'app-circle',
