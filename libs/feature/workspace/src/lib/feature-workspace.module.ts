@@ -16,14 +16,12 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
-
-import { ModelItemComponent } from './components/model-item/model-item.component';
-import { CircleItemComponent } from './components/circle-item/circle-item.component';
-import { ActivityItemComponent } from './components/activity-item/activity-item.component';
-import { ExerciseItemComponent } from './components/exercise-item/exercise-item.component';
-
+import { ResourceIconPipe } from './pipes/resource-icon.pipe';
+import { ResourceColorPipe } from './pipes/resource-color.pipe';
 
 import { ListComponent } from './components/list/list.component';
+import { CircleItemComponent } from './components/circle-item/circle-item.component';
+import { ResourceItemComponent } from './components/resource-item/resource-item.component';
 import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
@@ -49,25 +47,26 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
     exports: [
         StatusColorPipe,
         StatusLabelPipe,
+        ResourceIconPipe,
+        ResourceColorPipe,
 
         ListComponent,
-        ListItemComponent,
         EventListComponent,
         CircleTreeComponent,
+        ResourceItemComponent,
     ],
     declarations: [
         StatusColorPipe,
         StatusLabelPipe,
+        ResourceIconPipe,
+        ResourceColorPipe,
 
         ListComponent,
         ListItemComponent,
         EventListComponent,
         CircleTreeComponent,
-
-        ModelItemComponent,
         CircleItemComponent,
-        ActivityItemComponent,
-        ExerciseItemComponent,
+        ResourceItemComponent,
     ],
 })
 export class FeatureWorkspaceModule { }

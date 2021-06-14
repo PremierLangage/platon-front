@@ -20,7 +20,10 @@ export interface Circle {
     id: number;
     name: string;
     type: CircleTypes;
-    parent: number;
+    parent: {
+        id: number;
+        name: string;
+    };
     opened: boolean;
     desc: string;
     topics: string[];

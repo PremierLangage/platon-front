@@ -36,9 +36,11 @@ export class CreateExerciseComponent implements OnInit {
     get topics(): string[] {
         return this.selectedCircle?.topics || [];
     }
+
     get levels(): string[] {
         return this.selectedCircle?.levels || [];
     }
+
     constructor(
         private readonly router: Router,
         private readonly location: Location,
@@ -77,6 +79,7 @@ export class CreateExerciseComponent implements OnInit {
                 name,
                 desc,
                 type: 'EXERCISE',
+                //status: 'DRAFT',
                 circle: this.selectedCircle!.id,
                 levels: this.selectedLevels,
                 topics: this.selectedTopics,
@@ -102,7 +105,7 @@ export class CreateExerciseComponent implements OnInit {
                 relativeTo: this.activatedRoute,
                 replaceUrl: true
             });
-        } catch(error) {
+        } catch (error) {
             console.error(error);
             this.notificationService.error('',
                 'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'

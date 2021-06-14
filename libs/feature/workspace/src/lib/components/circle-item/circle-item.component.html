@@ -1,6 +1,6 @@
 <ui-list-item-article
   [articleTitle]="item.name"
-  [articleTags]="item.topics"
+  [articleTags]="item.topics.concat(item.levels)"
   [articleIconTemplate]="image"
   [articleDescription]="item.desc"
   [articleUrl]="['/circle', item.id]"
@@ -20,12 +20,12 @@
   </ui-list-item-article-action>
   <ui-list-item-article-action
     [actionTitle]="item.membersCount"
-    [matTooltip]="'Contient '  + item.membersCount + ' membre(s)'">
+    [matTooltip]="item.membersCount + ' membre(s)'">
     <mat-icon>people</mat-icon>
   </ui-list-item-article-action>
   <ui-list-item-article-action
     [actionTitle]="item.resourcesCount"
-    [matTooltip]="'Contient '  + item.resourcesCount + ' ressource(s)'">
+    [matTooltip]="item.resourcesCount + ' ressource(s)'">
     <mat-icon>article</mat-icon>
   </ui-list-item-article-action>
 </ui-list-item-article>

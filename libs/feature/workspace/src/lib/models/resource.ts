@@ -19,7 +19,10 @@ export interface Resource {
     desc: string;
     status: ResourceStatus;
     author: string;
-    circle: number;
+    circle: {
+        id: number;
+        name: string;
+    };
     topics: string[];
     levels: string[];
     createdAt: string;
@@ -88,3 +91,14 @@ export const STATUS_LABELS: Record<ResourceStatus, string> = {
     DEPRECATED: 'Ne pas utiliser'
 };
 
+export const RESOURCE_ICONS: Record<ResourceTypes, string> = {
+    MODEL: 'blue',
+    EXERCISE: 'article',
+    ACTIVITY: 'widgets'
+};
+
+export const RESOURCE_COLORS: Record<ResourceTypes, string> = {
+    MODEL: '#d89614',
+    EXERCISE: '#108ee9',
+    ACTIVITY: '#f50'
+};

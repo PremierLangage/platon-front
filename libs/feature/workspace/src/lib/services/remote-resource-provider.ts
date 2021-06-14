@@ -86,13 +86,7 @@ export class RemoteResourceProvider extends ResourceProvider {
     }
 
     recentViews(): Observable<Resource[]> {
-        return this.http.get<Resource[]>(
-            `/api/v1/resources/recent-views/`
-        ).pipe(
-            map((res: any) => {
-                return res.results.map((e: any) => e.item)
-            })
-        );
+        return this.http.get<Resource[]>( `/api/v1/resources/recent-views/`);
     }
 
     createResource(form: CreateResourceForm): Observable<Resource> {
