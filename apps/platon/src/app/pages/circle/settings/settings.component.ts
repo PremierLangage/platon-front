@@ -7,6 +7,10 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent implements OnInit {
+    readonly tabs = [
+        { title: 'Général', link: ['general'] },
+        { title: 'Membres', link: ['members'] }
+    ];
 
     constructor() { }
 

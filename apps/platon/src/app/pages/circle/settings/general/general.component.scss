@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  max-width: 720px;
+  padding: 0 12px;
+}
+
+nz-select,
+mat-checkbox,
+mat-form-field {
+  display: block;
+}
+
+mat-label,
+nz-select,
+mat-checkbox {
+  margin-bottom: 12px;
+}

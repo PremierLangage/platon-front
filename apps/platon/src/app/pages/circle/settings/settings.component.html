@@ -1,3 +1,10 @@
-<p>
-  settings works!
-</p>
+<nz-tabset [nzTabPosition]="'left'" [nzLinkExact]="false" nzLinkRouter>
+  <ng-container *ngFor="let tab of tabs">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="tab.link">{{tab.title}}</a>
+      <ng-template nz-tab>
+        <router-outlet></router-outlet>
+      </ng-template>
+    </nz-tab>
+  </ng-container>
+</nz-tabset>

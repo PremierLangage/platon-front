@@ -1,3 +1,44 @@
-<p>
-  general works!
-</p>
+  <form
+    [formGroup]="form"
+    (ngSubmit)="saveChanges()">
+    <mat-form-field appearance="fill">
+      <mat-label>Nom</mat-label>
+      <input formControlName="name" matInput>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Description</mat-label>
+      <textarea cdkTextareaAutosize formControlName="desc" matInput></textarea>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="opened">Autoriser la création de ressource par tout le monde?</mat-checkbox>
+
+    <mat-label>Topics</mat-label>
+    <nz-select
+      nzAllowClear
+      nzShowSearch
+      nzSize="large"
+      nzMode="multiple"
+      nzPlaceHolder="Selectionnez une liste de topics"
+      formControlName="topics">
+      <!-- <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option> -->
+    </nz-select>
+
+    <mat-label>Niveaux</mat-label>
+    <nz-select
+      nzAllowClear
+      nzShowSearch
+      nzSize="large"
+      nzMode="multiple"
+      nzPlaceHolder="Selectionnez une liste de niveaux"
+      formControlName="topics">
+      <!-- <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option> -->
+    </nz-select>
+
+    <button
+      mat-raised-button
+      type="submit"
+      color="primary"
+      [disabled]="!canSubmit">
+      Sauvegarder
+    </button>
+  </form>
