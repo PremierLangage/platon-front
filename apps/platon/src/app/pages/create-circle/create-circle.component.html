@@ -7,20 +7,20 @@
 </header>
 <main>
   <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
-    <ui-stepper #stepper (didChangeStep)="onChangeStep($event)">
+    <ui-stepper #stepper (didSubmit)="onSubmit()">
       <!-- STEP 1 -->
-      <ng-template uiStepperStep stepTitle="Parent" stepIcon="aim">
+      <ng-template uiStepperStep stepTitle="Parent" stepIcon="apartment" [stepValidator]="!!this.parent">
         <section>
-          <h2>Veuillez choisir un parent pour créer un nouveau cercle</h2>
+          <h2>Quel est le parent du cercle que vous voulez créer ?</h2>
           <ng-container *ngIf="tree">
             <ws-circle-tree [tree]="tree" [(selection)]="parent"></ws-circle-tree>
           </ng-container>
         </section>
       </ng-template>
       <!-- STEP 2 -->
-      <ng-template uiStepperStep stepTitle="Informations" stepIcon="info-circle">
+      <ng-template uiStepperStep stepTitle="Informations" stepIcon="info-circle" [stepValidator]="!!this.formInfos.valid">
         <section>
-          <h2>Veuillez saisir les informations du cercle</h2>
+          <h2>Saisissez les informations de votre cercle</h2>
           <form [formGroup]="formInfos">
             <mat-form-field appearance="fill">
               <mat-label>Nom</mat-label>
@@ -28,14 +28,14 @@
             </mat-form-field>
             <mat-form-field appearance="fill">
               <mat-label>Description</mat-label>
-              <textarea cdkTextareaAutosize  matInput formControlName="description"></textarea>
+              <textarea cdkTextareaAutosize  matInput formControlName="desc"></textarea>
             </mat-form-field>
             <mat-checkbox formControlName="opened">Autoriser la création de ressource par tout le monde?</mat-checkbox>
           </form>
         </section>
       </ng-template>
       <!-- STEP 3 -->
-      <ng-template uiStepperStep stepTitle="Topics" stepIcon="tags">
+      <ng-template uiStepperStep stepTitle="Topics" stepIcon="tags" [stepValidator]="!!this.selectedTopics.length">
         <section>
           <h2>Ajoutez au moins un topic au cercle</h2>
           <nz-select
@@ -50,7 +50,7 @@
         </section>
       </ng-template>
       <!-- STEP 4 -->
-      <ng-template uiStepperStep stepTitle="Niveaux" stepIcon="bar-chart">
+      <ng-template uiStepperStep stepTitle="Niveaux" stepIcon="bar-chart" [stepValidator]="!!this.selectedLevels.length">
         <section>
           <h2>Ajoutez au moins un niveau scolaire au cercle</h2>
           <nz-select
@@ -83,7 +83,7 @@
     <button
       mat-button
       color="primary"
-      [disabled]="!validate(stepper.step)"
+      [disabled]="!stepper.isValid"
       (click)="stepper.nextStep()">
       {{ stepper.isLast ? 'Créer' : 'Suivant'}}
     </button>

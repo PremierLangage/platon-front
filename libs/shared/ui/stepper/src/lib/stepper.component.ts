@@ -10,14 +10,17 @@ import { StepDirective } from './step.directive';
 export class StepperComponent implements AfterContentInit {
     _items: StepDirective[] = [];
     _status: string[] = [];
+    _activeStep?: StepDirective;
     _activeTemplate?: TemplateRef<any>;
 
     step = 0;
+
 
     @ContentChildren(StepDirective)
     steps!: QueryList<StepDirective>;
 
     @Output() didChangeStep = new EventEmitter<number>();
+    @Output() didSubmit = new EventEmitter();
 
     get isFirst(): boolean {
         return this.step === 0;
@@ -27,9 +30,13 @@ export class StepperComponent implements AfterContentInit {
         return this.step === this._items.length - 1;
     }
 
+    get isValid(): boolean {
+        return !!(this._activeStep?.stepValidator ?? true);
+    }
+
     constructor(
         private readonly changeDetectorRef: ChangeDetectorRef
-    ) {}
+    ) { }
 
     ngAfterContentInit(): void {
         this.step = 0;
@@ -37,6 +44,7 @@ export class StepperComponent implements AfterContentInit {
         this._items.forEach(() => this._status.push('wait'));
         if (this._status.length) {
             this._status[0] = 'process';
+            this._activeStep = this._items[0];
             this._activeTemplate = this._items[0].templateRef;
         }
     }
@@ -46,7 +54,7 @@ export class StepperComponent implements AfterContentInit {
             this.step++;
             this.changeStep();
         } else {
-            this.didChangeStep.emit(this.step + 1);
+            this.didSubmit.emit();
         }
     }
 
@@ -70,7 +78,9 @@ export class StepperComponent implements AfterContentInit {
             }
         }
         this._status[this.step] = 'process';
+        this._activeStep = this._items[this.step];
         this._activeTemplate = this._items[this.step].templateRef;
+        this.didChangeStep.emit(this.step);
         this.changeDetectorRef.markForCheck();
     }
 }

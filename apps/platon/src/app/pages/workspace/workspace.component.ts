@@ -46,12 +46,6 @@ export class WorkspaceComponent {
 
         this.actions.push(
             {
-                id: 'menu-create-model',
-                title: 'Créer un modèle',
-                icon: 'widgets',
-                link: ['/create-model']
-            },
-            {
                 id: 'menu-create-exercise',
                 title: 'Créer un exercice',
                 icon: 'article',

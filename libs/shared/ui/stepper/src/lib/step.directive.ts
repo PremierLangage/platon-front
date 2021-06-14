@@ -8,6 +8,9 @@ export class StepDirective {
     stepTitle?: string;
     @Input()
     stepIcon?: string;
+    @Input()
+    stepValidator?: boolean;
+
     constructor(
         readonly templateRef: TemplateRef<any>,
     ) { }

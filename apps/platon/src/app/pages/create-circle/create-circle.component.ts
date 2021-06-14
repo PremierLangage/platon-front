@@ -29,14 +29,14 @@ export class CreateCircleComponent implements OnInit {
     selectedTopics: string[] = [];
     selectedLevels: string[] = [];
 
-    formInfos = new FormGroup({
-        name: new FormControl('', [Validators.required]),
-        opened: new FormControl(false, [Validators.required]),
-        description: new FormControl('', [Validators.required])
-    });
-
     loading = true;
     creating = false;
+
+    formInfos = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        desc: new FormControl('', [Validators.required]),
+        opened: new FormControl(false, [Validators.required]),
+    });
 
     constructor(
         private readonly router: Router,
@@ -66,47 +66,28 @@ export class CreateCircleComponent implements OnInit {
         this.location.back();
     }
 
-    validate(step: number): boolean {
-        switch (step) {
-            case 0:
-                return !!this.parent;
-            case 1:
-                return this.formInfos.valid;
-            case 2:
-                return !!this.selectedTopics.length;
-            case 3:
-                return !!this.selectedLevels.length;
-            default:
-                return true;
-        }
-    }
-
-    onChangeStep(step: number) {
-        if (step === 4) {
+    async onSubmit() {
+        try {
             const { name, desc, opened } = this.formInfos.value;
             this.creating = true;
-            this.circleService.createCircle({
+            const circle = await this.circleService.createCircle({
                 name,
                 desc,
                 opened,
                 levels: this.selectedLevels,
                 topics: this.selectedTopics,
                 parent: this.parent!
-            })
-                .toPromise()
-                .then((circle) => {
-                    this.router.navigate(['/circle', circle.id], {
-                        relativeTo: this.activatedRoute,
-                        replaceUrl: true
-                    });
-                })
-                .catch(() => {
-                    this.notificationService.error('',
-                        'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
-                    );
-                    this.creating = false;
-                    this.changeDetectorRef.markForCheck();
-                });
+            }).toPromise();
+            this.router.navigate(['/circle', circle.id], {
+                relativeTo: this.activatedRoute,
+                replaceUrl: true
+            });
+        } catch {
+            this.notificationService.error('',
+                'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
+            );
+            this.creating = false;
+            this.changeDetectorRef.markForCheck();
         }
     }
 

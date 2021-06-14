@@ -12,7 +12,6 @@ export declare type ResourceStatus =
     'NOT_TESTED'
     ;
 
-
 export interface Resource {
     id: number;
     type: ResourceTypes;
@@ -32,15 +31,6 @@ export interface Resource {
     versionsUrl: string;
 }
 
-export interface ResourceForm {
-    type: ResourceTypes;
-    name: string;
-    desc: string;
-    circle: number;
-    topics: string[];
-    levels: string[];
-}
-
 export interface ResourceVersion {
     number: number;
     author: string;
@@ -49,6 +39,36 @@ export interface ResourceVersion {
     createdAt: string;
     url: string;
     filesUrl: string;
+}
+
+export interface ResourceFilters {
+    search?: string;
+    circle?: number;
+    updatedAt?: number;
+    authors?: string[];
+    types?: ResourceTypes[];
+    status?: ResourceStatus;
+    offset?: number;
+    limit?: number;
+    orderBy?:
+    'name' |
+    'date'
+    ;
+}
+
+export interface ResourceCompletion {
+    names: string[];
+    topics: string[];
+    levels: string[];
+}
+
+export interface CreateResourceForm {
+    type: ResourceTypes;
+    name: string;
+    desc: string;
+    circle: number;
+    topics: string[];
+    levels: string[];
 }
 
 
@@ -68,25 +88,3 @@ export const STATUS_LABELS: Record<ResourceStatus, string> = {
     DEPRECATED: 'Ne pas utiliser'
 };
 
-
-export interface ResourceFilters {
-    search?: string;
-    circle?: number;
-    updatedAt?: number;
-    authors?: string[];
-    types?: ResourceTypes[];
-    status?: ResourceStatus;
-    offset?: number;
-    limit?: number;
-    orderBy?:
-    'name' |
-    'date'
-    ;
-}
-
-
-export interface ResourceCompletion {
-    names: string[];
-    topics: string[];
-    levels: string[];
-}

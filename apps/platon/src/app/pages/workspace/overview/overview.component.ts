@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '@platon/core/auth';
-import { Circle, CircleService, CircleTree, Resource } from '@platon/feature/workspace';
+import { Circle, CircleService, CircleTree, Resource, ResourceService } from '@platon/feature/workspace';
 import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
@@ -13,16 +13,18 @@ import { forkJoin, Subscription } from 'rxjs';
 export class OverviewComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    personalCircle?: Circle;
-    circleTree?: CircleTree;
-    watchedCircles: Circle[] = [];
+    tree?: CircleTree;
+    circle?: Circle;
+    circles: Circle[] = [];
     resources: Resource[] = [];
+
     loading = true;
 
     constructor(
         private readonly router: Router,
         private readonly authService: AuthService,
         private readonly circleService: CircleService,
+        private readonly resourceService: ResourceService,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
@@ -37,12 +39,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
             forkJoin([
                 this.circleService.tree(),
                 this.circleService.findUserPersonal(),
-                this.circleService.findWatchedBy(user.username)
-            ]).subscribe(([tree, personal, watchedCircles]) => {
-                this.circleTree = tree;
-                this.personalCircle = personal;
-                this.watchedCircles = watchedCircles.results;
-
+                this.circleService.findWatchedBy(user.username),
+                this.resourceService.recentViews().toPromise(),
+            ]).subscribe(([tree, personal, circles, resources]) => {
+                this.tree = tree;
+                this.circle = personal;
+                this.circles = circles.results;
+                this.resources = resources;
                 this.loading = false;
                 this.changeDetectorRef.markForCheck();
             })

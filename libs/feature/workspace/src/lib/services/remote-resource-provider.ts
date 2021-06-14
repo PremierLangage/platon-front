@@ -2,11 +2,12 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { PageResult } from '@platon/shared/utils';
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import {
     Resource,
     ResourceCompletion,
     ResourceFilters,
-    ResourceForm,
+    CreateResourceForm,
     ResourceVersion
 } from "../models/resource";
 import { ResourceProvider } from "../models/resource-provider";
@@ -85,10 +86,16 @@ export class RemoteResourceProvider extends ResourceProvider {
     }
 
     recentViews(): Observable<Resource[]> {
-        return this.http.get<Resource[]>(`/api/v1/resources/recent-views/`);
+        return this.http.get<Resource[]>(
+            `/api/v1/resources/recent-views/`
+        ).pipe(
+            map((res: any) => {
+                return res.results.map((e: any) => e.item)
+            })
+        );
     }
 
-    createResource(form: ResourceForm): Observable<Resource> {
+    createResource(form: CreateResourceForm): Observable<Resource> {
         return this.http.post<Resource>('api/v1/resources/', form);
     }
 

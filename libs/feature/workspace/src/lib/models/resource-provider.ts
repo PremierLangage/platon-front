@@ -1,10 +1,10 @@
 import { PageResult } from '@platon/shared/utils';
 import { Observable } from "rxjs";
 import {
+    CreateResourceForm,
     Resource,
     ResourceCompletion,
     ResourceFilters,
-    ResourceForm,
     ResourceVersion
 } from "./resource";
 
@@ -14,7 +14,7 @@ export abstract class ResourceProvider {
     abstract search(filters?: ResourceFilters): Observable<PageResult<Resource>>;
     abstract findById(id: number): Observable<Resource>;
     abstract recentViews(): Observable<Resource[]>;
-    abstract createResource(form: ResourceForm): Observable<Resource>;
+    abstract createResource(form: CreateResourceForm): Observable<Resource>;
 
     abstract findVersion(resource: Resource, version: number): Observable<ResourceVersion>;
     abstract listVersions(resource: Resource): Observable<PageResult<ResourceVersion>>;

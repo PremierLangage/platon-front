@@ -116,15 +116,6 @@ const routes: Routes = [
         ).then(m => m.CreateExerciseModule)
     },
     {
-        path: 'create-model',
-        canActivate: [AuthGuard],
-        data: { roles: ['editor'] },
-        loadChildren: () => import(
-            /* webpackChunkName: "create-model" */
-            './pages/create-model/create-model.module'
-        ).then(m => m.CreateModelModule)
-    },
-    {
         path: 'workspace',
         canActivate: [AuthGuard],
         data: { roles: ['editor'] },

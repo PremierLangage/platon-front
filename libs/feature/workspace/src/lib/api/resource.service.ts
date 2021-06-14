@@ -6,7 +6,7 @@ import {
     Resource,
     ResourceCompletion,
     ResourceFilters,
-    ResourceForm,
+    CreateResourceForm,
     ResourceVersion
 } from "../models/resource";
 
@@ -33,7 +33,7 @@ export class ResourceService {
         return this.provider.recentViews();
     }
 
-    createResource(form: ResourceForm): Observable<Resource> {
+    createResource(form: CreateResourceForm): Observable<Resource> {
         return this.provider.createResource(form);
     }
 
