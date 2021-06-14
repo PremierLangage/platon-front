@@ -23,11 +23,18 @@ const routes: Routes = [
                 ).then(m => m.ResourceSearchModule)
             },
             {
-                path: 'settings',
+                path: 'members',
                 loadChildren: () => import(
-                    /* webpackChunkName: "circle-settings" */
-                    './settings/settings.module'
-                ).then(m => m.SettingsModule)
+                    /* webpackChunkName: "circle-members" */
+                    './members/members.module'
+                ).then(m => m.MembersModule)
+            },
+            {
+                path: 'informations',
+                loadChildren: () => import(
+                    /* webpackChunkName: "circle-informations" */
+                    './informations/informations.module'
+                ).then(m => m.InformationsModule)
             },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' }
         ]

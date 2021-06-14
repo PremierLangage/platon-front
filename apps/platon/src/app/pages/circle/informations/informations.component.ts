@@ -2,14 +2,14 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CircleService } from '@platon/feature/workspace';
 import { Subscription } from 'rxjs';
-import { CirclePresenter } from '../../circle.presenter';
+import { CirclePresenter } from '../circle.presenter';
 
 @Component({
-    selector: 'app-circle-settings-general',
-    templateUrl: './general.component.html',
-    styleUrls: ['./general.component.scss']
+    selector: 'app-circle-informations',
+    templateUrl: './informations.component.html',
+    styleUrls: ['./informations.component.scss']
 })
-export class GeneralComponent implements OnInit, OnDestroy {
+export class InformationsComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     topics: string[] = [];

@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 
-import { GeneralComponent } from './general.component';
+import { InformationsComponent } from './informations.component';
 
 @NgModule({
     imports: [
@@ -27,8 +27,8 @@ import { GeneralComponent } from './general.component';
         NzSpinModule,
         NzSelectModule,
 
-        RouterModule.forChild([{ path: '', component: GeneralComponent }])
+        RouterModule.forChild([{ path: '', component: InformationsComponent }])
     ],
-    declarations: [GeneralComponent]
+    declarations: [InformationsComponent]
 })
-export class GeneralModule { }
+export class InformationsModule { }

@@ -18,18 +18,23 @@ export class CircleComponent implements OnInit, OnDestroy {
             title: "Vue d'ensemble",
             link: ['overview']
         },
-
         {
             id: 'tab-resources',
             title: 'Ressources',
             link: ['resources']
         },
         {
-            id: 'tab-settings',
-            title: 'Paramètres',
-            link: ['settings']
+            id: 'tab-members',
+            title: 'Membres',
+            link: ['members']
+        },
+        {
+            id: 'tab-informations',
+            title: 'Informations',
+            link: ['informations']
         },
     ];
+
     readonly actions: MenuAction[] = [];
 
 

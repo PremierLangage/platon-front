@@ -21,12 +21,12 @@ mat-checkbox {
   margin-bottom: 12px;
 }
 
+nz-spin,
 button {
-  width: auto;
-  align-self: center;
-  max-width: 50%;
+  align-self: flex-start;
 }
 
 nz-spin {
-  margin: 2rem 0;
+  margin: 2rem 1rem;
 }
+
