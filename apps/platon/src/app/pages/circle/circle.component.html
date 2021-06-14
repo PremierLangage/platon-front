@@ -1,46 +1,61 @@
-<app-container>
-  <app-content>
-    <!-- HEADER -->
-    <nz-skeleton [nzActive]="state.state !== 'READY'" [nzLoading]="state.state === 'LOADING'">
-      <section *ngIf="state.state === 'READY'">
-        <app-circle-header
-          [state]="state"
-          (didAcceptInvitation)="acceptInvitation()"
-          (didDeclineInvitation)="declineInvitation()"
-          (didChangeWatchingState)="changeWatchingState()">
-        </app-circle-header>
-      </section>
-    </nz-skeleton>
-    <!-- TABS -->
-    <section >
-      <nz-tabset nzLinkRouter [nzLinkExact]="false" nzSize="default" nzType="card">
-        <ng-container *ngFor="let tab of tabs">
-          <nz-tab>
-            <a *nzTabLink nz-tab-link class="tab-title" [routerLink]="tab.link">
-              {{ tab.title }}
-            </a>
-          </nz-tab>
-        </ng-container>
-      </nz-tabset>
-    </section>
-    <!-- ACTIVE TAB CONTENT -->
-    <nz-skeleton [nzActive]="state.state !== 'READY'" [nzLoading]="state.state === 'LOADING'">
-      <section>
-        <ng-container [ngSwitch]="state.state">
-          <ng-container *ngSwitchCase="'READY'">
-            <router-outlet></router-outlet>
-          </ng-container>
-          <ng-container *ngSwitchCase="'SERVER_ERROR'">
-            <app-error-500></app-error-500>
-          </ng-container>
-          <ng-container *ngSwitchCase="'UNAUTHORIZED'">
-            <app-error-403></app-error-403>
-          </ng-container>
-          <ng-container *ngSwitchCase="'NOT_FOUND'">
-            <app-error-404></app-error-404>
-          </ng-container>
-        </ng-container>
-      </section>
-    </nz-skeleton>
-  </app-content>
-</app-container>
+<app-container-tabbed [state]="state.state" [tabs]="tabs">
+  <ng-container *ngIf="state.state === 'READY'">
+    <ng-container [ngTemplateOutlet]="header"></ng-container>
+  </ng-container>
+</app-container-tabbed>
+
+<ng-template #header>
+  <nz-breadcrumb>
+    <nz-breadcrumb-item *ngIf="state.circle!.parent">
+      <a [routerLink]="['/circle', state.circle!.parent.id]">{{state.circle!.parent!.name}}</a>
+    </nz-breadcrumb-item>
+    <nz-breadcrumb-item>
+      {{state.circle!.name}}
+      <mat-icon>group_work</mat-icon>
+      <i
+        nz-icon
+        [nzType]="state.circle?.opened ? 'unlock' : 'lock'"
+        [matTooltip]="state.circle?.opened ? 'Vous devez être membre pour publier' : 'Vous pouvez publier sans être membre'"
+        nzTheme="twotone">
+      </i>
+    </nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <p class="description">{{state.circle!.desc}}</p>
+
+  <nz-button-group *ngIf="actions.length">
+    <button nz-button nzType="primary" [matMenuTriggerFor]="menu">
+      <i nz-icon nzType="plus" nzTheme="outline"></i>
+    </button>
+  </nz-button-group>
+
+  <nz-button-group>
+    <button nz-button nzType="default" (click)="changeWatchingState()">
+      <i nz-icon nzType="eye" nzTheme="outline"></i>
+      {{ state.watcher ? 'Ne plus suivre' : 'Suivre' }}
+    </button>
+    <button nz-button nzType="default">{{state.circle!.watchersCount}}</button>
+  </nz-button-group>
+
+  <nz-button-group *ngIf="state.invitation">
+    <button nz-button nzType="primary" (click)="acceptInvitation()">
+      Accepter l'invitation
+    </button>
+    <button nz-button nzType="danger" (click)="declineInvitation()">
+      Refuser l'invitation
+    </button>
+  </nz-button-group>
+
+  <mat-menu #menu="matMenu">
+    <ng-container *ngFor="let action of actions">
+      <a
+        mat-menu-item
+        [disabled]="false"
+        [id]="action.id"
+        [routerLink]="action.link">
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <span>{{ action.title }}</span>
+      </a>
+    </ng-container>
+  </mat-menu>
+</ng-template>

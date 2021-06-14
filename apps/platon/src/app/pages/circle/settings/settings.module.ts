@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 
 // Libs
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +16,7 @@ import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
 import { SettingsComponent } from './settings.component';
+import { SettingsRoutingModule } from './settings-routing.module';
 
 
 @NgModule({
@@ -35,12 +35,7 @@ import { SettingsComponent } from './settings.component';
 
         FeatureWorkspaceModule,
 
-        RouterModule.forChild([
-            {
-                path: '',
-                component: SettingsComponent
-            }
-        ])
+        SettingsRoutingModule,
     ],
     declarations: [SettingsComponent]
 })

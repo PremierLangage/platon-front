@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { LayoutTab } from '../../shared/layout/index';
 import { CirclePresenter } from './circle.presenter';
 @Component({
     selector: 'app-circle',
@@ -11,7 +12,7 @@ import { CirclePresenter } from './circle.presenter';
 export class CircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    readonly tabs: Tab[] = [
+    readonly tabs: LayoutTab[] = [
         {
             id: 'tab-overview',
             title: "Vue d'ensemble",
@@ -29,6 +30,8 @@ export class CircleComponent implements OnInit, OnDestroy {
             link: ['settings']
         },
     ];
+    readonly actions: MenuAction[] = [];
+
 
     state = this.presenter.loadingState;
 
@@ -41,6 +44,22 @@ export class CircleComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.stateChange.subscribe(context => {
                 this.state = context;
+                if (this.state.isMember) {
+                    this.actions.push(
+                        {
+                            id: 'menu-create-exercise',
+                            title: 'Créer un exercice',
+                            icon: 'article',
+                            link: ['/workspace', 'create-exercise']
+                        },
+                        {
+                            id: 'menu-create-activity',
+                            title: 'Créer une activité',
+                            icon: 'assessment',
+                            link: ['/workspace', 'create-activity']
+                        }
+                    );
+                }
                 this.changeDetectorRef.markForCheck();
             })
         );
@@ -67,8 +86,10 @@ export class CircleComponent implements OnInit, OnDestroy {
     }
 }
 
-interface Tab {
+
+interface MenuAction {
     id: string;
+    icon: string;
     title: string;
     link: string | any[];
 }
