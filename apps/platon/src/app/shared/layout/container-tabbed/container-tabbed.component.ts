@@ -12,5 +12,5 @@ export class ContainerTabbedComponent {
     tabs: LayoutTab[] = [];
 
     @Input()
-    state: LayoutState = 'LOADING';
+    state: LayoutState = 'READY';
 }
