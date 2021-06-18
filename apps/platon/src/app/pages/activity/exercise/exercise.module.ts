@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 
 import { AppSharedLayoutModule } from '../../../shared/layout/layout.module';
@@ -17,6 +18,7 @@ import { PlatonTextComponent } from '../platon-text/platon-text.component';
         FormsModule,
         CommonModule,
         MatCardModule,
+        MatButtonToggleModule,
 
         AppSharedLayoutModule,
 

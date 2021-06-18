@@ -1,20 +1,33 @@
-<div class="exercise-zone" [innerHtml]="parsedText">
-  <mat-card class="exercise">
-
-    <mat-card-header class="exercise__header">
-      <mat-card-subtitle class='exercise__author'>*ngIf="author; then author else ''"</mat-card-subtitle>
-      <mat-card-title class='exercise__header'>*ngIf="title; then title else ''"</mat-card-title>
-
-    </mat-card-header>mat-card-header>
-      <app-platon-text [rawText] = "text">*ngIf="text; then text else ''"</app-platon-text>
-    <mat-card-content class="exercise__body">
-
-    <div class="exercise__feedback">
-      <app-platon-text [rawText] = "feedback">*ngIf="feeback; then feedback else ''"</app-platon-text>
+<mat-card class="exercise">
+  <mat-card-header class="exercise__header">
+    <mat-card-subtitle class='exercise__author'>
+      <app-platon-text [rawText] = "author"></app-platon-text>
+    </mat-card-subtitle>
+    <mat-card-title class='exercise__header'>
+      <app-platon-text [rawText] = "title"></app-platon-text>
+    </mat-card-title>
+  </mat-card-header>
+   <!-- BODY -->
+  <mat-card-content class="exercise__body">
+    <!-- INSTRUCTIONS -->
+    <div class="exercise__instructions">
+      <app-platon-text [rawText] = "text"></app-platon-text>
     </div>
+    <!-- FEEDBACK -->
+    <div class="exercise__feedback">
+      <app-platon-text [rawText] = "feedback"></app-platon-text>
+    </div>
+    <!-- ACTIONS -->
+    <div class="exercise__actions text-center">
+      <div class="btn-group" role="group" aria-label="actions">
+        <mat-button-toggle-group>
+          <mat-button-toggle>Réinitialiser</mat-button-toggle>
+          <mat-button-toggle>Nouveau tirage</mat-button-toggle>
+          <mat-button-toggle>Sauvegarder</mat-button-toggle>
+          <mat-button-toggle>Valider</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+  </mat-card-content>
 
-    </mat-card-content>
 
-  </mat-card>
-
-</div>

@@ -23,5 +23,4 @@ export class ExerciseComponent implements OnInit {
     text = text;
     feedback = feedback;
 
-
 }
