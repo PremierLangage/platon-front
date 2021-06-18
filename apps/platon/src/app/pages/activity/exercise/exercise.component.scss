@@ -1,0 +1,89 @@
+$main: rgb(50, 50, 60);
+
+* {
+  color: $main;
+}
+
+p.test {
+  font-family: monospace;
+}
+
+.exercise-zone {
+  padding: 5px 15px;
+}
+
+:host::ng-deep h1 {
+  font-size: 3.5vh;
+}
+
+:host::ng-deep h2 {
+  font-size: 2.5vh;
+  text-transform: uppercase;
+}
+
+:host::ng-deep h3 {
+  font-size: 2.5vh;
+  text-decoration: underline;
+}
+
+:host::ng-deep h4 {
+  font-size: 2vh;
+  text-transform: uppercase;
+}
+
+:host::ng-deep h5 {
+  font-size: 2vh;
+  text-decoration: underline;
+}
+
+:host::ng-deep h6 {
+  text-decoration: underline;
+  font-size: 2vh;
+}
+
+:host::ng-deep .spoiler {
+  // directive: on click -> permanent reveal
+  padding: 0 10px;
+  background-color: rgba($color: $main, $alpha: 1);
+  border-radius: 2.5px;
+  transition: .2s;
+
+  &:hover {
+    background-color: rgba($color: $main, $alpha: .1);
+    border-radius: 10px;
+  }
+}
+
+:host::ng-deep .underlined {
+  text-decoration: underline;
+}
+
+:host::ng-deep .stroked {
+  text-decoration: line-through;
+}
+
+:host::ng-deep .carriage-return {
+  line-height: 0;
+}
+
+:host::ng-deep .quote {
+  display: block;
+  margin: 5px 0;
+  padding: 0 15px;
+  text-align: left;
+  background-color: rgba($color: $main, $alpha: .2);
+  border-left: solid 5px;
+  border-radius: 5px;
+}
+
+:host::ng-deep pre {
+  // syntax: http://jsfiddle.net/KJQ9K/554/
+  display: inline-block;
+  width: fit-content;
+  padding: 10px;
+  color: white;
+  background-color: $main;
+  border-radius: 2.5px;
+}
+
+

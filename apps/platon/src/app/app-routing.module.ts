@@ -67,7 +67,15 @@ const routes: Routes = [
             './pages/profile/profile.module'
         ).then(m => m.ProfileModule)
     },
-
+    {
+        path: 'activity',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "activity" */
+            './pages/activity/activity.module'
+        ).then(m => m.ActivityModule)
+    },
     // PROTECTED EDITOR PAGES
 
     {
@@ -115,6 +123,7 @@ const routes: Routes = [
             './pages/create-exercise/create-exercise.module'
         ).then(m => m.CreateExerciseModule)
     },
+
     {
         path: 'workspace',
         canActivate: [AuthGuard],

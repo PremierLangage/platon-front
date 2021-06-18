@@ -1,0 +1,20 @@
+<div class="exercise-zone" [innerHtml]="parsedText">
+  <mat-card class="exercise">
+
+    <mat-card-header class="exercise__header">
+      <mat-card-subtitle class='exercise__author'>*ngIf="author; then author else ''"</mat-card-subtitle>
+      <mat-card-title class='exercise__header'>*ngIf="title; then title else ''"</mat-card-title>
+
+    </mat-card-header>mat-card-header>
+      <app-platon-text [rawText] = "text">*ngIf="text; then text else ''"</app-platon-text>
+    <mat-card-content class="exercise__body">
+
+    <div class="exercise__feedback">
+      <app-platon-text [rawText] = "feedback">*ngIf="feeback; then feedback else ''"</app-platon-text>
+    </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>
