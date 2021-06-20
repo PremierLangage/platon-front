@@ -1,0 +1,18 @@
+<ui-search-bar [searchBar]="searchBar" [disabled]="disabled">
+  <ng-template let-item>
+    <auth-avatar [user]="item"></auth-avatar>
+  </ng-template>
+</ui-search-bar>
+<ui-list [items]="selection" [idField]="'id'">
+  <ui-list-template slot="row">
+  <ng-template let-item="item">
+    <div class="selection-item">
+      <auth-avatar [user]="item"></auth-avatar>
+      <div class="spacer"></div>
+      <button mat-button (click)="remove(item)">
+        <i nz-icon nzType="delete" nzTheme="outline"></i>
+      </button>
+    </div>
+  </ng-template>
+  </ui-list-template>
+</ui-list>

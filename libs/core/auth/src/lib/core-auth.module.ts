@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,12 +16,14 @@ import { SharedUiListModule } from '@platon/shared/ui/list';
 import { SharedUiSearchModule } from '@platon/shared/ui/search';
 
 import { AvatarComponent } from './components/avatar/avatar.component';
+import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { SearchModalComponent } from './components/search-modal/search-modal.component';
 
 @NgModule({
     imports: [
         CommonModule,
         RouterModule,
+        FormsModule,
 
         MatButtonModule,
         MatTooltipModule,
@@ -34,7 +37,15 @@ import { SearchModalComponent } from './components/search-modal/search-modal.com
         SharedUiListModule,
         SharedUiSearchModule,
     ],
-    exports: [AvatarComponent, SearchModalComponent],
-    declarations: [AvatarComponent, SearchModalComponent],
+    exports: [
+        AvatarComponent,
+        SearchBarComponent,
+        SearchModalComponent
+    ],
+    declarations: [
+        AvatarComponent,
+        SearchBarComponent,
+        SearchModalComponent
+    ],
 })
-export class CoreAuthModule {}
+export class CoreAuthModule { }

@@ -14,3 +14,11 @@ export interface AuthUser {
     firstName: string;
 }
 
+
+export interface AuthUserFilters {
+    admin?: boolean;
+    editor?: boolean;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}

@@ -1,26 +1,18 @@
-<nz-modal [(nzVisible)]="isVisible" [nzTitle]="searchTitle" (nzOnCancel)="close()">
-  <ng-container *nzModalContent>
-    <ui-search-bar [searchBar]="searchBar">
-      <ng-template let-item>
-        <auth-avatar [user]="item"></auth-avatar>
-      </ng-template>
-    </ui-search-bar>
-    <ui-list [items]="selections" [idField]="'id'">
-       <ui-list-template slot="row">
-        <ng-template let-item="item">
-          <div class="selection-item">
-            <auth-avatar [user]="item"></auth-avatar>
-            <div class="spacer"></div>
-            <button mat-button (click)="remove(item)">
-              <i nz-icon nzType="delete" nzTheme="outline"></i>
-            </button>
-          </div>
-        </ng-template>
-        </ui-list-template>
-    </ui-list>
-  </ng-container>
-  <ng-container *nzModalFooter>
-    <button nz-button nzType="default" (click)="close()">{{searchNoTitle}}</button>
-    <button nz-button nzType="primary" (click)="submit()" [disabled]="!ready">{{searchOkTitle}}</button>
-  </ng-container>
-</nz-modal>
+<ng-container *ngIf="isVisible">
+  <nz-modal [(nzVisible)]="isVisible" [nzTitle]="searchTitle" (nzOnCancel)="close()">
+    <ng-container *nzModalContent>
+      <auth-search-bar
+        [searchMulti]="searchMulti"
+        [searchAdmin]="searchAdmin"
+        [searchEditor]="searchEditor"
+        [searchExcludes]="searchExcludes"
+        [(ngModel)]="selection">
+      </auth-search-bar>
+    </ng-container>
+    <ng-container *nzModalFooter>
+      <button nz-button nzType="default" (click)="close()">{{searchNoTitle}}</button>
+      <button nz-button nzType="primary" (click)="submit()" [disabled]="!ready">{{searchOkTitle}}</button>
+    </ng-container>
+  </nz-modal>
+</ng-container>
+

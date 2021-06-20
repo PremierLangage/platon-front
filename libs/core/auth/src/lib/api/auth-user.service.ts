@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
+import { PageResult } from '@platon/shared/utils';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { AuthUser } from '../models/auth-user';
-import { AuthUserFilters, AuthUserProvider } from '../models/auth-user-provider';
+import { AuthUser, AuthUserFilters } from '../models/auth-user';
+import { AuthUserProvider } from '../models/auth-user-provider';
 
 /**
  * Facade class that will provide access to the user api of the platform.
  */
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthUserService {
     private users = new Map<string, AuthUser>();
-
 
     constructor(
         private readonly authUserProvider: AuthUserProvider
     ) { }
 
-    search(filters: AuthUserFilters): Observable<AuthUser[]> {
+    search(filters: AuthUserFilters): Observable<PageResult<AuthUser>> {
         return this.authUserProvider.search(filters);
     }
 
@@ -54,9 +54,9 @@ export class AuthUserService {
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
     findAllByUserNames(usernames: string[]): Observable<AuthUser[]> {
-        const notCached: string[]  = [];
+        const notCached: string[] = [];
         const cacheElements = usernames.map(username => {
-            const user =  this.users.get(username);
+            const user = this.users.get(username);
             if (user == null) {
                 notCached.push(username);
             }
