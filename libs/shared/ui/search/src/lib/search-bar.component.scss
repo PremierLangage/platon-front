@@ -6,7 +6,7 @@
   border-radius: 8px;
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: var(--brand-background-primary, 'white');
 }
 
 input {
@@ -20,4 +20,8 @@ input {
 
 input:focus {
   outline: none;
+}
+
+input:disabled {
+  cursor: not-allowed;
 }

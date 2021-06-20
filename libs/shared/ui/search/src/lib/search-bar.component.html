@@ -3,9 +3,9 @@
   type="search"
   [placeholder]="searchBar?.placeholder || ''"
   [formControl]="control"
-  (keydown.enter)="onSearch()"
-  [nzAutocomplete]="auto">
-<nz-autocomplete #auto>
+  (keydown.enter)="onKeyDownEnter()"
+  [nzAutocomplete]="autocomplete">
+<nz-autocomplete #autocomplete>
   <ng-container *ngIf="suggesting; else: result;">
     <nz-auto-option>
       <div style="display: flex; justify-content: center;">

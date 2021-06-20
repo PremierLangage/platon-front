@@ -104,6 +104,28 @@ export interface CircleFilters {
 }
 
 
+export interface CircleMembersFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}
+
+export interface CircleWatchersFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}
+
+export interface CircleInvitationsFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}
+
+
 export interface CreateCircleForm {
     name: string;
     desc: string;

@@ -5,6 +5,7 @@ import {
     ContentChild,
     HostBinding,
     Input,
+    OnChanges,
     OnDestroy,
     OnInit,
     TemplateRef,
@@ -20,23 +21,32 @@ import { SearchBar } from './search-bar';
     styleUrls: ['./search-bar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchBarComponent implements OnInit, OnDestroy {
+export class SearchBarComponent implements OnInit, OnChanges, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    @HostBinding('class')
-    readonly hostClass = 'mat-elevation-z2';
 
-    @Input() searchBar!: SearchBar<any>;
-    @ContentChild(TemplateRef) suggestionTemplate?: TemplateRef<any>;
+    @Input()
+    searchBar!: SearchBar<any>;
+
+    @Input()
+    disabled = false;
+
+    @ContentChild(TemplateRef)
+    suggestionTemplate?: TemplateRef<any>;
 
     control = new FormControl();
 
     suggesting = false;
     suggestions: any[] = [];
 
-    constructor(private readonly changeDetector: ChangeDetectorRef) {}
+    @HostBinding('class')
+    get hostClass(): string {
+        return this.disabled ? 'mat-elevation-z1' : 'mat-elevation-z2';
+    }
 
-    ngOnInit() {
+    constructor(private readonly changeDetector: ChangeDetectorRef) { }
+
+    ngOnInit(): void {
         this.subscriptions.push(
             this.control.valueChanges
                 .pipe(
@@ -61,30 +71,38 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }); // avoid ExpressionChangedAfterItHasBeenCheckedError
     }
 
-    ngOnDestroy() {
+    ngOnChanges(): void {
+        if (this.disabled) {
+            this.control.disable();
+        } else if (!this.control.enabled) {
+            this.control.enable();
+        }
+    }
+
+    ngOnDestroy(): void {
         this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
-    onSearch() {
+    onKeyDownEnter(): void {
         if (this.searchBar?.onSearch) {
             this.searchBar.onSearch(this.control.value);
         }
     }
 
-    onSelect(event: any, item: any) {
+    onSelect(event: any, item: any): void {
         if (event.isUserInput && this.searchBar.onSelect) {
             this.searchBar.onSelect(item);
         }
     }
 
-    onComplete(item: any) {
+    onComplete(item: any): any {
         if (this.searchBar.complete) {
             return this.searchBar.complete(item);
         }
         return item;
     }
 
-    private stopFiltering() {
+    private stopFiltering(): void {
         this.subscriptions.forEach((s, i) => {
             if (i > 0) {
                 s.unsubscribe();
@@ -93,7 +111,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.subscriptions.splice(1, this.subscriptions.length);
     }
 
-    private startFiltering(query?: string) {
+    private startFiltering(query?: string): void {
         this.suggesting = true;
         this.suggestions = [];
         this.changeDetector.markForCheck();
@@ -116,7 +134,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         );
     }
 
-    private defineSetterForValueProperty() {
+    private defineSetterForValueProperty(): void {
         if (!Object.getOwnPropertyDescriptor(this.searchBar, 'value')?.set) {
             Object.defineProperty(this.searchBar, 'value', {
                 get: () => {
@@ -124,7 +142,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
                 },
                 set: (value: string) => {
                     this.control.patchValue(value || '');
-                    this.onSearch();
+                    this.onKeyDownEnter();
                 },
             });
         }

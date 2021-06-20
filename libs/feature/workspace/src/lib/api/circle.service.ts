@@ -15,7 +15,10 @@ import {
     InvitationForm,
     Level,
     Topic,
-    UpdateCircleForm
+    UpdateCircleForm,
+    CircleMembersFilters,
+    CircleWatchersFilters,
+    CircleInvitationsFilters
 } from "../models/circle";
 
 @Injectable({ providedIn: 'root' })
@@ -65,7 +68,6 @@ export class CircleService {
         return this.provider.createCircle(form);
     }
 
-
     updateCircle(form: UpdateCircleForm): Observable<Circle> {
         return this.provider.updateCircle(form);
     }
@@ -79,13 +81,11 @@ export class CircleService {
     findMember(circle: Circle, username: string): Observable<CircleMember | undefined> {
         return this.provider.findMember(circle, username);
     }
-
     deleteMember(member: CircleMember): Observable<any> {
         return this.provider.deleteMember(member);
     }
-
-    listMembers(circle: Circle): Observable<PageResult<CircleMember>> {
-        return this.provider.listMembers(circle);
+    listMembers(filters: CircleMembersFilters): Observable<PageResult<CircleMember>> {
+        return this.provider.listMembers(filters);
     }
 
     // Watchers
@@ -93,17 +93,14 @@ export class CircleService {
     findWatcher(circle: Circle, username: string): Observable<CircleWatcher | undefined> {
         return this.provider.findWatcher(circle, username);
     }
-
     createWatcher(circle: Circle): Observable<CircleWatcher> {
         return this.provider.createWatcher(circle);
     }
-
     deleteWatcher(watcher: CircleWatcher): Observable<any> {
         return this.provider.deleteWatcher(watcher);
     }
-
-    listWatchers(circle: Circle): Observable<PageResult<CircleWatcher>> {
-        return this.provider.listWatchers(circle);
+    listWatchers(filters: CircleWatchersFilters): Observable<PageResult<CircleWatcher>> {
+        return this.provider.listWatchers(filters);
     }
 
     // Invitations
@@ -111,21 +108,17 @@ export class CircleService {
     createInvitation(form: InvitationForm): Observable<Invitation> {
         return this.provider.createInvitation(form);
     }
-
     deleteInvitation(invitation: Invitation): Observable<any> {
         return this.provider.deleteInvitation(invitation);
     }
-
     acceptInvitation(invitation: Invitation): Observable<any> {
         return this.provider.acceptInvitation(invitation);
     }
-
     findInvitation(circle: Circle, username: string): Observable<Invitation | undefined> {
         return this.provider.findInvitation(circle, username);
     }
-
-    listInvitations(circle: Circle): Observable<PageResult<Invitation>> {
-        return this.provider.listInvitations(circle);
+    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<Invitation>> {
+        return this.provider.listInvitations(filters);
     }
 
     // Events

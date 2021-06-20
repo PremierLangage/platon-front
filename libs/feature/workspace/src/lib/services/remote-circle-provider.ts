@@ -17,7 +17,10 @@ import {
     InvitationForm,
     Level,
     Topic,
-    UpdateCircleForm
+    UpdateCircleForm,
+    CircleMembersFilters,
+    CircleInvitationsFilters,
+    CircleWatchersFilters
 } from "../models/circle";
 
 @Injectable()
@@ -51,8 +54,8 @@ export class RemoteCircleProvider extends CircleProvider {
         }
 
         // type
-        if (filters.opened) {
-            params = params.append('opened', 'true');
+        if (filters.opened != null) {
+            params = params.append('opened', filters.opened.toString());
         }
 
         if (filters.watchers) {
@@ -93,6 +96,7 @@ export class RemoteCircleProvider extends CircleProvider {
         if (filters.offset) {
             params = params.append('offset', filters.offset.toString());
         }
+
         return this.http.get<PageResult<Circle>>(`/api/v1/circles/`, {
             params,
         });
@@ -135,8 +139,22 @@ export class RemoteCircleProvider extends CircleProvider {
         return this.http.delete<any>(member.url);
     }
 
-    listMembers(circle: Circle): Observable<PageResult<CircleMember>> {
-        return this.http.get<PageResult<CircleMember>>(circle.membersUrl);
+    listMembers(filters: CircleMembersFilters): Observable<PageResult<CircleMember>> {
+        const { circle  } = filters;
+        let params = new HttpParams();
+        if (filters.search) {
+            params = params.append('search', filters.search);
+        }
+        if (filters.limit) {
+            params = params.append('limit', filters.limit.toString());
+        }
+
+        if (filters.offset) {
+            params = params.append('offset', filters.offset.toString());
+        }
+        return this.http.get<PageResult<CircleMember>>(circle.membersUrl, {
+            params
+        });
     }
 
     // Watchers
@@ -157,8 +175,22 @@ export class RemoteCircleProvider extends CircleProvider {
         return this.http.delete<CircleWatcher>(watcher.url);
     }
 
-    listWatchers(circle: Circle): Observable<PageResult<CircleWatcher>> {
-        return this.http.get<PageResult<CircleWatcher>>(circle.watchersUrl);
+    listWatchers(filters: CircleWatchersFilters): Observable<PageResult<CircleWatcher>> {
+        const { circle  } = filters;
+        let params = new HttpParams();
+        if (filters.search) {
+            params = params.append('search', filters.search);
+        }
+        if (filters.limit) {
+            params = params.append('limit', filters.limit.toString());
+        }
+
+        if (filters.offset) {
+            params = params.append('offset', filters.offset.toString());
+        }
+        return this.http.get<PageResult<CircleWatcher>>(circle.watchersUrl, {
+            params
+        });
     }
 
     // Invitations
@@ -186,8 +218,22 @@ export class RemoteCircleProvider extends CircleProvider {
         );
     }
 
-    listInvitations(circle: Circle): Observable<PageResult<Invitation>> {
-        return this.http.get<PageResult<Invitation>>(circle.invitationsUrl);
+    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<Invitation>> {
+        const { circle  } = filters;
+        let params = new HttpParams();
+        if (filters.search) {
+            params = params.append('search', filters.search);
+        }
+        if (filters.limit) {
+            params = params.append('limit', filters.limit.toString());
+        }
+
+        if (filters.offset) {
+            params = params.append('offset', filters.offset.toString());
+        }
+        return this.http.get<PageResult<Invitation>>(circle.invitationsUrl, {
+            params
+        });
     }
 
 
