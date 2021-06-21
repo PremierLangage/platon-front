@@ -13,7 +13,7 @@ import {
     CircleMember,
     CircleTree,
     CircleWatcher,
-    Invitation,
+    CircleInvitation,
     InvitationForm,
     Level,
     Topic,
@@ -195,30 +195,30 @@ export class RemoteCircleProvider extends CircleProvider {
 
     // Invitations
 
-    createInvitation(form: InvitationForm): Observable<Invitation> {
-        return this.http.post<Invitation>(form.circle.invitationsUrl, {
+    createInvitation(form: InvitationForm): Observable<CircleInvitation> {
+        return this.http.post<CircleInvitation>(form.circle.invitationsUrl, {
             invitee: form.invitee,
             status: form.status,
         });
     }
 
-    deleteInvitation(invitation: Invitation): Observable<any> {
+    deleteInvitation(invitation: CircleInvitation): Observable<any> {
         return this.http.delete<any>(invitation.url);
     }
 
-    acceptInvitation(invitation: Invitation): Observable<any> {
-        return this.http.patch<Invitation>(invitation.url, {});
+    acceptInvitation(invitation: CircleInvitation): Observable<any> {
+        return this.http.patch<CircleInvitation>(invitation.url, {});
     }
 
-    findInvitation(circle: Circle, username: string): Observable<Invitation | undefined> {
-        return this.http.get<Invitation>(`${circle.invitationsUrl}${username}/`).pipe(
+    findInvitation(circle: Circle, username: string): Observable<CircleInvitation | undefined> {
+        return this.http.get<CircleInvitation>(`${circle.invitationsUrl}${username}/`).pipe(
             catchError(() => {
                 return of(undefined);
             })
         );
     }
 
-    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<Invitation>> {
+    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<CircleInvitation>> {
         const { circle  } = filters;
         let params = new HttpParams();
         if (filters.search) {
@@ -231,7 +231,7 @@ export class RemoteCircleProvider extends CircleProvider {
         if (filters.offset) {
             params = params.append('offset', filters.offset.toString());
         }
-        return this.http.get<PageResult<Invitation>>(circle.invitationsUrl, {
+        return this.http.get<PageResult<CircleInvitation>>(circle.invitationsUrl, {
             params
         });
     }

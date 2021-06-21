@@ -34,14 +34,12 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(state => {
+            this.presenter.stateChange.subscribe(async state => {
                 this.state = state;
+                if (this.state.circle) {
+                    this.events = await this.presenter.listEvents();
+                }
                 this.changeDetectorRef.markForCheck();
-
-                this.presenter.listEvents().then((events) => {
-                    this.events = events;
-                    this.changeDetectorRef.markForCheck();
-                });
             })
         );
     }

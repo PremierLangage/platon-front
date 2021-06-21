@@ -9,17 +9,16 @@ form {
   flex-direction: column;
 }
 
-nz-select,
-mat-checkbox,
-mat-form-field {
-  display: block;
-}
-
-mat-label,
-nz-select,
-mat-checkbox {
+nz-form-item {
   margin-bottom: 12px;
 }
+
+nz-select,
+mat-form-field {
+  display: block;
+  width: 100%;
+}
+
 
 nz-spin,
 button {

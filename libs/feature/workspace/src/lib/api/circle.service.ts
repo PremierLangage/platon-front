@@ -11,7 +11,7 @@ import {
     CircleMember,
     CircleTree,
     CircleWatcher,
-    Invitation,
+    CircleInvitation,
     InvitationForm,
     Level,
     Topic,
@@ -105,19 +105,19 @@ export class CircleService {
 
     // Invitations
 
-    createInvitation(form: InvitationForm): Observable<Invitation> {
+    createInvitation(form: InvitationForm): Observable<CircleInvitation> {
         return this.provider.createInvitation(form);
     }
-    deleteInvitation(invitation: Invitation): Observable<any> {
+    deleteInvitation(invitation: CircleInvitation): Observable<any> {
         return this.provider.deleteInvitation(invitation);
     }
-    acceptInvitation(invitation: Invitation): Observable<any> {
+    acceptInvitation(invitation: CircleInvitation): Observable<any> {
         return this.provider.acceptInvitation(invitation);
     }
-    findInvitation(circle: Circle, username: string): Observable<Invitation | undefined> {
+    findInvitation(circle: Circle, username: string): Observable<CircleInvitation | undefined> {
         return this.provider.findInvitation(circle, username);
     }
-    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<Invitation>> {
+    listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<CircleInvitation>> {
         return this.provider.listInvitations(filters);
     }
 

@@ -9,6 +9,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 
 import { InformationsComponent } from './informations.component';
@@ -25,6 +26,7 @@ import { InformationsComponent } from './informations.component';
         MatFormFieldModule,
 
         NzSpinModule,
+        NzFormModule,
         NzSelectModule,
 
         RouterModule.forChild([{ path: '', component: InformationsComponent }])

@@ -57,20 +57,20 @@ export class SearchBarComponent implements ControlValueAccessor {
 
     // ControlValueAccessor methods
 
-    writeValue(value: any) {
-        this.selection = value ?? [];
+    writeValue(value: any): void {
+        this.selection = value || [];
         this.changeDetectorRef.markForCheck();
     }
 
-    registerOnChange(fn: any) {
+    registerOnChange(fn: any): void {
         this.onChange = fn;
     }
 
-    registerOnTouched(fn: any) {
+    registerOnTouched(fn: any): void {
         this.onTouch = fn;
     }
 
-    setDisabledState(isDisabled: boolean) {
+    setDisabledState(isDisabled: boolean): void {
         this.disabled = isDisabled;
     }
 
@@ -91,16 +91,20 @@ export class SearchBarComponent implements ControlValueAccessor {
     }
 
     remove(item: AuthUser): void {
-        this.selection = this.selection.filter(e => e.id !== item.id);
+        this.selection = this.selection.filter(
+            e => e.id !== item.id
+        );
         this.onChangeSelection();
     }
 
     private isSelectable(user: AuthUser): boolean {
-        return !this.selection.find(e => e.id === user.id) && !this.searchExcludes.find(e => e === user.username);
+        return !this.selection.find(
+            e => e.id === user.id
+        ) && !this.searchExcludes.find(e => e === user.username);
     }
 
 
-    private onChangeSelection() {
+    private onChangeSelection(): void {
         if (this.searchMulti) {
             this.onTouch(this.selection);
             this.onChange(this.selection);

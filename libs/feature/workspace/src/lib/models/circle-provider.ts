@@ -9,7 +9,7 @@ import {
     CircleMember,
     CircleTree,
     CircleWatcher,
-    Invitation,
+    CircleInvitation,
     InvitationForm,
     Level,
     Topic,
@@ -49,11 +49,11 @@ export abstract class CircleProvider {
 
     // Invitations
 
-    abstract createInvitation(form: InvitationForm): Observable<Invitation>;
-    abstract deleteInvitation(invitation: Invitation): Observable<any>;
-    abstract acceptInvitation(invitation: Invitation): Observable<any>;
-    abstract findInvitation(circle: Circle, username: string): Observable<Invitation | undefined>;
-    abstract listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<Invitation>>;
+    abstract createInvitation(form: InvitationForm): Observable<CircleInvitation>;
+    abstract deleteInvitation(invitation: CircleInvitation): Observable<any>;
+    abstract acceptInvitation(invitation: CircleInvitation): Observable<any>;
+    abstract findInvitation(circle: Circle, username: string): Observable<CircleInvitation | undefined>;
+    abstract listInvitations(filters: CircleInvitationsFilters): Observable<PageResult<CircleInvitation>>;
 
     // Events
     abstract listEvents(circle: Circle): Observable<PageResult<CircleEvent>>;

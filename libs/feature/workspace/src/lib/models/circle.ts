@@ -77,13 +77,12 @@ export interface CircleWatcher {
     url: string;
     username: string;
 }
-export interface Invitation {
+export interface CircleInvitation {
     inviter: string;
     invitee: string;
     date: string;
     status: MemberStatus;
     url: string;
-    circleUrl: string;
 }
 
 export interface CircleFilters {

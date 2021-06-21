@@ -1,3 +1,27 @@
-<p>
-  members works!
-</p>
+<h2>Invitations</h2>
+<nz-collapse nzBordered="false">
+  <nz-collapse-panel nzHeader="Nouvelle" nzActive="true">
+    <mat-card>
+      <mat-card-content>
+        <app-circle-invitation-form
+          (didSubmit)="sendInvitation($event)">
+        </app-circle-invitation-form>
+      </mat-card-content>
+    </mat-card>
+  </nz-collapse-panel>
+</nz-collapse>
+
+<app-circle-invitations-table
+  [invitations]="invitations"
+  [editable]="!!state.isAdmin"
+  (didDelete)="deleteInvitation($event)"
+  (didChangeParams)="loadInvitations($event)">
+</app-circle-invitations-table>
+
+<h2>Membres</h2>
+<app-circle-members-table
+  [members]="members"
+  [editable]="!!state.isAdmin"
+  (didDelete)="deleteMember($event)"
+  (didChangeParams)="loadMembers($event)">
+</app-circle-members-table>
