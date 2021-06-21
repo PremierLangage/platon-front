@@ -217,10 +217,9 @@ export class CirclePresenter implements OnDestroy {
         });
     }
 
-    private async onChangeRoute(id: number): Promise<void> {
-        this.context.next({ state: 'LOADING' });
+    private async onChangeRoute(circleId: number): Promise<void> {
         try {
-            this.refresh(id);
+            this.refresh(circleId);
         } catch (error) {
             const status = error.status || 500;
             if (status >= 400 && status < 500) {

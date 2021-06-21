@@ -4,6 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CircleService, CircleTree } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 @Component({
@@ -43,8 +44,8 @@ export class CreateCircleComponent implements OnInit {
         private readonly location: Location,
         private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
+        private readonly messageService: NzMessageService,
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly notificationService: NzNotificationService,
     ) { }
 
     async ngOnInit() {
@@ -83,7 +84,7 @@ export class CreateCircleComponent implements OnInit {
                 replaceUrl: true
             });
         } catch {
-            this.notificationService.error('',
+            this.messageService.error(
                 'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
             );
             this.creating = false;

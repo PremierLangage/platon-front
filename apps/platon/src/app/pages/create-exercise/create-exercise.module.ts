@@ -12,8 +12,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 import { CoreAuthModule } from '@platon/core/auth';
 import { SharedUiStepperModule } from '@platon/shared/ui/stepper';
@@ -39,8 +39,8 @@ import { CreateExerciseRoutingModule } from './create-exercise-routing.module';
         NzIconModule,
         NzStepsModule,
         NzSelectModule,
+        NzMessageModule,
         NzSkeletonModule,
-        NzNotificationModule,
 
         CoreAuthModule,
         SharedUiStepperModule,

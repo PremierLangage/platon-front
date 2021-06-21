@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@platon/core/auth';
 import { Circle, CircleService, ResourceFileService, ResourceService } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
     selector: 'app-create-exercise',
@@ -47,10 +47,10 @@ export class CreateExerciseComponent implements OnInit {
         private readonly authService: AuthService,
         private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
+        private readonly messageService: NzMessageService,
         private readonly resourceService: ResourceService,
         private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly resourceFileService: ResourceFileService,
-        private readonly notificationService: NzNotificationService,
     ) { }
 
     async ngOnInit() {
@@ -107,7 +107,7 @@ export class CreateExerciseComponent implements OnInit {
             });
         } catch (error) {
             console.error(error);
-            this.notificationService.error('',
+            this.messageService.error(
                 'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
             );
             this.creating = false;

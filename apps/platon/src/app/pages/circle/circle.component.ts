@@ -12,6 +12,7 @@ import { CirclePresenter } from './circle.presenter';
 export class CircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
+    readonly actions: MenuAction[] = [];
     readonly tabs: LayoutTab[] = [
         {
             id: 'tab-overview',
@@ -34,9 +35,6 @@ export class CircleComponent implements OnInit, OnDestroy {
             link: ['informations']
         },
     ];
-
-    readonly actions: MenuAction[] = [];
-
 
     context = this.presenter.defaultContext;
 
