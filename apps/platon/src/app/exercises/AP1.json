@@ -1,0 +1,19 @@
+{
+    "name": "AP1",
+    "id": 1,
+    "activities": [
+        {
+            "name": "activity 1",
+            "id": 11
+        },
+
+        {
+            "name": "activity 2",
+            "id": 12
+        },
+        {
+            "name": "activity 3",
+            "id": 13
+        }
+    ]
+}
