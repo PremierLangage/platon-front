@@ -13,6 +13,7 @@
     "wendell.ng-zorro-essentials",
     "johnpapa.angular-essentials",
     "alexiv.vscode-angular2-files",
+    "formulahendry.auto-rename-tag",
     "vivaxy.vscode-conventional-commits",
   ]
 }
