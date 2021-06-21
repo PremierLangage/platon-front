@@ -18,7 +18,7 @@ export class MembersComponent implements OnInit, OnDestroy {
         'invitee': new FormControl(undefined, Validators.required),
     });
 
-    state = this.presenter.loadingState;
+    context = this.presenter.defaultContext;
 
     members: PageResult<CircleMember> = { count: 0, results: [] };
     invitations: PageResult<CircleInvitation> = { count: 0, results: [] };
@@ -30,8 +30,8 @@ export class MembersComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(async state => {
-                this.state = state;
+            this.presenter.contextChange.subscribe(async context => {
+                this.context = context;
                 this.changeDetectorRef.markForCheck();
             })
         );

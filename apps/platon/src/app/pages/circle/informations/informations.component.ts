@@ -22,16 +22,15 @@ export class InformationsComponent implements OnInit, OnDestroy {
         levels: new FormControl([], [Validators.required]),
     });
 
-    state = this.presenter.loadingState;
-
     saving = false;
+    context = this.presenter.defaultContext;
 
     get canEdit(): boolean {
-        return !!this.state.isAdmin;
+        return !!this.context.isAdmin;
     }
 
     get canSubmit(): boolean {
-        return this.form.valid && !!this.state.isAdmin;
+        return this.form.valid && !!this.context.isAdmin;
     }
 
     constructor(
@@ -42,7 +41,7 @@ export class InformationsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(async state => {
+            this.presenter.contextChange.subscribe(async context => {
                 const [topics, levels] = await Promise.all([
                     this.circleService.topics().toPromise(),
                     this.circleService.levels().toPromise(),
@@ -51,9 +50,9 @@ export class InformationsComponent implements OnInit, OnDestroy {
                 this.levels = levels;
                 this.topics = topics.map(e => e.name);
 
-                this.state = state;
+                this.context = context;
 
-                const circle = this.state.circle!;
+                const circle = this.context.circle!;
                 this.form = new FormGroup({
                     name: new FormControl({ value: circle.name, disabled: !this.canEdit }, [Validators.required]),
                     desc: new FormControl({ value: circle.desc, disabled: !this.canEdit }, [Validators.required]),

@@ -20,12 +20,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
         'DEPRECATED',
     ];
 
-    state = this.presenter.loadingState;
-
-    events: PageResult<CircleEvent> = {
-        count: 0,
-        results: []
-    };
+    events: PageResult<CircleEvent> = { count: 0, results: [] };
+    context = this.presenter.defaultContext;
 
     constructor(
         private readonly presenter: CirclePresenter,
@@ -34,9 +30,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(async state => {
-                this.state = state;
-                if (this.state.circle) {
+            this.presenter.contextChange.subscribe(async context => {
+                this.context = context;
+                if (this.context.circle) {
                     this.events = await this.presenter.listEvents();
                 }
                 this.changeDetectorRef.markForCheck();

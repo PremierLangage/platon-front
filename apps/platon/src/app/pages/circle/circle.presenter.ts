@@ -9,16 +9,16 @@ import { BehaviorSubject, forkJoin, Observable, Subscription } from 'rxjs';
 @Injectable()
 export class CirclePresenter implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
-    private readonly state = new BehaviorSubject<PresenterState>(this.loadingState);
+    private readonly context = new BehaviorSubject<Context>(this.defaultContext);
 
-    get loadingState(): PresenterState {
+    get defaultContext(): Context {
         return {
             state: 'LOADING'
         };
     }
 
-    get stateChange(): Observable<PresenterState> {
-        return this.state.asObservable();
+    get contextChange(): Observable<Context> {
+        return this.context.asObservable();
     }
 
     constructor(
@@ -42,7 +42,7 @@ export class CirclePresenter implements OnDestroy {
     // Watchers
 
     async watch(): Promise<boolean> {
-        const { circle } = this.state.value as Required<PresenterState>;
+        const { circle } = this.context.value as Required<Context>;
         try {
             await this.circleService.createWatcher(circle).toPromise();
             await this.refresh(circle.id);
@@ -54,7 +54,7 @@ export class CirclePresenter implements OnDestroy {
     }
 
     async unwatch(): Promise<boolean> {
-        const { circle, watcher } = this.state.value as Required<PresenterState>;
+        const { circle, watcher } = this.context.value as Required<Context>;
         try {
             await this.circleService.deleteWatcher(watcher).toPromise();
             await this.refresh(circle.id);
@@ -68,7 +68,7 @@ export class CirclePresenter implements OnDestroy {
     // Members
 
     async deleteMember(member: CircleMember): Promise<boolean> {
-        const { circle } = this.state.value as Required<PresenterState>;;
+        const { circle } = this.context.value as Required<Context>;;
         try {
             await this.circleService.deleteMember(member).toPromise();
             await this.refresh(circle.id);
@@ -84,7 +84,7 @@ export class CirclePresenter implements OnDestroy {
     async listMembers(
         filters: Omit<CircleMembersFilters, 'circle'>
     ): Promise<PageResult<CircleMember>> {
-        const { circle } = this.state.value as Required<PresenterState>;
+        const { circle } = this.context.value as Required<Context>;
         return this.circleService.listMembers({
             circle,
             ...filters
@@ -98,7 +98,7 @@ export class CirclePresenter implements OnDestroy {
     async listInvitations(
         filters: Omit<CircleInvitationsFilters, 'circle'>
     ): Promise<PageResult<CircleInvitation>> {
-        const { circle } = this.state.value as Required<PresenterState>;
+        const { circle } = this.context.value as Required<Context>;
         return this.circleService.listInvitations({
             circle,
             ...filters
@@ -107,7 +107,7 @@ export class CirclePresenter implements OnDestroy {
 
 
     async acceptInvitation(): Promise<boolean> {
-        const { circle, invitation } = this.state.value as Required<PresenterState>;
+        const { circle, invitation } = this.context.value as Required<Context>;
         try {
             await this.circleService.acceptInvitation(invitation).toPromise();
             await this.refresh(circle.id);
@@ -121,7 +121,7 @@ export class CirclePresenter implements OnDestroy {
     }
 
     async declineInvitation(): Promise<boolean> {
-        const { invitation } = this.state.value as Required<PresenterState>;;
+        const { invitation } = this.context.value as Required<Context>;;
         return this.deleteInvitation(invitation);
     }
 
@@ -133,7 +133,7 @@ export class CirclePresenter implements OnDestroy {
             nzDuration: 0
         }).messageId;
 
-        const { circle } = this.state.value as Required<PresenterState>;
+        const { circle } = this.context.value as Required<Context>;
         try {
             await this.circleService.createInvitation({ ...form, circle }).toPromise();
             await this.refresh(circle.id);
@@ -151,7 +151,7 @@ export class CirclePresenter implements OnDestroy {
     }
 
     async deleteInvitation(invitation: CircleInvitation): Promise<boolean> {
-        const { circle } = this.state.value as Required<PresenterState>;;
+        const { circle } = this.context.value as Required<Context>;;
         try {
             await this.circleService.deleteInvitation(invitation).toPromise();
             await this.refresh(circle.id);
@@ -166,20 +166,20 @@ export class CirclePresenter implements OnDestroy {
 
 
     async listEvents(): Promise<PageResult<CircleEvent>> {
-        const { circle } = this.state.value as Required<PresenterState>;
+        const { circle } = this.context.value as Required<Context>;
         return this.circleService.listEvents(circle).toPromise();
     }
 
     async updateCircle(form: Omit<UpdateCircleForm, 'circle'>): Promise<boolean> {
-        const { circle } = this.state.value as Required<PresenterState>;;
+        const { circle } = this.context.value as Required<Context>;;
         try {
             const newCircle = await this.circleService.updateCircle({
                 circle,
                 ...form
             }).toPromise();
 
-            this.state.next({
-                ...this.state.value,
+            this.context.next({
+                ...this.context.value,
                 circle: newCircle,
             });
 
@@ -205,7 +205,7 @@ export class CirclePresenter implements OnDestroy {
             this.circleService.findInvitation(circle!, user!.username),
         ]).toPromise();
 
-        this.state.next({
+        this.context.next({
             state: 'READY',
             user,
             circle,
@@ -218,15 +218,15 @@ export class CirclePresenter implements OnDestroy {
     }
 
     private async onChangeRoute(id: number): Promise<void> {
-        this.state.next({ state: 'LOADING' });
+        this.context.next({ state: 'LOADING' });
         try {
             this.refresh(id);
         } catch (error) {
             const status = error.status || 500;
             if (status >= 400 && status < 500) {
-                this.state.next({ state: 'NOT_FOUND' });
+                this.context.next({ state: 'NOT_FOUND' });
             } else {
-                this.state.next({ state: 'SERVER_ERROR' });
+                this.context.next({ state: 'SERVER_ERROR' });
             }
         }
     }
@@ -238,7 +238,7 @@ export class CirclePresenter implements OnDestroy {
     }
 }
 
-export interface PresenterState {
+export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
     circle?: Circle;

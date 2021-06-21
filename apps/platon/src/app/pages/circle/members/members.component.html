@@ -13,7 +13,7 @@
 
 <app-circle-invitations-table
   [invitations]="invitations"
-  [editable]="!!state.isAdmin"
+  [editable]="!!context.isAdmin"
   (didDelete)="deleteInvitation($event)"
   (didChangeParams)="loadInvitations($event)">
 </app-circle-invitations-table>
@@ -21,7 +21,7 @@
 <h2>Membres</h2>
 <app-circle-members-table
   [members]="members"
-  [editable]="!!state.isAdmin"
+  [editable]="!!context.isAdmin"
   (didDelete)="deleteMember($event)"
   (didChangeParams)="loadMembers($event)">
 </app-circle-members-table>
