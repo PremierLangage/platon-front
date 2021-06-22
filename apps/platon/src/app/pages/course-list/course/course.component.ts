@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import { courses } from '../../../exercises/course.json';
+
 @Component({
   selector: 'app-course',
   templateUrl: './course.component.html',
@@ -11,5 +13,7 @@ export class CourseComponent implements OnInit {
 
   ngOnInit() {
   }
+
+  courses = courses;
 
 }

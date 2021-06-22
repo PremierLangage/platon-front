@@ -14,7 +14,7 @@ export class ActivityService {
     posts : any;
 
     loadExercise() {
-        this.posts = this.http.get(this.ROOT_URL.)
+        this.posts = this.http.get(this.ROOT_URL + '/posts')
     }
 
     //loadActivity() {

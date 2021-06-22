@@ -1,0 +1,10 @@
+<app-content>
+  <mat-button-toggle-group>
+    <mat-button-toggle *ngFor="let exo of activity" value="{{exo.id}}"></mat-button-toggle>
+  </mat-button-toggle-group>
+  <div>
+    <app-exercise>
+    </app-exercise>
+  </div>
+</app-content>
+

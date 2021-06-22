@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActivityService } from '../activity.service';
 
 @Component({
     selector: 'app-platon-text',
@@ -9,7 +8,7 @@ import { ActivityService } from '../activity.service';
 export class PlatonTextComponent implements OnInit {
     @Input() rawText: string = "";
     parsedText: string = "";
-    constructor(private readonly activityService: ActivityService) {}
+    constructor() {}
 
     ngOnInit() {}
 
