@@ -1,25 +1,25 @@
 <mat-card class="exercise">
   <mat-card-header class="exercise__header">
     <mat-card-subtitle class='exercise__author'>
-      <app-platon-text [rawText] = "author"></app-platon-text>
+      <app-platon-text [rawText] = "auteur"></app-platon-text>
     </mat-card-subtitle>
     <mat-card-title class='exercise__header'>
-      <app-platon-text [rawText] = "title"></app-platon-text>
+      <app-platon-text [rawText] = "titre"></app-platon-text>
     </mat-card-title>
   </mat-card-header>
    <!-- BODY -->
   <mat-card-content class="exercise__body">
     <!-- INSTRUCTIONS -->
-    <div class="exercise__instructions">
+    <div>
       <app-platon-text [rawText] = "text"></app-platon-text>
     </div>
     <!-- FEEDBACK -->
-    <div class="exercise__feedback">
-      <app-platon-text [rawText] = "feedback"></app-platon-text>
+    <div>
+      <app-platon-text [rawText] = "rendu"></app-platon-text>
     </div>
     <!-- ACTIONS -->
-    <div class="exercise__actions text-center">
-      <div class="btn-group" role="group" aria-label="actions">
+    <div>
+      <div>
         <mat-button-toggle-group>
           <mat-button-toggle>Réinitialiser</mat-button-toggle>
           <mat-button-toggle>Nouveau tirage</mat-button-toggle>

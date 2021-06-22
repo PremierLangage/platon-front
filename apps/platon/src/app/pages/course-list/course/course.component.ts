@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { courses } from '../../../exercises/course.json';
-
+import {name,id,activities} from '../../../exercises/AP1.json'
 @Component({
   selector: 'app-course',
   templateUrl: './course.component.html',
@@ -9,11 +8,19 @@ import { courses } from '../../../exercises/course.json';
 })
 export class CourseComponent implements OnInit {
 
-  constructor() { }
+    public nom;
+    public num;
+    public activity_list;
 
-  ngOnInit() {
-  }
+    constructor() {
+        this.nom = name;
+        this.num = id;
+        this.activity_list = activities;
+    }
 
-  courses = courses;
+    ngOnInit() {
+
+    }
+
 
 }

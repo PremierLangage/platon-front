@@ -18,9 +18,9 @@ export class ExerciseComponent implements OnInit {
 
     ngOnInit() {}
 
-    author = author;
-    title = title;
-    text = text;
-    feedback = feedback;
+    auteur = author;
+    titre = title;
+    texte = text;
+    rendu = feedback;
 
 }

@@ -1,5 +1,10 @@
 <app-container>
-  <mat-button-toggle-group>
-    <mat-button-toggle ></mat-button-toggle>
-  </mat-button-toggle-group>
+  <app-content>
+    <mat-button-toggle-group>
+      <mat-button-toggle *ngFor="let activity of this.activities" value="{{activity.name}}">{{activity.name}}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <div>
+      <app-course></app-course>
+    </div>
+  </app-content>
 </app-container>
