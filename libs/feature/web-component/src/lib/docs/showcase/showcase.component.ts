@@ -39,7 +39,7 @@ export class ShowcaseComponent implements OnInit {
 
         this.options.modes = ['tree'/* , 'view', 'form', 'code', 'text' */];
         this.options.language = 'fr-FR';
-        // this.options.schema = this.definition.schema;
+        this.options.schema = this.definition.schema;
         this.options.mainMenuBar = false;
         this.options.sortObjectKeys = true;
     }
