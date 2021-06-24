@@ -8,12 +8,10 @@ import { AppSharedLayoutModule } from '../../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
 import { CourseComponent } from './course.component';
-import { ActivityModule } from './activity/activity.module';
 
 
 @NgModule ({
     imports: [
-        ActivityModule,
         FormsModule,
         CommonModule,
         MatCardModule,

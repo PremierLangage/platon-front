@@ -7,12 +7,11 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AppSharedLayoutModule } from '../../../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
-import { PlatonTextModule } from '../../platon-text/platon-text.module';
 import { ActivityComponent } from './activity.component';
-import { ExerciseModule } from './exercise/exercise.module';
+import { ExerciseModule } from '../activity/exercise/exercise.module';
+
 @NgModule({
     imports: [
-        PlatonTextModule,
         ExerciseModule,
 
         FormsModule,
@@ -22,7 +21,6 @@ import { ExerciseModule } from './exercise/exercise.module';
         MatButtonToggleModule,
 
         AppSharedLayoutModule,
-
     ],
 
     declarations: [ActivityComponent],

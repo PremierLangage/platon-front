@@ -10,10 +10,13 @@ import { SafePipeModule } from '@platon/shared/utils';
 
 import { CourseListComponent } from './course-list.component';
 import { CourseModule } from './course/course.module';
+import { ActivityModule } from './course/activity/activity.module';
 
 @NgModule({
     imports: [
         CourseModule,
+        ActivityModule,
+
         FormsModule,
         CommonModule,
         MatCardModule,
@@ -26,7 +29,6 @@ import { CourseModule } from './course/course.module';
     ],
 
     declarations: [CourseListComponent],
-    exports: [CourseListComponent],
     providers: [],
 })
 export class CourseListModule {}

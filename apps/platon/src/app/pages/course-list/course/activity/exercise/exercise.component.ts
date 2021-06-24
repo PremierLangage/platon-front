@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActivityService } from '../activity.service';
 
 import { feedback } from '../../../../../exercises/pl1.json';
 import { author } from '../../../../../exercises/pl1.json';
@@ -14,7 +13,7 @@ import { text } from '../../../../../exercises/pl1.json';
 export class ExerciseComponent implements OnInit {
     @Input() rawText: string = "";
     parsedText: string = "";
-    constructor(private readonly activityService: ActivityService) {}
+    constructor() {}
 
     ngOnInit() {}
 
