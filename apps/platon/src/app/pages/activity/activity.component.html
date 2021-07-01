@@ -1,0 +1,11 @@
+<app-container-tabbed [tabs]="tabs">
+  <h1> Activite : {{this.nom}} </h1>
+  <h2> Id : {{this.num}} </h2>
+  <div>
+    <mat-button-toggle-group>
+      <mat-button-toggle *ngFor="let exo of this.exercises_list">{{exo}}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</app-container-tabbed>
+
+

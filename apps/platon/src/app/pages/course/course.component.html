@@ -1,0 +1,9 @@
+<app-container>
+  <app-content>
+    <div> Cours : {{this.nom}} </div>
+    <div> Id : {{this.num}} </div>
+    <mat-button-toggle-group>
+      <mat-button-toggle *ngFor="let activity of this.activity_list" value="{{activity.name}}">{{activity.name}}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </app-content>
+</app-container>

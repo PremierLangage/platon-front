@@ -76,6 +76,52 @@ const routes: Routes = [
             './pages/course-list/course-list.module'
         ).then(m => m.CourseListModule)
     },
+    {
+        path: 'course',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "course" */
+            './pages/course/course.module'
+        ).then(m => m.CourseModule)
+    },
+    {
+        path: 'exercise',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "exercise" */
+            './pages/exercise/exercise.module'
+        ).then(m => m.ExerciseModule)
+    },
+    {
+        path: 'student-dashboard',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "student-dashboard" */
+            './pages/student-dashboard/student-dashboard.module'
+        ).then(m => m.StudentDashboardModule)
+    },
+    {
+        path: 'group-dashboard',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "group-dashboard" */
+            './pages/group-dashboard/group-dashboard.module'
+        ).then(m => m.GroupDashboardModule)
+    },
+    {
+        path: 'activity',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "activity" */
+            './pages/activity/activity.module'
+        ).then(m => m.ActivityModule)
+    },
+
     // PROTECTED EDITOR PAGES
 
     {

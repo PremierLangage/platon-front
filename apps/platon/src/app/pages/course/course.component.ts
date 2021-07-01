@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import {name,id,activities} from '../../../exercises/AP1.json'
+import {name,id,activities} from '../../exercises/AP1.json'
 @Component({
   selector: 'app-course',
   templateUrl: './course.component.html',
