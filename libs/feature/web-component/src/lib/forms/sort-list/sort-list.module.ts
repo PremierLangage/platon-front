@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
-import { NgeMarkdownModule } from 'nge-markdown';
+import { NgeMarkdownModule } from '@mcisse/nge/markdown';
 
 import { SortListComponent } from './sort-list.component';
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgeMonacoModule } from 'nge-monaco';
+import { NgeMonacoModule } from '@mcisse/nge/monaco';
 import { BaseComponent } from './base.component';
 
 @NgModule({

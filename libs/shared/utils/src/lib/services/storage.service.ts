@@ -9,7 +9,6 @@ export const STORAGE_PREFIX = new InjectionToken<string>('STORAGE_PREFIX');
     providedIn: 'root'
 })
 export class StorageService {
-
     constructor(
         @Optional()
         @Inject(STORAGE_PREFIX)
@@ -60,5 +59,4 @@ export class StorageService {
     addPrefix(key: string) {
         return this.prefix || '' + `_${key}_`;
     }
-
 }

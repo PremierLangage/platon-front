@@ -6,7 +6,7 @@ import { CheckboxGroupComponent } from './checkbox-group.component';
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
 
-import { NgeMarkdownModule } from 'nge-markdown';
+import { NgeMarkdownModule } from '@mcisse/nge/markdown';
 
 @NgModule({
     declarations: [CheckboxGroupComponent],

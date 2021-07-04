@@ -1,5 +1,6 @@
 import { Resource } from "./resource";
 
+
 export interface ResourceFile {
     path: string;
     parent: string;
@@ -8,13 +9,23 @@ export interface ResourceFile {
     url: string;
     downloadUrl: string;
     mime: string;
-    type: 'file' | 'directory';
+    type: 'file' | 'folder';
     children: ResourceFile[];
+}
+
+export interface ResourceTree {
+    path: string;
+    hexsha: string;
+    version: string;
+    directory: string;
+    url: string;
+    downloadUrl: string;
+    files: ResourceFile[];
 }
 
 export interface CreateFileForm {
     resource: Resource;
-    files: Record<string, { type: string, content?: string }>;
+    files: Record<string, { type: 'file' | 'folder', content?: string }>;
 }
 
 export interface UpdateFileForm {

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AssetLoaderService, StorageService } from '@platon/shared/utils';
-
+import { StorageService } from '@platon/shared/utils';
 
 export declare type Theme = 'light' | 'dark';
 
@@ -32,7 +31,6 @@ export class ThemeService {
 
     constructor(
         private readonly storage: StorageService,
-        private readonly assetLoader: AssetLoaderService,
     ) {}
 
     /**
