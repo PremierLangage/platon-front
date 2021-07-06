@@ -1,23 +1,26 @@
 import { Component, OnInit } from '@angular/core';
+import introJs from 'intro.js';
+import { InvertByPipe } from 'ngx-pipes';
 
-import { courses } from '../../exercises/course.json';
+import { CourseListService } from './course-list.service';
 
 @Component({
   selector: 'app-course-list',
   templateUrl: './course-list.component.html',
+  providers: [CourseListService],
   styleUrls: ['./course-list.component.scss']
 })
 export class CourseListComponent implements OnInit {
+    courses: any[] = [];
 
-    public activities;
-
-    constructor() {
-        this.activities = courses;
+    constructor(public courselistService: CourseListService) {
     }
 
-    ngOnInit() {
-        console.log(this.activities);
+    async ngOnInit() {
+        this.courses = await this.courselistService.loadCourses().toPromise();
     }
 
-
+    courseChosen(course: any) {
+        return course.id;
+    }
 }

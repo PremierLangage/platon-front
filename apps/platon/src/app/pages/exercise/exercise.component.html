@@ -1,36 +1,35 @@
-<app-container>
-  <app-content>
-    <mat-card class="exercise">
-      <mat-card-header class="exercise__header">
-        <mat-card-title class='exercise__header'>
-          <div [innerHtml] = "titre | safe: 'html'"></div>
-        </mat-card-title>
-      </mat-card-header>
-      <!-- BODY -->
-      <mat-card-content class="exercise__body">
-        <!-- INSTRUCTIONS -->
+<app-content>
+  <mat-card class="exercise">
+    <mat-card-header class="exercise__header">
+      <mat-card-title class='exercise__header'>
+        <div [innerHtml] = "titre | safe: 'html'"></div>
+      </mat-card-title>
+    </mat-card-header>
+    <!-- BODY -->
+    <mat-card-content class="exercise__body">
+      <!-- INSTRUCTIONS -->
+      <div>
+        <nge-markdown [data]="texte"></nge-markdown>
+      </div>
+      <div>
+        <nge-markdown [data]="form1"></nge-markdown>
+      </div>
+      <div>
+        <nge-markdown [data]="form2"></nge-markdown>
+      </div>
+      <!-- ACTIONS -->
+      <div>
         <div>
-          <nge-markdown [data]="texte"></nge-markdown>
+          <mat-button-toggle-group>
+            <mat-button-toggle>Réinitialiser</mat-button-toggle>
+            <mat-button-toggle>Nouveau tirage</mat-button-toggle>
+            <mat-button-toggle>Sauvegarder</mat-button-toggle>
+            <mat-button-toggle>Valider</mat-button-toggle>
+          </mat-button-toggle-group>
         </div>
-        <div>
-          <nge-markdown [data]="form1"></nge-markdown>
-        </div>
-        <div>
-          <nge-markdown [data]="form2"></nge-markdown>
-        </div>
-        <!-- ACTIONS -->
-        <div>
-          <div>
-            <mat-button-toggle-group>
-              <mat-button-toggle>Réinitialiser</mat-button-toggle>
-              <mat-button-toggle>Nouveau tirage</mat-button-toggle>
-              <mat-button-toggle>Sauvegarder</mat-button-toggle>
-              <mat-button-toggle>Valider</mat-button-toggle>
-            </mat-button-toggle-group>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </app-content>
-</app-container>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</app-content>
+
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AuthService } from '@platon/core/auth';
 import { LayoutTab } from '../../shared/layout';
-
+import { HttpClient } from '@angular/common/http';
 import { name, id, exercices_id } from '../../exercises/activity.json';
 
 @Component({
@@ -18,7 +18,9 @@ export class ActivityComponent implements OnInit {
     public num;
     public exercises_list;
 
-    constructor(private readonly authService: AuthService) {
+    constructor(private readonly http: HttpClient,
+                private readonly authService: AuthService)
+    {
         this.nom = name;
         this.num = id;
         this.exercises_list = exercices_id;
@@ -28,20 +30,27 @@ export class ActivityComponent implements OnInit {
         {
             id: 'menu-playexo',
             title: 'Play',
-            link: ['/exercice']
+            link: ['exercice']
         },
 
         {
             id: 'menu-dashboard',
             title: 'Dashboard',
-            link: ['/student-dashboard']
+            link: ['student-dashboard']
         },
         {
             id: 'menu-group-dashboard',
             title: 'Dashboard Group',
-            link: ['/group-dashboard']
+            link: ['group-dashboard']
         },
     ];
+
+    readonly ROOT_URL = '';
+    posts : any;
+
+    loadActivity() {
+        this.posts = this.http.get(this.ROOT_URL + '/posts')
+    }
 
     async ngOnInit() {
         const user = (await this.authService.ready())!;
