@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import introJs from 'intro.js';
-import { InvertByPipe } from 'ngx-pipes';
 
 import { CourseListService } from './course-list.service';
 

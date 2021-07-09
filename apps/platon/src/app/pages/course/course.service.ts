@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
-import { map } from 'rxjs/operators';
-import {  } from '../course-list/course-list.component';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 
 @Injectable()
-export class CourseListService {
+export class CourseService {
+    constructor(private readonly http: HttpClient) {}
 
-constructor(private readonly http: HttpClient) { }
+    ROOT_URL = '/api/v1/course/1';
 
-ROOT_URL = 'https://platon.dev/api/v1/course/me';
-
-loadActivities() {
-    return this.http.get(this.ROOT_URL).pipe(map(response => response));
+    loadActivities(): Observable<HttpResponse<Course>> {
+        return this.http.get<Course>(this.ROOT_URL, { observe: 'response' });
+    }
 }
-
+export interface Course {
+    name: string;
+    id: number;
+    activities: any[];
 }

@@ -68,7 +68,7 @@ const routes: Routes = [
         ).then(m => m.ProfileModule)
     },
     {
-        path: 'course-list',
+        path: 'courses',
         canActivate: [AuthGuard],
         data: { roles: ['all'] },
         loadChildren: () => import(
@@ -84,6 +84,15 @@ const routes: Routes = [
             /* webpackChunkName: "course" */
             './pages/course/course.module'
         ).then(m => m.CourseModule)
+    },
+    {
+        path: 'activity',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "activity" */
+            './pages/activity/activity.module'
+        ).then(m => m.ActivityModule)
     },
     {
         path: 'exercise',
@@ -111,15 +120,6 @@ const routes: Routes = [
             /* webpackChunkName: "group-dashboard" */
             './pages/group-dashboard/group-dashboard.module'
         ).then(m => m.GroupDashboardModule)
-    },
-    {
-        path: 'activity',
-        canActivate: [AuthGuard],
-        data: { roles: ['all'] },
-        loadChildren: () => import(
-            /* webpackChunkName: "activity" */
-            './pages/activity/activity.module'
-        ).then(m => m.ActivityModule)
     },
 
     // PROTECTED EDITOR PAGES

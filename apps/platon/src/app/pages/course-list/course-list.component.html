@@ -1,11 +1,16 @@
 <app-container>
   <app-content>
+    <div>
+      <button>
+        <span class="material-icons">add_box</span>
+      </button>
+    </div>
     <mat-button-toggle-group>
       <mat-button-toggle
         *ngFor="let course of courses"
         value="{{ course.name }}"
-        [routerLink]="['/
-        course', course.id]">
+        [routerLink]="['/course', course.id]"
+      >
         {{ course.name }}
       </mat-button-toggle>
     </mat-button-toggle-group>

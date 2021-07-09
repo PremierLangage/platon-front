@@ -23,11 +23,18 @@ import { CourseListComponent } from './course-list.component';
 
         AppSharedLayoutModule,
 
-        RouterModule.forChild([{ path: '', component: CourseListComponent }]),
+        RouterModule.forChild([
+            {
+                path: '',
+                component: CourseListComponent,
+                children: [
+                    { path: ':id', loadChildren: () => import('../course/course.module').then(m => m.CourseModule)}
+                ]
+            },
+        ]),
     ],
 
     declarations: [CourseListComponent],
     providers: [],
 })
 export class CourseListModule {}
-
