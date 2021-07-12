@@ -10,6 +10,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
+import { CreateCourseComponent } from './create-course/create-course.component';
 import { CourseListComponent } from './course-list.component';
 
 @NgModule({
@@ -34,7 +35,7 @@ import { CourseListComponent } from './course-list.component';
         ]),
     ],
 
-    declarations: [CourseListComponent],
+    declarations: [CourseListComponent, CreateCourseComponent],
     providers: [],
 })
 export class CourseListModule {}
