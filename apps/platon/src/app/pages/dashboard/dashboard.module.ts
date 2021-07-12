@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 import { SharedUiSearchModule } from '@platon/shared/ui/search';
 
@@ -17,6 +18,7 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 
     MatIconModule,
     MatButtonModule,
+    NzEmptyModule,
 
     SharedUiSearchModule,
 

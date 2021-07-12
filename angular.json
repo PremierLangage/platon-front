@@ -81,8 +81,18 @@
               },
               {
                 "glob": "**/*",
-                "input": "./node_modules/nge-monaco/assets/",
-                "output": "./assets/vendors/nge-monaco/"
+                "input": "./node_modules/@mcisse/nge/assets/monaco/",
+                "output": "./assets/vendors/nge/monaco/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min",
+                "output": "./assets/vendors/nge/monaco/min"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min-maps",
+                "output": "./assets/vendors/nge/monaco/min-maps"
               },
               {
                 "glob": "**/*.js",

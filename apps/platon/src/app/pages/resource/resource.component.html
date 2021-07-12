@@ -1,1 +1,8 @@
-<h1>TODO</h1>
+<app-container #app>
+  <app-content>
+    <ng-container *ngIf="context.state === 'READY'">
+      <p>resource work's</p>
+      <!-- <ide-root></ide-root> -->
+    </ng-container>
+  </app-content>
+</app-container>
