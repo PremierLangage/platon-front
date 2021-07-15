@@ -11,20 +11,22 @@ import { map } from 'rxjs/operators';
 export class CourseService {
     constructor(private readonly http: HttpClient) {}
 
-    ROOT_URL = '/api/v1/courses/';
 
-    loadActivities(): Observable<HttpResponse<Course>> {
-        console.log('loadActivity')
-        return this.http.get<Course>(this.ROOT_URL, { observe: 'response' });
+    /**
+     * Get course detail with id 'id'x
+     * @param id
+     */
+    getCourse(id: string): Promise<CourseDetail | undefined> {
+        return this.http.get<CourseDetail>(`/api/v1/courses/${id}`).pipe(
+                catchError(() => {
+                    return of(undefined);
+                })
+            ).toPromise();
     }
 
-    getCoursesL():  Observable<Course | undefined> {
-        console.log('loadCourses')
-        return this.http.get<any[]>(this.ROOT_URL).pipe(
-            map((response: any) => response.courses)
-        );
-    }
-
+    /**
+     * Get all courses
+     */
     getCourses(): Promise<Courses | undefined> {
         return this.http.get<Courses>('/api/v1/courses/').pipe(
                 catchError(() => {
@@ -33,19 +35,23 @@ export class CourseService {
             ).toPromise();
     }
 
-
-    createCoursesss(course_name: string, description: string, sandbox_name: string): Observable<Course | undefined> {
-        return this.http.post<Course>('/api/v1/courses/', {
-            "name": course_name,
-            "desc": description,
-            "sandbox_name": sandbox_name
-          }).pipe(
+    /**
+     * Get my courses
+     */
+    getmyCourses(): Promise<Courses | undefined> {
+        return this.http.get<Courses>('/api/v1/courses/me').pipe(
                 catchError(() => {
                     return of(undefined);
                 })
-            );
+            ).toPromise();
     }
 
+    /**
+     * Create a course
+     * @param course_name
+     * @param description
+     * @param sandbox_name
+     */
     createCourse(course_name: string, description: string, sandbox_name: string): Promise<Course | undefined> {
         return this.http.post<Course>('/api/v1/courses/', {
             "name": course_name,
@@ -70,3 +76,18 @@ export interface Courses {
     courses: Course[];
 }
 
+export interface CourseDetail {
+    id:        number;
+    opening:   string;
+    closing:   string;
+    name:      string;
+    desc:      string;
+    aav:       string;
+    isVisible: boolean;
+    sandbox:   number;
+    settings:  Settings;
+    status:    string;
+}
+
+export interface Settings {
+}
