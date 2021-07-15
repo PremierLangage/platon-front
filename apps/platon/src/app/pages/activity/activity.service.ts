@@ -4,16 +4,15 @@ import { of } from 'rxjs';
 import { catchError } from "rxjs/operators";
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import {}
 
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ActivityService {
 
     constructor(private readonly http: HttpClient) {}
 
-    getctivities(): Promise<Activity | undefined> {
+    getActivities(id: number): Promise<Activity | undefined> {
         return this.http.get<Activity>('/api/v1/activity/').pipe(
                 catchError(() => {
                     return of(undefined);
@@ -22,8 +21,6 @@ export class ActivityService {
     }
 
     createActivity(course_id: number, name: string, description: string): Promise<Activity | undefined> {
-
-
 
         return this.http.post<Activity>('/api/v1/activity/',
             {

@@ -5,7 +5,8 @@ import { ActivityComponent } from './activity.component';
 
 const routes: Routes = [
     {
-        path: '',
+
+        path: ':id',
         component: ActivityComponent,
         children: [
             {
