@@ -3,12 +3,14 @@ import { AuthService } from '@platon/core/auth';
 import { LayoutTab } from '../../shared/layout';
 import { HttpClient } from '@angular/common/http';
 import { name, id, exercices_id } from '../../exercises/activity.json';
+import { ActivityService } from './activity.service'
 
 @Component({
     selector: 'app-activity',
     templateUrl: 'activity.component.html',
     styleUrls: ['./activity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: []
 })
 
 export class ActivityComponent implements OnInit {
@@ -19,7 +21,8 @@ export class ActivityComponent implements OnInit {
     public exercises_list;
 
     constructor(private readonly http: HttpClient,
-                private readonly authService: AuthService)
+                private readonly authService: AuthService,
+                public activityService: ActivityService )
     {
         this.nom = name;
         this.num = id;
@@ -52,7 +55,12 @@ export class ActivityComponent implements OnInit {
         this.posts = this.http.get(this.ROOT_URL + '/posts')
     }
 
+
+
     async ngOnInit() {
+
+
+
         const user = (await this.authService.ready())!;
 
         if (user.isAdmin) {
@@ -77,8 +85,8 @@ export class ActivityComponent implements OnInit {
             );
         }
     }
-
 }
+
 interface MenuAction {
     id: string;
     icon: string;

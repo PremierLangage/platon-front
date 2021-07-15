@@ -3,19 +3,10 @@
     <h1>COURSE LIST MODULE</h1>
 
     <app-create-course></app-create-course>
-    <!-- <mat-button-toggle-group>
-      <mat-button-toggle
-        *ngFor="let course of courses"
-        value="{{ course.name }}"
-        [routerLink]="['/course', course.id]"
-      >
-        {{ course.name }}
-      </mat-button-toggle>
-    </mat-button-toggle-group> -->
+
     <div>
       <a *ngFor="let course of courses" [routerLink]="['/courses', course.id]">
-        <figure class="space"
-        >
+        <figure class="space">
           <img src="../../../../../../assets/images/illustrations/course.jpg" />
           <figcaption>{{ course.name }}</figcaption>
         </figure>
