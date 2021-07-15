@@ -21,7 +21,7 @@ import { CourseComponent } from './course.component';
 
         AppSharedLayoutModule,
 
-        RouterModule.forChild([{ path: ':id', component: CourseComponent }]),
+        RouterModule.forChild([{ path: '', component: CourseComponent }]),
     ],
 
     declarations: [CourseComponent],

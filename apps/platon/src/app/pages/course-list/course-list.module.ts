@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { HttpClientModule } from '@angular/common/http';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
@@ -17,14 +17,28 @@ import { CourseListComponent } from './course-list.component';
     imports: [
         FormsModule,
         CommonModule,
+
         MatCardModule,
-        SafePipeModule,
-        HttpClientModule,
+        MatInputModule,
+        MatFormFieldModule,
         MatButtonToggleModule,
 
+        SafePipeModule,
         AppSharedLayoutModule,
 
+<<<<<<< HEAD
         RouterModule.forChild([{ path: '', component: CourseListComponent }]),
+=======
+        RouterModule.forChild([
+            {
+                path: '',
+                component: CourseListComponent,
+                // children: [
+                //     { path: ':id', loadChildren: () => import('../course/course.module').then(m => m.CourseModule)}
+                // ]
+            },
+        ]),
+>>>>>>> 1c51ed15c2f1228cdc097be96dc043cb4f841f50
     ],
 
     declarations: [CourseListComponent, CreateCourseComponent],

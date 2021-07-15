@@ -1,14 +1,17 @@
 <app-container>
   <app-content>
-    <div>Cours : {{ course.name }}</div>
-    <div>Id : {{ course.id }}</div>
-    <mat-button-toggle-group>
+    <div *ngIf="course">
+      <h1><b>{{ course.name }}</b></h1>
+      <div>{{ course | json }}</div>
+    </div>
+
+    <!-- <mat-button-toggle-group>
       <mat-button-toggle
         *ngFor="let activity of this.course.activities"
         value="{{ activity.name }}"
         [routerLink]="['/activity',activity.id]"
         >{{ activity.name }}</mat-button-toggle
       >
-    </mat-button-toggle-group>
+    </mat-button-toggle-group> -->
   </app-content>
 </app-container>

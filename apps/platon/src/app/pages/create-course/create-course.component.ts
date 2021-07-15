@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
+import { CourseService } from '../../course/course.service'
 
-import { Inject } from '@angular/core';
+
 
 @Component({
     selector: 'app-create-course',
@@ -10,16 +11,28 @@ import { Inject } from '@angular/core';
 
 export class CreateCourseComponent {
     submitted = false;
+    name!: string;
+    desc!: string;
+    sandbox_name!: string;
 
-    constructor(
-        @Inject(String) public name: string,
-        @Inject(String) public desc: string,
-        @Inject(String) public sandbox_name: string
-    ) {}
+    constructor(public courseService: CourseService) {}
 
-    ngOnInit(): void {};
+    ngOnInit() {
+    }
 
     onSubmit() {
         this.submitted = true;
+        if(this.name  && this.desc  && this.sandbox_name){
+            this.courseService.createCourse(this.name.trim(), this.desc.trim(), this.sandbox_name.trim())
+                .then(response => {
+                    if(response){
+                        console.log(response)
+                    }
+                })
+                .then(response => {console.log("submit data")})
+                .catch(error => console.error(error));
+        }
     }
+
+
 }

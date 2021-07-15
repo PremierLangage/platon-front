@@ -1,22 +1,35 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CourseListService } from './course-list.service';
+import { CourseService } from '../course/course.service';
+import { Course } from '../course/course.service'
+import { Courses } from '../course/course.service'
 
 @Component({
   selector: 'app-course-list',
   templateUrl: './course-list.component.html',
-  providers: [CourseListService],
+  providers: [CourseService],
   styleUrls: ['./course-list.component.scss']
 })
 export class CourseListComponent implements OnInit {
-    courses: any[] = [];
+    courses: Course[] = []
 
-    constructor(public courselistService: CourseListService) {
+
+    constructor(public courseService: CourseService) {
     }
 
-    async ngOnInit() {
-        this.courses = await this.courselistService.loadCourses().toPromise();
-    }
+    ngOnInit(): void {
+        this.courseService.getCourses()
+            .then(response => {
+                if(response){
+                    this.courses = response.courses;
+                }
+
+            })
+            .then(response => {console.log("Get DATA")})
+            .catch(error => console.error(error));
+
+    };
+
 
     courseChosen(course: any) {
         return course.id;
