@@ -11,10 +11,7 @@ import { map } from 'rxjs/operators';
 export class CourseService {
     constructor(private readonly http: HttpClient) {}
 
-<<<<<<< HEAD
     ROOT_URL = '/api/v1/courses/1';
-=======
->>>>>>> 1c51ed15c2f1228cdc097be96dc043cb4f841f50
 
     /**
      * Get course detail with id 'id'x

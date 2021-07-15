@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CourseService } from '../../course/course.service'
+import { CourseService } from '../course/course.service'
 
 
 

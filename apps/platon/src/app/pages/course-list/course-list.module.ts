@@ -26,9 +26,9 @@ import { CourseListComponent } from './course-list.component';
         SafePipeModule,
         AppSharedLayoutModule,
 
-<<<<<<< HEAD
+
         RouterModule.forChild([{ path: '', component: CourseListComponent }]),
-=======
+
         RouterModule.forChild([
             {
                 path: '',
@@ -38,7 +38,6 @@ import { CourseListComponent } from './course-list.component';
                 // ]
             },
         ]),
->>>>>>> 1c51ed15c2f1228cdc097be96dc043cb4f841f50
     ],
 
     declarations: [CourseListComponent, CreateCourseComponent],
