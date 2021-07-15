@@ -77,7 +77,7 @@ const routes: Routes = [
         ).then(m => m.CourseListModule)
     },
     {
-        path: 'course',
+        path: 'courses/:id',
         canActivate: [AuthGuard],
         data: { roles: ['all'] },
         loadChildren: () => import(

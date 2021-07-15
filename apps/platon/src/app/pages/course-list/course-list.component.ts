@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CourseService } from '../course/course.service';
+import { Course } from '../course/course.service'
+import { Courses } from '../course/course.service'
 
 @Component({
   selector: 'app-course-list',
@@ -9,14 +11,25 @@ import { CourseService } from '../course/course.service';
   styleUrls: ['./course-list.component.scss']
 })
 export class CourseListComponent implements OnInit {
-    courses: any[] = [];
+    courses: Course[] = []
+
 
     constructor(public courseService: CourseService) {
     }
 
-    async ngOnInit() {
-        // this.courses = await this.courseService.loadCourses().toPromise();
-    }
+    ngOnInit(): void {
+        this.courseService.getCourses()
+            .then(response => {
+                if(response){
+                    this.courses = response.courses;
+                }
+
+            })
+            .then(response => {console.log("Get DATA")})
+            .catch(error => console.error(error));
+
+    };
+
 
     courseChosen(course: any) {
         return course.id;

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { CourseService} from './course.service';
+import { CourseService, CourseDetail} from './course.service';
+
 @Component({
   selector: 'app-course',
   templateUrl: './course.component.html',
@@ -10,7 +11,7 @@ import { CourseService} from './course.service';
 })
 
 export class CourseComponent implements OnInit {
-    course: any;
+    course!: CourseDetail;
     id_course: any;
 
     constructor(public courseService: CourseService,
@@ -18,15 +19,18 @@ export class CourseComponent implements OnInit {
     }
 
     async ngOnInit() {
-        this.course = this.courseService.loadActivities().subscribe(
-            (data) =>
-                (this.course = {
-                    name: (data as any).name,
-                    id: (data as any).id,
-                    activities: (data as any).activities,
-                })
-        );
         this.id_course = this.route.snapshot.paramMap.get('id');
+        this.courseService.getCourse(this.id_course)
+            .then(response => {
+                if(response){
+                    this.course = response;
+                    console.log(this.course)
+                }
+                else{
+                    console.log("pb")
+                }
+
+            })
         console.log(this.id_course);
     }
 

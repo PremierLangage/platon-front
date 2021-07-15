@@ -12,6 +12,12 @@
         {{ course.name }}
       </mat-button-toggle>
     </mat-button-toggle-group> -->
+    <ul>
+      <li *ngFor="let course of courses"
+        [routerLink]="['/courses', course.id]"
+      >
+        {{ course | json }}</li>
+    </ul>
   </app-content>
 </app-container>
 <!-- platon.dev/course/1 -->

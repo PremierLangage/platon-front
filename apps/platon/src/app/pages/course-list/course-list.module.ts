@@ -30,9 +30,9 @@ import { CourseListComponent } from './course-list.component';
             {
                 path: '',
                 component: CourseListComponent,
-                children: [
-                    { path: ':id', loadChildren: () => import('../course/course.module').then(m => m.CourseModule)}
-                ]
+                // children: [
+                //     { path: ':id', loadChildren: () => import('../course/course.module').then(m => m.CourseModule)}
+                // ]
             },
         ]),
     ],

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CourseService } from '../../course/course.service'
-import { Course } from '../../course/course.service'
-import { Courses } from '../../course/course.service'
+
 
 
 @Component({
@@ -15,21 +14,11 @@ export class CreateCourseComponent {
     name!: string;
     desc!: string;
     sandbox_name!: string;
-    courses: Course[] = []
 
     constructor(public courseService: CourseService) {}
 
-    ngOnInit(): void {
-        this.courseService.getCourses()
-            .then(response => {
-                if(response){
-                    this.courses = response.courses
-                }
-            })
-            .then(response => {console.log("Get DATA")})
-            .catch(error => console.error(error));
-
-    };
+    ngOnInit() {
+    }
 
     onSubmit() {
         this.submitted = true;
@@ -40,7 +29,7 @@ export class CreateCourseComponent {
                         console.log(response)
                     }
                 })
-                .then(response => {console.log("log log")})
+                .then(response => {console.log("submit data")})
                 .catch(error => console.error(error));
         }
     }
