@@ -10,7 +10,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
-import { CreateCourseComponent } from './create-course/create-course.component';
+import { CreateCourseComponent } from '../create-course/create-course.component';
 import { CourseListComponent } from './course-list.component';
 
 @NgModule({
@@ -24,15 +24,7 @@ import { CourseListComponent } from './course-list.component';
 
         AppSharedLayoutModule,
 
-        RouterModule.forChild([
-            {
-                path: '',
-                component: CourseListComponent,
-                children: [
-                    { path: ':id', loadChildren: () => import('../course/course.module').then(m => m.CourseModule)}
-                ]
-            },
-        ]),
+        RouterModule.forChild([{ path: '', component: CourseListComponent }]),
     ],
 
     declarations: [CourseListComponent, CreateCourseComponent],

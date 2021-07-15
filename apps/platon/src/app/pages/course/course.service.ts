@@ -6,7 +6,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 export class CourseService {
     constructor(private readonly http: HttpClient) {}
 
-    ROOT_URL = '/api/v1/course/1';
+    ROOT_URL = '/api/v1/courses/1';
 
     loadActivities(): Observable<HttpResponse<Course>> {
         return this.http.get<Course>(this.ROOT_URL, { observe: 'response' });
