@@ -17,7 +17,7 @@ export class CourseService {
      * Get course detail with id 'id'x
      * @param id
      */
-    getCourse(id: string): Promise<CourseDetail | undefined> {
+    getCourse(id: number): Promise<CourseDetail | undefined> {
         return this.http.get<CourseDetail>(`/api/v1/courses/${id}`).pipe(
                 catchError(() => {
                     return of(undefined);

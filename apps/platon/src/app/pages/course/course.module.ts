@@ -9,7 +9,6 @@ import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
 import { CourseComponent } from './course.component';
-import { ActivityListComponent } from '../activity-list/activity-list.component';
 
 
 @NgModule ({
@@ -23,7 +22,6 @@ import { ActivityListComponent } from '../activity-list/activity-list.component'
         AppSharedLayoutModule,
 
         RouterModule.forChild([{ path: '', component: CourseComponent }]),
-        ActivityListComponent,
     ],
 
     declarations: [CourseComponent],
