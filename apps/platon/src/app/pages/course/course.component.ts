@@ -41,9 +41,23 @@ export class CourseComponent implements OnInit {
                 }
 
             })
-        this.activityService.getActivities(this.id_course)
-            .then(response => {console.log(response)})
+        // this.activityService.getActivities(this.id_course)
+        //     .then(response => {
+        //         console.log("get activities")
+        //         console.log(response)})
+
         console.log(this.id_course);
+        // this.activityService.createActivity(this.id_course, "act1", "blabla")
+        //     .then(response => {
+        //         if(response){
+        //             console.log(this.course)
+        //         }
+        //         else{
+        //             console.log("pb")
+        //             console.log(response)
+        //         }
+
+        //     })
     }
 
     createActivity(){

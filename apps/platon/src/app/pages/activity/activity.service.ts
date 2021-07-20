@@ -21,6 +21,7 @@ export class ActivityService {
     }
 
     createActivity(course_id: number, name: string, description: string): Promise<Activity | undefined> {
+        console.log("create activity")
 
         return this.http.post<Activity>('/api/v1/activity/',
             {
@@ -41,6 +42,9 @@ export class ActivityService {
 
 export interface Activity {
     name: string;
+    desc: string;
+    id: number;
+
 }
 
 
