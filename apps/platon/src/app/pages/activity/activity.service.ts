@@ -12,13 +12,6 @@ export class ActivityService {
 
     constructor(private readonly http: HttpClient) {}
 
-    getActivities(id: number): Promise<Activity | undefined> {
-        return this.http.get<Activity>('/api/v1/activity/').pipe(
-                catchError(() => {
-                    return of(undefined);
-                })
-            ).toPromise();
-    }
 
     createActivity(course_id: number, name: string, description: string): Promise<Activity | undefined> {
         console.log("create activity")

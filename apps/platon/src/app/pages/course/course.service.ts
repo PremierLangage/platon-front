@@ -6,6 +6,8 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 
 import { map } from 'rxjs/operators';
 
+import { Activity } from '../activity/activity.service'
+
 
 @Injectable()
 export class CourseService {
@@ -71,6 +73,8 @@ export interface Course {
     name: string;
     desc: string;
     status: string;
+
+
 }
 
 export interface Courses {
@@ -88,6 +92,7 @@ export interface CourseDetail {
     sandbox:   number;
     settings:  Settings;
     status:    string;
+    activities: Activity[]
 }
 
 export interface Settings {

@@ -5,15 +5,10 @@
       <div>{{ course | json }}</div>
     </div>
 
-    <!-- <mat-button-toggle-group>
-      <mat-button-toggle
-        *ngFor="let activity of this.course.activities"
-        value="{{ activity.name }}"
-        [routerLink]="['/activity',activity.id]"
-        >{{ activity.name }}</mat-button-toggle
-      >
-    </mat-button-toggle-group> -->
+
   </app-content>
+
+
 
   <div *ngIf="course">
     <!-- <app-activity-list [id]="course.id"></app-activity-list> -->
