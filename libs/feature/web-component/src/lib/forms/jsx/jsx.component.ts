@@ -6,7 +6,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-import { AssetLoaderService } from '@platon/shared/utils';
+import { ResourceLoaderService } from '@mcisse/nge/services'
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service';
 import { JsxComponentDefinition, JsxState } from './jsx';
@@ -31,12 +31,12 @@ export class JsxComponent
 
     constructor(
         readonly injector: Injector,
+        readonly resourceLoader: ResourceLoaderService,
         readonly changeDetector: WebComponentChangeDetectorService
     ) {}
 
     async ngOnInit() {
-        const assets = this.injector.get(AssetLoaderService);
-        await assets
+        await this.resourceLoader
             .loadAllSync([
                 ['script', 'assets/vendors/jsxgraph/jsxgraphcore.js'],
                 ['style', 'assets/vendors/jsxgraph/jsxgraph.css'],

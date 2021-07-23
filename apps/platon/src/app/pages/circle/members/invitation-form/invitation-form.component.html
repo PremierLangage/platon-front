@@ -1,0 +1,37 @@
+<form
+  nz-form
+  nzLayout="vertical"
+  [formGroup]="form"
+  (ngSubmit)="didSubmit.emit(form.value)">
+  <nz-form-item>
+    <nz-form-label nzFor="invitee" nzRequired>Utilisateur</nz-form-label>
+    <nz-form-control>
+      <auth-search-bar
+        id="invitee"
+        name="invitee"
+        formControlName="invitee"
+        [searchMulti]="false"
+        [searchAdmin]="false"
+        [searchEditor]="true"
+        [searchExcludes]="excludes">
+      </auth-search-bar>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label nzFor="status" nzRequired>Rôle</nz-form-label>
+    <nz-form-control>
+      <nz-select
+        id="status"
+        name="status"
+        formControlName="status"
+        nzSize="large"
+        nzPlaceHolder="Cliquez pour selectionner">
+        <nz-option nzLabel="Admin" nzValue="ADMIN"></nz-option>
+        <nz-option nzLabel="Membre" nzValue="MEMBER"></nz-option>
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
+  <button nz-button type="submit" nzType="primary" [disabled]="!form.valid">
+    Inviter
+  </button>
+</form>

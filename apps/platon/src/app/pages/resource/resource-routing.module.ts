@@ -4,7 +4,27 @@ import { RouterModule, Routes } from '@angular/router';
 import { ResourceComponent } from './resource.component';
 
 const routes: Routes = [
-    { path: ':id', component: ResourceComponent },
+    {
+        path: ':id',
+        component: ResourceComponent,
+        // children: [
+        //     {
+        //         path: 'overview',
+        //         loadChildren: () => import(
+        //             /* webpackChunkName: "resource-overview" */
+        //             './overview/overview.module'
+        //         ).then(m => m.OverviewModule)
+        //     },
+        //     {
+        //         path: 'informations',
+        //         loadChildren: () => import(
+        //             /* webpackChunkName: "resource-informations" */
+        //             './informations/informations.module'
+        //         ).then(m => m.InformationsModule)
+        //     },
+        //     { path: '**', redirectTo: 'overview', pathMatch: 'full' }
+        // ]
+    },
 ];
 
 @NgModule({
@@ -14,4 +34,4 @@ const routes: Routes = [
     ],
     exports: [RouterModule]
 })
-export class ResourceRoutingModule {}
+export class ResourceRoutingModule { }

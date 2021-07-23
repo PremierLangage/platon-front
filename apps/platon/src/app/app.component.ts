@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NzIconService } from 'ng-zorro-antd/icon';
 import { ThemeService } from '@platon/core/config';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

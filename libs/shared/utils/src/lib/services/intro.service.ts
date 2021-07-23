@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
-import { AssetLoaderService } from './asset-loader.service';
+import { ResourceLoaderService } from '@mcisse/nge/services';
 import introJs from 'intro.js';
 
 @Injectable({providedIn: 'root'})
 export class IntroService {
     constructor(
-        private readonly assetLoader: AssetLoaderService
+        private readonly resourceLoader: ResourceLoaderService
     ) { }
 
     async create(options?: {
         element?: HTMLElement,
         querySelector?: string
     }) {
-        await this.assetLoader.loadAllSync([
+        await this.resourceLoader.loadAllSync([
             ['style', 'assets/vendors/intro.js/introjs.css']
         ]).toPromise();
         if (options?.element) {

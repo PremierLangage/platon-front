@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform, Input } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({name: 'nicifyName'})
 export class NicifyNamePipe implements PipeTransform {
@@ -8,7 +8,7 @@ export class NicifyNamePipe implements PipeTransform {
             return v;
         }
         if (!nicifyProperty) {
-            v = v.split('.').pop();
+            v = v.split('.').pop()!;
         }
         const builder: string[] = [];
         let index = 0;

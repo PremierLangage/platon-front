@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Resource } from '../models/resource';
-import { CreateFileForm, DeleteFileForm, MoveFileForm, RenameFileForm, ResourceFile, UpdateFileForm } from '../models/resource-file';
+import {
+    CreateFileForm,
+    MoveFileForm,
+    RenameFileForm,
+    ResourceFile,
+    ResourceTree,
+    UpdateFileForm
+} from '../models/resource-file';
 import { ResourceFileProvider } from '../models/resource-file-provider';
 
 @Injectable()
@@ -14,10 +21,18 @@ export class RemoteResourceFileProvider extends ResourceFileProvider {
         super()
     }
 
-    tree(resource: Resource): Observable<ResourceFile> {
-        return this.http.get<any>(resource.filesUrl).pipe(
-            map(res => res.files)
+    tree(resource: Resource): Observable<ResourceTree> {
+        return this.http.get<ResourceTree>(resource.filesUrl).pipe(
+            map(res => res)
         );
+    }
+
+    read(file: ResourceFile): Observable<string> {
+        return this.http.get<string>(file.url);
+    }
+
+    delete(file: ResourceFile): Observable<any> {
+        return this.http.delete<any>(file.url);
     }
 
     create(form: CreateFileForm): Observable<any> {
@@ -35,7 +50,9 @@ export class RemoteResourceFileProvider extends ResourceFileProvider {
     }
 
     update(form: UpdateFileForm): Observable<any> {
-        throw new Error('Method not implemented.');
+        return this.http.put<any>(form.file.url, {
+            content: form.content
+        });
     }
 
     rename(form: RenameFileForm): Observable<any> {
@@ -43,9 +60,5 @@ export class RemoteResourceFileProvider extends ResourceFileProvider {
             action: 'rename',
             newpath: form.newpath,
         });
-    }
-
-    delete(form: DeleteFileForm): Observable<any> {
-        return this.http.delete<any>(`${form.resource.filesUrl}/${form.path}`);
     }
 }

@@ -1,5 +1,5 @@
 import { NgModule, Type } from '@angular/core';
-import { NgeMonacoModule } from 'nge-monaco';
+import { NgeMonacoModule } from '@mcisse/nge/monaco';
 import { BaseModule } from '../../shared/components/base/base.module';
 
 import { CodeViewerComponent } from './code-viewer.component';

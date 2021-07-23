@@ -6,7 +6,7 @@
     <aside>
       <mat-card>
         <nz-statistic
-          [nzValue]="(state.circle!.membersCount | number)!"
+          [nzValue]="(context.circle!.membersCount | number)!"
           [nzTitle]="'Membres'"
           [nzPrefix]="prefix2">
         </nz-statistic>
@@ -16,7 +16,7 @@
       </mat-card>
       <mat-card>
         <nz-statistic
-          [nzValue]="(state.circle!.resourcesCount | number)!"
+          [nzValue]="(context.circle!.resourcesCount | number)!"
           [nzTitle]="'Resources'"
           [nzPrefix]="prefix1">
         </nz-statistic>

@@ -1,3 +1,3 @@
-export * from './lib/pipes/_';
-export * from './lib/services/_';
-export * from './lib/utils/_';
+export * from './lib/pipes';
+export * from './lib/services';
+export * from './lib/utils';

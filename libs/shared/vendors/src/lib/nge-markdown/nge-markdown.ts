@@ -9,9 +9,9 @@ import {
     NgeMarkdownHighlighterMonacoProvider,
     NgeMarkdownKatexOptionsProvider,
     NgeMarkdownEmojiOptionsProvider,
-} from 'nge-markdown';
+} from '@mcisse/nge/markdown';
 
-import { NgeMonacoColorizerService } from 'nge-monaco';
+import { NgeMonacoColorizerService } from '@mcisse/nge/monaco';
 
 export const NgeMarkdownProviders = [
     NgeMarkdownKatexProvider,

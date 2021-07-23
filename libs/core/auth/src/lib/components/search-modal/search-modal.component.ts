@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { SearchBar } from '@platon/shared/ui/search';
-import Fuse from 'fuse.js';
-import { map } from 'rxjs/operators';
-import { AuthUserService } from '../../api/auth-user.service';
-import { AuthUser, AuthUserSearchIndexes } from '../../models/auth-user';
+import { AuthUser } from '../../models/auth-user';
 
 @Component({
     selector: 'auth-search-modal',
@@ -15,82 +11,38 @@ export class SearchModalComponent {
     isVisible = false;
 
     @Input() searchTitle = '';
-    @Input() searchRole: 'ALL' = 'ALL';
     @Input() searchOkTitle = 'OK';
     @Input() searchNoTitle = 'Annuler';
+    @Input() searchAdmin?: boolean;
+    @Input() searchEditor?: boolean;
     @Input() searchMulti = true;
-    @Input() searchExcludes: Partial<AuthUser>[] = [];
+    @Input() searchExcludes: string[] = [];
 
-    @Output() didSelect = new EventEmitter<AuthUser[]>();
+    @Output() didSubmit = new EventEmitter<AuthUser[]>();
 
-    readonly searchBar: SearchBar<AuthUser> = {
-        placeholder: 'Essayez un nom, un email...',
-        filterer: {
-            run: this.search.bind(this),
-        },
-        complete: item => item.username,
-        onSelect: user => {
-            this.selections.push(user);
-            this.searchBar.value = '';
-            this.changeDetector.markForCheck();
-        }
-    };
-
-    selections: AuthUser[] = [];
+    selection: AuthUser[] = [];
 
     get ready() {
-        const n = this.selections.length;
+        const n = this.selection.length;
         return !this.searchMulti ? n === 1 : n > 0;
     }
 
     constructor(
-        private readonly api: AuthUserService,
         private readonly changeDetector: ChangeDetectorRef
     ) { }
 
-    open() {
+    open(): void {
         this.isVisible = true;
         this.changeDetector.markForCheck();
     }
 
-    close() {
-        this.searchBar.value = '',
-            this.isVisible = false;
+    close(): void {
+        this.isVisible = false;
         this.changeDetector.markForCheck();
     }
 
-    submit() {
+    submit(): void {
         this.close();
-        this.didSelect.emit(this.selections);
-    }
-
-    search(query: string) {
-        return this.api
-            .search({
-                role: this.searchRole,
-                query,
-            })
-            .pipe(
-                map((users) => {
-                    users = users.filter(this.isSelectable.bind(this));
-                    const fuse = new Fuse(users, {
-                        includeMatches: true,
-                        findAllMatches: false,
-                        threshold: 0.2,
-                        keys: [...AuthUserSearchIndexes],
-                    });
-                    return fuse.search(query).map((r) => r.item).slice(0, 4);
-                })
-            );
-    }
-
-    remove(item: AuthUser) {
-        this.selections = this.selections.filter(e => e.id !== item.id);
-        this.changeDetector.markForCheck();
-    }
-
-    private isSelectable(user: AuthUser) {
-        return !this.selections.find(e => e.id === user.id) &&
-            !this.searchExcludes.find(e => e.id === user.id);
+        this.didSubmit.emit(this.selection);
     }
 }

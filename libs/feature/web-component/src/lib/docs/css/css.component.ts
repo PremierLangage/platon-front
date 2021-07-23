@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DialogService } from '@platon/shared/ui/dialog';
-import { ClipboardService } from '@platon/shared/utils';
+import { ClipboardService } from '@mcisse/nge/services';
 
 @Component({
   selector: 'wc-editor-css',

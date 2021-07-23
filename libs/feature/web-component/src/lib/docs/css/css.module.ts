@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CssComponent } from './css.component';
-import { NgeMarkdownModule } from 'nge-markdown';
+import { NgeMarkdownModule } from '@mcisse/nge/markdown';
 import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
 
 @NgModule({

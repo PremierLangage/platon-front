@@ -77,13 +77,12 @@ export interface CircleWatcher {
     url: string;
     username: string;
 }
-export interface Invitation {
+export interface CircleInvitation {
     inviter: string;
     invitee: string;
     date: string;
     status: MemberStatus;
     url: string;
-    circleUrl: string;
 }
 
 export interface CircleFilters {
@@ -101,6 +100,28 @@ export interface CircleFilters {
     'watchers' |
     'resources'
     ;
+}
+
+
+export interface CircleMembersFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}
+
+export interface CircleWatchersFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
+}
+
+export interface CircleInvitationsFilters {
+    circle: Circle;
+    search?: string;
+    offset?: number;
+    limit?: number;
 }
 
 

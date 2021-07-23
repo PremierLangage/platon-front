@@ -5,7 +5,7 @@
  * @throws {ReferenceError} if obj is null or undefined
  * @return the object itself.
  */
-export function requireNonNull<T>(obj: T, message?: string): T {
+export function requireNonNull<T>(obj?: T, message?: string): T {
     if (obj == null) {
         message = message || 'requireNonNull';
         throw new ReferenceError(message);
@@ -33,7 +33,7 @@ export function requireNonNullString(input: string, message?: string): string {
  * @param message - an optional error message
  * @throws {Error} if condition is false
  */
-export function requireTrue(condition: boolean, message?: string) {
+export function requireTrue(condition: boolean, message?: string): void {
     if (!condition) {
         throw new Error(message);
     }

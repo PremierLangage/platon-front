@@ -5,7 +5,7 @@ import { MatRadioModule } from '@angular/material/radio';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
-import { NgeMarkdownModule } from 'nge-markdown';
+import { NgeMarkdownModule } from '@mcisse/nge/markdown';
 
 import { RadioGroupComponent } from './radio-group.component';
 

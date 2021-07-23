@@ -9,8 +9,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 
@@ -32,8 +32,8 @@ import { CircleRoutingModule } from './circle-routing.module';
 
         NzIconModule,
         NzButtonModule,
+        NzMessageModule,
         NzBreadCrumbModule,
-        NzNotificationModule,
 
         AppSharedLayoutModule,
 

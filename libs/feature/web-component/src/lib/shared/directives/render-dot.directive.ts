@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, NgModule, OnChanges, OnInit } from '@angular/core';
-import { AssetLoaderService } from '@platon/shared/utils';
+import { ResourceLoaderService } from '@mcisse/nge/services';
 import { graphviz } from 'd3-graphviz';
 import { take } from 'rxjs/operators';
 
@@ -17,11 +17,11 @@ export class RenderDotDirective implements OnInit, OnChanges {
 
     constructor(
         private el: ElementRef,
-        private readonly assets: AssetLoaderService
+        private readonly resourceLoader: ResourceLoaderService
     ) {}
 
     ngOnInit() {
-        this.assets.loadAllSync([
+        this.resourceLoader.loadAllSync([
             // http://www.xavierdupre.fr/js/vizjs/viz-lite.js
             ['script', 'assets/vendors/viz/viz.js']
         ]).pipe(take(1)).subscribe(() => {

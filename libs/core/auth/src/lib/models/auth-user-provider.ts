@@ -1,11 +1,12 @@
+import { PageResult } from '@platon/shared/utils';
 import { Observable } from 'rxjs';
-import { AuthUser } from './auth-user';
+import { AuthUser, AuthUserFilters } from './auth-user';
 
 /**
  * Provides an api to query user objects.
  */
 export abstract class AuthUserProvider{
-    abstract search(filters: AuthUserFilters): Observable<AuthUser[]>;
+    abstract search(filters: AuthUserFilters): Observable<PageResult<AuthUser>>;
 
     /**
      * Finds the user identified by `username`.
@@ -20,10 +21,4 @@ export abstract class AuthUserProvider{
      * @returns An observable that will emit the user found or `undefined` once the server will response.
      */
     abstract findAllByUserNames(userNames: string[]): Observable<AuthUser[]>;
-}
-
-
-export interface AuthUserFilters {
-    role: 'ALL';
-    query?: string;
 }

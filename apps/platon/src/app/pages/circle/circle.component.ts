@@ -12,6 +12,7 @@ import { CirclePresenter } from './circle.presenter';
 export class CircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
+    readonly actions: MenuAction[] = [];
     readonly tabs: LayoutTab[] = [
         {
             id: 'tab-overview',
@@ -35,10 +36,7 @@ export class CircleComponent implements OnInit, OnDestroy {
         },
     ];
 
-    readonly actions: MenuAction[] = [];
-
-
-    state = this.presenter.loadingState;
+    context = this.presenter.defaultContext;
 
     constructor(
         private readonly presenter: CirclePresenter,
@@ -47,9 +45,9 @@ export class CircleComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.stateChange.subscribe(context => {
-                this.state = context;
-                if (this.state.isMember) {
+            this.presenter.contextChange.subscribe(context => {
+                this.context = context;
+                if (this.context.isMember) {
                     this.actions.push(
                         {
                             id: 'menu-create-exercise',
@@ -83,7 +81,7 @@ export class CircleComponent implements OnInit, OnDestroy {
     }
 
     async changeWatchingState(): Promise<void> {
-        if (this.state.watcher) {
+        if (this.context.watcher) {
             await this.presenter.unwatch();
         } else {
             await this.presenter.watch();
