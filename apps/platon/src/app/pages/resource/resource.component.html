@@ -1,8 +1,7 @@
 <app-container #app>
   <app-content>
     <ng-container *ngIf="context.state === 'READY'">
-      <p>resource work's</p>
-      <!-- <ide-root></ide-root> -->
+      <a nz-button [href]="openInVsCodeUrl|safe:'url'">Open In VS Code</a>
     </ng-container>
   </app-content>
 </app-container>

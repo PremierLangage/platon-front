@@ -14,7 +14,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     tree?: CircleTree;
-    circle?: Circle;
     circles: Circle[] = [];
     resources: Resource[] = [];
 
@@ -38,12 +37,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             forkJoin([
                 this.circleService.tree(),
-                this.circleService.findUserPersonal(),
                 this.circleService.findWatchedBy(user.username),
                 this.resourceService.recentViews().toPromise(),
-            ]).subscribe(([tree, personal, circles, resources]) => {
+            ]).subscribe(([tree, circles, resources]) => {
                 this.tree = tree;
-                this.circle = personal;
                 this.circles = circles.results;
                 this.resources = resources;
                 this.loading = false;

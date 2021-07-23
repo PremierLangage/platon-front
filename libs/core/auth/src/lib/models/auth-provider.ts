@@ -1,6 +1,10 @@
+import { AuthToken } from "./auth-token";
 import { AuthUser } from "./auth-user";
 
 export abstract class AuthProvider {
+
+    abstract token(): Promise<AuthToken | undefined>;
+
     /**
      * Gets the current logged user.
      * @returns A promise that will resolves with the user found or `undefined` once the server will response.

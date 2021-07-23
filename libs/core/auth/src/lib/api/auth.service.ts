@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { shareReplay, take } from 'rxjs/operators';
 import { AuthObserver, AUTH_OBSERVER } from '../models/auth';
 import { AuthProvider } from '../models/auth-provider';
+import { AuthToken } from '../models/auth-token';
 import { AuthUser } from '../models/auth-user';
 
 /**
@@ -25,6 +26,10 @@ export class AuthService {
         private readonly injector: Injector,
         private readonly authProvider: AuthProvider,
     ) { }
+
+    token(): Promise<AuthToken | undefined> {
+        return this.authProvider.token();
+    }
 
     /**
      * Checks whether there is an authentificated user or not.

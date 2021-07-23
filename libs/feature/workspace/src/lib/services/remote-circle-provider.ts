@@ -106,10 +106,6 @@ export class RemoteCircleProvider extends CircleProvider {
         return this.http.get<Circle>(`/api/v1/circles/${id}/`);
     }
 
-    findUserPersonal(): Observable<Circle> {
-        return this.http.get<Circle>('/api/v1/circles/me/');
-    }
-
     createCircle(form: CreateCircleForm): Observable<Circle> {
         return this.http.post<Circle>('/api/v1/circles/', {
             ...form,

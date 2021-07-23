@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthUser } from '../models/auth-user';
 import { AuthProvider } from '../models/auth-provider';
 import { RemoteTokenProvider } from './remote-token-provider';
+import { AuthToken } from '../models/auth-token';
 
 
 @Injectable()
@@ -15,6 +16,10 @@ export class RemoteAuthProvider extends AuthProvider {
 
     ) {
         super();
+    }
+
+    token(): Promise<AuthToken | undefined> {
+        return this.tokenProvider.token();
     }
 
     async current(): Promise<AuthUser | undefined> {

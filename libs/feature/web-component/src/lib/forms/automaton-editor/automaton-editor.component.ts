@@ -133,7 +133,7 @@ export class AutomatonEditorComponent implements OnInit, OnDestroy, WebComponent
             connector: 'StateMachine',
         });
 
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
             this.jsp.ready(() => {
                 this.addListeners();
                 resolve();

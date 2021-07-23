@@ -28,7 +28,6 @@ export abstract class CircleProvider {
 
     abstract search(filters?: CircleFilters): Observable<PageResult<Circle>>;
     abstract findById(id: number): Observable<Circle>;
-    abstract findUserPersonal(): Observable<Circle>;
 
     abstract createCircle(form: CreateCircleForm): Observable<Circle>;
     abstract updateCircle(form: UpdateCircleForm): Observable<Circle>;

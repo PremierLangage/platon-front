@@ -12,6 +12,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 
+import { SafePipeModule } from '@platon/shared/utils';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
@@ -33,6 +34,7 @@ import { ResourceRoutingModule } from './resource-routing.module';
         NzMessageModule,
         NzBreadCrumbModule,
 
+        SafePipeModule,
         AppSharedLayoutModule,
         FeatureWorkspaceModule,
 

@@ -53,10 +53,6 @@ export class CircleService {
         return this.provider.findById(id);
     }
 
-    findUserPersonal(): Observable<Circle> {
-        return this.provider.findUserPersonal();
-    }
-
     findWatchedBy(username: string): Observable<PageResult<Circle>> {
         return this.provider.search({
             limit: 5,
