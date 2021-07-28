@@ -92,6 +92,10 @@ export class SearchCircleComponent implements OnInit, OnDestroy {
             queryParams['visibility'] = 'belonging';
         }
 
+        if (queryParams.visibility === 'all') {
+            this.filter.opened = undefined;
+        }
+
         this.router.navigate([], {
             queryParams,
             relativeTo: this.activatedRoute,
@@ -101,6 +105,7 @@ export class SearchCircleComponent implements OnInit, OnDestroy {
         this.searching = true;
         this.page = await this.circleService.search(this.filter).toPromise();
         this.searching = false;
+
         this.changeDetectorRef.markForCheck();
     }
 
