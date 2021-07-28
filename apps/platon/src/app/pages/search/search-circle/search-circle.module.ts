@@ -29,8 +29,8 @@ import { SharedUiSearchModule } from '@platon/shared/ui/search';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
-import { CircleSearchComponent } from './circle-search.component';
-import { CircleFiltersComponent } from './filters/filters.component';
+import { SearchCircleComponent } from './search-circle.component';
+import { FiltersComponent } from './filters/filters.component';
 
 
 @NgModule({
@@ -65,13 +65,13 @@ import { CircleFiltersComponent } from './filters/filters.component';
         RouterModule.forChild([
             {
                 path: '',
-                component: CircleSearchComponent
+                component: SearchCircleComponent
             }
         ])
     ],
     declarations: [
-        CircleSearchComponent,
-        CircleFiltersComponent,
+        SearchCircleComponent,
+        FiltersComponent,
     ]
 })
-export class CircleSearchModule { }
+export class SearchCircleModule { }

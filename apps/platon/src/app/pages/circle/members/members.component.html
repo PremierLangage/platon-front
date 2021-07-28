@@ -1,15 +1,11 @@
 <h2>Invitations</h2>
-<nz-collapse nzBordered="false">
-  <nz-collapse-panel nzHeader="Nouvelle" nzActive="true">
-    <mat-card>
-      <mat-card-content>
-        <app-circle-invitation-form
-          (didSubmit)="sendInvitation($event)">
-        </app-circle-invitation-form>
-      </mat-card-content>
-    </mat-card>
-  </nz-collapse-panel>
-</nz-collapse>
+<mat-card>
+  <mat-card-content>
+    <app-circle-invitation-form
+      (didSubmit)="sendInvitation($event)">
+    </app-circle-invitation-form>
+  </mat-card-content>
+</mat-card>
 
 <app-circle-invitations-table
   [invitations]="invitations"

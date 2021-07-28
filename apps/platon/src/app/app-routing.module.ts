@@ -89,31 +89,22 @@ const routes: Routes = [
         ).then(m => m.ResourceModule)
     },
     {
-        path: 'create-activity',
-        canActivate: [AuthGuard],
-        data: { roles: ['editor'] },
-        loadChildren: () => import(
-            /* webpackChunkName: "create-activity" */
-            './pages/create-activity/create-activity.module'
-        ).then(m => m.CreateActivityModule)
-    },
-    {
         path: 'create-circle',
         canActivate: [AuthGuard],
         data: { roles: ['editor'] },
         loadChildren: () => import(
             /* webpackChunkName: "create-circle" */
-            './pages/create-circle/create-circle.module'
+            './pages/create/create-circle/create-circle.module'
         ).then(m => m.CreateCircleModule)
     },
     {
-        path: 'create-exercise',
+        path: 'create-resource',
         canActivate: [AuthGuard],
         data: { roles: ['editor'] },
         loadChildren: () => import(
-            /* webpackChunkName: "create-exercise" */
-            './pages/create-exercise/create-exercise.module'
-        ).then(m => m.CreateExerciseModule)
+            /* webpackChunkName: "create-resource" */
+            './pages/create/create-resource/create-resource.module'
+        ).then(m => m.CreateResourceModule)
     },
     {
         path: 'workspace',

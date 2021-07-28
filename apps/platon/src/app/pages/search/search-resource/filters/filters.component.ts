@@ -7,11 +7,11 @@ import { ResourceFilters } from '@platon/feature/workspace';
 
 
 @Component({
-    selector: 'app-resource-filters',
+    selector: 'app-search-resource-filters',
     templateUrl: './filters.component.html',
     styleUrls: ['./filters.component.scss']
 })
-export class ResourceFiltersComponent implements OnInit, OnDestroy {
+export class FiltersComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     readonly form = new FormGroup({

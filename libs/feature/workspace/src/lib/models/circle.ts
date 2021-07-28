@@ -1,8 +1,3 @@
-export declare type CircleTypes =
-    'PUBLIC' |
-    'PERSONAL'
-    ;
-
 export declare type CircleEventTypes =
     'MEMBER_CREATE' |
     'MEMBER_REMOVE' |
@@ -19,7 +14,6 @@ export declare type MemberStatus =
 export interface Circle {
     id: number;
     name: string;
-    type: CircleTypes;
     parent: {
         id: number;
         name: string;

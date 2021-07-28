@@ -1,33 +1,33 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import {  ResourceService, Resource, ResourceFilters, ResourceCompletion } from '@platon/feature/workspace';
+import { CircleCompletion, CircleService, CircleFilters, Circle } from '@platon/feature/workspace';
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
 import { of, Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-resource-search',
-    templateUrl: './resource-search.component.html',
-    styleUrls: ['./resource-search.component.scss'],
+    selector: 'app-search-circle',
+    templateUrl: './search-circle.component.html',
+    styleUrls: ['./search-circle.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResourceSearchComponent implements OnInit, OnDestroy {
+export class SearchCircleComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     user?: AuthUser;
-    filter: ResourceFilters = {};
-    page: PageResult<Resource> = {
-        count: 0,
-        results: []
-    };
-    completion: ResourceCompletion = {
+    filter: CircleFilters = {};
+    completion: CircleCompletion = {
         names: [],
         topics: [],
         levels: []
     };
 
+    page: PageResult<Circle> = {
+        count: 0,
+        results: []
+    };
     searching = true;
     initialRequest = true;
 
@@ -53,15 +53,15 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
     constructor(
         private readonly router: Router,
         private readonly authService: AuthService,
+        private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
-        private readonly resourceService: ResourceService,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
     async ngOnInit(): Promise<void> {
         const [user, completion] = await Promise.all([
             this.authService.ready(),
-            this.resourceService.completion().toPromise()
+            this.circleService.completion().toPromise()
         ]);
 
         this.user = user;
@@ -81,13 +81,15 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
             q: this.filter.search,
             date: this.filter.updatedAt,
             order: this.filter.orderBy,
-            status: this.filter.status,
-            visibility: 'all',
-            types: (this.filter.types || []).map(e => e.toLowerCase()).join('|'),
+            visibility: 'all'
         };
 
-        if (this.filter.authors) {
-            queryParams['visibility'] = 'authored';
+        if (this.filter.opened) {
+            queryParams['visibility'] = 'opened';
+        } else if (this.filter.watchers) {
+            queryParams['visibility'] = 'watching';
+        } else if (this.filter.members) {
+            queryParams['visibility'] = 'belonging';
         }
 
         this.router.navigate([], {
@@ -97,9 +99,8 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
         });
 
         this.searching = true;
-        this.page = await this.resourceService.search(this.filter).toPromise();
+        this.page = await this.circleService.search(this.filter).toPromise();
         this.searching = false;
-
         this.changeDetectorRef.markForCheck();
     }
 
@@ -107,7 +108,7 @@ export class ResourceSearchComponent implements OnInit, OnDestroy {
         this.searchBar.value = tag;
     }
 
-    onChangeFilter(filter: ResourceFilters) {
+    onChangeFilter(filter: CircleFilters) {
         if (this.initialRequest || this.searchBar.value !== filter.search) {
             this.initialRequest = false;
             this.searchBar.value = filter.search; // will trigger search()

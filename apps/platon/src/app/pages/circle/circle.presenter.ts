@@ -12,9 +12,7 @@ export class CirclePresenter implements OnDestroy {
     private readonly context = new BehaviorSubject<Context>(this.defaultContext);
 
     get defaultContext(): Context {
-        return {
-            state: 'LOADING'
-        };
+        return { state: 'LOADING' };
     }
 
     get contextChange(): Observable<Context> {
@@ -37,6 +35,14 @@ export class CirclePresenter implements OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    async openInVsCodeUrl(): Promise<string> {
+        const authToken = (await this.authService.token())!;
+        const rid = this.context.value.circle?.id;
+        const { access, refresh } = authToken;
+        const origin = location.origin;
+        return `vscode://platon.platon-explorer?origin=${origin}&circle=${rid}&access=${access}&refresh=${refresh}`;
     }
 
     // Watchers
@@ -94,7 +100,6 @@ export class CirclePresenter implements OnDestroy {
 
     // Invitation
 
-
     async listInvitations(
         filters: Omit<CircleInvitationsFilters, 'circle'>
     ): Promise<PageResult<CircleInvitation>> {
@@ -104,7 +109,6 @@ export class CirclePresenter implements OnDestroy {
             ...filters
         }).toPromise();
     }
-
 
     async acceptInvitation(): Promise<boolean> {
         const { circle, invitation } = this.context.value as Required<Context>;

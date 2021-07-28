@@ -10,7 +10,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzAutocompleteModule } from 'ng-zorro-antd/auto-complete';
 
@@ -36,7 +35,6 @@ import { InvitationsTableComponent } from './invitations-table/invitations-table
         NzTableModule,
         NzSelectModule,
         NzButtonModule,
-        NzCollapseModule,
         NzPopconfirmModule,
         NzAutocompleteModule,
 

@@ -5,11 +5,11 @@
         Recherche avancée
       </mat-expansion-panel-header>
       <ng-container *ngIf="user">
-        <app-resource-filters
+        <app-search-resource-filters
           [user]="user.username"
           [(filter)]="filter"
           (filterChange)="onChangeFilter($event)">
-        </app-resource-filters>
+        </app-search-resource-filters>
       </ng-container>
     </mat-expansion-panel>
   </nz-col>

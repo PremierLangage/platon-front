@@ -19,8 +19,8 @@ import { CoreAuthModule } from '@platon/core/auth';
 import { SharedUiStepperModule } from '@platon/shared/ui/stepper';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
-import { CreateExerciseComponent } from './create-exercise.component';
-import { CreateExerciseRoutingModule } from './create-exercise-routing.module';
+import { CreateResourceComponent } from './create-resource.component';
+import { CreateResourceRoutingModule } from './create-resource-routing.module';
 
 
 @NgModule({
@@ -46,8 +46,8 @@ import { CreateExerciseRoutingModule } from './create-exercise-routing.module';
         SharedUiStepperModule,
         FeatureWorkspaceModule,
 
-        CreateExerciseRoutingModule
+        CreateResourceRoutingModule
   ],
-  declarations: [CreateExerciseComponent]
+  declarations: [CreateResourceComponent]
 })
-export class CreateExerciseModule { }
+export class CreateResourceModule { }

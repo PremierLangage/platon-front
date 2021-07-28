@@ -29,8 +29,8 @@ import { SharedUiSearchModule } from '@platon/shared/ui/search';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 // Module
-import { ResourceSearchComponent } from './resource-search.component';
-import { ResourceFiltersComponent } from './filters/filters.component';
+import { SearchResourceComponent } from './search-resource.component';
+import { FiltersComponent } from './filters/filters.component';
 
 
 @NgModule({
@@ -64,13 +64,13 @@ import { ResourceFiltersComponent } from './filters/filters.component';
         RouterModule.forChild([
             {
                 path: '',
-                component: ResourceSearchComponent
+                component: SearchResourceComponent
             }
         ])
     ],
     declarations: [
-        ResourceSearchComponent,
-        ResourceFiltersComponent,
+        SearchResourceComponent,
+        FiltersComponent,
     ]
 })
-export class ResourceSearchModule { }
+export class SearchResourceModule { }

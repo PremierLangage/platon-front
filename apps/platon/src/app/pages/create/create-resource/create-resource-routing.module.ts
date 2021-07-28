@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { CreateExerciseComponent } from './create-exercise.component';
+import { CreateResourceComponent } from './create-resource.component';
 
 const routes: Routes = [
-    { path: '', component: CreateExerciseComponent }
+    { path: '', component: CreateResourceComponent }
 ];
 
 @NgModule({
     imports: [CommonModule, RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class CreateExerciseRoutingModule {}
+export class CreateResourceRoutingModule {}

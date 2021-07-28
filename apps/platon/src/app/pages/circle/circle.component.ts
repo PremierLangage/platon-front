@@ -37,6 +37,27 @@ export class CircleComponent implements OnInit, OnDestroy {
     ];
 
     context = this.presenter.defaultContext;
+    openInVsCodeUrl = '';
+
+    get parentLink(): any[] {
+        return ['/circle', this.context.circle!.parent.id];
+    }
+
+    get parentName(): string {
+        return this.context.circle!.parent.name;
+    }
+
+    get openedIconName(): string {
+        return !this.context.circle?.opened
+            ? 'lock'
+            : 'unlock'
+    }
+
+    get openedIconTooltip(): string {
+        return !this.context.circle?.opened
+            ? 'Vous devez être membre pour publier'
+            : 'Vous pouvez publier sans être membre'
+    }
 
     constructor(
         private readonly presenter: CirclePresenter,
@@ -45,24 +66,24 @@ export class CircleComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.contextChange.subscribe(context => {
+            this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
+
                 if (this.context.isMember) {
+                    this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
                     this.actions.push(
                         {
-                            id: 'menu-create-exercise',
-                            title: 'Créer un exercice',
-                            icon: 'article',
-                            link: ['/workspace', 'create-exercise']
+                            id: 'menu-create-model',
+                            title: 'Créer une ressource',
+                            icon: 'widgets',
+                            link: ['/create-resource'],
+                            queryParams: {
+                                'circle': context.circle!.id
+                            }
                         },
-                        {
-                            id: 'menu-create-activity',
-                            title: 'Créer une activité',
-                            icon: 'assessment',
-                            link: ['/workspace', 'create-activity']
-                        }
                     );
                 }
+
                 this.changeDetectorRef.markForCheck();
             })
         );
@@ -95,4 +116,5 @@ interface MenuAction {
     icon: string;
     title: string;
     link: string | any[];
+    queryParams?: Record<string, any>;
 }

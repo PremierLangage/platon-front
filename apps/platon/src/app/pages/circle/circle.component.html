@@ -1,61 +1,67 @@
 <app-container-tabbed [state]="context.state" [tabs]="tabs">
   <ng-container *ngIf="context.state === 'READY'">
-    <ng-container [ngTemplateOutlet]="header"></ng-container>
+    <nz-breadcrumb>
+      <nz-breadcrumb-item *ngIf="context.circle!.parent">
+        <a [routerLink]="parentLink">{{ parentName }}</a>
+      </nz-breadcrumb-item>
+      <nz-breadcrumb-item>
+        {{ context.circle!.name }}
+        <mat-icon>group_work</mat-icon>
+        <i
+          nz-icon
+          [nzType]="openedIconName"
+          [matTooltip]="openedIconTooltip"
+          nzTheme="twotone">
+        </i>
+      </nz-breadcrumb-item>
+    </nz-breadcrumb>
+
+    <p class="description">{{ context.circle!.desc }}</p>
+
+    <nz-button-group *ngIf="actions.length">
+      <button nz-button nzType="primary" [matMenuTriggerFor]="menu">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+      </button>
+      <a
+        nz-button
+        matTooltip="Éditer avec Visual Studio Code"
+        [href]="openInVsCodeUrl | safe: 'url'">
+        <img src="assets/images/vscode/vscode.svg" />
+      </a>
+    </nz-button-group>
+
+    <nz-button-group>
+      <button nz-button nzType="default" (click)="changeWatchingState()">
+        <i nz-icon nzType="eye" nzTheme="outline"></i>
+        {{ context.watcher ? 'Ne plus suivre' : 'Suivre' }}
+      </button>
+      <button nz-button nzType="default">
+        {{ context.circle!.watchersCount }}
+      </button>
+    </nz-button-group>
+
+    <nz-button-group *ngIf="context.invitation">
+      <button nz-button nzType="primary" (click)="acceptInvitation()">
+        Accepter l'invitation
+      </button>
+      <button nz-button nzType="danger" (click)="declineInvitation()">
+        Refuser l'invitation
+      </button>
+    </nz-button-group>
+
+    <mat-menu #menu="matMenu">
+      <ng-container *ngFor="let action of actions">
+        <a
+          mat-menu-item
+          [disabled]="false"
+          [id]="action.id"
+          [routerLink]="action.link"
+          [queryParams]="action.queryParams"
+          [queryParamsHandling]="'merge'">
+          <mat-icon>{{ action.icon }}</mat-icon>
+          <span>{{ action.title }}</span>
+        </a>
+      </ng-container>
+    </mat-menu>
   </ng-container>
 </app-container-tabbed>
-
-<ng-template #header>
-  <nz-breadcrumb>
-    <nz-breadcrumb-item *ngIf="context.circle!.parent">
-      <a [routerLink]="['/circle', context.circle!.parent.id]">{{context.circle!.parent!.name}}</a>
-    </nz-breadcrumb-item>
-    <nz-breadcrumb-item>
-      {{context.circle!.name}}
-      <mat-icon>group_work</mat-icon>
-      <i
-        nz-icon
-        [nzType]="context.circle?.opened ? 'unlock' : 'lock'"
-        [matTooltip]="context.circle?.opened ? 'Vous devez être membre pour publier' : 'Vous pouvez publier sans être membre'"
-        nzTheme="twotone">
-      </i>
-    </nz-breadcrumb-item>
-  </nz-breadcrumb>
-
-  <p class="description">{{context.circle!.desc}}</p>
-
-  <nz-button-group *ngIf="actions.length">
-    <button nz-button nzType="primary" [matMenuTriggerFor]="menu">
-      <i nz-icon nzType="plus" nzTheme="outline"></i>
-    </button>
-  </nz-button-group>
-
-  <nz-button-group>
-    <button nz-button nzType="default" (click)="changeWatchingState()">
-      <i nz-icon nzType="eye" nzTheme="outline"></i>
-      {{ context.watcher ? 'Ne plus suivre' : 'Suivre' }}
-    </button>
-    <button nz-button nzType="default">{{context.circle!.watchersCount}}</button>
-  </nz-button-group>
-
-  <nz-button-group *ngIf="context.invitation">
-    <button nz-button nzType="primary" (click)="acceptInvitation()">
-      Accepter l'invitation
-    </button>
-    <button nz-button nzType="danger" (click)="declineInvitation()">
-      Refuser l'invitation
-    </button>
-  </nz-button-group>
-
-  <mat-menu #menu="matMenu">
-    <ng-container *ngFor="let action of actions">
-      <a
-        mat-menu-item
-        [disabled]="false"
-        [id]="action.id"
-        [routerLink]="action.link">
-        <mat-icon>{{ action.icon }}</mat-icon>
-        <span>{{ action.title }}</span>
-      </a>
-    </ng-container>
-  </mat-menu>
-</ng-template>

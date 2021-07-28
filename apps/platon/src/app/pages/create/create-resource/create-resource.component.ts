@@ -8,9 +8,9 @@ import { zoomInOnEnterAnimation } from 'angular-animations';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
-    selector: 'app-create-exercise',
-    templateUrl: './create-exercise.component.html',
-    styleUrls: ['./create-exercise.component.scss'],
+    selector: 'app-create-resource',
+    templateUrl: './create-resource.component.html',
+    styleUrls: ['./create-resource.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     // tslint:disable-next-line: no-host-metadata-property
     host: {
@@ -18,7 +18,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     },
     animations: [zoomInOnEnterAnimation({ duration: 300 })],
 })
-export class CreateExerciseComponent implements OnInit {
+export class CreateResourceComponent implements OnInit {
     circles: Circle[] = [];
 
     selectedCircle?: Circle;
@@ -57,11 +57,17 @@ export class CreateExerciseComponent implements OnInit {
         this.loading = true;
 
         const user = (await this.authService.ready())!;
-        const [circles, personal] = await Promise.all([
-            this.circleService.findWatchedBy(user.username).toPromise(),
-            this.circleService.findUserPersonal().toPromise(),
-        ]);
-        this.circles = [personal, ...circles.results];
+
+        this.circles = (
+            await this.circleService.findWatchedBy(user.username).toPromise()
+        ).results;
+
+        const circle = Number.parseInt(
+            this.activatedRoute.snapshot.queryParamMap.get('circle') || '-1',
+            10
+        );
+
+        this.selectedCircle = this.circles.find(e => e.id === circle);
 
         this.loading = false;
         this.changeDetectorRef.markForCheck();

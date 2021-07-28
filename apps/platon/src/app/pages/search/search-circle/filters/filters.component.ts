@@ -6,12 +6,12 @@ import { CircleFilters } from '@platon/feature/workspace';
 
 
 @Component({
-    selector: 'app-circle-filters',
+    selector: 'app-search-circle-filters',
     templateUrl: './filters.component.html',
     styleUrls: ['./filters.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CircleFiltersComponent implements OnInit, OnDestroy {
+export class FiltersComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
     readonly form = new FormGroup({
         date: new FormControl(0),

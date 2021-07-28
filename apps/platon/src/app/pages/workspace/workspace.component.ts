@@ -47,16 +47,10 @@ export class WorkspaceComponent {
 
         this.actions.push(
             {
-                id: 'menu-create-exercise',
-                title: 'Créer un exercice',
-                icon: 'article',
-                link: ['/create-exercise']
-            },
-            {
-                id: 'menu-create-activity',
-                title: 'Créer une activité',
-                icon: 'assessment',
-                link: ['/create-activity']
+                id: 'menu-create-model',
+                title: 'Créer une ressource',
+                icon: 'widgets',
+                link: ['/create-resource']
             },
         );
     }
