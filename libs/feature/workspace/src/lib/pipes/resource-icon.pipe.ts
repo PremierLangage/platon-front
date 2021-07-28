@@ -1,11 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ResourceTypes, RESOURCE_ICONS } from '../models/resource';
+import { ResourceTypes } from '../models/resource';
+
+const ICONS: Record<ResourceTypes, string> = {
+    MODEL: 'blue',
+    EXERCISE: 'article',
+    ACTIVITY: 'widgets'
+};
 
 @Pipe({
     name: 'resourceIcon',
 })
 export class ResourceIconPipe implements PipeTransform {
     transform(type: ResourceTypes): string {
-        return RESOURCE_ICONS[type];
+        return ICONS[type];
     }
 }

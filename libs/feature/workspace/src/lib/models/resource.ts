@@ -72,6 +72,7 @@ export interface CreateResourceForm {
     circle: number;
     topics: string[];
     levels: string[];
+    files?: Record<string, { type: 'file' | 'folder', content?: string }>;
 }
 
 export interface UpdateResourceForm {
@@ -81,32 +82,3 @@ export interface UpdateResourceForm {
     topics: string[];
     levels: string[];
 }
-
-
-export const STATUS_COLORS: Record<ResourceStatus, string> = {
-    DRAFT: 'blue',
-    READY: 'green',
-    BUGGED: 'magenta',
-    NOT_TESTED: 'gold',
-    DEPRECATED: 'red'
-};
-
-export const STATUS_LABELS: Record<ResourceStatus, string> = {
-    DRAFT: 'Brouillon',
-    READY: "Prêt à l'utilisation",
-    BUGGED: 'Contient des bugs',
-    NOT_TESTED: "Besoin d'être tester",
-    DEPRECATED: 'Ne pas utiliser'
-};
-
-export const RESOURCE_ICONS: Record<ResourceTypes, string> = {
-    MODEL: 'blue',
-    EXERCISE: 'article',
-    ACTIVITY: 'widgets'
-};
-
-export const RESOURCE_COLORS: Record<ResourceTypes, string> = {
-    MODEL: '#d89614',
-    EXERCISE: '#108ee9',
-    ACTIVITY: '#f50'
-};

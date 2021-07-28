@@ -1,5 +1,5 @@
 <header>
-  <h1>Nouvel exercice</h1>
+  <h1>Nouvelle ressource</h1>
   <div class="spacer"></div>
   <button *ngIf="!creating" mat-icon-button (click)="dismiss()">
   <i nz-icon nzType="close-circle" nzTheme="outline" style="font-size: 24px;"></i>
@@ -11,8 +11,7 @@
         <!-- STEP 1 -->
         <ng-template uiStepperStep stepTitle="Cercle" stepIcon="apartment" [stepValidator]="!!selectedCircle">
           <section>
-            <h2>Dans quel cercle voulez-vous créer un exercice?</h2>
-
+            <h2>Dans quel cercle voulez-vous créer une ressource?</h2>
             <nz-select
               nzShowSearch
               nzPlaceHolder="Selectionnez un cercle"
@@ -27,10 +26,22 @@
           </section>
         </ng-template>
         <!-- STEP 2 -->
-       <!--  <ng-template uiStepperStep stepTitle="Template" stepIcon="snippets">
+        <ng-template uiStepperStep stepTitle="Template" stepIcon="snippets"  [stepValidator]="!!selectedType">
           <section>
+            <h2>Quel type de ressource souhaitez vous créer?</h2>
+            <nz-select
+              nzShowSearch
+              nzPlaceHolder="Selectionnez un type"
+              [(ngModel)]="selectedType"
+              [nzShowArrow]="false">
+              <nz-option
+                *ngFor="let type of types"
+                [nzLabel]="type|resourceName"
+                [nzValue]="type">
+              </nz-option>
+            </nz-select>
           </section>
-        </ng-template> -->
+        </ng-template>
         <!-- STEP 3 -->
         <ng-template uiStepperStep stepTitle="Informations" stepIcon="info-circle" [stepValidator]="!!formInfos.valid">
         <section>

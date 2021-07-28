@@ -16,6 +16,7 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
+import { ResourceNamePipe } from './pipes/resource-name.pipe';
 import { ResourceIconPipe } from './pipes/resource-icon.pipe';
 import { ResourceColorPipe } from './pipes/resource-color.pipe';
 
@@ -48,6 +49,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
+        ResourceNamePipe,
         ResourceColorPipe,
 
         ListComponent,
@@ -60,6 +62,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
+        ResourceNamePipe,
         ResourceColorPipe,
 
         ListComponent,

@@ -53,9 +53,9 @@ export class CircleService {
         return this.provider.findById(id);
     }
 
-    findWatchedBy(username: string): Observable<PageResult<Circle>> {
+    findWatchedBy(username: string, limit=5): Observable<PageResult<Circle>> {
         return this.provider.search({
-            limit: 5,
+            limit,
             watchers: [username]
         });
     }

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@platon/core/auth';
-import { Circle, CircleService, ResourceFileService, ResourceService } from '@platon/feature/workspace';
+import { Circle, CircleService, ResourceFileService, ResourceService, ResourceTypes } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
@@ -20,10 +20,12 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 })
 export class CreateResourceComponent implements OnInit {
     circles: Circle[] = [];
+    types: ResourceTypes[] = ['MODEL', 'EXERCISE', 'ACTIVITY'];
 
     selectedCircle?: Circle;
     selectedTopics: string[] = [];
     selectedLevels: string[] = [];
+    selectedType: ResourceTypes = 'MODEL';
 
     loading = true;
     creating = false;
@@ -50,7 +52,6 @@ export class CreateResourceComponent implements OnInit {
         private readonly messageService: NzMessageService,
         private readonly resourceService: ResourceService,
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly resourceFileService: ResourceFileService,
     ) { }
 
     async ngOnInit() {
@@ -59,15 +60,12 @@ export class CreateResourceComponent implements OnInit {
         const user = (await this.authService.ready())!;
 
         this.circles = (
-            await this.circleService.findWatchedBy(user.username).toPromise()
+            await this.circleService.findWatchedBy(user.username, 100).toPromise()
         ).results;
 
-        const circle = Number.parseInt(
-            this.activatedRoute.snapshot.queryParamMap.get('circle') || '-1',
-            10
-        );
-
-        this.selectedCircle = this.circles.find(e => e.id === circle);
+        const { queryParamMap } = this.activatedRoute.snapshot;
+        const circleId = Number.parseInt(queryParamMap.get('circle') || '-1', 10);
+        this.selectedCircle = this.circles.find(e => e.id === circleId);
 
         this.loading = false;
         this.changeDetectorRef.markForCheck();
@@ -84,24 +82,15 @@ export class CreateResourceComponent implements OnInit {
             const resource = await this.resourceService.createResource({
                 name,
                 desc,
-                type: 'EXERCISE',
-                //status: 'DRAFT',
+                type: this.selectedType,
                 circle: this.selectedCircle!.id,
                 levels: this.selectedLevels,
                 topics: this.selectedTopics,
-            }).toPromise();
-
-            await this.resourceFileService.create({
-                resource,
                 files: {
-                    'main.pl': { type: 'file', content: '' },
                     'resource-info.json': {
                         type: 'file',
                         content: JSON.stringify({
-                            name,
-                            desc,
-                            type: 'EXERCISE',
-                            dependencies: {}
+                            type: this.selectedType,
                         }, null, 4)
                     }
                 }
