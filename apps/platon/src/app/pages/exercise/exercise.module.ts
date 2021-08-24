@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { NgeMarkdownModule} from 'nge-markdown';
+import { NgeMarkdownModule} from '@mcisse/nge/markdown';
 import { SafePipeModule } from '@platon/shared/utils';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 
