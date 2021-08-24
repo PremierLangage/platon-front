@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CourseService } from '../course/course.service'
+import { Component, EventEmitter, Output } from '@angular/core';
+import { CourseService, Course } from '../course/course.service'
 
 
 
@@ -14,6 +14,8 @@ export class CreateCourseComponent {
     name!: string;
     desc!: string;
     sandbox_name!: string;
+    @Output() course = new EventEmitter<Course>();
+
 
     constructor(public courseService: CourseService) {}
 
@@ -26,6 +28,7 @@ export class CreateCourseComponent {
             this.courseService.createCourse(this.name.trim(), this.desc.trim(), this.sandbox_name.trim())
                 .then(response => {
                     if(response){
+                        this.course.emit(response)
                         console.log(response)
                     }
                 })

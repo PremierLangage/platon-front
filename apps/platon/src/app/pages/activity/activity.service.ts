@@ -30,6 +30,17 @@ export class ActivityService {
                 })
             ).toPromise();
     }
+
+    getActivity(course_id: number): Promise<Activity | undefined> {
+        console.log("create activity")
+
+        return this.http.get<Activity>(`/api/v1/activity/${course_id}`)
+            .pipe(
+                catchError(() => {
+                    return of(undefined);
+                })
+            ).toPromise();
+    }
 }
 
 

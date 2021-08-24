@@ -24,9 +24,6 @@ export class ExerciseComponent implements OnInit {
     <wc-code-editor state='{"selector": "c-code-editor", "language": "python", "code": "# write your code here"}'></wc-code-editor>
     `;
 
-
-
-
     ngOnInit() {
     }
 
