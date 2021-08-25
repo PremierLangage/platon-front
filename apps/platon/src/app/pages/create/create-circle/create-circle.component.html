@@ -45,7 +45,11 @@
             nzMode="multiple"
             nzPlaceHolder="Selectionnez une liste de topics"
             [(ngModel)]="selectedTopics">
-            <nz-option *ngFor="let item of topics; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option>
+            <nz-option
+              *ngFor="let item of topics; trackBy: trackByValue"
+              [nzLabel]="item"
+              [nzValue]="item">
+            </nz-option>
           </nz-select>
         </section>
       </ng-template>
@@ -61,7 +65,11 @@
             nzMode="multiple"
             nzPlaceHolder="Selectionnez une liste de niveaux"
             [(ngModel)]="selectedLevels">
-            <nz-option *ngFor="let item of levels; trackByValue" [nzLabel]="item" [nzValue]="item"></nz-option>
+            <nz-option
+              *ngFor="let item of levels; trackBy: trackByValue"
+              [nzLabel]="item"
+              [nzValue]="item">
+            </nz-option>
           </nz-select>
         </section>
       </ng-template>

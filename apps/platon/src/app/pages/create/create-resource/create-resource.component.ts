@@ -109,4 +109,8 @@ export class CreateResourceComponent implements OnInit {
             this.changeDetectorRef.markForCheck();
         }
     }
+
+    trackByValue(_: number, item: any) {
+        return item;
+    }
 }

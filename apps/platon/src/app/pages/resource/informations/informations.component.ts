@@ -1,11 +1,10 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CircleService } from '@platon/feature/workspace';
 import { Subscription } from 'rxjs';
-import { CirclePresenter } from '../circle.presenter';
+import { ResourcePresenter } from '../resource-presenter';
 
 @Component({
-    selector: 'app-circle-informations',
+    selector: 'app-resource-informations',
     templateUrl: './informations.component.html',
     styleUrls: ['./informations.component.scss']
 })
@@ -34,31 +33,25 @@ export class InformationsComponent implements OnInit, OnDestroy {
     }
 
     constructor(
-        private readonly presenter: CirclePresenter,
-        private readonly circleService: CircleService,
+        private readonly presenter: ResourcePresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
     ngOnInit() {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(async context => {
-                const [topics, levels] = await Promise.all([
-                    this.circleService.topics().toPromise(),
-                    this.circleService.levels().toPromise(),
-                ]);
-
-                this.levels = levels;
-                this.topics = topics.map(e => e.name);
-
                 this.context = context;
-
-                const circle = this.context.circle!;
-                this.form = new FormGroup({
-                    name: new FormControl({ value: circle.name, disabled: !this.canEdit }, [Validators.required]),
-                    desc: new FormControl({ value: circle.desc, disabled: !this.canEdit }, [Validators.required]),
-                    topics: new FormControl(circle.topics),
-                    levels: new FormControl(circle.levels),
-                });
+                const { circle, resource } = context;
+                if (circle && resource) {
+                    this.levels = circle.levels;
+                    this.topics = circle.topics;
+                    this.form = new FormGroup({
+                        name: new FormControl({ value: resource.name, disabled: !this.canEdit }, [Validators.required]),
+                        desc: new FormControl({ value: resource.desc, disabled: !this.canEdit }, [Validators.required]),
+                        topics: new FormControl(resource.topics),
+                        levels: new FormControl(resource.levels),
+                    });
+                }
 
                 this.changeDetectorRef.markForCheck();
             })

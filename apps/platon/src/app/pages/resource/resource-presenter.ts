@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Resource, ResourceService } from '@platon/feature/workspace';
+import { Circle, CircleService, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
@@ -11,9 +11,7 @@ export class ResourcePresenter implements OnDestroy {
     private readonly context = new BehaviorSubject<Context>(this.defaultContext);
 
     get defaultContext(): Context {
-        return {
-            state: 'LOADING'
-        };
+        return { state: 'LOADING' };
     }
 
     get contextChange(): Observable<Context> {
@@ -23,6 +21,7 @@ export class ResourcePresenter implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
+        private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
         private readonly resourceService: ResourceService,
@@ -38,15 +37,46 @@ export class ResourcePresenter implements OnDestroy {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
 
+    async openInVsCodeUrl(): Promise<string> {
+        const authToken = (await this.authService.token())!;
+        const rid = this.context.value.resource?.id;
+        const { access, refresh } = authToken;
+        const origin = location.origin;
+        return `vscode://platon.platon-explorer?origin=${origin}&resource=${rid}&access=${access}&refresh=${refresh}`;
+    }
+
+    async update(form: Omit<UpdateResourceForm, 'resource'>): Promise<boolean> {
+        const { resource } = this.context.value as Required<Context>;;
+        try {
+            const newResource = await this.resourceService.updateResource({
+                resource,
+                ...form
+            }).toPromise();
+
+            this.context.next({
+                ...this.context.value,
+                resource: newResource,
+            });
+
+            this.messageService.success('Les informations de la ressource ont bien été modifiées !');
+            return true;
+        } catch {
+            this.alertError();
+            return false;
+        }
+    }
+
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),
             this.resourceService.findById(resourceId).toPromise()
         ]);
 
+        const circle = await this.circleService.findById(resource.circle.id).toPromise();
         this.context.next({
             state: 'READY',
             user,
+            circle,
             resource,
         });
     }
@@ -63,11 +93,18 @@ export class ResourcePresenter implements OnDestroy {
             }
         }
     }
+
+    private alertError(): void {
+        this.messageService.error(
+            'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !',
+        );
+    }
 }
 
 
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
+    circle?: Circle;
     resource?: Resource;
 }

@@ -14,7 +14,6 @@
     <tr>
       <th>Utilisateur</th>
       <th>Date d'ajout</th>
-      <th>Rôle</th>
       <th *ngIf="editable"></th>
     </tr>
   </thead>
@@ -24,15 +23,6 @@
         <auth-avatar [username]="data.username"></auth-avatar>
       </td>
       <td>{{data.dateJoined|date}}</td>
-      <td>
-        <nz-select
-          [(ngModel)]="data.status"
-          [nzDisabled]="true"
-          nzSize="large">
-          <nz-option nzLabel="Admin" nzValue="ADMIN"></nz-option>
-          <nz-option nzLabel="Membre" nzValue="MEMBER"></nz-option>
-        </nz-select>
-      </td>
       <td *ngIf="editable">
         <button
           nz-button

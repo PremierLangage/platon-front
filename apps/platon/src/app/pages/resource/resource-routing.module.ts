@@ -7,23 +7,23 @@ const routes: Routes = [
     {
         path: ':id',
         component: ResourceComponent,
-        // children: [
-        //     {
-        //         path: 'overview',
-        //         loadChildren: () => import(
-        //             /* webpackChunkName: "resource-overview" */
-        //             './overview/overview.module'
-        //         ).then(m => m.OverviewModule)
-        //     },
-        //     {
-        //         path: 'informations',
-        //         loadChildren: () => import(
-        //             /* webpackChunkName: "resource-informations" */
-        //             './informations/informations.module'
-        //         ).then(m => m.InformationsModule)
-        //     },
-        //     { path: '**', redirectTo: 'overview', pathMatch: 'full' }
-        // ]
+        children: [
+            {
+                path: 'overview',
+                loadChildren: () => import(
+                    /* webpackChunkName: "resource-overview" */
+                    './overview/overview.module'
+                ).then(m => m.OverviewModule)
+            },
+            {
+                path: 'informations',
+                loadChildren: () => import(
+                    /* webpackChunkName: "resource-informations" */
+                    './informations/informations.module'
+                ).then(m => m.InformationsModule)
+            },
+            { path: '**', redirectTo: 'overview', pathMatch: 'full' }
+        ]
     },
 ];
 

@@ -6,10 +6,8 @@ export declare type CircleEventTypes =
     ;
 
 export declare type MemberStatus =
-    'ADMIN' |
     'MEMBER'
     ;
-
 
 export interface Circle {
     id: number;
@@ -18,6 +16,10 @@ export interface Circle {
         id: number;
         name: string;
     };
+    permissions: {
+        write: boolean;
+        delete: boolean;
+    },
     opened: boolean;
     desc: string;
     topics: string[];

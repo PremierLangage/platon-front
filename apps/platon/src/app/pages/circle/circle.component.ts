@@ -68,8 +68,7 @@ export class CircleComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
-
-                if (this.context.isMember) {
+                if (context.circle?.permissions.write) {
                     this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
                     this.actions.push(
                         {

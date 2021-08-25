@@ -23,6 +23,10 @@ export interface Resource {
         id: number;
         name: string;
     };
+    permissions: {
+        write: boolean;
+        delete: boolean;
+    },
     topics: string[];
     levels: string[];
     createdAt: string;
@@ -77,8 +81,9 @@ export interface CreateResourceForm {
 
 export interface UpdateResourceForm {
     resource: Resource;
-    name: string;
-    desc: string;
-    topics: string[];
-    levels: string[];
+    name?: string;
+    desc?: string;
+    status?: ResourceStatus;
+    topics?: string[];
+    levels?: string[];
 }

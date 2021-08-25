@@ -168,13 +168,15 @@ export class CirclePresenter implements OnDestroy {
         }
     }
 
+    // Event
 
     async listEvents(): Promise<PageResult<CircleEvent>> {
         const { circle } = this.context.value as Required<Context>;
         return this.circleService.listEvents(circle).toPromise();
     }
 
-    async updateCircle(form: Omit<UpdateCircleForm, 'circle'>): Promise<boolean> {
+
+    async update(form: Omit<UpdateCircleForm, 'circle'>): Promise<boolean> {
         const { circle } = this.context.value as Required<Context>;;
         try {
             const newCircle = await this.circleService.updateCircle({
@@ -187,9 +189,7 @@ export class CirclePresenter implements OnDestroy {
                 circle: newCircle,
             });
 
-            this.messageService.success(
-                'Les informations du cercle ont bien été modifiées !',
-            );
+            this.messageService.success('Les informations du cercle ont bien été modifiées !');
             return true;
         } catch {
             this.alertError();
@@ -216,8 +216,6 @@ export class CirclePresenter implements OnDestroy {
             member,
             watcher,
             invitation,
-            isAdmin: user!.isAdmin || member?.status === 'ADMIN',
-            isMember: user!.isAdmin || !!member,
         });
     }
 
@@ -248,6 +246,4 @@ export interface Context {
     watcher?: CircleWatcher;
     member?: CircleMember;
     invitation?: CircleInvitation;
-    isAdmin?: boolean;
-    isMember?: boolean;
 }
