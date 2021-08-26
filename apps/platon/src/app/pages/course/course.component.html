@@ -4,6 +4,14 @@
       <h1><b>{{ course.name }}</b></h1>
       <!-- <button (ngSubmit)="createActivity()">Créer une activity</button> -->
       <div>{{ course | json }}</div>
+      <div>
+        <a *ngFor="let activity of course.activities" >
+          <figure class="space">
+            <img src="../..../../../../assets/images/illustrations/course.jpg" height="150px"/>
+            <figcaption>{{ activity.name }} ({{activity.id}})</figcaption>
+          </figure>
+        </a>
+      </div>
     </div>
 
     <form (ngSubmit)="createActivity()" #activityForm="ngForm">
@@ -12,6 +20,7 @@
      <button type="submit" class="btn btn-success" [disabled]="!activityForm.form.valid">Créer une activity</button>
 
      </form>
+
   </app-content>
 
 
