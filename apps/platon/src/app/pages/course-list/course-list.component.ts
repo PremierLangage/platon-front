@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 
 import { CourseService } from '../course/course.service';
 import { Course } from '../course/course.service'
-import { Courses } from '../course/course.service'
 
 @Component({
   selector: 'app-course-list',
@@ -13,7 +12,6 @@ import { Courses } from '../course/course.service'
 export class CourseListComponent implements OnInit {
     courses: Course[] = []
 
-
     constructor(public courseService: CourseService) {
     }
 
@@ -23,15 +21,17 @@ export class CourseListComponent implements OnInit {
                 if(response){
                     this.courses = response.courses;
                 }
-
             })
             .then(response => {console.log("Get DATA")})
             .catch(error => console.error(error));
-
     };
 
 
     courseChosen(course: any) {
         return course.id;
+    }
+
+    addCourse(course: Course) : void {
+        this.courses.push(course);
     }
 }

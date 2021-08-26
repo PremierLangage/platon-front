@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { CourseService, CourseDetail} from './course.service';
-import { ActivityService, Activity } from '../activity/activity.service'
+import { ActivityService } from '../activity/activity.service'
 
 
 @Component({
@@ -16,7 +16,6 @@ export class CourseComponent implements OnInit {
 
     course!: CourseDetail;
     id_course: any;
-
 
     constructor(public courseService: CourseService,
                 private route: ActivatedRoute,
