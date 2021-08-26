@@ -2,7 +2,6 @@
   <app-content>
     <div *ngIf="course">
       <h1><b>{{ course.name }}</b></h1>
-      <!-- <button (ngSubmit)="createActivity()">Créer une activity</button> -->
       <div>{{ course | json }}</div>
       <div>
         <a *ngFor="let activity of course.activities" >
@@ -17,20 +16,10 @@
     <form (ngSubmit)="createActivity()" #activityForm="ngForm">
 
 
-     <button type="submit" class="btn btn-success" [disabled]="!activityForm.form.valid">Créer une activity</button>
+     <button type="submit" class="btn btn-success" [disabled]="!activityForm.form.valid">Create activity</button>
 
      </form>
 
   </app-content>
-
-
-   <p>coucou</p>
-
-
-
-  <div *ngIf="course">
-    <!-- <app-activity-list [id]="course.id"></app-activity-list> -->
-  </div>
-
 
 </app-container>
