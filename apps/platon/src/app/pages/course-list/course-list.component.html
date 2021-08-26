@@ -2,7 +2,7 @@
   <app-content>
     <h1>COURSE LIST MODULE</h1>
 
-    <app-create-course></app-create-course>
+    <app-create-course (course)="addCourse($event)"></app-create-course>
 
     <div>
       <a *ngFor="let course of courses" [routerLink]="['/courses', course.id]">

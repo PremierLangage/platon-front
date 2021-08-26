@@ -1,28 +1,26 @@
  <form (ngSubmit)="onSubmit()" #courseForm="ngForm">
- <div>
-  <mat-form-field appearance="fill">
-    <mat-label>Nom du cours</mat-label>
-    <input matInput type="text" [(ngModel)]="name" name="name">
-  </mat-form-field>
-</div>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Nom du cours</mat-label>
+      <input matInput type="text" [(ngModel)]="name" name="name">
+    </mat-form-field>
+  </div>
 
-<div>
-  <mat-form-field class="example-full-width" appearance="fill">
-    <mat-label>Description</mat-label>
-    <textarea matInput [(ngModel)]="desc" placeholder="Ex. It makes me feel..." name="desc"></textarea>
-  </mat-form-field>
-</div>
+  <div>
+    <mat-form-field class="example-full-width" appearance="fill">
+      <mat-label>Description</mat-label>
+      <textarea matInput [(ngModel)]="desc" placeholder="Ex. It makes me feel..." name="desc"></textarea>
+    </mat-form-field>
+  </div>
 
-<div>
-  <mat-form-field appearance="fill">
-    <mat-label>Nom de la sandbox</mat-label>
-    <input matInput type="text" [(ngModel)]="sandbox_name" name="sandbox_name">
-  </mat-form-field>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Nom de la sandbox</mat-label>
+      <input matInput type="text" [(ngModel)]="sandbox_name" name="sandbox_name">
+    </mat-form-field>
+  </div>
 
-</div>
-
-<button type="submit" class="btn btn-success" [disabled]="!courseForm.form.valid">Créer un cours</button>
-
+  <button type="submit" class="btn btn-success" [disabled]="!courseForm.form.valid">Créer un cours</button>
 </form>
 
 
