@@ -22,7 +22,7 @@ export class CourseListComponent implements OnInit {
                     this.courses = response.courses;
                 }
             })
-            .then(response => {console.log("Get DATA")})
+            .then(response => {console.log("GET COURS : " + this.courses)})
             .catch(error => console.error(error));
     };
 

@@ -27,13 +27,8 @@ import { CourseListComponent } from './course-list.component';
         AppSharedLayoutModule,
 
 
-        RouterModule.forChild([{ path: '', component: CourseListComponent }]),
-
         RouterModule.forChild([
-            {
-                path: '',
-                component: CourseListComponent,
-            },
+            { path: '', component: CourseListComponent}
         ]),
     ],
 

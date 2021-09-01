@@ -9,7 +9,7 @@ import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
 import { CourseComponent } from './course.component';
-
+import { ActivityListModule } from '../activity-list/activity-list.module';
 
 @NgModule ({
     imports: [
@@ -20,8 +20,8 @@ import { CourseComponent } from './course.component';
         MatButtonToggleModule,
 
         AppSharedLayoutModule,
-
-        RouterModule.forChild([{ path: '', component: CourseComponent }]),
+        ActivityListModule,
+        RouterModule.forChild([{ path: ':id', component: CourseComponent }]),
     ],
 
     declarations: [CourseComponent],

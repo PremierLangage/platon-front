@@ -7,7 +7,6 @@ import { CourseService, Course } from '../course/course.service'
     templateUrl: './create-course.component.html',
     styleUrls: ['./create-course.component.scss'],
 })
-
 export class CreateCourseComponent {
     submitted = false;
     name!: string;

@@ -2,16 +2,17 @@
   <app-content>
     <h1>COURSE LIST MODULE</h1>
 
-    <app-create-course (course)="addCourse($event)"></app-create-course>
-
     <div>
-      <a *ngFor="let course of courses" [routerLink]="['/courses', course.id]">
+      <a *ngFor="let course of courses" [routerLink]="['/course-detail', course.id]">
         <figure class="space">
           <img src="../../../../../../assets/images/illustrations/course.jpg" />
           <figcaption>{{ course.name }}</figcaption>
         </figure>
       </a>
     </div>
+
+    <app-create-course (course)="addCourse($event)"></app-create-course>
+
   </app-content>
 </app-container>
 <!-- platon.dev/course/1 -->

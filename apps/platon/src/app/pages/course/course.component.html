@@ -1,25 +1,27 @@
 <app-container>
-  <app-content>
-    <div *ngIf="course">
-      <h1><b>{{ course.name }}</b></h1>
-      <div>{{ course | json }}</div>
-      <div>
-        <a *ngFor="let activity of course.activities"  [routerLink]="['/activity', activity.id]" >
-          <figure class="space">
-            <img src="../..../../../../assets/images/illustrations/course.jpg" height="150px"/>
-            <figcaption>{{ activity.name }} ({{activity.id}})</figcaption>
-          </figure>
-        </a>
-      </div>
+  <app-content *ngIf="course">
+    <h1><b>NAME : {{ course.name }}</b></h1>
+    <div>{{ course | json }}</div>
+    <!--
+    <div>
+      <a *ngFor="let activity of course.activities"  [routerLink]="['/activity', activity.id]" >
+        <figure class="space">
+          <img src="../..../../../../assets/images/illustrations/course.jpg" height="150px"/>
+          <figcaption>{{ activity.name }} ({{activity.id}})</figcaption>
+        </figure>
+      </a>
     </div>
+    -->
+    <app-activity-list [courseId]="course.id" [activities]="course.activities"></app-activity-list>
 
+    <!--
     <form (ngSubmit)="createActivity()" #activityForm="ngForm">
 
 
      <button type="submit" class="btn btn-success" [disabled]="!activityForm.form.valid">Create activity</button>
 
      </form>
-
+    -->
   </app-content>
 
 </app-container>
