@@ -1,20 +1,9 @@
-<app-container-tabbed [tabs]="tabs">
-  <h1> Activite : {{this.nom}} </h1>
-  <h2> Id : {{this.num}} </h2>
-
-  <button mat-icon-button>
-    <mat-icon>
-      <span class="material-icons">menu</span>
-    </mat-icon>
-  </button>
-
-  <div>
-    <mat-button-toggle-group>
-      <mat-button-toggle *ngFor="let exo of this.exercises_list">{{exo}}</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
-
-</app-container-tabbed>
-
-
-
+<app-container>
+  <app-content>
+    <h1>ACTIVITY DETAIL</h1>
+    <div *ngIf="activity">
+      <h1><b>{{ activity.name }}</b></h1>
+      <div>{{ activity | json }}</div>
+    </div>
+  </app-content>
+</app-container>

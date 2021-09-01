@@ -1,41 +1,64 @@
 import { Injectable } from '@angular/core';
-
 import { of } from 'rxjs';
 import { catchError } from "rxjs/operators";
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 
+import { Course, Settings } from '../course/course.service'
 
 
-@Injectable({providedIn: 'root'})
+@Injectable()
 export class ActivityService {
-
     constructor(private readonly http: HttpClient) {}
 
+    ROOT_URL = '/api/v1/activity/1';
 
-    createActivity(course_id: number, name: string, description: string): Promise<Activity | undefined> {
-        console.log("create activity")
-
-        return this.http.post<Activity>('/api/v1/activity/',
-            {
-                "name": name,
-                "desc": description,
-                "json_activity": mock_data_activity,
-                "exercices": mock_data_exercices,
-                "course_id": course_id
-            }
-          ).pipe(
+    /**
+     * Get course detail with id 'id'x
+     * @param id
+     */
+    getActivity(id: number): Promise<ActivityDetail | undefined> {
+        return this.http.get<ActivityDetail>(`/api/v1/activity/${id}`).pipe(
                 catchError(() => {
                     return of(undefined);
                 })
             ).toPromise();
     }
 
-    getActivity(course_id: number): Promise<Activity | undefined> {
-        console.log("create activity")
+    /**
+     * Get all courses
+     */
+    getActivities(): Promise<Activities | undefined> {
+        return this.http.get<Activities>('/api/v1/activity/').pipe(
+                catchError(() => {
+                    return of(undefined);
+                })
+            ).toPromise();
+    }
 
-        return this.http.get<Activity>(`/api/v1/activity/${course_id}`)
-            .pipe(
+    /**
+     * Get my courses
+     */
+    getmyActivities(): Promise<Activities | undefined> {
+        return this.http.get<Activities>('/api/v1/activity/me').pipe(
+                catchError(() => {
+                    return of(undefined);
+                })
+            ).toPromise();
+    }
+
+    /**
+     * Create a course
+     * @param activity_name
+     */
+    createActivity(activity_name: string, course_id: number): Promise<Activity | undefined> {
+        return this.http.post<Activity>('/api/v1/activity/', {
+            "name": activity_name,
+            "desc": "Mon activity test",
+            "json_activity": activity_json,
+            "exercices": exercice_json,
+            "course_id": course_id
+          }).pipe(
                 catchError(() => {
                     return of(undefined);
                 })
@@ -43,21 +66,7 @@ export class ActivityService {
     }
 }
 
-
-export interface Activity {
-    name: string;
-    desc: string;
-    id: number;
-
-}
-
-
-const mock_data_activity = {
-    "__files": {
-        "start.py":"#!/usr/bin/env python3\n# coding: utf-8\n\nimport sys, json, jsonpickle\n\nfrom platon import makepayload\n\nif __name__ == \"__main__\":\n    if len(sys.argv) < 4:\n        msg = (\"Sandbox did not call starter properly:\\n\"\n               +\"Usage: python3 start.py [input_json] [output_json] [result_json]\")\n        print(msg, file=sys.stderr)\n        sys.exit(1)\n    input_json = sys.argv[1]\n    output_json = sys.argv[2]\n    result_json = sys.argv[3]\n    \n    with open(input_json, \"r\") as f:\n        dic = json.load(f)\n    \n    if 'start' in dic:\n        exec(dic['start'], dic)\n    else:\n        print((\"No default start script. Please define a start script.\"),\n              file = sys.stderr)\n        sys.exit(1)\n\n    if \"lst_exos\" in dic:\n        name_exos = dict()\n        for exo in dic[\"lst_exos\"]:\n            with open(str(exo) + \".json\", \"r\") as f:\n                exercice_json = json.load(f)\n                name_exos[exo] = exercice_json[\"title\"]\n        dic[\"name_exos\"] = name_exos\n\n    \n    ploaddic = makepayload(dic)\n    with open(result_json,\"w+\") as pload:\n        pload.write(jsonpickle.encode(ploaddic, unpicklable=False))\n\n    with open(output_json, \"w+\") as f:\n        f.write(jsonpickle.encode(dic, unpicklable=False))\n    \n    sys.exit(0)\n",
-        "platon.py":"import os\nimport subprocess\n\ndef makepayload(dic):\n    \"\"\"\n    Objectif réduire la taille du dict retourné au front.\n    \"\"\"\n    d={}\n    for key in dic.keys():\n        # pas de code \n        if key.endswith(\".py\"): \n            continue\n        # pas les settings \n        if key==\"settings\":\n            continue\n        # pas les variables \"_privées\" \n        if key.startswith(\"_\"):\n            continue\n        d[key]= dic[key]\n    return d\n\ndef build(plid, params):\n    \"\"\"\n    création de l'environement\n    \"\"\"\n    os.chdir(str(plid))\n    command = \"python3 builder.py pl.json processed.json 2> stderr.log\"\n    subprocess.call([command], shell=True)\n    path = os.getcwd()\n    print(os.path.basename(path))\n    os.chdir(\"..\")\n",
-        "next.py":"#!/usr/bin/env python3\n# coding: utf-8\n\nimport sys, json, jsonpickle\n\nfrom platon import makepayload\n\nif __name__ == \"__main__\":\n    if len(sys.argv) < 4:\n        msg = (\"Sandbox did not call nexter properly:\\n\"\n               +\"Usage: python3 next.py [input_json] [output_json] [result_json]\")\n        print(msg, file=sys.stderr)\n        sys.exit(1)\n    input_json = sys.argv[1]\n    output_json = sys.argv[2]\n    result_json = sys.argv[3]\n\n    \n    with open(input_json, \"r\") as f:\n        dic = json.load(f)\n        copy_dic = {k:v for k,v in dic.items()}\n    \n    if 'next' in dic:\n        exec(dic['next'], copy_dic)\n    else:\n        print((\"No default next script. Please define a next script.\"),\n              file = sys.stderr)\n        sys.exit(1)\n    \n    for key in copy_dic.keys():\n        if key in dic.keys():\n            dic[key] = copy_dic[key]\n\n    ploaddic = makepayload(dic)\n    with open(result_json,\"w+\") as pload:\n        pload.write(jsonpickle.encode(ploaddic, unpicklable=False))\n\n    with open(output_json, \"w+\") as f:\n        f.write(jsonpickle.encode(dic, unpicklable=False))\n\n    with open(input_json, \"w+\") as f:\n        f.write(json.dumps(dic))\n    \n    sys.exit(0)"
-    },
+var activity_json = {
     "lst_exos": [
         2
     ],
@@ -73,9 +82,9 @@ const mock_data_activity = {
     "start2":"import os\nfrom platon import build\nfor i in lst_exos:\n    build(i, {})\n",
     "next":"from platon import build\ncurrent = current+1\nbuild(lst_exos[current], {})\n",
     "end":""
-  }
+}
 
-  const mock_data_exercices = {
+var exercice_json =  {
     "exercices": [
        {
          "__format": ".pl",
@@ -168,4 +177,33 @@ const mock_data_activity = {
      }
 
     ]
-  }
+ }
+
+
+export interface Activity {
+    id: number;
+    name: string;
+    desc: string;
+}
+
+export interface Activities {
+    activities: Activity[];
+}
+
+export interface ActivityDetail {
+    id:               number;
+    idFrozenResource: number;
+    opening:          string;
+    closing:          string;
+    name:             string;
+    desc:             string;
+    aav:              string;
+    isVisible:        boolean;
+    course:           Course;
+    settings:         Settings;
+    activities:       Activity[];
+    exercices:        Exercice[];
+}
+
+export interface Exercice {
+}
