@@ -42,7 +42,7 @@ export class ResourcePresenter implements OnDestroy {
         const rid = this.context.value.resource?.id;
         const { access, refresh } = authToken;
         const origin = location.origin;
-        return `vscode://platon.platon-explorer?origin=${origin}&resource=${rid}&access=${access}&refresh=${refresh}`;
+        return `vscode://PLaTon.platon-editor?origin=${origin}&resource=${rid}&access=${access}&refresh=${refresh}`;
     }
 
     async update(form: Omit<UpdateResourceForm, 'resource'>): Promise<boolean> {

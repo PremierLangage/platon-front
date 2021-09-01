@@ -1,7 +1,7 @@
 {
   "name": "platon-front",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "CeCILL-B",
   "scripts": {
     "postinstall": "node ./decorate-angular-cli.js && ngcc",
     "ng": "nx",

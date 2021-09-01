@@ -42,7 +42,7 @@ export class CirclePresenter implements OnDestroy {
         const rid = this.context.value.circle?.id;
         const { access, refresh } = authToken;
         const origin = location.origin;
-        return `vscode://platon.platon-explorer?origin=${origin}&circle=${rid}&access=${access}&refresh=${refresh}`;
+        return `vscode://PLaTon.platon-editor?origin=${origin}&circle=${rid}&access=${access}&refresh=${refresh}`;
     }
 
     // Watchers
