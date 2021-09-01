@@ -77,7 +77,7 @@ const routes: Routes = [
         ).then(m => m.CourseListModule)
     },
     {
-        path: 'courses/:id',
+        path: 'course-detail',
         canActivate: [AuthGuard],
         data: { roles: ['all'] },
         loadChildren: () => import(
@@ -86,7 +86,7 @@ const routes: Routes = [
         ).then(m => m.CourseModule)
     },
     {
-        path: 'activity/:id',
+        path: 'activity-detail',
         canActivate: [AuthGuard],
         data: { roles: ['all'] },
         loadChildren: () => import(
@@ -141,15 +141,6 @@ const routes: Routes = [
             /* webpackChunkName: "resource" */
             './pages/resource/resource.module'
         ).then(m => m.ResourceModule)
-    },
-    {
-        path: 'create-activity',
-        canActivate: [AuthGuard],
-        data: { roles: ['editor'] },
-        loadChildren: () => import(
-            /* webpackChunkName: "create-activity" */
-            './pages/create-activity/create-activity.module'
-        ).then(m => m.CreateActivityModule)
     },
     {
         path: 'create-circle',
