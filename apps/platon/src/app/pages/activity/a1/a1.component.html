@@ -1,5 +1,0 @@
-<ng-container *ngIf="(presenter.contextChange|async) as context">
-  <ng-container *ngIf="context.activity">
-    <app-exercise [exercise]="context.activity.exercises[currentExercise]"></app-exercise>
-  </ng-container>
-</ng-container>
