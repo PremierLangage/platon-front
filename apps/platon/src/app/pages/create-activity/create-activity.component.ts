@@ -10,6 +10,7 @@ import { ActivityService, Activity } from '../activity/activity.service'
 export class CreateActivityComponent {
     submitted = false;
     name!: string;
+    desc!: string;
     @Input() courseId!: number;
     @Output() activity = new EventEmitter<Activity>();
 
@@ -21,7 +22,7 @@ export class CreateActivityComponent {
     onSubmit() {
         this.submitted = true;
         if(this.name && this.courseId){
-            this.activityService.createActivity(this.name.trim(), this.courseId)
+            this.activityService.createActivity(this.name.trim(), this.desc, this.courseId)
                 .then(response => {
                     if(response){
                         this.activity.emit(response)

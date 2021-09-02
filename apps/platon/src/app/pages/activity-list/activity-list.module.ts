@@ -7,11 +7,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 import { SafePipeModule } from '@platon/shared/utils';
 
 import { ActivityListComponent } from './activity-list.component';
 import { CreateActivityComponent } from '../create-activity/create-activity.component';
+import { ActivityLabelComponent } from '../activity-label/activity-label.component';
 
 @NgModule({
     imports: [
@@ -22,6 +24,7 @@ import { CreateActivityComponent } from '../create-activity/create-activity.comp
         MatInputModule,
         MatFormFieldModule,
         MatButtonToggleModule,
+        MatExpansionModule,
 
         SafePipeModule,
         AppSharedLayoutModule,
@@ -30,7 +33,7 @@ import { CreateActivityComponent } from '../create-activity/create-activity.comp
         RouterModule.forChild([{ path: '', component: ActivityListComponent }]),
     ],
 
-    declarations: [ActivityListComponent, CreateActivityComponent],
+    declarations: [ActivityListComponent, CreateActivityComponent, ActivityLabelComponent],
     exports: [ActivityListComponent],
     providers: [],
 })

@@ -1,26 +1,6 @@
-figure {
-    border: 1px solid #ddd;
-    display:inline-block;
-    border-radius: 4px;
-    padding: 5px;
-    width: 300px;
-  }
-  
-  img {
-    width: 288px;
-    height: 150px;
-  }
-  
-  figure.space{
-    margin-right: 50px;
-  }
-  
-  figcaption {
-    background-color: #222;
-    color: #fff;
-    font: italic smaller sans-serif;
-    padding: 3px;
-    text-align: center;
-  }
-  
-  
+h1.no-activity {
+  font-size: 5em;
+  text-align: center;
+  margin-bottom: 2em;
+}
+

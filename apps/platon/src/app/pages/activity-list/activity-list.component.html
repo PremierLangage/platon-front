@@ -1,13 +1,18 @@
-
-<h1>ACTIVITIES LIST MODULE</h1>
-<h2>COURSE_ID = {{ this.courseId }}</h2>
 <div>
+  <div *ngIf="activities.length==0">
+    <h1 class="no-activity">Aucune activité disponible</h1>
+  </div>
   <a *ngFor="let activity of activities"  [routerLink]="['/activity-detail', activity.id]" >
-    <figure class="space">
-      <img src="../..../../../../assets/images/illustrations/course.jpg" height="150px"/>
-      <figcaption>{{ activity.name }} ({{activity.id}})</figcaption>
-    </figure>
+    <app-activity-label [name]="activity.name" [desc]="activity.desc"></app-activity-label>
   </a>
 </div>
-<app-create-activity (activity)="addActivity($event)" [courseId]="this.courseId"></app-create-activity>
+<mat-expansion-panel [expanded]="false"  *ngIf="user?.isAdmin || user?.isEditor">
+  <mat-expansion-panel-header>
+    Créer une activité
+  </mat-expansion-panel-header>
+  <ng-container>
+    <app-create-activity (activity)="addActivity($event)" [courseId]="this.courseId"></app-create-activity>
+  </ng-container>
+</mat-expansion-panel>
+
 <!-- platon.dev/course/1 -->

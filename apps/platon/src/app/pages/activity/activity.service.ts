@@ -51,10 +51,10 @@ export class ActivityService {
      * Create a course
      * @param activity_name
      */
-    createActivity(activity_name: string, course_id: number): Promise<Activity | undefined> {
+    createActivity(activity_name: string, desc:string, course_id: number): Promise<Activity | undefined> {
         return this.http.post<Activity>('/api/v1/activity/', {
             "name": activity_name,
-            "desc": "Mon activity test",
+            "desc": desc,
             "json_activity": activity_json,
             "exercices": exercice_json,
             "course_id": course_id
