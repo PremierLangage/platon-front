@@ -27,9 +27,11 @@ export class CreateCourseComponent {
                     if(response){
                         this.course.emit(response)
                         console.log(response)
+                        this.name = "";
+                        this.desc = "";
+                        this.sandbox_name = "";
                     }
                 })
-                .then(response => {console.log("submit data")})
                 .catch(error => console.error(error));
         }
     }

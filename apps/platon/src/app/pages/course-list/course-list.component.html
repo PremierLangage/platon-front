@@ -1,18 +1,21 @@
 <app-container>
   <app-content>
-    <h1>COURSE LIST MODULE</h1>
-
-    <div>
+    <div *ngIf="courses.length==0">
+      <h1 class="no-course">Aucun cours disponible</h1>
+    </div>
+    <div *ngIf="courses.length">
       <a *ngFor="let course of courses" [routerLink]="['/course-detail', course.id]">
-        <figure class="space">
-          <img src="../../../../../../assets/images/illustrations/course.jpg" />
-          <figcaption>{{ course.name }}</figcaption>
-        </figure>
+        <app-course-label [name]="course.name" [desc]="course.desc"></app-course-label>
       </a>
     </div>
-
-    <app-create-course (course)="addCourse($event)"></app-create-course>
-
+    <mat-expansion-panel [expanded]="false"  *ngIf="user?.isAdmin || user?.isEditor">
+      <mat-expansion-panel-header>
+        Créer un cours
+      </mat-expansion-panel-header>
+      <ng-container>
+        <app-create-course (course)="addCourse($event)"></app-create-course>
+      </ng-container>
+    </mat-expansion-panel>
   </app-content>
 </app-container>
 <!-- platon.dev/course/1 -->
