@@ -19,7 +19,7 @@ export const PickerComponentDefinition = defineWebComponent({
     name: 'Picker',
     icon: 'assets/images/components/forms/picker/picker.svg',
     selector: 'wc-picker',
-    description: 'Permets de choisir une proposition parmi liste.',
+    description: 'Permets de choisir une proposition dans une liste.',
     fullDescriptionUrl: 'assets/docs/components/forms/picker/picker.md',
     schema: {
         $schema: 'http://json-schema.org/draft-07/schema',
