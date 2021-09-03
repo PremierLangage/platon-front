@@ -5,26 +5,28 @@ import {
     CreateFileForm,
     MoveFileForm,
     RenameFileForm,
-    ResourceFile,
-    ResourceTree,
+    FileEntry,
+    FileTree,
     UpdateFileForm
-} from "../models/resource-file";
-import { ResourceFileProvider } from '../models/resource-file-provider';
+} from "../models/file";
+import { FileProvider } from '../models/file-provider';
+import { Circle } from '../models/circle';
 
 @Injectable({ providedIn: 'root' })
-export class ResourceFileService {
+export class FileService {
     constructor(
-        private readonly provider: ResourceFileProvider
+        private readonly provider: FileProvider
     ) { }
 
-    tree(resource: Resource): Observable<ResourceTree> {
-        return this.provider.tree(resource);
+    tree(owner: Resource | Circle): Observable<FileTree> {
+        return this.provider.tree(owner);
     }
 
-    read(file: ResourceFile): Observable<string> {
+    read(file: FileEntry): Observable<string> {
         return this.provider.read(file);
     }
-    delete(file: ResourceFile): Observable<any> {
+
+    delete(file: FileEntry): Observable<any> {
         return this.provider.delete(file);
     }
 

@@ -1,7 +1,8 @@
+import { Circle } from "./circle";
 import { Resource } from "./resource";
 
 
-export interface ResourceFile {
+export interface FileEntry {
     path: string;
     parent: string;
     hexsha: string;
@@ -10,43 +11,44 @@ export interface ResourceFile {
     downloadUrl: string;
     mime: string;
     type: 'file' | 'folder';
-    children: ResourceFile[];
+    children: FileEntry[];
 }
 
-export interface ResourceTree {
+export interface FileTree {
     path: string;
     hexsha: string;
     version: string;
     directory: string;
     url: string;
+    bundleUrl: string;
     downloadUrl: string;
-    files: ResourceFile[];
+    files: FileEntry[];
 }
 
 export interface CreateFileForm {
-    resource: Resource;
+    owner: Resource | Circle;
     files: Record<string, { type: 'file' | 'folder', content?: string }>;
 }
 
 export interface UpdateFileForm {
-    file: ResourceFile;
+    file: FileEntry;
     content: string;
 }
 
 export interface MoveFileForm {
-    resource: Resource;
+    owner: Resource | Circle;
     oldpath: string;
     newpath: string;
     copy?: boolean;
 }
 
 export interface RenameFileForm {
-    resource: Resource;
+    owner: Resource | Circle;
     oldpath: string;
     newpath: string;
 }
 
 export interface DeleteFileForm {
-    resource: Resource;
+    owner: Resource | Circle;
     path: string;
 }

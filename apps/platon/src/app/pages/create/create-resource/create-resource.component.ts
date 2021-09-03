@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@platon/core/auth';
-import { Circle, CircleService, ResourceFileService, ResourceService, ResourceTypes } from '@platon/feature/workspace';
+import { Circle, CircleService, ResourceService, ResourceTypes } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 import { NzMessageService } from 'ng-zorro-antd/message';
 

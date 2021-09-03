@@ -18,8 +18,14 @@
 
     <p class="description">{{ context.circle!.desc }}</p>
 
-    <nz-button-group *ngIf="actions.length">
-      <button nz-button nzType="primary" [matMenuTriggerFor]="menu">
+    <nz-button-group *ngIf="context.circle?.permissions?.write">
+      <button
+        nz-button
+        nzType="primary"
+        matTooltip="Créer une ressource"
+        [routerLink]="['/create-resource']"
+        [queryParams]="{ 'circle': context.circle!.id }"
+        [queryParamsHandling]="'merge'">
         <i nz-icon nzType="plus" nzTheme="outline"></i>
       </button>
       <a
@@ -48,20 +54,5 @@
         Refuser l'invitation
       </button>
     </nz-button-group>
-
-    <mat-menu #menu="matMenu">
-      <ng-container *ngFor="let action of actions">
-        <a
-          mat-menu-item
-          [disabled]="false"
-          [id]="action.id"
-          [routerLink]="action.link"
-          [queryParams]="action.queryParams"
-          [queryParamsHandling]="'merge'">
-          <mat-icon>{{ action.icon }}</mat-icon>
-          <span>{{ action.title }}</span>
-        </a>
-      </ng-container>
-    </mat-menu>
   </ng-container>
 </app-container-tabbed>

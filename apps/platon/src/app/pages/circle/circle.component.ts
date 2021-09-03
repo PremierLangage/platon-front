@@ -20,6 +20,11 @@ export class CircleComponent implements OnInit, OnDestroy {
             link: ['overview']
         },
         {
+            id: 'tab-files',
+            title: 'Fichiers',
+            link: ['files']
+        },
+        {
             id: 'tab-resources',
             title: 'Ressources',
             link: ['resources']

@@ -7,10 +7,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { SharedUiListModule } from '@platon/shared/ui/list';
 
+import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 
@@ -26,6 +31,7 @@ import { ResourceItemComponent } from './components/resource-item/resource-item.
 import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
+import { FilesTreeComponent } from './components/files-tree/files-tree.component';
 
 
 @NgModule({
@@ -37,9 +43,14 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         MatTooltipModule,
 
         NzIconModule,
+        NzSpinModule,
         NzEmptyModule,
         NzBadgeModule,
+        NzButtonModule,
         NzAvatarModule,
+        NzMessageModule,
+        NzTreeModule,
+        NzDropDownModule,
         NzTreeViewModule,
         NzTimelineModule,
 
@@ -57,6 +68,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         CircleTreeComponent,
         CircleItemComponent,
         ResourceItemComponent,
+        FilesTreeComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -71,6 +83,7 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
         CircleTreeComponent,
         CircleItemComponent,
         ResourceItemComponent,
+        FilesTreeComponent,
     ],
 })
 export class FeatureWorkspaceModule { }

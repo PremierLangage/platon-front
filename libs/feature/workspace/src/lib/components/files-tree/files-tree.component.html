@@ -1,0 +1,47 @@
+<ng-container *ngIf="!_loading; else: loadingTemplate">
+  <button
+    nz-button
+    nzType="primary"
+    matTooltip="Rafraîchir les fichiers"
+    (click)="refresh()">
+    <i nz-icon nzType="reload" nzTheme="outline"></i>
+  </button>
+  <nz-tree
+    *ngIf="nodes.length; else: emptyTemplate"
+    nzBlockNode
+    [nzData]="nodes"
+    [nzTreeTemplate]="nzTreeTemplate">
+  </nz-tree>
+</ng-container>
+
+
+<ng-template #nzTreeTemplate let-node let-origin="origin">
+  <span class="node">
+    <span *ngIf="!node.isLeaf" (contextmenu)="contextMenu($event, menu, node)">
+      <i nz-icon [nzType]="node.isExpanded ? 'folder-open' : 'folder'"></i>
+      <span class="folder-name">{{ node.title }}</span>
+    </span>
+    <span *ngIf="node.isLeaf" (contextmenu)="contextMenu($event, menu, node)">
+      <i nz-icon nzType="file"></i>
+      <span class="file-name">{{ node.title }}</span>
+    </span>
+  </span>
+</ng-template>
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <li nz-menu-item (click)="download()">Télécharger</li>
+    <li nz-menu-item (click)="copyPath()">Copier le chemin</li>
+  </ul>
+</nz-dropdown-menu>
+
+<ng-template #emptyTemplate>
+<nz-empty  nzNotFoundImage="simple" [nzNotFoundContent]="content">
+  <ng-template #content>
+    <p>Aucun fichier à afficher</p>
+  </ng-template>
+</nz-empty>
+</ng-template>
+
+<ng-template #loadingTemplate>
+  <nz-spin nzSimple nzSize="large"></nz-spin>
+</ng-template>

@@ -16,6 +16,13 @@ const routes: Routes = [
                 ).then(m => m.OverviewModule)
             },
             {
+                path: 'files',
+                loadChildren: () => import(
+                    /* webpackChunkName: "circle-files" */
+                    './files/files.module'
+                ).then(m => m.FilesModule)
+            },
+            {
                 path: 'resources',
                 loadChildren: () => import(
                     /* webpackChunkName: "circle-resources" */

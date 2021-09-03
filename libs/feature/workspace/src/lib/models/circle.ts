@@ -34,6 +34,7 @@ export interface Circle {
     activitiesCount: number;
     resourcesCount: number;
     url: string;
+    filesUrl: string;
     eventsUrl: string;
     membersUrl: string;
     watchersUrl: string;

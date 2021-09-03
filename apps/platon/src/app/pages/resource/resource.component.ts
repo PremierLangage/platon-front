@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '@platon/core/auth';
-import { ResourceFileService, ResourceStatus } from '@platon/feature/workspace';
+import { ResourceStatus } from '@platon/feature/workspace';
 import { AuthToken } from 'libs/core/auth/src/lib/models/auth-token';
 import { Subscription } from 'rxjs';
 import { LayoutTab } from '../../shared/layout';
@@ -19,11 +19,16 @@ export class ResourceComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     readonly tabs: LayoutTab[] = [
-        /* {
+        {
             id: 'tab-overview',
             title: "Vue d'ensemble",
             link: ['overview']
-        }, */
+        },
+        {
+            id: 'tab-files',
+            title: 'Fichiers',
+            link: ['files']
+        },
         {
             id: 'tab-informations',
             title: 'Informations',

@@ -22,6 +22,13 @@ const routes: Routes = [
                     './informations/informations.module'
                 ).then(m => m.InformationsModule)
             },
+            {
+                path: 'files',
+                loadChildren: () => import(
+                    /* webpackChunkName: "resource-files" */
+                    './files/files.module'
+                ).then(m => m.FilesModule)
+            },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' }
         ]
     },

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ResourcePresenter } from '../resource-presenter';
@@ -6,7 +6,8 @@ import { ResourcePresenter } from '../resource-presenter';
 @Component({
     selector: 'app-resource-informations',
     templateUrl: './informations.component.html',
-    styleUrls: ['./informations.component.scss']
+    styleUrls: ['./informations.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InformationsComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];

@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleService, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
+import { Circle, CircleService, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
@@ -18,9 +18,9 @@ export class ResourcePresenter implements OnDestroy {
         return this.context.asObservable();
     }
 
-
     constructor(
         private readonly authService: AuthService,
+        private readonly fileService: FileService,
         private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
@@ -35,6 +35,14 @@ export class ResourcePresenter implements OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    fileTree(): Observable<FileTree> {
+        const { resource } = this.context.value;
+        if (resource) {
+            return this.fileService.tree(resource)
+        }
+        throw new ReferenceError('missing resource');
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -65,6 +73,7 @@ export class ResourcePresenter implements OnDestroy {
             return false;
         }
     }
+
 
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([

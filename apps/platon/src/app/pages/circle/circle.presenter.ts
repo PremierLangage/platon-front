@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleEvent, CircleMember, CircleMembersFilters, CircleService, CircleWatcher, CircleInvitation, InvitationForm, UpdateCircleForm, CircleInvitationsFilters } from '@platon/feature/workspace';
+import { Circle, CircleEvent, CircleMember, CircleMembersFilters, CircleService, CircleWatcher, CircleInvitation, InvitationForm, UpdateCircleForm, CircleInvitationsFilters, FileTree, FileService } from '@platon/feature/workspace';
 import { PageResult } from '@platon/shared/utils';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject, forkJoin, Observable, Subscription } from 'rxjs';
@@ -21,6 +21,7 @@ export class CirclePresenter implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
+        private readonly fileService: FileService,
         private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
@@ -35,6 +36,14 @@ export class CirclePresenter implements OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    fileTree(): Observable<FileTree> {
+        const { circle } = this.context.value;
+        if (circle) {
+            return this.fileService.tree(circle)
+        }
+        throw new ReferenceError('missing circle');
     }
 
     async openInVsCodeUrl(): Promise<string> {
