@@ -1,0 +1,7 @@
+<figure *ngIf="asset" class="space">
+  <img src="../../../../../../assets/images/illustrations/course.jpg" />
+  <figcaption>{{ asset.name }}</figcaption>
+  <figcaption>{{ asset.desc }}</figcaption>
+  <figcaption float=left>{{ convertDate(asset.opening) }}</figcaption>
+  <figcaption>{{ convertDate(asset.closing) }}</figcaption>
+</figure>
