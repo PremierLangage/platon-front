@@ -3,9 +3,9 @@
     <div *ngIf="courses.length==0">
       <h1 class="no-course">Aucun cours disponible</h1>
     </div>
-    <div *ngIf="courses.length">
+    <div>
       <a *ngFor="let course of courses" [routerLink]="['/course-detail', course.id]">
-        <app-course-label [name]="course.name" [desc]="course.desc"></app-course-label>
+        <app-asset class="preview" [asset]="course"></app-asset>
       </a>
     </div>
     <mat-expansion-panel [expanded]="false"  *ngIf="user?.isAdmin || user?.isEditor">

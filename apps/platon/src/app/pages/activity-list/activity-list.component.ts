@@ -13,7 +13,7 @@ import { Activity } from '../activity/activity.service'
 export class ActivityListComponent implements OnInit {
     user?: AuthUser;
     @Input() activities!: Activity[];
-    @Input() courseId!: number;
+    @Input() courseId?: number;
 
     constructor(
         public activityService: ActivityService,

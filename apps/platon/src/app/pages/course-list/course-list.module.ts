@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -16,7 +16,7 @@ import { SafePipeModule } from '@platon/shared/utils';
 
 import { CreateCourseComponent } from '../create-course/create-course.component';
 import { CourseListComponent } from './course-list.component';
-import { CourseLabelComponent } from '../course-label/course-label.component';
+import { AssetModule } from '../assets/assets.module';
 
 @NgModule({
     imports: [
@@ -31,15 +31,19 @@ import { CourseLabelComponent } from '../course-label/course-label.component';
         MatDatepickerModule,
         MatNativeDateModule,
 
+        ReactiveFormsModule,
+
         SafePipeModule,
         AppSharedLayoutModule,
+
+        AssetModule,
 
         RouterModule.forChild([
             { path: '', component: CourseListComponent}
         ]),
     ],
 
-    declarations: [CourseListComponent, CreateCourseComponent, CourseLabelComponent],
+    declarations: [CourseListComponent, CreateCourseComponent],
     providers: [],
 })
 export class CourseListModule {}

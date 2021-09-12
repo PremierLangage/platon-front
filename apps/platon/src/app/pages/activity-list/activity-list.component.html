@@ -1,9 +1,10 @@
+
+<div *ngIf="activities.length==0">
+  <h1 class="no-activity">Aucune activité disponible</h1>
+</div>
 <div>
-  <div *ngIf="activities.length==0">
-    <h1 class="no-activity">Aucune activité disponible</h1>
-  </div>
-  <a *ngFor="let activity of activities"  [routerLink]="['/activity-detail', activity.id]" >
-    <app-activity-label [name]="activity.name" [desc]="activity.desc"></app-activity-label>
+  <a *ngFor="let activity of activities"  [routerLink]="['/activity-detail', activity.id]">
+    <app-asset class="preview" [asset]="activity"></app-asset>
   </a>
 </div>
 <mat-expansion-panel [expanded]="false"  *ngIf="user?.isAdmin || user?.isEditor">

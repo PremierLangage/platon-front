@@ -4,7 +4,8 @@ import { catchError } from "rxjs/operators";
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 
-import { Course, Settings } from '../course/course.service'
+import { Course } from '../course/course.service'
+import { Asset, Settings, Exercice } from '../assets/assets.model';
 
 
 @Injectable()
@@ -51,15 +52,18 @@ export class ActivityService {
      * Create a course
      * @param activity_name
      */
-    createActivity(activity_name: string, desc:string, course_id: number): Promise<Activity | undefined> {
+    createActivity(activity_name: string, desc:string, opening: any, closing: any, course_id: number): Promise<Activity | undefined> {
         return this.http.post<Activity>('/api/v1/activity/', {
             "name": activity_name,
             "desc": desc,
             "json_activity": activity_json,
             "exercices": exercice_json,
-            "course_id": course_id
+            "course_id": course_id,
+            "opening": opening,
+            "closing": closing,
           }).pipe(
                 catchError(() => {
+                    console.log("Can't create activity");
                     return of(undefined);
                 })
             ).toPromise();
@@ -179,31 +183,30 @@ var exercice_json =  {
     ]
  }
 
+export class Activity implements Asset {
+    id?: number;
+    name!: string;
+    desc!: string;
+    opening!:   string;
+    closing!:   string;
 
-export interface Activity {
-    id: number;
-    name: string;
-    desc: string;
+    constructor() {
+        this.name = "";
+        this.desc = "";
+        this.opening = "";
+        this.closing = "";
+    }
 }
 
-export interface Activities {
-    activities: Activity[];
-}
-
-export interface ActivityDetail {
-    id:               number;
+export interface ActivityDetail extends Asset {
     idFrozenResource: number;
-    opening:          string;
-    closing:          string;
-    name:             string;
-    desc:             string;
-    aav:              string;
-    isVisible:        boolean;
     course:           Course;
     settings:         Settings;
     activities:       Activity[];
     exercices:        Exercice[];
 }
 
-export interface Exercice {
+export interface Activities {
+    activities: Activity[];
 }
+

@@ -1,25 +1,31 @@
-<div class="create-activity">
-  <form (ngSubmit)="onSubmit()" #activityForm="ngForm">
+<div class="wrapper">
+  <form (ngSubmit)="onSubmit()" #courseForm="ngForm" class="create-activity">
     <div>
       <mat-form-field appearance="fill">
-        <mat-label>Nom de l'Activité</mat-label>
-        <input matInput type="text" [(ngModel)]="name" name="name">
+        <mat-label>Nom de l'activité</mat-label>
+        <input matInput type="text" [(ngModel)]="activityCreate.name" name="name">
       </mat-form-field>
-    </div>
 
-    <div>
       <mat-form-field appearance="fill">
         <mat-label>Description</mat-label>
-        <textarea matInput [(ngModel)]="desc" placeholder="Ex. It makes me feel..." name="desc"></textarea>
+        <textarea matInput [(ngModel)]="activityCreate.desc" placeholder="Ex. It makes me feel..." name="desc"></textarea>
       </mat-form-field>
     </div>
 
-    <button type="submit" class="btn btn-success" [disabled]="!activityForm.form.valid">Créer une activité</button>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Enter a date range</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate placeholder="Ouverture de l'activité" [(ngModel)]="activityCreate.opening" name="opening">
+          <input matEndDate placeholder="Fermeture du l'activité" [(ngModel)]="activityCreate.closing" name="closing">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+    </div>
+
+    <button type="submit" class="btn btn-success" [disabled]="!courseForm.form.valid">Créer une activité</button>
   </form>
+
+  <app-asset class="preview" [asset]="activityCreate"></app-asset>
 </div>
-<div>
-  <app-activity-label [name]="name" [desc]="desc"></app-activity-label>
-</div>
-
-
-

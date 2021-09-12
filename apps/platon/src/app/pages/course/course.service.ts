@@ -5,6 +5,7 @@ import { catchError } from "rxjs/operators";
 import { HttpClient, HttpResponse } from '@angular/common/http';
 
 import { Activity } from '../activity/activity.service'
+import { Asset, Settings } from '../assets/assets.model';
 
 
 @Injectable()
@@ -53,11 +54,16 @@ export class CourseService {
      * @param description
      * @param sandbox_name
      */
-    createCourse(course_name: string, description: string, sandbox_name: string): Promise<Course | undefined> {
+    createCourse(course_name: string, description: string, opening: any, closing: any): Promise<Course | undefined> {
+        console.log("create");
+        console.log("opening : " + opening);
+        console.log("closing : " + closing);
         return this.http.post<Course>('/api/v1/courses/', {
             "name": course_name,
             "desc": description,
-            "sandbox_name": sandbox_name
+            "sandbox_name": "default_sandbox",
+            "opening": opening,
+            "closing": closing,
           }).pipe(
                 catchError(() => {
                     return of(undefined);
@@ -66,33 +72,28 @@ export class CourseService {
     }
 }
 
+export class Course implements Asset {
+    id?: number;
+    name!: string;
+    desc!: string;
+    opening!:   string;
+    closing!:   string;
 
+    constructor() {
+        this.name = "";
+        this.desc = "";
+        this.opening = "";
+        this.closing = "";
+    }
+}
 
-
-export interface Course {
-    id: number;
-    name: string;
-    desc: string;
-    status: string;
+export interface CourseDetail extends Asset {
+    sandbox:   number;
+    settings:  Settings;
+    activities: Activity[];
 }
 
 export interface Courses {
     courses: Course[];
 }
 
-export interface CourseDetail {
-    id:        number;
-    opening:   string;
-    closing:   string;
-    name:      string;
-    desc:      string;
-    aav:       string;
-    isVisible: boolean;
-    sandbox:   number;
-    settings:  Settings;
-    status:    string;
-    activities: Activity[]
-}
-
-export interface Settings {
-}

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
@@ -28,4 +29,4 @@ import { ActivityListModule } from '../activity-list/activity-list.module';
     exports: [CourseComponent],
     providers: [],
 })
-export class CourseModule {}
+export class CourseModule { }

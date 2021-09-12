@@ -1,9 +1,6 @@
 <app-container>
   <app-content *ngIf="course">
     <h1 class="title"><b>{{ course.name }}</b></h1>
-    <!--
-    <div>{{ course | json }}</div>
-    -->
 
     <app-activity-list [courseId]="course.id" [activities]="course.activities"></app-activity-list>
 
