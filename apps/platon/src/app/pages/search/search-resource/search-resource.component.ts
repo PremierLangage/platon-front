@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import {  ResourceService, Resource, ResourceFilters, ResourceCompletion } from '@platon/feature/workspace';
+import { ResourceService, Resource, ResourceFilters, ResourceCompletion } from '@platon/feature/workspace';
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
@@ -67,6 +67,11 @@ export class SearchResourceComponent implements OnInit, OnDestroy {
         this.user = user;
         this.completion = completion;
 
+        const { url } = this.router;
+        const matches = url.match(/\/circle\/(\d+).+/);
+        if (matches) {
+            this.filter.circle = Number.parseInt(matches[1], 10);
+        }
         this.changeDetectorRef.detectChanges();
     }
 
