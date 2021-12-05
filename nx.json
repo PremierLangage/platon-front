@@ -26,6 +26,14 @@
       "tags": [],
       "implicitDependencies": ["platon"]
     },
+
+    "premierlangage": {
+      "tags": ["scope:premierlangage"]
+    },
+    "premierlangage-e2e": {
+      "tags": [],
+      "implicitDependencies": ["premierlangage"]
+    },
     "core-auth": {
       "tags": ["scope:core", "type:auth"]
     },

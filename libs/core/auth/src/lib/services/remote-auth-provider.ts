@@ -31,6 +31,7 @@ export class RemoteAuthProvider extends AuthProvider {
                 await this.tokenProvider.remove();
             }
         }
+        return undefined;
     }
 
     async signIn(username: string, password: string): Promise<AuthUser> {

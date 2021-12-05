@@ -24,86 +24,22 @@
             "assets": [
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
-              {
-                "glob": "**/*",
-                "input": "assets",
-                "output": "./assets"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
-                "output": "/assets/@ant-design/assets/"
-              },
-              {
-                "glob": "**/*.md",
-                "input": "libs/feature/web-component/src/lib",
-                "output": "./assets/docs/components"
-              },
-              {
-                "glob": "**/*.svg",
-                "input": "libs/feature/web-component/src/lib",
-                "output": "./assets/images/components"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/intro.js/",
-                "output": "./assets/vendors/intro.js/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/katex/dist/",
-                "output": "./assets/vendors/katex/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/jsplumb/dist/",
-                "output": "./assets/vendors/jsplumb/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/jsplumb/css/",
-                "output": "./assets/vendors/jsplumb/css/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/jsxgraph/distrib/",
-                "output": "./assets/vendors/jsxgraph/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/mathlive/dist/",
-                "output": "./assets/vendors/mathlive/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/jsoneditor/dist/",
-                "output": "./assets/vendors/jsoneditor/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@mcisse/nge/assets/monaco/",
-                "output": "./assets/vendors/nge/monaco/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/monaco-editor/min",
-                "output": "./assets/vendors/nge/monaco/min"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/monaco-editor/min-maps",
-                "output": "./assets/vendors/nge/monaco/min-maps"
-              },
-              {
-                "glob": "**/*.js",
-                "input": "./node_modules/emoji-toolkit/lib/js/",
-                "output": "./assets/vendors/emoji-toolkit/"
-              },
-              {
-                "glob": "viz.js",
-                "input": "./node_modules/viz.js/",
-                "output": "./assets/vendors/viz/"
-              }
+              { "glob": "**/*",  "input": "assets", "output": "./assets" },
+              { "glob": "**/*", "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/", "output": "/assets/@ant-design/assets/" },
+              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
+              { "glob": "**/*", "input": "./node_modules/intro.js/", "output": "./assets/vendors/intro.js/" },
+              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
+              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/",  "output": "./assets/vendors/jsxgraph/" },
+              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
+              { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
+              { "glob": "**/*", "input": "./node_modules/@mcisse/nge/assets/monaco/", "output": "./assets/vendors/nge/monaco/" },
+              { "glob": "**/*", "input": "./node_modules/monaco-editor/min", "output": "./assets/vendors/nge/monaco/min" },
+              { "glob": "**/*", "input": "./node_modules/monaco-editor/min-maps", "output": "./assets/vendors/nge/monaco/min-maps" },
+              { "glob": "**/*.js",  "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
+              { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/"  }
             ],
             "styles": [
               "styles/app.scss",
@@ -114,14 +50,8 @@
               { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
             ],
             "scripts": [
-              {
-                "bundleName": "polyfill-webcomp-es5",
-                "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
-              },
-              {
-                "bundleName": "polyfill-webcomp",
-                "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js"
-              },
+              { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
+              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" },
               "node_modules/rxjs/bundles/rxjs.umd.js",
               "node_modules/@angular/core/bundles/core.umd.js",
               "node_modules/@angular/common/bundles/common.umd.js",
@@ -228,6 +158,166 @@
           "options": {
             "tsConfig": "apps/platon-e2e/tsconfig.e2e.json",
             "exclude": ["**/node_modules/**", "!apps/platon-e2e/**/*"]
+          }
+        }
+      }
+    },
+    "premierlangage": {
+      "projectType": "application",
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/premierlangage",
+      "sourceRoot": "apps/premierlangage/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/apps/premierlangage",
+            "index": "apps/premierlangage/src/index.html",
+            "main": "apps/premierlangage/src/main.ts",
+            "polyfills": "apps/premierlangage/src/polyfills.ts",
+            "tsConfig": "apps/premierlangage/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "apps/premierlangage/src/favicon.ico",
+              "apps/premierlangage/src/assets",
+              { "glob": "**/*",  "input": "assets", "output": "./assets" },
+              { "glob": "**/*", "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/", "output": "/assets/@ant-design/assets/" },
+              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
+              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
+              { "glob": "**/*", "input": "./node_modules/intro.js/", "output": "./assets/vendors/intro.js/" },
+              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
+              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
+              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/",  "output": "./assets/vendors/jsxgraph/" },
+              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
+              { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
+              { "glob": "**/*", "input": "./node_modules/@mcisse/nge/assets/monaco/", "output": "./assets/vendors/nge/monaco/" },
+              { "glob": "**/*", "input": "./node_modules/monaco-editor/min", "output": "./assets/vendors/nge/monaco/min" },
+              { "glob": "**/*", "input": "./node_modules/monaco-editor/min-maps", "output": "./assets/vendors/nge/monaco/min-maps" },
+              { "glob": "**/*.js",  "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
+              { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/"  }
+            ],
+            "styles": [
+              "styles/app.scss",
+              "apps/premierlangage/src/styles.scss",
+              { "input": "styles/ng-zorro/dark.less", "bundleName": "styles.ng-zorro.dark", "inject": false },
+              { "input": "styles/ng-zorro/light.less", "bundleName": "styles.ng-zorro.light", "inject": false },
+              { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark", "inject": false },
+              { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
+            ],
+            "scripts": [
+              { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
+              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" },
+              "node_modules/rxjs/bundles/rxjs.umd.js",
+              "node_modules/@angular/core/bundles/core.umd.js",
+              "node_modules/@angular/common/bundles/common.umd.js",
+              "node_modules/@angular/common/bundles/common-http.umd.js",
+              "node_modules/@angular/compiler/bundles/compiler.umd.js",
+              "node_modules/@angular/elements/bundles/elements.umd.js",
+              "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
+              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
+              "node_modules/@angular/router/bundles/router.umd.js",
+              "node_modules/@angular/forms/bundles/forms.umd.js"
+            ],
+            "allowedCommonJsDependencies": ["hammerjs", "d3-graphviz"]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "apps/premierlangage/src/environments/environment.ts",
+                  "with": "apps/premierlangage/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "none",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "options": {
+            "browserTarget": "premierlangage:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "premierlangage:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "premierlangage:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/premierlangage/tsconfig.app.json",
+              "apps/premierlangage/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!apps/premierlangage/**/*"]
+          }
+        },
+        "test": {
+          "builder": "ngx-build-plus:karma",
+          "options": {
+            "main": "apps/premierlangage/src/test.ts",
+            "tsConfig": "apps/premierlangage/tsconfig.spec.json",
+            "karmaConfig": "apps/premierlangage/karma.conf.js",
+            "polyfills": "apps/premierlangage/src/polyfills.ts",
+            "styles": [],
+            "scripts": [],
+            "assets": []
+          }
+        }
+      }
+    },
+    "premierlangage-e2e": {
+      "root": "apps/premierlangage-e2e",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "apps/premierlangage-e2e/protractor.conf.js",
+            "devServerTarget": "premierlangage:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "premierlangage:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["apps/premierlangage-e2e/**/*.ts"]
           }
         }
       }
@@ -613,11 +703,19 @@
   },
   "schematics": {
     "@nrwl/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
       "unitTestRunner": "karma",
-      "e2eTestRunner": "protractor"
+      "e2eTestRunner": "protractor",
+      "strict": true
     },
     "@nrwl/angular:library": {
+      "style": "scss",
+      "linter": "eslint",
       "unitTestRunner": "karma"
+    },
+    "@nrwl/angular:component": {
+      "style": "scss"
     }
   },
   "defaultProject": "platon"

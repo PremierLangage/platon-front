@@ -89,7 +89,6 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
             lineNumbers: 'on',
             renderWhitespace: 'all',
             quickSuggestions: true,
-            renderIndentGuides: true,
             glyphMargin: false,
             renderControlCharacters: true,
             minimap: {
@@ -121,7 +120,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
         // COMMANDS
         this.editor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {}, ''
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {}, ''
         );
 
         this.initialCode = this.state.code;
