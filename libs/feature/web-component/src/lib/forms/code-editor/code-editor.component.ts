@@ -23,10 +23,12 @@ import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor';
     selector: 'wc-code-editor',
     templateUrl: 'code-editor.component.html',
     styleUrls: ['code-editor.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @WebComponent(CodeEditorComponentDefinition)
-export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComponentHooks<CodeEditorState> {
+export class CodeEditorComponent
+    implements AfterViewChecked, OnDestroy, WebComponentHooks<CodeEditorState>
+{
     private readonly disposables: monaco.IDisposable[] = [];
     private model?: monaco.editor.ITextModel;
     private editor?: monaco.editor.IStandaloneCodeEditor;
@@ -46,18 +48,16 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
     constructor(
         readonly injector: Injector,
-        readonly changeDetector: WebComponentChangeDetectorService,
+        readonly changeDetector: WebComponentChangeDetectorService
     ) {}
 
     ngAfterViewChecked() {
-        if (!this.editor || !this.footer)
-            return;
+        if (!this.editor || !this.footer) return;
 
         const rect = this.footer.nativeElement.getBoundingClientRect();
-        if (!rect)
-            return;
+        if (!rect) return;
 
-        const { width , height } = rect;
+        const { width, height } = rect;
         if (this.width !== width || this.height !== height) {
             this.editor?.layout();
             this.width = width;
@@ -66,16 +66,20 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
     }
 
     ngOnDestroy() {
-        this.disposables.forEach(d => d.dispose());
+        this.disposables.forEach((d) => d.dispose());
     }
 
     onCreateEditor(editor: monaco.editor.IEditor) {
         this.editor = editor as monaco.editor.IStandaloneCodeEditor;
 
-        editor.setModel(this.model = this.model || monaco.editor.createModel(
-            this.state.code || '',
-            this.state.language || 'plaintext',
-        ));
+        editor.setModel(
+            (this.model =
+                this.model ||
+                monaco.editor.createModel(
+                    this.state.code || '',
+                    this.state.language || 'plaintext'
+                ))
+        );
 
         // OPTIONS
         this.detectOptionsChange();
@@ -97,7 +101,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
             scrollbar: {
                 verticalScrollbarSize: 4,
                 verticalSliderSize: 4,
-            }
+            },
         });
 
         // LISTENERS
@@ -111,7 +115,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
             })
         );
         this.disposables.push(
-            this.editor.onDidChangeCursorPosition(e => {
+            this.editor.onDidChangeCursorPosition((e) => {
                 this.changeDetector.ignore(this, () => {
                     this.cursor = e.position;
                 });
@@ -120,15 +124,16 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
         // COMMANDS
         this.editor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {}, ''
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+            () => {},
+            ''
         );
 
         this.initialCode = this.state.code;
     }
 
     onChangeState() {
-        if (!this.model)
-            return;
+        if (!this.model) return;
 
         monaco.editor.setModelLanguage(
             this.model,
@@ -137,7 +142,7 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
 
         this.editor?.updateOptions({
             tabSize: this.state.tabSize,
-            quickSuggestions: this.state.quickSuggestions
+            quickSuggestions: this.state.quickSuggestions,
         });
         this.model.setValue(this.state.code);
     }
@@ -147,32 +152,28 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
     }
 
     goToLine() {
-        if (!this.editor)
-            return;
+        if (!this.editor) return;
         const action = this.editor.getAction(ACTION_GOTO_LINE);
         this.editor.focus();
         action.run();
     }
 
     quickCommand() {
-        if (!this.editor)
-            return;
+        if (!this.editor) return;
         const action = this.editor.getAction(ACTION_QUICK_COMMAND);
         this.editor.focus();
         action.run();
     }
 
     changeIndent() {
-        if (!this.editor)
-            return;
+        if (!this.editor) return;
         const action = this.editor.getAction(ACTION_INDENT_USING_SPACES);
         this.editor.focus();
         action.run();
     }
 
     private detectOptionsChange() {
-        if (!this.model)
-            return;
+        if (!this.model) return;
 
         const component = this;
         const updateOptions = this.model.updateOptions;
@@ -183,10 +184,10 @@ export class CodeEditorComponent implements AfterViewChecked, OnDestroy, WebComp
             updateOptions.apply(this, [options]);
             if (options.tabSize) {
                 component.changeDetector.ignore(component, () => {
-                    component.state.tabSize = options.tabSize || component.state.tabSize;
+                    component.state.tabSize =
+                        options.tabSize || component.state.tabSize;
                 });
             }
         };
     }
-
 }

@@ -23,9 +23,7 @@ import { APP_BASE_HREF } from '@angular/common';
         SharedVendorsModule,
         FeatureWebComponentModule,
     ],
-    providers: [
-        { provide: APP_BASE_HREF, useValue: '/' },
-    ],
-    bootstrap: [AppComponent]
+    providers: [{ provide: APP_BASE_HREF, useValue: '/' }],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}

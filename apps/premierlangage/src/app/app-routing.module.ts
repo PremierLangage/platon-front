@@ -5,12 +5,12 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
     {
         path: 'editor',
-        loadChildren: () => import(
-            /* webpackChunkName: "editor" */
-            './pages/editor/editor.module'
-        ).then(m => m.EditorModule)
+        loadChildren: () =>
+            import(
+                /* webpackChunkName: "editor" */
+                './pages/editor/editor.module'
+            ).then((m) => m.EditorModule),
     },
-
 ];
 
 @NgModule({
@@ -18,9 +18,9 @@ const routes: Routes = [
         CommonModule,
         RouterModule.forRoot(routes, {
             enableTracing: false,
-            preloadingStrategy: PreloadAllModules
+            preloadingStrategy: PreloadAllModules,
         }),
     ],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
 export class AppRoutingModule {}

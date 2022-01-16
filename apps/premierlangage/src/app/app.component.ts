@@ -10,8 +10,8 @@ import { NzIconService } from 'ng-zorro-antd/icon';
 export class AppComponent implements OnInit {
     constructor(
         private readonly themeService: ThemeService,
-        private readonly nzIconService: NzIconService,
-    ) { }
+        private readonly nzIconService: NzIconService
+    ) {}
 
     ngOnInit() {
         this.themeService.loadTheme().catch(console.error);

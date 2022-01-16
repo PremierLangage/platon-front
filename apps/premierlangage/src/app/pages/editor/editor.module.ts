@@ -9,7 +9,6 @@ import { NgeIdeSettingsModule } from '@mcisse/nge-ide/settings';
 import { NgeIdeProblemsModule } from '@mcisse/nge-ide/problems';
 import { NgeIdeNotificationsModule } from '@mcisse/nge-ide/notifications';
 
-
 import { EditorComponent } from './editor.component';
 import { RouterModule } from '@angular/router';
 
@@ -25,10 +24,8 @@ import { RouterModule } from '@angular/router';
         NgeIdeProblemsModule,
         NgeIdeNotificationsModule,
 
-        RouterModule.forChild([
-            { path: '', component: EditorComponent }
-        ])
+        RouterModule.forChild([{ path: '', component: EditorComponent }]),
     ],
-    declarations: [EditorComponent]
+    declarations: [EditorComponent],
 })
-export class EditorModule { }
+export class EditorModule {}

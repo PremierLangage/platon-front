@@ -6,14 +6,11 @@ import { AuthProvider } from '../models/auth-provider';
 import { RemoteTokenProvider } from './remote-token-provider';
 import { AuthToken } from '../models/auth-token';
 
-
 @Injectable()
 export class RemoteAuthProvider extends AuthProvider {
-
     constructor(
         private readonly http: HttpClient,
-        private readonly tokenProvider: RemoteTokenProvider,
-
+        private readonly tokenProvider: RemoteTokenProvider
     ) {
         super();
     }
@@ -26,7 +23,9 @@ export class RemoteAuthProvider extends AuthProvider {
         const token = await this.tokenProvider.token();
         if (token) {
             try {
-                return await this.http.get<AuthUser>('/api/v1/users/me/').toPromise();
+                return await this.http
+                    .get<AuthUser>('/api/v1/users/me/')
+                    .toPromise();
             } catch {
                 await this.tokenProvider.remove();
             }
