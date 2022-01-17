@@ -1,94 +1,6 @@
 {
   "version": 1,
   "projects": {
-    "core-auth": {
-      "projectType": "library",
-      "root": "libs/core/auth",
-      "sourceRoot": "libs/core/auth/src",
-      "prefix": "auth",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/core/auth/src/test.ts",
-            "tsConfig": "libs/core/auth/tsconfig.spec.json",
-            "karmaConfig": "libs/core/auth/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "tags": ["scope:core", "type:auth"]
-    },
-    "core-config": {
-      "projectType": "library",
-      "root": "libs/core/config",
-      "sourceRoot": "libs/core/config/src",
-      "prefix": "config",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/core/config/src/test.ts",
-            "tsConfig": "libs/core/config/tsconfig.spec.json",
-            "karmaConfig": "libs/core/config/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "tags": ["scope:core", "type:config"]
-    },
-    "feature-web-component": {
-      "projectType": "library",
-      "root": "libs/feature/web-component",
-      "sourceRoot": "libs/feature/web-component/src",
-      "prefix": "wc",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/feature/web-component/src/test.ts",
-            "tsConfig": "libs/feature/web-component/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/web-component/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@nrwl/angular:component": {
-          "style": "scss"
-        }
-      },
-      "tags": ["scope:feature", "type:web-component"]
-    },
-    "feature-workspace": {
-      "projectType": "library",
-      "root": "libs/feature/workspace",
-      "sourceRoot": "libs/feature/workspac/src",
-      "prefix": "ws",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "libs/feature/workspace/src/test.ts",
-            "tsConfig": "libs/feature/workspace/tsconfig.spec.json",
-            "karmaConfig": "libs/feature/workspace/karma.conf.js"
-          }
-        }
-      },
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "tags": ["scope:feature", "type:workspace"]
-    },
     "platon": {
       "projectType": "application",
       "schematics": {
@@ -101,7 +13,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "ngx-build-plus:browser",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/apps/platon",
             "index": "apps/platon/src/index.html",
@@ -140,17 +52,7 @@
             ],
             "scripts": [
               { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
-              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" },
-              "node_modules/rxjs/dist/bundles/rxjs.umd.js",
-              "node_modules/@angular/core/bundles/core.umd.js",
-              "node_modules/@angular/common/bundles/common.umd.js",
-              "node_modules/@angular/common/bundles/common-http.umd.js",
-              "node_modules/@angular/compiler/bundles/compiler.umd.js",
-              "node_modules/@angular/elements/bundles/elements.umd.js",
-              "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
-              "node_modules/@angular/router/bundles/router.umd.js",
-              "node_modules/@angular/forms/bundles/forms.umd.js"
+              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" }
             ],
             "allowedCommonJsDependencies": ["hammerjs", "d3-graphviz"]
           },
@@ -165,7 +67,6 @@
               "optimization": true,
               "outputHashing": "none",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -186,7 +87,7 @@
           }
         },
         "serve": {
-          "builder": "ngx-build-plus:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "platon:build"
           },
@@ -203,7 +104,7 @@
           }
         },
         "test": {
-          "builder": "ngx-build-plus:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "apps/platon/src/test.ts",
             "tsConfig": "apps/platon/tsconfig.spec.json",
@@ -249,7 +150,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "ngx-build-plus:browser",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/apps/premierlangage",
             "index": "apps/premierlangage/src/index.html",
@@ -281,40 +182,14 @@
             "styles": [
               "styles/app.scss",
               "apps/premierlangage/src/styles.scss",
-              {
-                "input": "styles/ng-zorro/dark.less",
-                "bundleName": "styles.ng-zorro.dark",
-                "inject": false
-              },
-              {
-                "input": "styles/ng-zorro/light.less",
-                "bundleName": "styles.ng-zorro.light",
-                "inject": false
-              },
-              {
-                "input": "styles/material/dark.scss",
-                "bundleName": "styles.material.dark",
-                "inject": false
-              },
-              {
-                "input": "styles/material/light.scss",
-                "bundleName": "styles.material.light",
-                "inject": false
-              }
+              { "input": "styles/ng-zorro/dark.less", "bundleName": "styles.ng-zorro.dark", "inject": false },
+              { "input": "styles/ng-zorro/light.less", "bundleName": "styles.ng-zorro.light", "inject": false },
+              { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark",  "inject": false },
+              { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
             ],
             "scripts": [
               { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
-              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" },
-              "node_modules/rxjs/dist/bundles/rxjs.umd.js",
-              "node_modules/@angular/core/bundles/core.umd.js",
-              "node_modules/@angular/common/bundles/common.umd.js",
-              "node_modules/@angular/common/bundles/common-http.umd.js",
-              "node_modules/@angular/compiler/bundles/compiler.umd.js",
-              "node_modules/@angular/elements/bundles/elements.umd.js",
-              "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-              "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
-              "node_modules/@angular/router/bundles/router.umd.js",
-              "node_modules/@angular/forms/bundles/forms.umd.js"
+              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" }
             ],
             "allowedCommonJsDependencies": ["hammerjs", "d3-graphviz"]
           },
@@ -329,7 +204,6 @@
               "optimization": true,
               "outputHashing": "none",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -350,7 +224,7 @@
           }
         },
         "serve": {
-          "builder": "ngx-build-plus:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "premierlangage:build"
           },
@@ -367,7 +241,7 @@
           }
         },
         "test": {
-          "builder": "ngx-build-plus:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "apps/premierlangage/src/test.ts",
             "tsConfig": "apps/premierlangage/tsconfig.spec.json",
@@ -407,6 +281,97 @@
       "tags": [],
       "implicitDependencies": ["premierlangage"]
     },
+
+    "core-auth": {
+      "projectType": "library",
+      "root": "libs/core/auth",
+      "sourceRoot": "libs/core/auth/src",
+      "prefix": "auth",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/core/auth/src/test.ts",
+            "tsConfig": "libs/core/auth/tsconfig.spec.json",
+            "karmaConfig": "libs/core/auth/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "tags": ["scope:core", "type:auth"]
+    },
+    "core-config": {
+      "projectType": "library",
+      "root": "libs/core/config",
+      "sourceRoot": "libs/core/config/src",
+      "prefix": "config",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/core/config/src/test.ts",
+            "tsConfig": "libs/core/config/tsconfig.spec.json",
+            "karmaConfig": "libs/core/config/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "tags": ["scope:core", "type:config"]
+    },
+
+    "feature-web-component": {
+      "projectType": "library",
+      "root": "libs/feature/web-component",
+      "sourceRoot": "libs/feature/web-component/src",
+      "prefix": "wc",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/feature/web-component/src/test.ts",
+            "tsConfig": "libs/feature/web-component/tsconfig.spec.json",
+            "karmaConfig": "libs/feature/web-component/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      },
+      "tags": ["scope:feature", "type:web-component"]
+    },
+    "feature-workspace": {
+      "projectType": "library",
+      "root": "libs/feature/workspace",
+      "sourceRoot": "libs/feature/workspac/src",
+      "prefix": "ws",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/feature/workspace/src/test.ts",
+            "tsConfig": "libs/feature/workspace/tsconfig.spec.json",
+            "karmaConfig": "libs/feature/workspace/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "tags": ["scope:feature", "type:workspace"]
+    },
+
     "shared-ui-dialog": {
       "projectType": "library",
       "root": "libs/shared/ui/dialog",
