@@ -1,6 +1,7 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared/components/base/base.module';
+import { IDynamicModule } from '@mcisse/nge/services';
 
+import { BaseModule } from '../../shared/components/base/base.module';
 import { JsxComponent } from './jsx.component';
 
 @NgModule({
@@ -10,6 +11,6 @@ import { JsxComponent } from './jsx.component';
     ],
     exports: [JsxComponent],
 })
-export class JsxModule {
-    customElementComponent: Type<any> = JsxComponent;
+export class JsxModule implements IDynamicModule {
+    component: Type<any> = JsxComponent;
 }

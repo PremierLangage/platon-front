@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+
+@Component({
+    selector: 'app-noop',
+    template: ''
+})
+export class NoOp {}
 
 const routes: Routes = [
     {
@@ -11,6 +17,15 @@ const routes: Routes = [
                 './pages/editor/editor.module'
             ).then((m) => m.EditorModule),
     },
+    {
+        path: 'doc',
+        loadChildren: () =>
+            import(
+                /* webpackChunkName: "doc" */
+                './pages/doc/doc.module'
+            ).then((m) => m.DocModule),
+    },
+    { path: '**', pathMatch: 'full', component: NoOp },
 ];
 
 @NgModule({
@@ -21,6 +36,7 @@ const routes: Routes = [
             preloadingStrategy: PreloadAllModules,
         }),
     ],
+    declarations: [NoOp],
     exports: [RouterModule],
 })
 export class AppRoutingModule {}

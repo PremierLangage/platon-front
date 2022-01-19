@@ -1,10 +1,14 @@
 import { NgModule, Type } from '@angular/core';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
-import { BaseModule } from '../../shared/components/base/base.module';
 
+import { IDynamicModule } from '@mcisse/nge/services';
+
+import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
+
+import { BaseModule } from '../../shared/components/base/base.module';
 import { AutomatonEditorComponent } from './automaton-editor.component';
 
 @NgModule({
@@ -18,6 +22,6 @@ import { AutomatonEditorComponent } from './automaton-editor.component';
     ],
     exports: [AutomatonEditorComponent],
 })
-export class AutomatonEditorModule {
-    customElementComponent: Type<any> = AutomatonEditorComponent;
+export class AutomatonEditorModule implements IDynamicModule {
+    component: Type<any> = AutomatonEditorComponent;
 }

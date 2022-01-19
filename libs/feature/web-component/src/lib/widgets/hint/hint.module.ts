@@ -1,4 +1,7 @@
 import { NgModule, Type } from '@angular/core';
+
+import { IDynamicModule } from '@mcisse/nge/services';
+
 import { BaseModule } from '../../shared/components/base/base.module';
 
 import { HintComponent } from './hint.component';
@@ -10,6 +13,6 @@ import { HintComponent } from './hint.component';
     ],
     exports: [HintComponent],
 })
-export class HintModule {
-    customElementComponent: Type<any> = HintComponent;
+export class HintModule implements IDynamicModule {
+    component: Type<any> = HintComponent;
 }

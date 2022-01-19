@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Attribute, Component, ElementRef, OnInit } from '@angular/core';
 import { ThemeService } from '@platon/core/config';
 import { NzIconService } from 'ng-zorro-antd/icon';
 
@@ -8,7 +8,10 @@ import { NzIconService } from 'ng-zorro-antd/icon';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+    noRouting = false;
+
     constructor(
+        private readonly elementRef: ElementRef<HTMLElement>,
         private readonly themeService: ThemeService,
         private readonly nzIconService: NzIconService
     ) {}
@@ -16,5 +19,9 @@ export class AppComponent implements OnInit {
     ngOnInit() {
         this.themeService.loadTheme().catch(console.error);
         this.nzIconService.changeAssetsSource('assets/@ant-design');
+
+        if (this.elementRef.nativeElement.hasAttribute('no-routing')) {
+            this.noRouting = true;
+        }
     }
 }

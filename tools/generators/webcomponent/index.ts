@@ -13,7 +13,8 @@ import { strings } from '@angular-devkit/core';
 import { Change, findNodes, InsertChange, insertImport } from '@nrwl/workspace/src/utils/ast-utils';
 
 // import { Change, InsertChange } from '@schematics/angular/utility/change';
-import { getWorkspace } from '@schematics/angular/utility/config';
+import { getWorkspace } from '@schematics/angular/utility/workspace';
+
 import { join } from 'path';
 import * as ts from 'typescript';
 
@@ -112,7 +113,7 @@ function addElementInArray(args: {
 function addComponentToRegistry(tree: Tree, schema: SchematicOptions): Rule {
     const className = strings.classify(schema.name);
     const selector = "wc-" + schema.name;
-    const toAdd = `    { selector: '${selector}', loadChildren: () => import( /* webpackChunkName: "${selector}" */ '${schema.modulePath}.module').then(m => m.${className}Module) }`;
+    const toAdd = `    { selector: '${selector}', module: () => import( /* webpackChunkName: "${selector}" */ '${schema.modulePath}.module').then(m => m.${className}Module) }`;
     return addElementInArray({
         tree,
         toAdd,
@@ -140,8 +141,9 @@ export default function (schema: SchematicOptions): Rule {
         throw new SchematicsException('type option is required.');
     }
 
-    return (tree: Tree) => {
-        const workspace = getWorkspace(tree);
+    return async (tree: Tree) => {
+        const workspace = await getWorkspace(tree);
+
         const components = workspace.projects['feature-web-component'];
         const sourceRoot = components.sourceRoot as string;
 

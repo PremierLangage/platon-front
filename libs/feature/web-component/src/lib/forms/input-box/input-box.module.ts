@@ -1,13 +1,15 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared/components/base/base.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
-import { InputBoxComponent } from './input-box.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { IDynamicModule } from '@mcisse/nge/services';
 import { IconGrPipeModule } from '@platon/shared/utils';
+
+import { BaseModule } from '../../shared/components/base/base.module';
+import { InputBoxComponent } from './input-box.component';
 
 @NgModule({
     declarations: [InputBoxComponent],
@@ -24,6 +26,6 @@ import { IconGrPipeModule } from '@platon/shared/utils';
     ],
     exports: [InputBoxComponent],
 })
-export class InputBoxModule {
-    customElementComponent: Type<any> = InputBoxComponent;
+export class InputBoxModule implements IDynamicModule {
+    component: Type<any> = InputBoxComponent;
 }

@@ -1,9 +1,13 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared/components/base/base.module';
+import { FormsModule } from '@angular/forms';
+
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+
+import { IDynamicModule } from '@mcisse/nge/services';
+
+import { BaseModule } from '../../shared/components/base/base.module';
 import { PickerComponent } from './picker.component';
-import { FormsModule } from '@angular/forms';
 import { IconGrPipeModule } from '@platon/shared/utils';
 
 @NgModule({
@@ -17,6 +21,6 @@ import { IconGrPipeModule } from '@platon/shared/utils';
     ],
     exports: [PickerComponent],
 })
-export class PickerModule {
-    customElementComponent: Type<any> = PickerComponent;
+export class PickerModule implements IDynamicModule {
+    component: Type<any> = PickerComponent;
 }
