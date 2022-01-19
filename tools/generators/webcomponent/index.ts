@@ -144,8 +144,12 @@ export default function (schema: SchematicOptions): Rule {
     return async (tree: Tree) => {
         const workspace = await getWorkspace(tree);
 
-        const components = workspace.projects['feature-web-component'];
-        const sourceRoot = components.sourceRoot as string;
+        const project = workspace.projects.get('feature-web-component');
+        if (!project) {
+            throw new Error('Could not find project "feature-web-component".');
+        }
+
+        const sourceRoot = project.sourceRoot as string;
 
         schema.name = strings.dasherize(schema.name);
         if (schema.name.startsWith('wc-')) {
