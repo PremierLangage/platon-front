@@ -1,4 +1,4 @@
-<app-container-tabbed [state]="context.state" [tabs]="tabs">
+<app-tabs [state]="context.state" [tabs]="tabs">
   <ng-container *ngIf="context.state === 'READY'">
     <nz-breadcrumb>
       <nz-breadcrumb-item>
@@ -49,4 +49,4 @@
       </nz-select>
     </nz-button-group>
   </ng-container>
-</app-container-tabbed>
+</app-tabs>
