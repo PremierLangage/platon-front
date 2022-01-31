@@ -12,11 +12,14 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
-
 import { FilesComponent } from './files.component';
-
 
 @NgModule({
     imports: [
@@ -33,10 +36,14 @@ import { FilesComponent } from './files.component';
         NzButtonModule,
         NzSelectModule,
 
+        NzUploadModule,
+        NzIconModule,
+        NzDividerModule,
+
         FeatureWorkspaceModule,
 
-        RouterModule.forChild([{ path: '', component: FilesComponent }])
+        RouterModule.forChild([{ path: '', component: FilesComponent }]),
     ],
-    declarations: [FilesComponent]
+    declarations: [FilesComponent],
 })
-export class FilesModule { }
+export class FilesModule {}
