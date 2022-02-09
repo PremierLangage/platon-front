@@ -1,13 +1,13 @@
-import { Observable } from "rxjs";
+import { Observable } from 'rxjs';
 import {
     CreateFileForm,
     UpdateFileForm,
     RenameFileForm,
     MoveFileForm,
     FileTree,
-    FileEntry
-} from "./file";
-import { Circle } from "./circle";
+    FileEntry,
+} from './file';
+import { Circle } from './circle';
 import { Resource } from './resource';
 
 export abstract class FileProvider {
@@ -20,4 +20,5 @@ export abstract class FileProvider {
     abstract move(form: MoveFileForm): Observable<any>;
     abstract update(form: UpdateFileForm): Observable<any>;
     abstract rename(form: RenameFileForm): Observable<any>;
+    abstract options(owner: Resource | Circle): Observable<any>;
 }

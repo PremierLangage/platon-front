@@ -3,7 +3,9 @@ import {
     Injector,
     Component,
     Input,
+    ViewChild,
 } from '@angular/core';
+import { RadioGroupComponent } from '../../forms/radio-group/radio-group.component';
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import {
     PlatonViewerComponentDefinition,

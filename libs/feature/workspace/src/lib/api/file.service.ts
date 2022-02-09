@@ -7,16 +7,14 @@ import {
     RenameFileForm,
     FileEntry,
     FileTree,
-    UpdateFileForm
-} from "../models/file";
+    UpdateFileForm,
+} from '../models/file';
 import { FileProvider } from '../models/file-provider';
 import { Circle } from '../models/circle';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
-    constructor(
-        private readonly provider: FileProvider
-    ) { }
+    constructor(private readonly provider: FileProvider) {}
 
     tree(owner: Resource | Circle): Observable<FileTree> {
         return this.provider.tree(owner);
@@ -44,5 +42,9 @@ export class FileService {
 
     rename(form: RenameFileForm): Observable<any> {
         return this.provider.rename(form);
+    }
+
+    options(owner: Resource | Circle): Observable<any> {
+        return this.provider.options(owner);
     }
 }

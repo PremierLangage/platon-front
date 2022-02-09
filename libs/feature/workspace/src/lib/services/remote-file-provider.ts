@@ -9,23 +9,21 @@ import {
     RenameFileForm,
     FileEntry,
     FileTree,
-    UpdateFileForm
+    UpdateFileForm,
 } from '../models/file';
 import { FileProvider } from '../models/file-provider';
 import { Circle } from '../models/circle';
 
 @Injectable()
 export class RemoteFileProvider extends FileProvider {
-    constructor(
-        private readonly http: HttpClient
-    ) {
-        super()
+    constructor(private readonly http: HttpClient) {
+        super();
     }
 
     tree(resource: Resource | Circle): Observable<FileTree> {
-        return this.http.get<FileTree>(resource.filesUrl).pipe(
-            map(res => res)
-        );
+        return this.http
+            .get<FileTree>(resource.filesUrl)
+            .pipe(map((res) => res));
     }
 
     read(file: FileEntry): Observable<string> {
@@ -37,8 +35,9 @@ export class RemoteFileProvider extends FileProvider {
     }
 
     create(form: CreateFileForm): Observable<any> {
-        return this.http.post<any>(form.owner.filesUrl, {
-            files: form.files
+        return this.http.post<any>(form.owner.filesUrl, form.file, {
+            reportProgress: true,
+            observe: 'events',
         });
     }
 
@@ -46,13 +45,13 @@ export class RemoteFileProvider extends FileProvider {
         return this.http.patch<any>(`${form.owner.filesUrl}/${form.oldpath}`, {
             action: 'move',
             newpath: form.newpath,
-            copy: !!form.copy
+            copy: !!form.copy,
         });
     }
 
     update(form: UpdateFileForm): Observable<any> {
         return this.http.put<any>(form.file.url, {
-            content: form.content
+            content: form.content,
         });
     }
 
@@ -61,5 +60,9 @@ export class RemoteFileProvider extends FileProvider {
             action: 'rename',
             newpath: form.newpath,
         });
+    }
+
+    options(resource: Resource | Circle): Observable<any> {
+        return this.http.options<any>(resource.url);
     }
 }

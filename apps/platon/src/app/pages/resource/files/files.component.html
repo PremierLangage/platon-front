@@ -4,20 +4,24 @@
     <!-- FILE UPLOAD -->
     <nz-divider nzText="Ajouter des fichiers" nzOrientation="left"></nz-divider>
 
-
     <div class="uploader">
       <button
         nz-button
         [nzType]="'primary'"
-        [nzLoading]="uploading"
+        [nzLoading]="uploading > 0"
         (click)="handleUpload()"
-        [disabled]="fileList.length === 0"
+        [disabled]="files.length === 0"
       >
         {{ uploading ? 'Chargement' : 'Envoyer' }}
       </button>
     </div>
 
-    <nz-upload [(nzFileList)]="fileList" [nzBeforeUpload]="beforeUpload">
+    <nz-upload
+      [(nzFileList)]="files"
+      [nzBeforeUpload]="beforeUpload"
+      [nzMultiple]="true"
+      [nzDirectory]="false"
+    >
       <button nz-button>
         <i nz-icon nzType="upload"></i>
         Selectionner les fichiers
@@ -25,13 +29,13 @@
     </nz-upload>
 
     <!-- FILE TREE -->
-    <nz-divider nzText="Fichiers de la ressource" nzOrientation="left"></nz-divider>
+    <nz-divider
+      nzText="Fichiers de la ressource"
+      nzOrientation="left"
+    ></nz-divider>
     <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()"></ws-files-tree>
   </nz-col>
 
   <!-- RIGHT SIZE FILE TAB -->
-  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
-
-
-  </nz-col>
+  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12"> </nz-col>
 </nz-row>

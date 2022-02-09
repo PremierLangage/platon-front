@@ -1,4 +1,10 @@
 import {
+    HttpEvent,
+    HttpEventType,
+    HttpRequest,
+    HttpResponse,
+} from '@angular/common/http';
+import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -7,8 +13,8 @@ import {
 } from '@angular/core';
 import { FileEntry, FileTree } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzUploadFile } from 'ng-zorro-antd/upload';
-import { Subscription } from 'rxjs';
+import { NzUploadFile, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
+import { observable, Subscription } from 'rxjs';
 import { ResourcePresenter } from '../resource-presenter';
 
 @Component({
@@ -23,13 +29,14 @@ export class FilesComponent implements OnInit, OnDestroy {
     context = this.presenter.defaultContext;
     tree?: FileTree;
 
-    uploading = false;
-    fileList: NzUploadFile[] = [];
+    files: NzUploadFile[] = [];
+
+    uploading = 0;
 
     constructor(
         private readonly presenter: ResourcePresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private msg: NzMessageService
+        private messageService: NzMessageService
     ) {}
 
     ngOnInit() {
@@ -51,37 +58,63 @@ export class FilesComponent implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck();
     }
 
-    beforeUpload(): boolean {
-        return true;
-    }
+    beforeUpload = (file: NzUploadFile): boolean => {
+        let present = this.files.find((f) => {
+            return f.name === file.name;
+        });
+        if (present) {
+            this.messageService.error(present.name + ' déjà présent.');
+            return false;
+        }
+        this.files = this.files.concat(file);
+        this.messageService.info(file.name + ' fichier chargé.');
+        return false;
+    };
 
     handleUpload(): void {
-        const formData = new FormData();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.fileList.forEach((file: any) => {
-            formData.append('files[]', file);
+        this.files.forEach((file) => {
+            this.uploading += 1;
+            file.status = 'uploading';
+            this.changeDetectorRef.markForCheck();
+            this.customUpload(file);
         });
-        this.uploading = true;
+    }
 
-        /*
-        // You can use any AJAX library you like
-        const req = new HttpRequest('POST', 'https://www.mocky.io/v2/5cc8019d300000980a055e76', formData, {
-          // reportProgress: true
+    private customUpload(item: NzUploadFile) {
+        // Create formData for file
+        let formData = new FormData();
+        formData.append('file', item as any);
+        // Send the form to webservice
+        this.presenter.upload(formData).then((request) => {
+            // Subscribe on post
+            request.subscribe(
+                (event) => {
+                    switch (event.type) {
+                        case HttpEventType.UploadProgress:
+                            item.percent = Math.round(
+                                100 * (event.loaded / event.total)
+                            );
+                            break;
+                        case HttpEventType.Response:
+                            item.status = 'success';
+                            this.files = this.files.filter(
+                                (file) => file !== item
+                            );
+                            this.messageService.success(
+                                item.name + ' uploader.'
+                            );
+                            this.uploading -= 1;
+                            this.refreshFiles();
+                            break;
+                    }
+                    this.changeDetectorRef.markForCheck();
+                },
+                (error) => {
+                    item.status = 'error';
+                    item.response = error;
+                    this.messageService.error(item.name + ' erreur upload.');
+                }
+            );
         });
-        this.http
-          .request(req)
-          .pipe(filter(e => e instanceof HttpResponse))
-          .subscribe(
-            () => {
-              this.uploading = false;
-              this.fileList = [];
-              this.msg.success('upload successfully.');
-            },
-            () => {
-              this.uploading = false;
-              this.msg.error('upload failed.');
-            }
-          );
-        */
     }
 }
