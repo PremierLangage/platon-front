@@ -1,6 +1,6 @@
 import { NgModule, Type } from '@angular/core';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipe, CssPipeModule } from '../../shared/pipes/css.pipe';

@@ -47,8 +47,8 @@
     "@angular/platform-browser-dynamic": "^13.1.2",
     "@angular/router": "^13.1.2",
     "@auth0/angular-jwt": "^5.0.2",
-    "@mcisse/nge": "^13.1.1",
-    "@mcisse/nge-ide": "^13.0.1",
+    "@cisstech/nge": "^13.1.5",
+    "@cisstech/nge-ide": "^13.0.3",
     "@ngx-formly/core": "^5.10.22",
     "@ngx-formly/material": "^5.10.22",
     "@ngx-pwa/local-storage": "^13.0.2",
@@ -81,7 +81,7 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^13.1.3",
+    "@angular-devkit/build-angular": "^13.2.2",
     "@angular-devkit/core": "^13.1.3",
     "@angular-eslint/eslint-plugin": "~1.0.0",
     "@angular-eslint/eslint-plugin-template": "~1.0.0",

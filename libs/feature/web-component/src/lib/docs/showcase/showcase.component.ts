@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { ResourceLoaderService } from '@mcisse/nge/services';
+import { ResourceLoaderService } from '@cisstech/nge/services';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { WebComponentDefinition } from '../../web-component';
 

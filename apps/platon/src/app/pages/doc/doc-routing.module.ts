@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WebComponentDocs } from '@platon/feature/web-component';
-import { NgeDocSettings } from '@mcisse/nge/doc';
+import { NgeDocSettings } from '@cisstech/nge/doc';
 import { DocComponent } from './doc.component';
 
 const DeveloperDocs = {
@@ -26,7 +26,7 @@ const routes: Routes = [
     { path: '', component: DocComponent },
     {
         path: '**',
-        loadChildren: () => import('@mcisse/nge/doc').then(m => m.NgeDocModule),
+        loadChildren: () => import('@cisstech/nge/doc').then(m => m.NgeDocModule),
         data: [
             DeveloperDocs,
             WebComponentDocs,

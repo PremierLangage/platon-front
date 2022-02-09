@@ -1,7 +1,7 @@
 import { NgModule, Type } from '@angular/core';
 
-import { IDynamicModule } from '@mcisse/nge/services';
-import { NgeMarkdownModule } from '@mcisse/nge/markdown';
+import { IDynamicModule } from '@cisstech/nge/services';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { MatchListComponent } from './match-list.component';

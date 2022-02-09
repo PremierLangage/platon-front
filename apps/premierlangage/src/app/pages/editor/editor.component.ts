@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FileService, IdeService } from '@mcisse/nge-ide/core';
+import { FileService, IdeService } from '@cisstech/nge-ide/core';
 import { PlFileSystem } from './pl-file-system';
 
 

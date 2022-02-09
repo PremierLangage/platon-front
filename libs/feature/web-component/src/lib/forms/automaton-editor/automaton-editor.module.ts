@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
 

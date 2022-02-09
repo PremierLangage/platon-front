@@ -5,7 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 import { IconGrPipeModule } from '@platon/shared/utils';
 
 import { BaseModule } from '../../shared/components/base/base.module';

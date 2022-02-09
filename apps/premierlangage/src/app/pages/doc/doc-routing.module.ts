@@ -9,7 +9,7 @@ const routes: Routes = [
     { path: '', component: DocComponent },
     {
         path: '**',
-        loadChildren: () => import('@mcisse/nge/doc').then(m => m.NgeDocModule),
+        loadChildren: () => import('@cisstech/nge/doc').then(m => m.NgeDocModule),
         data: [
             WebComponentDocs,
         ],

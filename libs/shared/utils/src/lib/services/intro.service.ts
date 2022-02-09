@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ResourceLoaderService } from '@mcisse/nge/services';
+import { ResourceLoaderService } from '@cisstech/nge/services';
 import introJs from 'intro.js';
 
 @Injectable({providedIn: 'root'})

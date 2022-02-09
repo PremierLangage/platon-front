@@ -1,5 +1,5 @@
 import { NgModule, Type } from '@angular/core';
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 import { RenderDotModule } from '../../shared/directives/render-dot.directive';
 import { BaseModule } from '../../shared/components/base/base.module';

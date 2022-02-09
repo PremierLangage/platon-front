@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { PickerComponent } from './picker.component';

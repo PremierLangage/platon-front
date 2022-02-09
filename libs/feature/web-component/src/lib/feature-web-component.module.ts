@@ -2,7 +2,7 @@
 import { NgModule } from '@angular/core';
 
 // LIBS
-import { NgeElementModule } from '@mcisse/nge/elements';
+import { NgeElementModule } from '@cisstech/nge/elements';
 
 // MODULE
 import { WEB_COMPONENTS_BUNDLES, WEB_COMPONENTS_REGISTRY } from './web-component-registry';

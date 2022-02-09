@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { FileSystemProvider, FileSystemProviderCapabilities, IFile, Paths, SearchForm, SearchResult } from '@mcisse/nge-ide/core';
+import { FileSystemProvider, FileSystemProviderCapabilities, IFile, Paths, SearchForm, SearchResult } from '@cisstech/nge-ide/core';
 
 interface IRemoteFile {
     type: 'file' | 'folder';

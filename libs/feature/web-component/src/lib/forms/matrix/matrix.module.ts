@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';

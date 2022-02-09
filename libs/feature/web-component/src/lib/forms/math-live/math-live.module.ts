@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule, Type } from '@angular/core';
 
-import { IDynamicModule } from '@mcisse/nge/services';
+import { IDynamicModule } from '@cisstech/nge/services';
 import { IconGrPipeModule } from '@platon/shared/utils';
 
 import { BaseModule } from '../../shared/components/base/base.module';

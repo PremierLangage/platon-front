@@ -6,7 +6,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-import { ResourceLoaderService } from '@mcisse/nge/services'
+import { ResourceLoaderService } from '@cisstech/nge/services'
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service';
 import { JsxComponentDefinition, JsxState } from './jsx';

@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core';
-import { NgeElementDef } from '@mcisse/nge/elements';
+import { NgeElementDef } from '@cisstech/nge/elements';
 
 import { WEB_COMPONENT_DEFINITIONS } from './web-component';
 

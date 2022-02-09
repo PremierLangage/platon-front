@@ -1,4 +1,4 @@
-import { NgeDocLink, NgeDocSettings } from '@mcisse/nge/doc';
+import { NgeDocLink, NgeDocSettings } from '@cisstech/nge/doc';
 import { WebComponentTypes } from '../web-component';
 import { WebComponentService } from '../web-component.service';
 

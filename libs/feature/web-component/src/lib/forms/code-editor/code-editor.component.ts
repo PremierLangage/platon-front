@@ -14,7 +14,7 @@ import {
     ACTION_GOTO_LINE,
     ACTION_INDENT_USING_SPACES,
     ACTION_QUICK_COMMAND,
-} from '@mcisse/nge/monaco';
+} from '@cisstech/nge/monaco';
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { WebComponentChangeDetectorService } from '../../web-component-change-detector.service';
 import { CodeEditorComponentDefinition, CodeEditorState } from './code-editor';
