@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CssComponent } from './css.component';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
+import { IDynamicModule } from '@cisstech/nge/services';
 
 @NgModule({
   imports: [
@@ -12,6 +13,6 @@ import { SharedUiDialogModule } from '@platon/shared/ui/dialog';
   ],
   declarations: [CssComponent]
 })
-export class CssModule {
+export class CssModule implements IDynamicModule {
     component = CssComponent;
 }

@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ResourceLoaderService } from '@cisstech/nge/services';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
+import { JSONSchema7 } from 'json-schema';
 import { WebComponentDefinition } from '../../web-component';
 
 @Component({
@@ -32,14 +33,25 @@ export class ShowcaseComponent implements OnInit {
         this.component = document.createElement(
             this.definition.selector
         ) as any;
-        if (this.definition.showcase) {
-            this.component.state = this.definition.showcase;
+
+        const { showcase, schema } = this.definition;
+        if (showcase) {
+            this.component.state = {
+                ...showcase,
+                ...Object.keys(this.definition.schema.properties).filter(k => {
+                    return !showcase.hasOwnProperty(k);
+                }).reduce((rec, curr) => {
+                    if (!showcase.hasOwnProperty(curr))
+                        rec[curr] = schema.properties[curr].default;
+                    return rec;
+                }, {} as Record<string, any>)
+            }
         }
         host?.appendChild(this.component);
 
         this.options.modes = ['tree'/* , 'view', 'form', 'code', 'text' */];
         this.options.language = 'fr-FR';
-        this.options.schema = this.definition.schema;
+        this.options.schema = schema;
         this.options.mainMenuBar = false;
         this.options.sortObjectKeys = true;
     }

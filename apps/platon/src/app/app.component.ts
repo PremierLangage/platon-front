@@ -15,6 +15,6 @@ export class AppComponent implements OnInit {
 
     ngOnInit() {
         this.themeService.loadTheme().catch(console.error);
-        this.nzIconService.changeAssetsSource('assets/@ant-design');
+        this.nzIconService.changeAssetsSource('assets/vendors/@ant-design');
     }
 }

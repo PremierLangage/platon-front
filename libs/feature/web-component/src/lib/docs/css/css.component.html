@@ -1,17 +1,14 @@
 <nge-markdown ngPreserveWhitespaces>
 # API CSS
 Cette page décrit les bonnes pratiques à adopter pour utiliser du CSS dans vos exercices.
-
-TODO
-
 </nge-markdown>
 
 <h2>Apparences</h2>
 <section>
-    <p>Cliquez sur une apparence pour copier les classes css appliquées à sa boîte.</p>
+    <p>Cliquez sur une apparence pour copier la liste des classes css qui lui sont appliquées.</p>
     <div class="appearances">
       <div
-        class="box-appearance {{ css }} animate__animated animate__{{ activeAnimation }} animate__infinite"
+        class="box-appearance {{ css }} animate__animated animate__{{ activeAnimation }} animate__infinite"
         *ngFor="let css of appearances; trackBy: trackByIndex"
         matTooltip="Click to copy"
         (click)="copyCss(css)">
@@ -27,8 +24,8 @@ TODO
     <div
       class="box-animation"
       *ngFor="let animation of animations; trackBy: trackByIndex"
-      (click)="animate(animation)">
-        <div class="text animate__animated animate__{{ animation }}">{{ animation }}</div>
+      (click)="activeAnimation = animation">
+        <div class="text animate__animated animate__{{ animation }}">{{ animation }}</div>
     </div>
   </div>
 </section>

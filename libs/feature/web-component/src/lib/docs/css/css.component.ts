@@ -36,10 +36,6 @@ export class CssComponent {
         private readonly clipboard: ClipboardService,
     ) {}
 
-    animate(animation: string) {
-        this.activeAnimation = animation;
-    }
-
     copyCss(appearance: string) {
         this.clipboard.copy(
             `${appearance} animate__animated animate__${this.activeAnimation} animate__infinite`

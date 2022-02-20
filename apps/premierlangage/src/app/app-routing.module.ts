@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
+import { createWebComponentDoc } from '@platon/feature/web-component';
+
 @Component({
     selector: 'app-noop',
     template: ''
@@ -18,12 +20,11 @@ const routes: Routes = [
             ).then((m) => m.EditorModule),
     },
     {
-        path: 'doc',
-        loadChildren: () =>
-            import(
-                /* webpackChunkName: "doc" */
-                './pages/doc/doc.module'
-            ).then((m) => m.DocModule),
+        path: 'components',
+        loadChildren: () => import('@cisstech/nge/doc').then(m => m.NgeDocModule),
+        data: [
+            createWebComponentDoc({ root: '/components/', backUrl: '' }),
+        ],
     },
     { path: '**', pathMatch: 'full', component: NoOp },
 ];
