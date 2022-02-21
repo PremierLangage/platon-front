@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import { Circle, CircleService, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -78,10 +78,10 @@ export class ResourcePresenter implements OnDestroy {
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),
-            this.resourceService.findById(resourceId).toPromise()
+            lastValueFrom(this.resourceService.findById(resourceId))
         ]);
 
-        const circle = await this.circleService.findById(resource.circle.id).toPromise();
+        const circle = await lastValueFrom(this.circleService.findById(resource.circle.id));
         this.context.next({
             state: 'READY',
             user,
@@ -94,7 +94,7 @@ export class ResourcePresenter implements OnDestroy {
         try {
             this.refresh(circleId);
         } catch (error) {
-            const status = error.status || 500;
+            const status = (error as any).status || 500;
             if (status >= 400 && status < 500) {
                 this.context.next({ state: 'NOT_FOUND' });
             } else {

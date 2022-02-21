@@ -6,6 +6,7 @@ import { CircleService, CircleTree } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-create-circle',
@@ -50,13 +51,13 @@ export class CreateCircleComponent implements OnInit {
 
     async ngOnInit() {
         const [tree, topics, levels] = await Promise.all([
-            this.circleService.tree().toPromise(),
-            this.circleService.topics().toPromise(),
-            this.circleService.levels().toPromise(),
+            lastValueFrom(this.circleService.tree()),
+            lastValueFrom(this.circleService.topics()),
+            lastValueFrom(this.circleService.levels()),
         ]);
 
         this.tree = tree;
-        this.topics = topics.map(e => e.name);
+        this.topics = topics?.map(e => e.name) || [];
         this.levels = levels;
         this.loading = false;
 
@@ -71,14 +72,14 @@ export class CreateCircleComponent implements OnInit {
         try {
             const { name, desc, opened } = this.formInfos.value;
             this.creating = true;
-            const circle = await this.circleService.createCircle({
+            const circle = await lastValueFrom(this.circleService.createCircle({
                 name,
                 desc,
                 opened,
                 levels: this.selectedLevels,
                 topics: this.selectedTopics,
                 parent: this.parent!
-            }).toPromise();
+            }));
             this.router.navigate(['/circle', circle.id], {
                 relativeTo: this.activatedRoute,
                 replaceUrl: true

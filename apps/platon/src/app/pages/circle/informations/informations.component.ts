@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CircleService } from '@platon/feature/workspace';
-import { Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { CirclePresenter } from '../circle.presenter';
 
 @Component({
@@ -43,11 +43,11 @@ export class InformationsComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(async context => {
                 const [topics, levels] = await Promise.all([
-                    this.circleService.topics().toPromise(),
-                    this.circleService.levels().toPromise(),
+                    lastValueFrom(this.circleService.topics()),
+                    lastValueFrom(this.circleService.levels()),
                 ]);
 
-                this.levels = levels;
+                this.levels = levels || [];
                 this.topics = topics.map(e => e.name);
 
                 this.context = context;

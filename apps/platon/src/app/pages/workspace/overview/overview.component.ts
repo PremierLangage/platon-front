@@ -42,7 +42,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
             ]).subscribe(([tree, circles, resources]) => {
                 this.tree = tree;
                 this.circles = circles.results;
-                this.resources = resources;
+                this.resources = resources || [];
                 this.loading = false;
                 this.changeDetectorRef.markForCheck();
             })

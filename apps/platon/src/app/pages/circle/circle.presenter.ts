@@ -4,7 +4,7 @@ import { AuthService, AuthUser } from '@platon/core/auth';
 import { Circle, CircleEvent, CircleMember, CircleMembersFilters, CircleService, CircleWatcher, CircleInvitation, InvitationForm, UpdateCircleForm, CircleInvitationsFilters, FileTree, FileService } from '@platon/feature/workspace';
 import { PageResult } from '@platon/shared/utils';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, forkJoin, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, forkJoin, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class CirclePresenter implements OnDestroy {
@@ -59,7 +59,7 @@ export class CirclePresenter implements OnDestroy {
     async watch(): Promise<boolean> {
         const { circle } = this.context.value as Required<Context>;
         try {
-            await this.circleService.createWatcher(circle).toPromise();
+            await lastValueFrom(this.circleService.createWatcher(circle));
             await this.refresh(circle.id);
             return true;
         } catch {
@@ -71,7 +71,7 @@ export class CirclePresenter implements OnDestroy {
     async unwatch(): Promise<boolean> {
         const { circle, watcher } = this.context.value as Required<Context>;
         try {
-            await this.circleService.deleteWatcher(watcher).toPromise();
+            await lastValueFrom(this.circleService.deleteWatcher(watcher));
             await this.refresh(circle.id);
             return true;
         } catch {
@@ -85,7 +85,7 @@ export class CirclePresenter implements OnDestroy {
     async deleteMember(member: CircleMember): Promise<boolean> {
         const { circle } = this.context.value as Required<Context>;;
         try {
-            await this.circleService.deleteMember(member).toPromise();
+            await lastValueFrom(this.circleService.deleteMember(member));
             await this.refresh(circle.id);
             this.messageService.success(`Membre supprimé !`);
             return true;
@@ -100,10 +100,7 @@ export class CirclePresenter implements OnDestroy {
         filters: Omit<CircleMembersFilters, 'circle'>
     ): Promise<PageResult<CircleMember>> {
         const { circle } = this.context.value as Required<Context>;
-        return this.circleService.listMembers({
-            circle,
-            ...filters
-        }).toPromise();
+        return lastValueFrom(this.circleService.listMembers({ circle, ...filters }));
     }
 
 
@@ -113,10 +110,10 @@ export class CirclePresenter implements OnDestroy {
         filters: Omit<CircleInvitationsFilters, 'circle'>
     ): Promise<PageResult<CircleInvitation>> {
         const { circle } = this.context.value as Required<Context>;
-        return this.circleService.listInvitations({
+        return lastValueFrom(this.circleService.listInvitations({
             circle,
             ...filters
-        }).toPromise();
+        }));
     }
 
     async acceptInvitation(): Promise<boolean> {
@@ -181,17 +178,17 @@ export class CirclePresenter implements OnDestroy {
 
     async listEvents(): Promise<PageResult<CircleEvent>> {
         const { circle } = this.context.value as Required<Context>;
-        return this.circleService.listEvents(circle).toPromise();
+        return lastValueFrom(this.circleService.listEvents(circle));
     }
 
 
     async update(form: Omit<UpdateCircleForm, 'circle'>): Promise<boolean> {
         const { circle } = this.context.value as Required<Context>;;
         try {
-            const newCircle = await this.circleService.updateCircle({
+            const newCircle = await lastValueFrom(this.circleService.updateCircle({
                 circle,
                 ...form
-            }).toPromise();
+            }));
 
             this.context.next({
                 ...this.context.value,
@@ -209,14 +206,14 @@ export class CirclePresenter implements OnDestroy {
     private async refresh(circleId: number): Promise<void> {
         const [user, circle] = await Promise.all([
             this.authService.ready(),
-            this.circleService.findById(circleId).toPromise()
+            lastValueFrom(this.circleService.findById(circleId))
         ]);
 
-        const [member, watcher, invitation] = await forkJoin([
+        const [member, watcher, invitation] = await lastValueFrom(forkJoin([
             this.circleService.findMember(circle!, user!.username),
             this.circleService.findWatcher(circle!, user!.username),
             this.circleService.findInvitation(circle!, user!.username),
-        ]).toPromise();
+        ]));
 
         this.context.next({
             state: 'READY',
@@ -232,7 +229,7 @@ export class CirclePresenter implements OnDestroy {
         try {
             this.refresh(circleId);
         } catch (error) {
-            const status = error.status || 500;
+            const status = (error as any).status || 500;
             if (status >= 400 && status < 500) {
                 this.context.next({ state: 'NOT_FOUND' });
             } else {

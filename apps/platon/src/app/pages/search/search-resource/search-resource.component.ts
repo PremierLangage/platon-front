@@ -5,7 +5,7 @@ import { ResourceService, Resource, ResourceFilters, ResourceCompletion } from '
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
-import { of, Subscription } from 'rxjs';
+import { lastValueFrom, of, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-search-resource',
@@ -61,7 +61,7 @@ export class SearchResourceComponent implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         const [user, completion] = await Promise.all([
             this.authService.ready(),
-            this.resourceService.completion().toPromise()
+            lastValueFrom(this.resourceService.completion())
         ]);
 
         this.user = user;
@@ -102,7 +102,7 @@ export class SearchResourceComponent implements OnInit, OnDestroy {
         });
 
         this.searching = true;
-        this.page = await this.resourceService.search(this.filter).toPromise();
+        this.page = await lastValueFrom(this.resourceService.search(this.filter));
         this.searching = false;
 
         this.changeDetectorRef.markForCheck();
