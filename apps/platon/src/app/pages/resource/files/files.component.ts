@@ -106,6 +106,7 @@ export class FilesComponent implements OnInit, OnDestroy {
                 }
             );
         });
-
+        this.files = [];
+        this.description = "";
     }
 }
