@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 
@@ -35,6 +36,7 @@ import { FilesComponent } from './files.component';
         NzSpinModule,
         NzFormModule,
         NzInputModule,
+        NzProgressModule,
         NzButtonModule,
         NzSelectModule,
 

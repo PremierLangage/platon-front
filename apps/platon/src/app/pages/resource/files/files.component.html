@@ -3,7 +3,11 @@
   <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
     <!-- FILE UPLOAD -->
     <nz-divider nzText="Ajouter des fichiers" nzOrientation="left"></nz-divider>
-
+    <nz-progress *ngIf="uploading"
+      [nzPercent]="percent"
+      [nzStrokeColor]="{ '0%': '#108ee9', '100%': '#87d068' }"
+      nzStatus="active"
+    ></nz-progress>
     <div class="uploader">
       <nz-input-group nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
         <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description"/>
@@ -12,7 +16,6 @@
         <button
         nz-button
         [nzType]="'primary'"
-        [nzLoading]="uploading > 0"
         nzSearch
         (click)="handleUpload()"
         [disabled]="files.length === 0 || description == ''"

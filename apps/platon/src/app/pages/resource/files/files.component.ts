@@ -30,9 +30,10 @@ export class FilesComponent implements OnInit, OnDestroy {
     context = this.presenter.defaultContext;
     tree?: FileTree;
 
+    percent: number = 0;
     files: NzUploadFile[] = [];
 
-    uploading = 0;
+    uploading = false;
 
     constructor(
         private readonly presenter: ResourcePresenter,
@@ -73,14 +74,15 @@ export class FilesComponent implements OnInit, OnDestroy {
     };
 
     handleUpload(): void {
+        this.uploading = true;
         this.presenter.upload(this.files, this.description).then((request) => {
             request.subscribe(
                 (event) => {
                     switch (event.type) {
                         case HttpEventType.UploadProgress:
-                            // item.percent = Math.round(
-                            //     100 * (event.loaded / event.total)
-                            // );
+                            this.percent = Math.round(
+                                100 * (event.loaded / event.total)
+                            );
                             break;
                         case HttpEventType.Response:
                             // item.status = 'success';
@@ -90,7 +92,7 @@ export class FilesComponent implements OnInit, OnDestroy {
                             // this.messageService.success(
                             //     item.name + ' uploader.'
                             // );
-                            this.uploading -= 1;
+                            this.uploading = false;
                             this.refreshFiles();
                             break;
                     }
