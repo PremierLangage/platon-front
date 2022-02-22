@@ -12,6 +12,7 @@ import {
     UpdateResourceForm,
 } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 @Injectable()
@@ -89,11 +90,12 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
-    async upload(form: FormData): Promise<Observable<any>> {
+    async upload(files : NzUploadFile[], description : string): Promise<Observable<any>> {
         const { resource } = this.context.value as Required<Context>;
         return this.fileService.create({
             owner: resource,
-            file: form,
+            files: files,
+            description: description,
         });
     }
 

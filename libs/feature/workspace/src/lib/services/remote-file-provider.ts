@@ -35,7 +35,14 @@ export class RemoteFileProvider extends FileProvider {
     }
 
     create(form: CreateFileForm): Observable<any> {
-        return this.http.post<any>(form.owner.filesUrl, form.file, {
+        let request = new FormData();
+        request.append("description", form.description);
+        request.append("owner", form.owner as any);
+        for(let i = 0; i < form.files.length; i++) {
+            request.append(`files[${i}]`, form.files[i] as any);
+        }
+
+        return this.http.post<any>(form.owner.filesUrl, request, {
             reportProgress: true,
             observe: 'events',
         });

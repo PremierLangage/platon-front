@@ -5,18 +5,25 @@
     <nz-divider nzText="Ajouter des fichiers" nzOrientation="left"></nz-divider>
 
     <div class="uploader">
-      <button
+      <nz-input-group nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
+        <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description"/>
+      </nz-input-group>
+      <ng-template #suffixButton>
+        <button
         nz-button
         [nzType]="'primary'"
         [nzLoading]="uploading > 0"
+        nzSearch
         (click)="handleUpload()"
-        [disabled]="files.length === 0"
+        [disabled]="files.length === 0 || description == ''"
       >
         {{ uploading ? 'Chargement' : 'Envoyer' }}
       </button>
+      </ng-template>
     </div>
 
-    <nz-upload
+
+      <nz-upload
       [(nzFileList)]="files"
       [nzBeforeUpload]="beforeUpload"
       [nzMultiple]="true"
@@ -27,6 +34,8 @@
         Selectionner les fichiers
       </button>
     </nz-upload>
+
+
 
     <!-- FILE TREE -->
     <nz-divider

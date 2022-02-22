@@ -26,6 +26,7 @@ import { ResourcePresenter } from '../resource-presenter';
 export class FilesComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
+    description: string = "";
     context = this.presenter.defaultContext;
     tree?: FileTree;
 
@@ -72,37 +73,23 @@ export class FilesComponent implements OnInit, OnDestroy {
     };
 
     handleUpload(): void {
-        this.files.forEach((file) => {
-            this.uploading += 1;
-            file.status = 'uploading';
-            this.changeDetectorRef.markForCheck();
-            this.customUpload(file);
-        });
-    }
-
-    private customUpload(item: NzUploadFile) {
-        // Create formData for file
-        let formData = new FormData();
-        formData.append('file', item as any);
-        // Send the form to webservice
-        this.presenter.upload(formData).then((request) => {
-            // Subscribe on post
+        this.presenter.upload(this.files, this.description).then((request) => {
             request.subscribe(
                 (event) => {
                     switch (event.type) {
                         case HttpEventType.UploadProgress:
-                            item.percent = Math.round(
-                                100 * (event.loaded / event.total)
-                            );
+                            // item.percent = Math.round(
+                            //     100 * (event.loaded / event.total)
+                            // );
                             break;
                         case HttpEventType.Response:
-                            item.status = 'success';
-                            this.files = this.files.filter(
-                                (file) => file !== item
-                            );
-                            this.messageService.success(
-                                item.name + ' uploader.'
-                            );
+                            // item.status = 'success';
+                            // this.files = this.files.filter(
+                            //     (file) => file !== item
+                            // );
+                            // this.messageService.success(
+                            //     item.name + ' uploader.'
+                            // );
                             this.uploading -= 1;
                             this.refreshFiles();
                             break;
@@ -110,11 +97,15 @@ export class FilesComponent implements OnInit, OnDestroy {
                     this.changeDetectorRef.markForCheck();
                 },
                 (error) => {
-                    item.status = 'error';
-                    item.response = error;
-                    this.messageService.error(item.name + ' erreur upload.');
+                    // item.status = 'error';
+                    // item.response = error;
+
+                    this.messageService.error(/*item.name + */' erreur upload.');
+                    console.log('Something going wrong');
+                    console.log(error);
                 }
             );
         });
+
     }
 }
