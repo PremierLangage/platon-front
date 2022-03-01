@@ -16,7 +16,7 @@
 
 
 <ng-template #nzTreeTemplate let-node let-origin="origin">
-  <span class="node">
+  <span class="node" (mouseenter)="node.display=true" (mouseleave)="node.display=false">
     <span *ngIf="!node.isLeaf" (contextmenu)="contextMenu($event, menu, node)">
       <i nz-icon [nzType]="node.isExpanded ? 'folder-open' : 'folder'"></i>
       <span class="folder-name">{{ node.title }}</span>
@@ -26,8 +26,17 @@
       <span class="file-name">{{ node.title }}</span>
     </span>
     <span class="file-actions">
-      <ng-template [ngTemplateOutlet]="actionsTemplate">
-    </ng-template>
+      <div *ngIf="node.display" >
+        <button
+          type="button"
+          nz-button
+          nzType="text"
+          nzSize="small"
+          (click)="delete(node)"
+         >
+        <i nz-icon nzType="delete" class="remove"></i>
+        </button>
+      </div>
     </span>
 
   </span>
@@ -52,17 +61,7 @@
 </ng-template>
 
 <ng-template #actionsTemplate>
-    <div (mouseover)="isDisplay=true" (mouseout)="isDisplay=false">
-      <button
-        type="button"
-        nz-button
-        nzType="text"
-        nzSize="small"
-        [hidden]="isDisplay"
-       >
-      <i nz-icon nzType="delete"></i>
-      </button>
-    </div>
+
 
 </ng-template>
 

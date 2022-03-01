@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -31,7 +31,7 @@ export class RemoteFileProvider extends FileProvider {
     }
 
     delete(file: FileEntry): Observable<any> {
-        return this.http.delete<any>(file.url);
+        return this.http.delete<any>(decodeURIComponent(file.url));
     }
 
     create(form: CreateFileForm): Observable<any> {

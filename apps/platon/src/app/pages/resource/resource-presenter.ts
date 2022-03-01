@@ -5,6 +5,7 @@ import {
     Circle,
     CircleService,
     CreateFileForm,
+    FileEntry,
     FileService,
     FileTree,
     Resource,
@@ -97,6 +98,10 @@ export class ResourcePresenter implements OnDestroy {
             files: files,
             description: description,
         });
+    }
+
+    async delete(file : FileEntry, description : string = ""): Promise<Observable<any>> {
+        return this.fileService.delete(file);
     }
 
     // async upload(

@@ -60,6 +60,21 @@ export class FilesComponent implements OnInit, OnDestroy {
         this.changeDetectorRef.markForCheck();
     }
 
+    delete(file : FileEntry) {
+        this.presenter.delete(file).then((request) => {
+            request.subscribe(
+                (event) => {
+                    this.messageService.success("Fichier supprimer avec succès.");
+                    this.refreshFiles();
+                },
+                (error) => {
+                    this.messageService.error("Erreur avec la suppression du fichier.");
+                }
+            )
+        });
+
+    }
+
     beforeUpload = (file: NzUploadFile): boolean => {
         let present = this.files.find((f) => {
             return f.name === file.name;
