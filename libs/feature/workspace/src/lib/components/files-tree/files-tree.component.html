@@ -25,7 +25,16 @@
       <i nz-icon nzType="file"></i>
       <span class="file-name">{{ node.title }}</span>
     </span>
+    <span class="file-actions">
+      <ng-template [ngTemplateOutlet]="actionsTemplate">
+    </ng-template>
+    </span>
+
   </span>
+  <!--
+    <i nz-icon class="delete" nzType="delete" (click)="delete(node)"></i>
+  -->
+
 </ng-template>
 <nz-dropdown-menu #menu="nzDropdownMenu">
   <ul nz-menu>
@@ -40,6 +49,21 @@
     <p>Aucun fichier à afficher</p>
   </ng-template>
 </nz-empty>
+</ng-template>
+
+<ng-template #actionsTemplate>
+    <div (mouseover)="isDisplay=true" (mouseout)="isDisplay=false">
+      <button
+        type="button"
+        nz-button
+        nzType="text"
+        nzSize="small"
+        [hidden]="isDisplay"
+       >
+      <i nz-icon nzType="delete"></i>
+      </button>
+    </div>
+
 </ng-template>
 
 <ng-template #loadingTemplate>

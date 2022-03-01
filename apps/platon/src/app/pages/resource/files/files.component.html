@@ -45,7 +45,7 @@
       nzText="Fichiers de la ressource"
       nzOrientation="left"
     ></nz-divider>
-    <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()"></ws-files-tree>
+    <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()" deleteFile="delete()"></ws-files-tree>
   </nz-col>
 
   <!-- RIGHT SIZE FILE TAB -->
