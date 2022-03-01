@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, ɵclearResolutionOfComponentResourcesQueue } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import {
@@ -102,6 +102,17 @@ export class ResourcePresenter implements OnDestroy {
 
     async delete(file : FileEntry, description : string = ""): Promise<Observable<any>> {
         return this.fileService.delete(file);
+    }
+
+    async addFolder(foldername : string, description : string = ""): Promise<Observable<any>> {
+        const { resource } = this.context.value as Required<Context>;
+        console.log("foldername");
+        return this.fileService.createFolder({
+            name: foldername,
+            owner: resource,
+            files: {},
+            description: description,
+        });
     }
 
     // async upload(

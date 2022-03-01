@@ -32,6 +32,13 @@ export interface CreateFileForm {
     //files: Record<string, { type: 'file' | 'folder'; content?: string }>;
 }
 
+export interface CreateFolderForm {
+    name: string;
+    owner: Resource | Circle;
+    description : string;
+    files: Record<string, { type: 'file' | 'folder'; content?: string }>;
+}
+
 export interface UpdateFileForm {
     file: FileEntry;
     content: string;

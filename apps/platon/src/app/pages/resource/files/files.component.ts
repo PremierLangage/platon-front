@@ -27,6 +27,7 @@ export class FilesComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     description: string = "";
+    foldername: string = "";
     context = this.presenter.defaultContext;
     tree?: FileTree;
 
@@ -73,6 +74,21 @@ export class FilesComponent implements OnInit, OnDestroy {
             )
         });
 
+    }
+
+    addFolder(){
+        this.presenter.addFolder(this.foldername,this.description).then((request) => {
+            request.subscribe (
+                (event) => {
+                    this.messageService.success("Dossier créé avec succès");
+                    this.refreshFiles();
+                },
+                (error) => {
+                    this.messageService.error("Erreur avec la création du dossier.");
+                }
+            )
+        }
+        )
     }
 
     beforeUpload = (file: NzUploadFile): boolean => {

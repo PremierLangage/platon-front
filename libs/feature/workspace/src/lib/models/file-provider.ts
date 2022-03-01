@@ -6,6 +6,7 @@ import {
     MoveFileForm,
     FileTree,
     FileEntry,
+    CreateFolderForm,
 } from './file';
 import { Circle } from './circle';
 import { Resource } from './resource';
@@ -17,6 +18,7 @@ export abstract class FileProvider {
     abstract delete(file: FileEntry): Observable<any>;
 
     abstract create(form:  CreateFileForm): Observable<any>;
+    abstract createFolder(form: CreateFolderForm): Observable<any>;
     abstract move(form: MoveFileForm): Observable<any>;
     abstract update(form: UpdateFileForm): Observable<any>;
     abstract rename(form: RenameFileForm): Observable<any>;

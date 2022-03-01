@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Resource } from '../models/resource';
 import {
     CreateFileForm,
+    CreateFolderForm,
     MoveFileForm,
     RenameFileForm,
     FileEntry,
@@ -30,6 +31,10 @@ export class FileService {
 
     create(form: CreateFileForm): Observable<any> {
         return this.provider.create(form);
+    }
+
+    createFolder(form: CreateFolderForm): Observable<any> {
+        return this.provider.createFolder(form);
     }
 
     move(form: MoveFileForm): Observable<any> {

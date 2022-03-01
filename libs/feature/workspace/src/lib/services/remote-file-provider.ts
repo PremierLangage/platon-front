@@ -10,6 +10,7 @@ import {
     FileEntry,
     FileTree,
     UpdateFileForm,
+    CreateFolderForm,
 } from '../models/file';
 import { FileProvider } from '../models/file-provider';
 import { Circle } from '../models/circle';
@@ -38,6 +39,22 @@ export class RemoteFileProvider extends FileProvider {
         let request = new FormData();
         request.append("description", form.description);
         request.append("owner", form.owner as any);
+        for(let i = 0; i < form.files.length; i++) {
+            request.append(`files[${i}]`, form.files[i] as any);
+        }
+
+        return this.http.post<any>(form.owner.filesUrl, request, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
+
+    createFolder(form: CreateFolderForm): Observable<any> {
+        let request = new FormData();
+        request.append("name", form.name as any);
+        request.append("owner", form.owner as any);
+        request.append("description", form.description);
+        
         for(let i = 0; i < form.files.length; i++) {
             request.append(`files[${i}]`, form.files[i] as any);
         }
