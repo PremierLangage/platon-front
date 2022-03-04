@@ -12,12 +12,10 @@ export class WebComponentDetectorDirective implements OnInit, OnDestroy {
     private observer?: MutationObserver;
     private listener?: () => void;
 
-    constructor(
-        private readonly componentLoader: ComponentLoaderService,
-    ) {}
+    constructor(private readonly componentLoader: ComponentLoaderService) {}
 
     ngOnInit() {
-        this.lazyLoadWebComponents()
+        this.lazyLoadWebComponents();
         this.observeWebComponents();
     }
 
@@ -35,12 +33,16 @@ export class WebComponentDetectorDirective implements OnInit, OnDestroy {
     private lazyLoadWebComponents() {
         const listener = () => {
             setTimeout(async () => {
-                let unloadedTags = Array.from(this.componentLoader.getComponentsToLoad());
+                let unloadedTags = Array.from(
+                    this.componentLoader.getComponentsToLoad()
+                );
                 for (const tagName of unloadedTags) {
                     const tags = document.getElementsByTagName(tagName);
                     if (tags?.length) {
                         await this.componentLoader.loadComponent(tagName);
-                        unloadedTags = unloadedTags.filter(e => e !== tagName);
+                        unloadedTags = unloadedTags.filter(
+                            (e) => e !== tagName
+                        );
                     }
                 }
             });
@@ -58,19 +60,24 @@ export class WebComponentDetectorDirective implements OnInit, OnDestroy {
      */
     private observeWebComponents(): void {
         const target = document.body;
-        let unloadedTags = Array.from(this.componentLoader.getComponentsToLoad());
+        let unloadedTags = Array.from(
+            this.componentLoader.getComponentsToLoad()
+        );
         this.observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node instanceof HTMLElement) {
-                        unloadedTags = this.checkWebcomponentInNode(node, unloadedTags);
+                        unloadedTags = this.checkWebcomponentInNode(
+                            node,
+                            unloadedTags
+                        );
                     }
                 });
             });
         });
         this.observer.observe(target, {
             subtree: true,
-            childList: true
+            childList: true,
         });
     }
 
@@ -81,13 +88,16 @@ export class WebComponentDetectorDirective implements OnInit, OnDestroy {
 
         const tagName = node.tagName.toLowerCase();
         if (unloadedTags.includes(tagName)) {
-            unloadedTags = unloadedTags.filter(e => e !== tagName);
+            unloadedTags = unloadedTags.filter((e) => e !== tagName);
             this.componentLoader.loadComponent(tagName).catch(console.error);
         }
 
         for (const child of Array.from(node.childNodes)) {
             if (child instanceof HTMLElement) {
-                unloadedTags = this.checkWebcomponentInNode(child, unloadedTags);
+                unloadedTags = this.checkWebcomponentInNode(
+                    child,
+                    unloadedTags
+                );
             }
         }
         return unloadedTags;

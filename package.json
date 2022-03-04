@@ -46,7 +46,7 @@
     "@angular/router": "^11.2.3",
     "@auth0/angular-jwt": "^5.0.2",
     "@juristr/ngx-lazy-el": "^1.0.1",
-    "@mcisse/nge": "0.0.4",
+    "@mcisse/nge": "0.0.18",
     "@ngx-formly/core": "^5.10.22",
     "@ngx-formly/material": "^5.10.22",
     "@ngx-pwa/local-storage": "^11.1.0",

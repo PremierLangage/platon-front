@@ -1,1 +1,65 @@
-<ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()"></ws-files-tree>
+<nz-row [nzGutter]="[24, 24]" nzAlign="top">
+  <!-- LEFT SIZE FILE TAB-->
+  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
+    <!-- FILE TREE -->
+    <nz-divider
+      nzText="Fichiers de la ressource"
+      nzOrientation="left"
+    ></nz-divider>
+    <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()" (deleteFile)="delete($event)"></ws-files-tree>
+
+
+
+    <!-- FILE UPLOAD -->
+    <nz-divider nzText="Ajouter des fichiers" nzOrientation="left"></nz-divider>
+    <nz-progress *ngIf="uploading"
+      [nzPercent]="percent"
+      [nzStrokeColor]="{ '0%': '#108ee9', '100%': '#87d068' }"
+      nzStatus="active"
+    ></nz-progress>
+    <div class="uploader">
+      <nz-input-group nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
+        <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description"/>
+      </nz-input-group>
+      <ng-template #suffixButton>
+        <button
+        nz-button
+        [nzType]="'primary'"
+        nzSearch
+        (click)="handleUpload()"
+        [disabled]="files.length === 0 || description == ''"
+      >
+        {{ uploading ? 'Chargement' : 'Envoyer' }}
+      </button>
+     <span>
+        <button
+          nz-button
+          nzType="primary"
+          matTooltip="Créer un dossier"
+          (click)="addFolder()">
+          <i nz-icon nzType="folder-add" nzTheme="outline"></i>
+        </button>
+        <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername"/>
+      </span>
+      
+      </ng-template>
+    </div>
+
+
+      <nz-upload
+      [(nzFileList)]="files"
+      [nzBeforeUpload]="beforeUpload"
+      [nzMultiple]="true"
+      [nzDirectory]="false"
+    >
+      <button nz-button>
+        <i nz-icon nzType="upload"></i>
+        Selectionner les fichiers
+      </button>
+    </nz-upload>
+
+  </nz-col>
+
+  <!-- RIGHT SIZE FILE TAB -->
+  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12"> </nz-col>
+</nz-row>

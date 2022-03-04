@@ -1,6 +1,6 @@
-import { Circle } from "./circle";
-import { Resource } from "./resource";
-
+import { Circle } from './circle';
+import { Resource } from './resource';
+import { NzUploadFile } from 'ng-zorro-antd/upload';
 
 export interface FileEntry {
     path: string;
@@ -27,7 +27,16 @@ export interface FileTree {
 
 export interface CreateFileForm {
     owner: Resource | Circle;
-    files: Record<string, { type: 'file' | 'folder', content?: string }>;
+    files: NzUploadFile[];
+    description : string;
+    //files: Record<string, { type: 'file' | 'folder'; content?: string }>;
+}
+
+export interface CreateFolderForm {
+    name: string;
+    owner: Resource | Circle;
+    description : string;
+    files: Record<string, { type: 'file' | 'folder'; content?: string }>;
 }
 
 export interface UpdateFileForm {

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,23 +9,22 @@ import {
     RenameFileForm,
     FileEntry,
     FileTree,
-    UpdateFileForm
+    UpdateFileForm,
+    CreateFolderForm,
 } from '../models/file';
 import { FileProvider } from '../models/file-provider';
 import { Circle } from '../models/circle';
 
 @Injectable()
 export class RemoteFileProvider extends FileProvider {
-    constructor(
-        private readonly http: HttpClient
-    ) {
-        super()
+    constructor(private readonly http: HttpClient) {
+        super();
     }
 
     tree(resource: Resource | Circle): Observable<FileTree> {
-        return this.http.get<FileTree>(resource.filesUrl).pipe(
-            map(res => res)
-        );
+        return this.http
+            .get<FileTree>(resource.filesUrl)
+            .pipe(map((res) => res));
     }
 
     read(file: FileEntry): Observable<string> {
@@ -33,12 +32,36 @@ export class RemoteFileProvider extends FileProvider {
     }
 
     delete(file: FileEntry): Observable<any> {
-        return this.http.delete<any>(file.url);
+        return this.http.delete<any>(decodeURIComponent(file.url));
     }
 
     create(form: CreateFileForm): Observable<any> {
-        return this.http.post<any>(form.owner.filesUrl, {
-            files: form.files
+        let request = new FormData();
+        request.append("description", form.description);
+        request.append("owner", form.owner as any);
+        for(let i = 0; i < form.files.length; i++) {
+            request.append(`files[${i}]`, form.files[i] as any);
+        }
+
+        return this.http.post<any>(form.owner.filesUrl, request, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
+
+    createFolder(form: CreateFolderForm): Observable<any> {
+        let request = new FormData();
+        request.append("name", form.name as any);
+        request.append("owner", form.owner as any);
+        request.append("description", form.description);
+        
+        for(let i = 0; i < form.files.length; i++) {
+            request.append(`files[${i}]`, form.files[i] as any);
+        }
+
+        return this.http.post<any>(form.owner.filesUrl, request, {
+            reportProgress: true,
+            observe: 'events',
         });
     }
 
@@ -46,13 +69,13 @@ export class RemoteFileProvider extends FileProvider {
         return this.http.patch<any>(`${form.owner.filesUrl}/${form.oldpath}`, {
             action: 'move',
             newpath: form.newpath,
-            copy: !!form.copy
+            copy: !!form.copy,
         });
     }
 
     update(form: UpdateFileForm): Observable<any> {
         return this.http.put<any>(form.file.url, {
-            content: form.content
+            content: form.content,
         });
     }
 
@@ -61,5 +84,9 @@ export class RemoteFileProvider extends FileProvider {
             action: 'rename',
             newpath: form.newpath,
         });
+    }
+
+    options(resource: Resource | Circle): Observable<any> {
+        return this.http.options<any>(resource.url);
     }
 }
