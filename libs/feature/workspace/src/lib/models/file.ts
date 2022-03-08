@@ -36,7 +36,7 @@ export interface CreateFolderForm {
     name: string;
     owner: Resource | Circle;
     description : string;
-    files: Record<string, { type: 'file' | 'folder'; content?: string }>;
+    files: Record<string, { type: 'folder'; content?: string }>;
 }
 
 export interface UpdateFileForm {

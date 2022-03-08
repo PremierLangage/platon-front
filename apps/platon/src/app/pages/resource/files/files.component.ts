@@ -32,7 +32,7 @@ export class FilesComponent implements OnInit, OnDestroy {
     tree?: FileTree;
 
     percent: number = 0;
-    files: NzUploadFile[] = [];
+    file: NzUploadFile[] = [];
 
     uploading = false;
 
@@ -92,21 +92,21 @@ export class FilesComponent implements OnInit, OnDestroy {
     }
 
     beforeUpload = (file: NzUploadFile): boolean => {
-        let present = this.files.find((f) => {
+        let present = this.file.find((f) => {
             return f.name === file.name;
         });
         if (present) {
             this.messageService.error(present.name + ' déjà présent.');
             return false;
         }
-        this.files = this.files.concat(file);
+        this.file = this.file.concat(file);
         this.messageService.info(file.name + ' fichier chargé.');
         return false;
     };
 
     handleUpload(): void {
         this.uploading = true;
-        this.presenter.upload(this.files, this.description).then((request) => {
+        this.presenter.upload(this.file, this.description).then((request) => {
             request.subscribe(
                 (event) => {
                     switch (event.type) {
@@ -139,7 +139,7 @@ export class FilesComponent implements OnInit, OnDestroy {
                 }
             );
         });
-        this.files = [];
+        this.file = [];
         this.description = "";
     }
 }

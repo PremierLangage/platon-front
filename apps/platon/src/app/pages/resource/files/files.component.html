@@ -27,7 +27,7 @@
         [nzType]="'primary'"
         nzSearch
         (click)="handleUpload()"
-        [disabled]="files.length === 0 || description == ''"
+        [disabled]="file.length === 0 || description == ''"
       >
         {{ uploading ? 'Chargement' : 'Envoyer' }}
       </button>
@@ -47,7 +47,7 @@
 
 
       <nz-upload
-      [(nzFileList)]="files"
+      [(nzFileList)]="file"
       [nzBeforeUpload]="beforeUpload"
       [nzMultiple]="true"
       [nzDirectory]="false"
