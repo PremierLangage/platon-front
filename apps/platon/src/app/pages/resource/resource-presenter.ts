@@ -104,14 +104,19 @@ export class ResourcePresenter implements OnDestroy {
         return this.fileService.delete(file);
     }
 
-    async addFolder(foldername : string, description : string = ""): Promise<Observable<any>> {
+    async addFolder(foldername : string, description : string = "aaah",files : {}): Promise<Observable<any>> {
         const { resource } = this.context.value as Required<Context>;
-        console.log("foldername");
+        files = {
+            "foldername": {
+                "type": "folder",
+                "content": ""
+            }
+        };
         return this.fileService.createFolder({
             name: foldername,
             owner: resource,
-            files: {},
             description: description,
+            files: files,
         });
     }
 

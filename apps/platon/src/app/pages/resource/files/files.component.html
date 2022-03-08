@@ -36,7 +36,8 @@
           nz-button
           nzType="primary"
           matTooltip="Créer un dossier"
-          (click)="addFolder()">
+          (click)="addFolder()"
+          [disabled]="foldername == ''">
           <i nz-icon nzType="folder-add" nzTheme="outline"></i>
         </button>
         <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername"/>

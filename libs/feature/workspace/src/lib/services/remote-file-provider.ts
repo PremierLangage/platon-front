@@ -54,7 +54,7 @@ export class RemoteFileProvider extends FileProvider {
         request.append("name", form.name as any);
         request.append("owner", form.owner as any);
         request.append("description", form.description);
-        request.append("file", form.files as any);
+        request.append("files", form.files as any);
         
         return this.http.post<any>(form.owner.filesUrl, request, {
             reportProgress: true,
