@@ -1,66 +1,54 @@
 <nz-row [nzGutter]="[24, 24]" nzAlign="top">
   <!-- LEFT SIZE FILE TAB-->
   <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="12" nzXl="12">
+    
     <!-- FILE TREE -->
-    <nz-divider
-      nzText="Fichiers de la ressource"
-      nzOrientation="left"
-    ></nz-divider>
+    <nz-divider nzText="Fichiers de la ressource" nzOrientation="left"></nz-divider>
     <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()" (deleteFile)="delete($event)"></ws-files-tree>
 
 
 
     <!-- FILE UPLOAD -->
     <nz-divider nzText="Ajouter des fichiers" nzOrientation="left"></nz-divider>
-    <nz-progress *ngIf="uploading"
-      [nzPercent]="percent"
-      [nzStrokeColor]="{ '0%': '#108ee9', '100%': '#87d068' }"
-      nzStatus="active"
-    ></nz-progress>
+    <nz-progress *ngIf="uploading" [nzPercent]="percent" [nzStrokeColor]="{ '0%': '#108ee9', '100%': '#87d068' }"
+      nzStatus="active"></nz-progress>
     <div class="uploader">
-      <nz-input-group nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
-        <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description"/>
+      <nz-input-group nzSearch [nzAddOnBefore]="addOnBeforeTemplate" [nzAddOnAfter]="suffixButton">
+        <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description" />
       </nz-input-group>
+      <ng-template #addOnBeforeTemplate>
+        <nz-select [ngModel]="'Http://'">
+          <nz-option nzLabel="Http://" nzValue="Http://"></nz-option>
+          <nz-option nzLabel="Https://" nzValue="Https://"></nz-option>
+        </nz-select>
+      </ng-template>
       <ng-template #suffixButton>
-        <button
-        nz-button
-        [nzType]="'primary'"
-        nzSearch
-        (click)="handleUpload()"
-        [disabled]="file.length === 0 || description == ''"
-      >
-        {{ uploading ? 'Chargement' : 'Envoyer' }}
-      </button>
-
-      
+        <button nz-button [nzType]="'primary'" nzSearch (click)="handleUpload()"
+          [disabled]="file.length === 0 || description == ''">
+          {{ uploading ? 'Chargement' : 'Envoyer' }}
+        </button>
       </ng-template>
     </div>
 
-
-      <nz-upload
-      [(nzFileList)]="file"
-      [nzBeforeUpload]="beforeUpload"
-      [nzMultiple]="true"
-      [nzDirectory]="false"
-    >
+    <nz-upload [(nzFileList)]="file" [nzBeforeUpload]="beforeUpload" [nzMultiple]="true" [nzDirectory]="false">
       <button nz-button>
         <i nz-icon nzType="upload"></i>
         Selectionner les fichiers
       </button>
     </nz-upload>
 
+    <!-- CREATE A FOLDER -->
+    <nz-divider nzText="Créer un dossier" nzOrientation="left"></nz-divider>
     <div>
-      <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername"/>
-    </div>
-    <div>
-      <button
-      nz-button
-      nzType="primary"
-      matTooltip="Créer un dossier"
-      (click)="addFolder()"
-      [disabled]="foldername == ''">
-      <i nz-icon nzType="folder-add" nzTheme="outline"></i>
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixFolder">
+      <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername" />
+    </nz-input-group>
+    <ng-template #suffixFolder>
+      <button nz-button nzType="primary" matTooltip="Créer un dossier" (click)="addFolder()"
+        [disabled]="foldername == ''">
+        <i nz-icon nzType="folder-add" nzTheme="outline"></i>
       </button>
+    </ng-template>
     </div>
   </nz-col>
 

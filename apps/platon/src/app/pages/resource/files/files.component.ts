@@ -69,7 +69,7 @@ export class FilesComponent implements OnInit, OnDestroy {
         this.presenter.delete(file).then((request) => {
             request.subscribe(
                 (event) => {
-                    this.messageService.success("Fichier supprimer avec succès.");
+                    this.messageService.success("Fichier supprimé avec succès.");
                     this.refreshFiles();
                 },
                 (error) => {
