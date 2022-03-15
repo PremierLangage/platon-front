@@ -50,15 +50,9 @@ export class RemoteFileProvider extends FileProvider {
     }
 
     createFolder(form: CreateFolderForm): Observable<any> {
-        let request = new FormData();
-        request.append("name", form.name as any);
-        request.append("owner", form.owner as any);
-        request.append("description", form.description);
-        request.append("files", form.files as any);
-        
-        return this.http.post<any>(form.owner.filesUrl, request, {
-            reportProgress: true,
-            observe: 'events',
+        const headers= new HttpHeaders().set('content-type', 'application/json')
+        return this.http.post<any>(form.owner.filesUrl, JSON.stringify(form), {
+            headers: headers
         });
     }
 

@@ -31,17 +31,7 @@
       >
         {{ uploading ? 'Chargement' : 'Envoyer' }}
       </button>
-     <span>
-        <button
-          nz-button
-          nzType="primary"
-          matTooltip="Créer un dossier"
-          (click)="addFolder()"
-          [disabled]="foldername == ''">
-          <i nz-icon nzType="folder-add" nzTheme="outline"></i>
-        </button>
-        <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername"/>
-      </span>
+
       
       </ng-template>
     </div>
@@ -59,6 +49,19 @@
       </button>
     </nz-upload>
 
+    <div>
+      <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername"/>
+    </div>
+    <div>
+      <button
+      nz-button
+      nzType="primary"
+      matTooltip="Créer un dossier"
+      (click)="addFolder()"
+      [disabled]="foldername == ''">
+      <i nz-icon nzType="folder-add" nzTheme="outline"></i>
+      </button>
+    </div>
   </nz-col>
 
   <!-- RIGHT SIZE FILE TAB -->

@@ -29,12 +29,8 @@ export class FilesComponent implements OnInit, OnDestroy {
     description: string = "";
     desc: string = "aaa";
     foldername: string = "";
-    files: Record<string, { type: 'folder'; content?: string }> = {
-        "foldername": {
-            "type": "folder",
-            "content": ""
-        }
-    };
+    
+    
 
     context = this.presenter.defaultContext;
     tree?: FileTree;
@@ -85,7 +81,12 @@ export class FilesComponent implements OnInit, OnDestroy {
     }
 
     addFolder(){
-        this.presenter.addFolder(this.foldername,this.desc,this.files).then((request) => {
+        let myfiles: Record<string, { type: 'folder'; content?: string }> = {
+            [this.foldername] : {
+                type: "folder",
+            }
+        };
+        this.presenter.addFolder(this.foldername,this.desc, myfiles).then((request) => {
             request.subscribe (
                 (event) => {
                     this.messageService.success("Dossier créé avec succès");
