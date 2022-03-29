@@ -33,7 +33,7 @@ export class FilesTreeComponent {
             return {
                 key: entry.path,
                 title: entry.path.split('/').pop(),
-                isLeaf: !entry.children?.length,
+                isLeaf: (entry.type == 'file'),
                 children: entry.children?.map(createNode).sort(this.compareNodes)
             };
         };
