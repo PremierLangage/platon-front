@@ -29,8 +29,8 @@ export class FileService {
         return this.provider.delete(file);
     }
 
-    create(form: CreateFileForm): Observable<any> {
-        return this.provider.create(form);
+    create(form: CreateFileForm, selectedFolder: FileEntry | undefined): Observable<any> {
+        return this.provider.create(form, selectedFolder);
     }
 
     createFolder(form: CreateFolderForm): Observable<any> {

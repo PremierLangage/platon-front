@@ -17,7 +17,8 @@
         <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description" />
       </nz-input-group>
       <ng-template #addOnBeforeTemplate>
-        <nz-select [ngModel]="selectedFolder">
+        <nz-select [(ngModel)]="selectedFolder">
+          <nz-option nzLabel="undefined" nzValue="undefined"></nz-option>
           <li *ngFor="let folder of getFolder()">
             <nz-option nzLabel={{folder.path}} nzValue={{folder.path}}></nz-option>
           </li>
@@ -41,9 +42,17 @@
     <!-- CREATE A FOLDER -->
     <nz-divider nzText="Créer un dossier" nzOrientation="left"></nz-divider>
     <div>
-      <nz-input-group nzSearch [nzAddOnAfter]="suffixFolder">
+      <nz-input-group nzSearch [nzAddOnBefore]="prefixFolder" [nzAddOnAfter]="suffixFolder">
       <input type="text" nz-input placeholder="Enter folder name" [(ngModel)]="foldername" />
     </nz-input-group>
+    <ng-template #prefixFolder>
+      <nz-select [(ngModel)]="parentFolder">
+        <nz-option nzLabel="undefined" nzValue="undefined"></nz-option>
+        <li *ngFor="let folder of getFolder()">
+          <nz-option nzLabel={{folder.path}} nzValue={{folder.path}}></nz-option>
+        </li>
+      </nz-select>
+    </ng-template>
     <ng-template #suffixFolder>
       <button nz-button nzType="primary" matTooltip="Créer un dossier" (click)="addFolder()"
         [disabled]="foldername == ''">

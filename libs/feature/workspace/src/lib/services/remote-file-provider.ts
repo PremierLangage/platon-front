@@ -35,18 +35,27 @@ export class RemoteFileProvider extends FileProvider {
         return this.http.delete<any>(decodeURIComponent(file.url));
     }
 
-    create(form: CreateFileForm): Observable<any> {
+    create(form: CreateFileForm, selectedFolder: FileEntry | undefined): Observable<any> {
         let request = new FormData();
         request.append("description", form.description);
         request.append("owner", form.owner as any);
         for(let i = 0; i < form.files.length; i++) {
             request.append(`file[${i}]`, form.files[i] as any);
         }
-
-        return this.http.post<any>(form.owner.filesUrl, request, {
-            reportProgress: true,
-            observe: 'events',
-        });
+        console.log("monselectedfolder "+ selectedFolder);
+        console.log(selectedFolder);
+        if (!selectedFolder) {
+            return this.http.post<any>(form.owner.filesUrl+selectedFolder, request, {
+                reportProgress: true,
+                observe: 'events',
+            });
+        }
+        else {
+            return this.http.post<any>(form.owner.filesUrl, request, {
+                reportProgress: true,
+                observe: 'events',
+            });
+        }
     }
 
     createFolder(form: CreateFolderForm): Observable<any> {

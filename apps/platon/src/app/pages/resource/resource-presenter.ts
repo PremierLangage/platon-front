@@ -91,13 +91,13 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
-    async upload(files : NzUploadFile[], description : string): Promise<Observable<any>> {
+    async upload(files : NzUploadFile[], description : string, selectedFolder: FileEntry | undefined): Promise<Observable<any>> {
         const { resource } = this.context.value as Required<Context>;
         return this.fileService.create({
             owner: resource,
             files: files,
             description: description,
-        });
+        }, selectedFolder);
     }
 
     async delete(file : FileEntry, description : string = ""): Promise<Observable<any>> {

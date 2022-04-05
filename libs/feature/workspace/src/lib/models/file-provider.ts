@@ -17,7 +17,7 @@ export abstract class FileProvider {
     abstract read(file: FileEntry): Observable<string>;
     abstract delete(file: FileEntry): Observable<any>;
 
-    abstract create(form:  CreateFileForm): Observable<any>;
+    abstract create(form:  CreateFileForm, selectedFolder: FileEntry | undefined): Observable<any>;
     abstract createFolder(form: CreateFolderForm): Observable<any>;
     abstract move(form: MoveFileForm): Observable<any>;
     abstract update(form: UpdateFileForm): Observable<any>;

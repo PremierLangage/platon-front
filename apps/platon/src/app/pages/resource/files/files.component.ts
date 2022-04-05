@@ -39,7 +39,8 @@ export class FilesComponent implements OnInit, OnDestroy {
     percent: number = 0;
     file: NzUploadFile[] = [];
     
-    selectedFolder!: FileEntry;
+    selectedFolder!: FileEntry | undefined;
+    parentFolder!: FileEntry;
     uploading = false;
 
     constructor(
@@ -84,6 +85,13 @@ export class FilesComponent implements OnInit, OnDestroy {
     }
 
     addFolder(){
+        if (this.parentFolder != undefined) {
+            let myfiles: Record<string, { type: 'folder'; content?: string }> = {
+                [this.parentFolder+'/'+this.foldername] : {
+                    type: "folder",
+                }
+            };
+        }
         let myfiles: Record<string, { type: 'folder'; content?: string }> = {
             [this.foldername] : {
                 type: "folder",
@@ -118,7 +126,8 @@ export class FilesComponent implements OnInit, OnDestroy {
 
     handleUpload(): void {
         this.uploading = true;
-        this.presenter.upload(this.file, this.description).then((request) => {
+       
+        this.presenter.upload(this.file, this.description, this.selectedFolder).then((request) => {
             request.subscribe(
                 (event) => {
                     switch (event.type) {
@@ -151,6 +160,7 @@ export class FilesComponent implements OnInit, OnDestroy {
                 }
             );
         });
+        
         this.file = [];
         this.description = "";
     }
@@ -175,6 +185,6 @@ export class FilesComponent implements OnInit, OnDestroy {
         if (this.tree !== undefined) {
             l = this.getFolders(this.tree?.files);
         }  
-        return l; 
+    return l; 
     }
 }
