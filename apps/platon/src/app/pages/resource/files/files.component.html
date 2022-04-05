@@ -4,7 +4,7 @@
     
     <!-- FILE TREE -->
     <nz-divider nzText="Fichiers de la ressource" nzOrientation="left"></nz-divider>
-    <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()" (deleteFile)="delete($event)"></ws-files-tree>
+    <ws-files-tree [tree]="tree" (didRefresh)="refreshFiles()" (deleteFile)="delete($event)" ></ws-files-tree>
 
 
 
@@ -17,9 +17,10 @@
         <input type="text" nz-input placeholder="Description of the new version" [(ngModel)]="description" />
       </nz-input-group>
       <ng-template #addOnBeforeTemplate>
-        <nz-select [ngModel]="'Http://'">
-          <nz-option nzLabel="Http://" nzValue="Http://"></nz-option>
-          <nz-option nzLabel="Https://" nzValue="Https://"></nz-option>
+        <nz-select [ngModel]="selectedFolder">
+          <li *ngFor="let folder of getFolder()">
+            <nz-option nzLabel={{folder.path}} nzValue={{folder.path}}></nz-option>
+          </li>
         </nz-select>
       </ng-template>
       <ng-template #suffixButton>

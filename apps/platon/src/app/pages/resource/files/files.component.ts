@@ -4,6 +4,7 @@ import {
     HttpRequest,
     HttpResponse,
 } from '@angular/common/http';
+import { elementEventFullName } from '@angular/compiler/src/view_compiler/view_compiler';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -14,7 +15,7 @@ import {
 import { FileEntry, FileTree } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
-import { observable, Subscription } from 'rxjs';
+import { concat, observable, Subscription } from 'rxjs';
 import { ResourcePresenter } from '../resource-presenter';
 
 @Component({
@@ -37,14 +38,16 @@ export class FilesComponent implements OnInit, OnDestroy {
 
     percent: number = 0;
     file: NzUploadFile[] = [];
-
+    
+    selectedFolder!: FileEntry;
     uploading = false;
 
     constructor(
         private readonly presenter: ResourcePresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private messageService: NzMessageService
-    ) {}
+        private messageService: NzMessageService,
+    ) {
+    }
 
     ngOnInit() {
         this.subscriptions.push(
@@ -150,5 +153,28 @@ export class FilesComponent implements OnInit, OnDestroy {
         });
         this.file = [];
         this.description = "";
+    }
+
+    getFolders(files : FileEntry[] | undefined ): FileEntry[]{
+        var l : FileEntry[] = [];
+        var l2 : FileEntry[] = [];
+        if (files !== undefined) {
+            files.forEach(file => {
+                if (file.type == 'folder'){
+                    l.push(file);
+                    l2 = this.getFolders(file.children);
+                    l2.forEach(m=>l.push(m));
+                }
+            });
+        }
+        return l;
+    }
+
+    getFolder(): FileEntry[] {
+        var l : FileEntry[] = [];
+        if (this.tree !== undefined) {
+            l = this.getFolders(this.tree?.files);
+        }  
+        return l; 
     }
 }
