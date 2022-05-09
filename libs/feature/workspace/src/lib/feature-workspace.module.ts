@@ -32,7 +32,7 @@ import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
-
+import { AssetNamePipe } from './pipes/asset-name.pipe';
 
 @NgModule({
     imports: [
@@ -57,6 +57,7 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         SharedUiListModule,
     ],
     exports: [
+        AssetNamePipe,
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
@@ -71,6 +72,7 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         FilesTreeComponent,
     ],
     declarations: [
+        AssetNamePipe,
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
@@ -86,4 +88,4 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         FilesTreeComponent,
     ],
 })
-export class FeatureWorkspaceModule { }
+export class FeatureWorkspaceModule {}

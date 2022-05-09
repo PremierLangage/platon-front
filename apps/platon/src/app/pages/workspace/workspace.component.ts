@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AuthService } from '@platon/core/auth';
 import { LayoutTab } from '../../shared/layout';
 
-
 @Component({
     selector: 'app-workspace',
     templateUrl: './workspace.component.html',
@@ -14,24 +13,24 @@ export class WorkspaceComponent {
         {
             id: 'tab-overview',
             title: "Vue d'ensemble",
-            link: ['overview']
+            link: ['overview'],
         },
 
         {
             id: 'tab-circles',
             title: 'Cercles',
-            link: ['circles']
+            link: ['circles'],
         },
         {
             id: 'tab-resources',
             title: 'Ressources',
-            link: ['resources']
+            link: ['resources'],
         },
     ];
 
     readonly actions: MenuAction[] = [];
 
-    constructor(private readonly authService: AuthService) { }
+    constructor(private readonly authService: AuthService) {}
 
     async ngOnInit() {
         const user = (await this.authService.ready())!;
@@ -41,21 +40,25 @@ export class WorkspaceComponent {
                 id: 'menu-create-circle',
                 title: 'Créer un cercle',
                 icon: 'group_work',
-                link: ['/create-circle']
+                link: ['/create-circle'],
             });
         }
 
-        this.actions.push(
-            {
-                id: 'menu-create-model',
-                title: 'Créer une ressource',
-                icon: 'widgets',
-                link: ['/create-resource']
-            },
-        );
+        this.actions.push({
+            id: 'menu-create-model',
+            title: 'Créer une ressource',
+            icon: 'widgets',
+            link: ['/create-resource'],
+        });
+
+        this.actions.push({
+            id: 'menu-create-asset',
+            title: 'Créer une asset',
+            icon: 'book',
+            link: ['/create-asset'],
+        });
     }
 }
-
 
 interface MenuAction {
     id: string;
