@@ -16,7 +16,7 @@ section {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-
+  background-color: white;
   &:last-child {
     background-image: linear-gradient(to bottom, #f8f8f8 1%, #f8f8f8 99%);
   }
@@ -33,7 +33,7 @@ mat-toolbar {
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #fff !important;
+  background-color: white !important;
 }
 
 mat-form-field {

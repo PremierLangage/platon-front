@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-// required by Angular Material https://www.npmjs.com/package/@angular/material
-import 'hammerjs';
-
 import { MaterialImports } from './material/material';
 import { NgeDocProviders } from './nge-doc/nge-doc';
 import { NgeMonacoImports } from './nge-monaco/nge-monaco';
