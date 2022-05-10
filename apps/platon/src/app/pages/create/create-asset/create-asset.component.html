@@ -12,7 +12,30 @@
 </header>
 <main>
   <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
-    <ui-stepper #stepper (didSubmit)="onSubmit()"> </ui-stepper>
+    <ui-stepper #stepper (didSubmit)="onSubmit()">
+      <!-- STEP 1 -->
+      <ng-template uiStepperStep stepTitle="Type" stepIcon="appstore-add">
+        <section>
+          <h2>Quel type d'asset voulez-vous créer ?</h2>
+          <nz-select
+            nzShowSearch
+            nzPlaceHolder="Selectionnez un type d'asset"
+            [(ngModel)]="selectedType"
+            [nzShowArrow]="false"
+          >
+            <nz-option
+              *ngFor="let type of types"
+              [nzLabel]="type | assetName"
+              [nzValue]="type"
+            >
+            </nz-option>
+          </nz-select>
+        </section>
+      </ng-template>
+      <!-- STEP 2 -->
+      <ng-template uiStepperStep stepTitle="Information" stepIcon="info-circle">
+      </ng-template>
+    </ui-stepper>
   </nz-skeleton>
 </main>
 <footer>

@@ -54,7 +54,7 @@ export class WorkspaceComponent {
         this.actions.push({
             id: 'menu-create-asset',
             title: 'Créer une asset',
-            icon: 'book',
+            icon: 'appstore',
             link: ['/create-asset'],
         });
     }

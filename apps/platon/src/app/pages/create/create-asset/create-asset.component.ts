@@ -5,6 +5,7 @@ import {
     Component,
     OnInit,
 } from '@angular/core';
+import { AssetTypes } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 
 @Component({
@@ -19,6 +20,10 @@ import { zoomInOnEnterAnimation } from 'angular-animations';
     animations: [zoomInOnEnterAnimation({ duration: 300 })],
 })
 export class CreateAssetComponent implements OnInit {
+    types: AssetTypes[] = ['COURS', 'ACTIVITY', 'EXERCICE'];
+
+    selectedType: AssetTypes = 'COURS';
+
     loading = true;
     creating = false;
 
