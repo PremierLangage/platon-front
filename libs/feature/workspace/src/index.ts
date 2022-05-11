@@ -1,3 +1,4 @@
+export * from './lib/api/asset.service';
 export * from './lib/api/circle.service';
 export * from './lib/api/file.service';
 export * from './lib/api/resource.service';

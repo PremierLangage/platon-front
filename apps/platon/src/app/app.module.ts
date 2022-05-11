@@ -25,10 +25,7 @@ import { AppRoutingModule } from './app-routing.module';
         SharedVendorsModule,
         FeatureWebComponentModule,
     ],
-    providers: [
-        ...AUTH_PROVIDERS,
-        ...WORKSPACE_PROVIDERS
-    ],
-    bootstrap: [AppComponent]
+    providers: [...AUTH_PROVIDERS, ...WORKSPACE_PROVIDERS],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}
