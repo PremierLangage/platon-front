@@ -5,6 +5,8 @@ import {
     Component,
     OnInit,
 } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 import { AssetTypes } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 
@@ -23,6 +25,25 @@ export class CreateAssetComponent implements OnInit {
     types: AssetTypes[] = ['COURS', 'ACTIVITY', 'EXERCICE'];
 
     selectedType: AssetTypes = 'COURS';
+
+    formInfos = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        desc: new FormControl('', [Validators.required]),
+    });
+
+    form = new FormGroup({});
+    model = { email: 'email@gmail.com' };
+    fields: FormlyFieldConfig[] = [
+        {
+            key: 'email',
+            type: 'input',
+            templateOptions: {
+                label: 'Email address',
+                placeholder: 'Enter email',
+                required: true,
+            },
+        },
+    ];
 
     loading = true;
     creating = false;

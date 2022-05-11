@@ -7,6 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
+import { FormlyModule } from '@ngx-formly/core';
+import { FormlyMaterialModule } from '@ngx-formly/material';
+
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -23,6 +26,9 @@ import { CreateAssetRoutingModule } from './create-asset-routing.module';
 
 @NgModule({
     imports: [
+        FormlyModule,
+        FormlyMaterialModule,
+
         CommonModule,
         FormsModule,
         ReactiveFormsModule,

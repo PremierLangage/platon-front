@@ -18,6 +18,8 @@ import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzCardModule } from 'ng-zorro-antd/card';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
@@ -33,6 +35,8 @@ import { EventListComponent } from './components/event-list/event-list.component
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
 import { AssetNamePipe } from './pipes/asset-name.pipe';
+import { CoursListComponent } from './components/cours-list/cours-list.component';
+import { CoursItemComponent } from './components/cours-item/cours-item.component';
 
 @NgModule({
     imports: [
@@ -53,6 +57,8 @@ import { AssetNamePipe } from './pipes/asset-name.pipe';
         NzDropDownModule,
         NzTreeViewModule,
         NzTimelineModule,
+        NzGridModule,
+        NzCardModule,
 
         SharedUiListModule,
     ],
@@ -70,6 +76,8 @@ import { AssetNamePipe } from './pipes/asset-name.pipe';
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
+        CoursListComponent,
+        CoursItemComponent,
     ],
     declarations: [
         AssetNamePipe,
@@ -86,6 +94,8 @@ import { AssetNamePipe } from './pipes/asset-name.pipe';
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
+        CoursListComponent,
+        CoursItemComponent,
     ],
 })
 export class FeatureWorkspaceModule {}

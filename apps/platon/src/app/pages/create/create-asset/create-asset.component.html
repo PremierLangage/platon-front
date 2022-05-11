@@ -34,6 +34,31 @@
       </ng-template>
       <!-- STEP 2 -->
       <ng-template uiStepperStep stepTitle="Information" stepIcon="info-circle">
+        <section>
+          <h2>Saisissez les informations de votre exercice</h2>
+          <!-- <form [formGroup]="formInfos">
+            <mat-form-field appearance="fill">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Description</mat-label>
+              <textarea
+                cdkTextareaAutosize
+                matInput
+                formControlName="desc"
+              ></textarea>
+            </mat-form-field>
+          </form> -->
+
+          <form [formGroup]="form">
+            <formly-form
+              [form]="form"
+              [fields]="fields"
+              [model]="model"
+            ></formly-form>
+          </form>
+        </section>
       </ng-template>
     </ui-stepper>
   </nz-skeleton>

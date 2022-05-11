@@ -2,9 +2,10 @@
   <app-content>
     <ui-search-banner
       [bannerTitle]="'Cours'"
-      [bannerImage]="'assets/images/illustrations/laptop2.svg'"
+      [bannerImage]="'assets/images/illustrations/network.png'"
       [bannerSearchBar]="searchBar"
-      [bannerActions]="actions">
+      [bannerActions]="actions"
+    >
       <ng-template #actions>
         <button class="banner-action" mat-raised-button>
           <mat-icon>info_outline</mat-icon>
@@ -12,11 +13,7 @@
         </button>
       </ng-template>
     </ui-search-banner>
-    <br/><br/>
-    <nz-empty [nzNotFoundContent]="content">
-      <ng-template #content>
-        <h2>Aucun cours</h2>
-      </ng-template>
-    </nz-empty>
+    <br /><br />
+    <ws-cours-list [cours]="cours"></ws-cours-list>
   </app-content>
 </app-container>
