@@ -7,6 +7,7 @@ import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 
 @NgModule({
     declarations: [AssetComponent],
@@ -15,6 +16,7 @@ import { MatMenuModule } from '@angular/material/menu';
 
         MatIconModule,
         MatMenuModule,
+        NzBreadCrumbModule,
 
         AppSharedLayoutModule,
         FeatureWorkspaceModule,
