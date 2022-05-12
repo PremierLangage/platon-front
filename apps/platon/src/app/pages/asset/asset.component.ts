@@ -4,6 +4,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
+import { AuthService } from '@platon/core/auth';
 import { Subscription } from 'rxjs';
 import { LayoutTab } from '../../shared/layout';
 import { AssetPresenter } from './asset.presenter';
@@ -18,11 +19,20 @@ import { AssetPresenter } from './asset.presenter';
 export class AssetComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    readonly tabs: LayoutTab[] = [];
+    readonly tabs: LayoutTab[] = [
+        {
+            id: 'tab-overview',
+            title: "Vue d'ensemble",
+            link: ['overview'],
+        },
+    ];
 
     context = this.presenter.defaultContext;
 
-    constructor(private readonly presenter: AssetPresenter) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly presenter: AssetPresenter
+    ) {}
 
     ngOnInit(): void {}
 

@@ -5,10 +5,16 @@ import { AssetRoutingModule } from './asset-routing.module';
 import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 import { AppSharedLayoutModule } from '../../shared/layout/layout.module';
 
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+
 @NgModule({
     declarations: [AssetComponent],
     imports: [
         CommonModule,
+
+        MatIconModule,
+        MatMenuModule,
 
         AppSharedLayoutModule,
         FeatureWorkspaceModule,

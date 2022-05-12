@@ -7,7 +7,18 @@ const routes: Routes = [
     {
         path: '',
         component: AssetComponent,
+        children: [
+            {
+                path: 'overview',
+                loadChildren: () =>
+                    import('./overview/overview.module').then(
+                        (m) => m.OverviewModule
+                    ),
+            },
+            { path: '**', redirectTo: 'overview', pathMatch: 'full' },
+        ],
     },
+    { path: '**', redirectTo: 'overview', pathMatch: 'full' },
 ];
 
 @NgModule({
