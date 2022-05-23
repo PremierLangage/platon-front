@@ -1,11 +1,7 @@
-export declare type AssetTypes = 'COURS' | 'ACTIVITY' | 'EXERCICE';
-
 export interface Asset {
     name: string;
-    type: AssetTypes;
-}
-
-export interface Cours {
-    name: string;
-    image: string;
+    date_creation: string;
+    parent?: number;
+    resource: number;
+    resource_version: string;
 }

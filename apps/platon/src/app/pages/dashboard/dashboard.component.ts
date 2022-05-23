@@ -20,49 +20,6 @@ export class DashboardComponent implements OnInit {
         },
     };
 
-    cours = [
-        {
-            name: 'Programmation Web',
-            image: 'fake/path',
-        },
-        {
-            name: 'Python 3',
-            image: 'fake/path',
-        },
-        {
-            name: 'Fake thing',
-            image: 'other/path',
-        },
-        {
-            name: 'Option web',
-            image: 'other/image.png',
-        },
-        {
-            name: 'Programmation reseau',
-            image: 'other/image.png',
-        },
-        {
-            name: 'Programmation Web',
-            image: 'fake/path',
-        },
-        {
-            name: 'Python 3',
-            image: 'fake/path',
-        },
-        {
-            name: 'Fake thing',
-            image: 'other/path',
-        },
-        {
-            name: 'Option web',
-            image: 'other/image.png',
-        },
-        {
-            name: 'Programmation reseau',
-            image: 'other/image.png',
-        },
-    ];
-
     constructor(
         private readonly authService: AuthService,
         private readonly introService: IntroService

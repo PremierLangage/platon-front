@@ -6,14 +6,11 @@ import { Subscription } from 'rxjs';
 import { LayoutTab } from '../../shared/layout';
 import { ResourcePresenter } from './resource-presenter';
 
-
 @Component({
     selector: 'app-resource',
     templateUrl: './resource.component.html',
     styleUrls: ['./resource.component.scss'],
-    providers: [
-        ResourcePresenter,
-    ]
+    providers: [ResourcePresenter],
 })
 export class ResourceComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
@@ -22,17 +19,22 @@ export class ResourceComponent implements OnInit, OnDestroy {
         {
             id: 'tab-overview',
             title: "Vue d'ensemble",
-            link: ['overview']
+            link: ['overview'],
         },
         {
             id: 'tab-files',
             title: 'Fichiers',
-            link: ['files']
+            link: ['files'],
         },
         {
             id: 'tab-informations',
             title: 'Informations',
-            link: ['informations']
+            link: ['informations'],
+        },
+        {
+            id: 'tab-publisher',
+            title: 'Publisher',
+            link: ['publisher'],
         },
     ];
 
@@ -67,12 +69,12 @@ export class ResourceComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly presenter: ResourcePresenter,
-        private readonly changeDetectorRef: ChangeDetectorRef,
-    ) { }
+        private readonly changeDetectorRef: ChangeDetectorRef
+    ) {}
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.contextChange.subscribe(async context => {
+            this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
                 this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
                 this.changeDetectorRef.markForCheck();
@@ -81,7 +83,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
     async updateStatus(status: ResourceStatus) {

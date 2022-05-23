@@ -74,13 +74,13 @@ const routes: Routes = [
                 './pages/profile/profile.module'
             ).then((m) => m.ProfileModule),
     },
-    {
-        path: 'asset',
-        canActivate: [AuthGuard],
-        data: { roles: ['editor'] },
-        loadChildren: () =>
-            import('./pages/asset/asset.module').then((m) => m.AssetModule),
-    },
+    // {
+    //     path: 'asset',
+    //     canActivate: [AuthGuard],
+    //     data: { roles: ['editor'] },
+    //     loadChildren: () =>
+    //         import('./pages/asset/asset.module').then((m) => m.AssetModule),
+    // },
 
     // PROTECTED EDITOR PAGES
 
@@ -104,15 +104,15 @@ const routes: Routes = [
                 './pages/resource/resource.module'
             ).then((m) => m.ResourceModule),
     },
-    {
-        path: 'create-asset',
-        canActivate: [AuthGuard],
-        data: { roles: ['editor'] },
-        loadChildren: () =>
-            import('./pages/create/create-asset/create-asset.module').then(
-                (m) => m.CreateAssetModule
-            ),
-    },
+    // {
+    //     path: 'create-asset',
+    //     canActivate: [AuthGuard],
+    //     data: { roles: ['editor'] },
+    //     loadChildren: () =>
+    //         import('./pages/create/create-asset/create-asset.module').then(
+    //             (m) => m.CreateAssetModule
+    //         ),
+    // },
     {
         path: 'create-circle',
         canActivate: [AuthGuard],

@@ -34,9 +34,8 @@ import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
-import { AssetNamePipe } from './pipes/asset-name.pipe';
-import { CoursListComponent } from './components/cours-list/cours-list.component';
-import { CoursItemComponent } from './components/cours-item/cours-item.component';
+import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
+import { PublisherItemComponent } from './components/publisher-item/publisher-item.component';
 
 @NgModule({
     imports: [
@@ -63,7 +62,6 @@ import { CoursItemComponent } from './components/cours-item/cours-item.component
         SharedUiListModule,
     ],
     exports: [
-        AssetNamePipe,
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
@@ -76,11 +74,10 @@ import { CoursItemComponent } from './components/cours-item/cours-item.component
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        CoursListComponent,
-        CoursItemComponent,
+        PublisherListComponent,
+        PublisherItemComponent,
     ],
     declarations: [
-        AssetNamePipe,
         StatusColorPipe,
         StatusLabelPipe,
         ResourceIconPipe,
@@ -94,8 +91,8 @@ import { CoursItemComponent } from './components/cours-item/cours-item.component
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        CoursListComponent,
-        CoursItemComponent,
+        PublisherListComponent,
+        PublisherItemComponent,
     ],
 })
 export class FeatureWorkspaceModule {}

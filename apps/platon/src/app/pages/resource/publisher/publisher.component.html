@@ -1,0 +1,37 @@
+<nz-row [nzGutter]="[24, 24]" nzAlign="top">
+  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="10" nzXl="10">
+    <nz-divider nzText="Création d'un asset" nzOrientation="left"></nz-divider>
+    <form
+      nz-form
+      [nzLayout]="'vertical'"
+      [formGroup]="form"
+      (submit)="publishRequest()"
+    >
+      <!-- NAME INPUT -->
+      <mat-form-field appearance="fill">
+        <mat-label>* Nom de l'asset</mat-label>
+        <input formControlName="name" matInput />
+      </mat-form-field>
+      <!-- SUBMIT BUTTON -->
+      <ng-container *ngIf="publishing; else actions">
+        <nz-spin style="margin-top: 20px"></nz-spin>
+      </ng-container>
+      <ng-template #actions>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [disabled]="!canSubmit"
+        >
+          Publier
+        </button>
+      </ng-template>
+    </form>
+  </nz-col>
+  <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="14" nzXl="14">
+    <nz-divider nzText="Asset de la resource" nzOrientation="left"></nz-divider>
+    <nz-skeleton [nzActive]="loading" [nzLoading]="loading">
+      <ws-publisher-list [items]="publisher?.results"></ws-publisher-list>
+    </nz-skeleton>
+  </nz-col>
+</nz-row>

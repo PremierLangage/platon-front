@@ -1,14 +1,27 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleService, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
+import {
+    Circle,
+    CircleService,
+    FileService,
+    FileTree,
+    Publisher,
+    PublisherForm,
+    PublisherService,
+    Resource,
+    ResourceService,
+    UpdateResourceForm,
+} from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
-    private readonly context = new BehaviorSubject<Context>(this.defaultContext);
+    private readonly context = new BehaviorSubject<Context>(
+        this.defaultContext
+    );
 
     get defaultContext(): Context {
         return { state: 'LOADING' };
@@ -25,24 +38,45 @@ export class ResourcePresenter implements OnDestroy {
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
         private readonly resourceService: ResourceService,
+        private readonly publisherService: PublisherService
     ) {
         this.subscriptions.push(
-            this.activatedRoute.params.subscribe(params => {
+            this.activatedRoute.params.subscribe((params) => {
                 this.onChangeRoute(Number.parseInt(params.id + '', 10));
             })
         );
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
     fileTree(): Observable<FileTree> {
         const { resource } = this.context.value;
         if (resource) {
-            return this.fileService.tree(resource)
+            return this.fileService.tree(resource);
         }
         throw new ReferenceError('missing resource');
+    }
+
+    publisher(): Observable<Publisher> {
+        return this.publisherService.get();
+    }
+
+    async publish(form: Omit<PublisherForm, 'resource'>): Promise<boolean> {
+        const { resource } = this.context.value as Required<Context>;
+        try {
+            const asset = await this.publisherService
+                .post({
+                    resource,
+                    ...form,
+                })
+                .toPromise();
+            return true;
+        } catch {
+            this.alertError();
+            return false;
+        }
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -54,19 +88,23 @@ export class ResourcePresenter implements OnDestroy {
     }
 
     async update(form: Omit<UpdateResourceForm, 'resource'>): Promise<boolean> {
-        const { resource } = this.context.value as Required<Context>;;
+        const { resource } = this.context.value as Required<Context>;
         try {
-            const newResource = await this.resourceService.updateResource({
-                resource,
-                ...form
-            }).toPromise();
+            const newResource = await this.resourceService
+                .updateResource({
+                    resource,
+                    ...form,
+                })
+                .toPromise();
 
             this.context.next({
                 ...this.context.value,
                 resource: newResource,
             });
 
-            this.messageService.success('Les informations de la ressource ont bien été modifiées !');
+            this.messageService.success(
+                'Les informations de la ressource ont bien été modifiées !'
+            );
             return true;
         } catch {
             this.alertError();
@@ -74,14 +112,15 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
-
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),
-            lastValueFrom(this.resourceService.findById(resourceId))
+            lastValueFrom(this.resourceService.findById(resourceId)),
         ]);
 
-        const circle = await lastValueFrom(this.circleService.findById(resource.circle.id));
+        const circle = await lastValueFrom(
+            this.circleService.findById(resource.circle.id)
+        );
         this.context.next({
             state: 'READY',
             user,
@@ -105,15 +144,15 @@ export class ResourcePresenter implements OnDestroy {
 
     private alertError(): void {
         this.messageService.error(
-            'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !',
+            'Une erreur est survenue lors de cette action, veuillez réessayer un peu plus tard !'
         );
     }
 }
-
 
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
     circle?: Circle;
     resource?: Resource;
+    publisher?: Publisher;
 }
