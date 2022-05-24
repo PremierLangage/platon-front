@@ -74,13 +74,13 @@ const routes: Routes = [
                 './pages/profile/profile.module'
             ).then((m) => m.ProfileModule),
     },
-    // {
-    //     path: 'asset',
-    //     canActivate: [AuthGuard],
-    //     data: { roles: ['editor'] },
-    //     loadChildren: () =>
-    //         import('./pages/asset/asset.module').then((m) => m.AssetModule),
-    // },
+    {
+        path: 'asset',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () =>
+            import('./pages/asset/asset.module').then((m) => m.AssetModule),
+    },
 
     // PROTECTED EDITOR PAGES
 

@@ -2,6 +2,7 @@ export * from './lib/api/circle.service';
 export * from './lib/api/file.service';
 export * from './lib/api/resource.service';
 export * from './lib/api/publisher.service';
+export * from './lib/api/asset.service';
 export * from './lib/feature-workspace.module';
 export * from './lib/models/circle';
 export * from './lib/models/file';
