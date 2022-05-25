@@ -12,7 +12,7 @@ export class PublisherService {
         return this.provider.get();
     }
 
-    post(form: PublisherForm): Observable<Asset> {
+    post(form: PublisherForm): Observable<Publisher> {
         return this.provider.publish(form);
     }
 }

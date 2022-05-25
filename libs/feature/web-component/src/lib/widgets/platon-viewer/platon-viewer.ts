@@ -1,7 +1,12 @@
-import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
+import {
+    defineWebComponent,
+    IWebComponent,
+    WebComponentTypes,
+} from '../../web-component';
 
 export interface PlatonViewerState extends IWebComponent {
-  myproperty: string;
+    loading: boolean;
+    platon: object;
 }
 
 export const PlatonViewerComponentDefinition = defineWebComponent({
@@ -10,13 +15,23 @@ export const PlatonViewerComponentDefinition = defineWebComponent({
     icon: 'assets/images/components/widgets/platon-viewer/platon-viewer.svg',
     selector: 'wc-platon-viewer',
     description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
-    fullDescriptionUrl: 'assets/docs/components/widgets/platon-viewer/platon-viewer.md',
+    fullDescriptionUrl:
+        'assets/docs/components/widgets/platon-viewer/platon-viewer.md',
     // https://json-schema.org/understanding-json-schema/
     schema: {
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
         properties: {
-            myproperty: { type: 'string', default: '', description: '' }
-        }
-    }
+            platon: {
+                type: 'object',
+                default: {},
+                description: 'Information du composant platon a afficher',
+            },
+            loading: {
+                type: 'boolean',
+                default: true,
+                description: 'Chargement du composant',
+            },
+        },
+    },
 });

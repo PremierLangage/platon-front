@@ -1,7 +1,9 @@
-<span>platon-viewer works</span>
+<ng-container *ngIf="state.loading; else component">
+  <nz-skeleton [nzActive]="state.loading"></nz-skeleton>
+</ng-container>
 
-<!--
-  THE FOLLOWING CODE HANDLE THE LOGIC SHARED BY ALL THE COMPONENTS
-  YOU SHOULD NOT MODIFY/REMOVE IT OR PLACE IT INSIDE ANY OTHER ELEMENT
--->
+<ng-template #component>
+  <div [innerHTML]="state.platon | component | safe: 'html'"></div>
+</ng-template>
+
 <wc-base [(state)]="state"></wc-base>

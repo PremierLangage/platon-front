@@ -1,7 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Asset, AssetService } from '@platon/feature/workspace';
+import {
+    Asset,
+    AssetService,
+    Platon,
+    RunnerService,
+} from '@platon/feature/workspace';
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
@@ -57,10 +62,13 @@ export class AssetPresenter implements OnDestroy {
             }
         }
     }
+
+    private async renderAsset(asset: Asset): Promise<void> {}
 }
 
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
     asset?: Asset;
+    platon?: Platon;
 }

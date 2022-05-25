@@ -1,16 +1,11 @@
-export declare type ResourceTypes =
-    'MODEL' |
-    'EXERCISE' |
-    'ACTIVITY'
-    ;
+export declare type ResourceTypes = 'MODEL' | 'EXERCISE' | 'ACTIVITY';
 
 export declare type ResourceStatus =
-    'DRAFT' |
-    'READY' |
-    'BUGGED' |
-    'DEPRECATED' |
-    'NOT_TESTED'
-    ;
+    | 'DRAFT'
+    | 'READY'
+    | 'BUGGED'
+    | 'DEPRECATED'
+    | 'NOT_TESTED';
 
 export interface Resource {
     id: number;
@@ -26,7 +21,7 @@ export interface Resource {
     permissions: {
         write: boolean;
         delete: boolean;
-    },
+    };
     topics: string[];
     levels: string[];
     createdAt: string;
@@ -36,6 +31,7 @@ export interface Resource {
     filesUrl: string;
     circleUrl: string;
     versionsUrl: string;
+    live_url: string;
 }
 
 export interface ResourceVersion {
@@ -57,10 +53,7 @@ export interface ResourceFilters {
     status?: ResourceStatus;
     offset?: number;
     limit?: number;
-    orderBy?:
-    'name' |
-    'date'
-    ;
+    orderBy?: 'name' | 'date';
 }
 
 export interface ResourceCompletion {
@@ -76,7 +69,7 @@ export interface CreateResourceForm {
     circle: number;
     topics: string[];
     levels: string[];
-    files?: Record<string, { type: 'file' | 'folder', content?: string }>;
+    files?: Record<string, { type: 'file' | 'folder'; content?: string }>;
 }
 
 export interface UpdateResourceForm {

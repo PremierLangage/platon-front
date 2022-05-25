@@ -1,1 +1,3 @@
-<h1>Runner works</h1>
+<nz-skeleton [nzActive]="loading" [nzLoading]="loading">
+  <div [innerHTML]="pl | component | safe: 'html'"></div>
+</nz-skeleton>
