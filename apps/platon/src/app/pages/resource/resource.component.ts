@@ -36,6 +36,11 @@ export class ResourceComponent implements OnInit, OnDestroy {
             title: 'Publisher',
             link: ['publisher'],
         },
+        {
+            id: 'tab-code',
+            title: 'Code',
+            link: ['code'],
+        },
     ];
 
     readonly status: ResourceStatus[] = [
@@ -48,6 +53,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
 
     context = this.presenter.defaultContext;
     openInVsCodeUrl = '';
+    liveUrl = '';
 
     get circleLink(): any[] {
         return ['/circle', this.context.resource!.circle.id];
@@ -77,6 +83,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
             this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
                 this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
+                this.liveUrl = await this.presenter.liveUrl();
                 this.changeDetectorRef.markForCheck();
             })
         );

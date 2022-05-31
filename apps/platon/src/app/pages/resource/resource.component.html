@@ -21,9 +21,9 @@
       </a>
       <a
         nz-button
-        [routerLink]="context.resource?.filesUrl"
         nzType="primary"
         matTooltip="Prévisualiser"
+        [href]="liveUrl | safe: 'url'"
       >
         <i nz-icon nzType="play-circle" nzTheme="outline"></i>
       </a>

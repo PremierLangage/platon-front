@@ -39,6 +39,11 @@ const routes: Routes = [
                         (m) => m.PublisherModule
                     ),
             },
+            {
+                path: 'code',
+                loadChildren: () =>
+                    import('./code/code.module').then((m) => m.CodeModule),
+            },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' },
         ],
     },

@@ -4,6 +4,7 @@ import { AuthService, AuthUser } from '@platon/core/auth';
 import {
     Circle,
     CircleService,
+    FileEntry,
     FileService,
     FileTree,
     Publisher,
@@ -85,6 +86,15 @@ export class ResourcePresenter implements OnDestroy {
         const { access, refresh } = authToken;
         const origin = location.origin;
         return `vscode://PLaTon.platon-editor?origin=${origin}&resource=${rid}&access=${access}&refresh=${refresh}`;
+    }
+
+    async liveUrl(): Promise<string> {
+        const rid = this.context.value.resource?.id;
+        return `https://platon.dev/live/${rid}`;
+    }
+
+    async fileContent(file: FileEntry): Promise<string> {
+        return lastValueFrom(this.fileService.read(file));
     }
 
     async update(form: Omit<UpdateResourceForm, 'resource'>): Promise<boolean> {
