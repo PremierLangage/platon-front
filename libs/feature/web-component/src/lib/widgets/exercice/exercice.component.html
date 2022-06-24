@@ -1,0 +1,29 @@
+<ng-container *ngIf="state; else loadingBlock">
+  <h1>{{title}}</h1>
+  <nz-divider nzType="horizontal" nzText="Énoncé" nzOrientation="left" ></nz-divider>
+  <p>{{text}}</p>
+
+  <nz-divider nzType="horizontal"></nz-divider>
+  <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start" ></nz-space>
+
+  <div #formLoader>
+  </div>
+
+  <button nz-button nzShape="round" nzSize="large" nzType="primary" (click)="submitForm()">Submit</button>
+</ng-container>
+
+
+<ng-template #loadingBlock>
+  <nz-spin [nzTip]="'No exercice were found, waiting for one to load...'" [nzSpinning]="true"></nz-spin>
+</ng-template>
+
+
+
+
+
+
+<!--
+  THE FOLLOWING CODE HANDLE THE LOGIC SHARED BY ALL THE COMPONENTS
+  YOU SHOULD NOT MODIFY/REMOVE IT OR PLACE IT INSIDE ANY OTHER ELEMENT
+-->
+<wc-base [(state)]="state"></wc-base>

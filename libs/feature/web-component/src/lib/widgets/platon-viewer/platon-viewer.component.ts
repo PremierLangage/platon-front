@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/co
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { PlatonViewerComponentDefinition, PlatonViewerState } from './platon-viewer';
 
+
 @Component({
     selector: 'wc-platon-viewer',
     templateUrl: 'platon-viewer.component.html',

@@ -60,9 +60,9 @@ export class BaseComponent implements OnInit, OnDestroy {
                 state[attribute.name] = this.parse(attribute.value);
             }
         }
-        if (changed) {
-            this.stateChange.emit(state);
-        }
+        // if (changed) {
+        //     this.stateChange.emit(state);
+        // }
     }
 
 }

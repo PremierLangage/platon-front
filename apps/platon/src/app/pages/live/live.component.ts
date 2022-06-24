@@ -23,6 +23,7 @@ export class LiveComponent implements OnInit, OnDestroy {
             this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
                 this.changeDetectorRef.markForCheck();
+                console.log(this.context);
             })
         );
     }
