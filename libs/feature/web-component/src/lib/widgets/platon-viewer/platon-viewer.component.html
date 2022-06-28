@@ -1,9 +1,4 @@
-<ng-container *ngIf="state.loading; else component">
-  <nz-skeleton [nzActive]="state.loading"></nz-skeleton>
+<ng-container *ngIf="state.process">
+  <div webComponent [innerHTML]="state.form| component: state.process | safe: 'html'"></div>
 </ng-container>
-
-<ng-template #component>
-  <div [innerHTML]="state.platon | component | safe: 'html'"></div>
-</ng-template>
-
 <wc-base [(state)]="state"></wc-base>

@@ -1,0 +1,24 @@
+<div nz-space nzAlign="baseline" class="git-panel">
+
+  <!-- ROUTEUR BREADCRUMB -->
+
+  <nz-breadcrumb>
+    <nz-breadcrumb-item>
+      <a>
+        <i nz-icon nzType="home" nzTheme="outline"></i>
+        <span>{{ _name }}</span>
+      </a>
+    </nz-breadcrumb-item>
+
+    <nz-breadcrumb-item *ngFor="let item of path">
+      <a>
+        <span>{{ item }}</span>
+      </a>
+    </nz-breadcrumb-item>
+
+  </nz-breadcrumb>
+
+  <!-- ACTIONS -->
+
+
+</div>

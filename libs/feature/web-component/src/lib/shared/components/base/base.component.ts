@@ -50,6 +50,9 @@ export class BaseComponent implements OnInit, OnDestroy {
     private createStateFromAttributes() {
         const native: HTMLElement = this.elementRef.nativeElement;
         const parent = native.parentElement as HTMLElement;
+        if (!parent) {
+            return;
+        }
         const attributes = parent.attributes;
         const state: Record<string, any> = {};
         const properties = this.definition?.schema?.properties || {};
@@ -57,7 +60,11 @@ export class BaseComponent implements OnInit, OnDestroy {
         for (const attribute of Array.from(attributes)) {
             if (attribute.name in properties) {
                 changed = true;
-                state[attribute.name] = this.parse(attribute.value);
+                if (attribute.name === "cid") {
+                    state[attribute.name] = attribute.value;
+                } else {
+                    state[attribute.name] = this.parse(attribute.value);
+                }
             }
         }
         if (changed) {

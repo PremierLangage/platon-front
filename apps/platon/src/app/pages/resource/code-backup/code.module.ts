@@ -35,7 +35,7 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
         FeatureWorkspaceModule,
         RouterModule.forChild([
             {
-                path: '**',
+                path: '',
                 component: CodeComponent,
             },
         ]),

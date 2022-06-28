@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, EventEmitter, Output } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { PlatonViewerComponentDefinition, PlatonViewerState } from './platon-viewer';
+import { PlatonViewerHandler } from './platon-viewer.directive';
 
 @Component({
     selector: 'wc-platon-viewer',
@@ -18,6 +19,24 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      */
     @Input() state!: PlatonViewerState;
 
+    @ViewChild(PlatonViewerHandler) component !: PlatonViewerHandler;
+
+    private _componentState: any = {};
+    @Output() componentStateChange: EventEmitter<Record<string, any>> = new EventEmitter<Record<string, any>>();
+
+    @Input()
+    set componentState(state: any) {
+        this._componentState = this.component.getComponentState();
+        this.componentStateChange.emit(this._componentState);
+    }
+
+    get componentState(): any {
+        this._componentState = this.component.getComponentState();
+        return this._componentState;
+    }
+
+    loaded: boolean = false;
+
     constructor(
         readonly injector: Injector
     ) {}
@@ -31,6 +50,7 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      * @returns the state or a computed version of the state.
      */
     onGetState(state: PlatonViewerState) {
+        this.loaded = true;
         return state;
     }
 
@@ -43,6 +63,9 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      * - change detector is triggered right after the end of this method refresh the view.
      */
     onChangeState() {
+
     }
+
+
 
 }

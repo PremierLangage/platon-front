@@ -6,7 +6,15 @@
     <ng-template #finish>
       <h1>{{ context.live?.title }}</h1>
       <h2>{{ context.live?.text }}</h2>
-      <div [innerHTML]="context.live | component | safe: 'html'"></div>
+
+      <wc-platon-viewer [state]="init" debug="'true'">
+
+      </wc-platon-viewer>
+
+      <button nz-button nzType="primary" (click)="grader()">Submit</button>
+
+
+
     </ng-template>
   </app-content>
 </app-container>

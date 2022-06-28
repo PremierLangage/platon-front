@@ -90,7 +90,7 @@ export class ResourcePresenter implements OnDestroy {
 
     async liveUrl(): Promise<string> {
         const rid = this.context.value.resource?.id;
-        return `https://platon.dev/live/${rid}`;
+        return `https://platon.org/live/${rid}`;
     }
 
     async fileContent(file: FileEntry): Promise<string> {

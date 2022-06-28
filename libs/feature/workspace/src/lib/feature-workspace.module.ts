@@ -20,6 +20,8 @@ import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { NzListModule } from 'ng-zorro-antd/list';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
@@ -36,6 +38,9 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
 import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
 import { PublisherItemComponent } from './components/publisher-item/publisher-item.component';
+import { GitTreeComponent } from './components/git-tree/git-tree.component';
+import { GitPanelComponent } from './components/git-panel/git-panel.component';
+import { GitCloneComponent } from './components/git-clone/git-clone.component';
 
 @NgModule({
     imports: [
@@ -58,6 +63,8 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         NzTimelineModule,
         NzGridModule,
         NzCardModule,
+        NzBreadCrumbModule,
+        NzListModule,
 
         SharedUiListModule,
     ],
@@ -76,6 +83,10 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         FilesTreeComponent,
         PublisherListComponent,
         PublisherItemComponent,
+
+        GitCloneComponent,
+        GitTreeComponent,
+        GitPanelComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -93,6 +104,10 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         FilesTreeComponent,
         PublisherListComponent,
         PublisherItemComponent,
+
+        GitCloneComponent,
+        GitTreeComponent,
+        GitPanelComponent,
     ],
 })
 export class FeatureWorkspaceModule {}

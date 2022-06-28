@@ -1,0 +1,16 @@
+nz-breadcrumb {
+  font-size: 1.2em;
+  &::ng-deep {
+    .ant-breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      mat-icon {
+        margin: 0 8px;
+      }
+    }
+  }
+}
+
+.git-panel {
+
+}

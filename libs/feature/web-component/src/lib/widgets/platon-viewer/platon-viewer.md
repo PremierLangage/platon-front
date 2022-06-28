@@ -1,3 +1,3 @@
 # PlatonViewer
 
-Empty demo
+Ce composant permet d'afficher un composant PLaTon.
