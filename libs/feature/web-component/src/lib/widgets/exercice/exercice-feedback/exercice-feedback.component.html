@@ -1,5 +1,8 @@
-<div *ngIf="this.feedback__">
-  <nz-layout>
+<div class="main rounded-edge"
+  *ngIf="this.feedback__"
+  [ngStyle]="{'background': 'linear-gradient(' + getScoreColor() + ', rgba(66,66,66,0.350))'}"
+  >
+  <nz-layout class="rounded-edge">
 
 
     <!--
