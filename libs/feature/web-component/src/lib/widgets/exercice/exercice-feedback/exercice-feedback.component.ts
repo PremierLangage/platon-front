@@ -1,10 +1,30 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ExerciceFeedBack } from '../exercice';
 
 @Component({
     selector: 'app-exercice-feedback',
     templateUrl: './exercice-feedback.component.html',
-    styleUrls: ['./exercice-feedback.component.scss']
+    styleUrls: ['./exercice-feedback.component.scss'],
+    animations: [
+        trigger('fadeSlideInOutUpward', [
+            transition(':enter', [
+                style({ opacity: 0, transform: 'translateY(10px)' }),
+                animate('500ms', style({ opacity: 1, transform: 'translateY(0)' })),
+            ]),
+            transition(':leave', [
+                animate('500ms', style({ opacity: 0, transform: 'translateY(10px)' })),
+            ]),
+        ]),
+        trigger('fadeSlideInOutLeftToRight', [
+            transition(':enter', [
+                style({ opacity: 0, transform: 'translateX(10px)' }),
+                animate('500ms', style({ opacity: 1, transform: 'translateX(0)' })),
+            ]),
+            transition(':leave', [
+            ]),
+        ]),
+    ]
 })
 export class ExerciceFeedbackComponent implements OnInit {
 

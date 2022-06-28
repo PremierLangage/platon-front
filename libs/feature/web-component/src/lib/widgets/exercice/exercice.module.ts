@@ -19,11 +19,14 @@ import { ComponentExtractorPipe } from './component-extractor.pipe';
 import { RadioGroupModule } from '../../forms/radio-group/radio-group.module';
 import { ExerciceFeedbackComponent } from './exercice-feedback/exercice-feedback.component';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
     declarations: [ExerciceComponent, ComponentExtractorPipe, ExerciceFeedbackComponent],
     imports: [
         BaseModule,
+        CommonModule,
+
         SafePipeModule,
         ComponentPipeModule,
         PlatonViewerModule,
@@ -40,6 +43,7 @@ import { FormsModule } from '@angular/forms';
 
 
         RadioGroupModule,
+
     ],
     exports: [ExerciceComponent, ExerciceFeedbackComponent],
 })

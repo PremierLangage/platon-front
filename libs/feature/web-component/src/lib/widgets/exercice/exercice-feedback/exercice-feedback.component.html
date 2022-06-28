@@ -1,9 +1,9 @@
 <div class="main rounded-edge"
   *ngIf="this.feedback__"
+  @fadeSlideInOutUpward
   [ngStyle]="{'background': 'linear-gradient(' + getScoreColor() + ', rgba(66,66,66,0.350))'}"
   >
   <nz-layout class="rounded-edge">
-
 
     <!--
       SCORE DISPLAYING
@@ -12,6 +12,7 @@
       <nz-sider
         id="tv"
         *ngIf="this.displayScore && this.showScore"
+        [@fadeSlideInOutLeftToRight]
         class="fb-score fb-score-colorable visible hidden"
         [ngStyle]="{'background': 'linear-gradient(' + getScoreColor() + ', rgba(0,0,0,0.350))'}"
       >
