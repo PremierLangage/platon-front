@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, AfterViewInit, ElementRef, OnInit } from '@angular/core';
-import { RadioGroupComponent } from '../../forms/radio-group/radio-group.component';
+import { JsonPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { LiveService } from '@platon/feature/workspace';
+import { catchError, throwError } from 'rxjs';
 import { IWebComponent, WebComponent, WebComponentHooks } from '../../web-component';
-import { ExerciceComponentDefinition, ExerciceState } from './exercice';
-
+import { ExampleFeedBack, ExerciceComponentDefinition, ExerciceFeedBack, ExerciceState } from './exercice';
 
 @Component({
     selector: 'wc-exercice',
@@ -22,16 +23,20 @@ export class ExerciceComponent implements WebComponentHooks<ExerciceState>, Afte
 
     @ViewChild('formLoader') formLoader?: ElementRef<HTMLElement>;
 
-    private formComponent?: WebComponentHooks<IWebComponent>;
+    public formComponent?: WebComponentHooks<IWebComponent>;
 
     title?: string;
     text?: string;
-    loading : boolean = true;
 
+    loading : boolean = false;
+    showAnswer : boolean = false;
 
+    feedback__?: ExerciceFeedBack = undefined;
+    showFeedBackScore : boolean = true;
 
     constructor(
-        readonly injector: Injector
+        readonly injector: Injector,
+        readonly liveService : LiveService
     ) {}
 
     ngAfterViewInit(): void {
@@ -75,7 +80,16 @@ export class ExerciceComponent implements WebComponentHooks<ExerciceState>, Afte
     }
 
 
-    submitForm() {
-        console.log(this.formComponent?.state);
+    async submitForm() {
+        if (this.formComponent) {
+            this.showAnswer = true;
+            this.loading = true;
+            this.loading = false;
+            this.feedback__ = ExampleFeedBack;
+        }
+    }
+
+    switchScoreVisibilityStatus() {
+        this.showFeedBackScore = !this.showFeedBackScore;
     }
 }

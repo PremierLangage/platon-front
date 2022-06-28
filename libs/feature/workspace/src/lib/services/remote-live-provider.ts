@@ -13,4 +13,8 @@ export class RemoteLiveProvider extends LiveProvider {
     render(id: number): Observable<LiveRender> {
         return this.http.get<LiveRender>(`api/v1/runner/live/resource:${id}`);
     }
+
+    grader(id: number, answers: object): Observable<any> {
+        return this.http.post<any>(`api/v1/runner/live/resource:${id}`, answers);
+    }
 }

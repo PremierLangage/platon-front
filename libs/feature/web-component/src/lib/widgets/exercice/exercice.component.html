@@ -1,25 +1,72 @@
-<ng-container *ngIf="state; else loadingBlock">
-  <h1>{{title}}</h1>
-  <nz-divider nzType="horizontal" nzText="Énoncé" nzOrientation="left" ></nz-divider>
-  <p>{{text}}</p>
+<ng-container *ngIf="state; else noStateBlock">
+  <!-- HEADER
+    * TITLE
+    * STATE
+  -->
+  <div class="Exercice-Header">
+    <h1>{{title}}</h1>
+    <nz-divider nzType="horizontal" nzText="Énoncé" nzOrientation="left" ></nz-divider>
+    <p>{{text}}</p>
+  </div>
+
 
   <nz-divider nzType="horizontal"></nz-divider>
   <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start" ></nz-space>
 
+  <!-- FEEDBACK -->
+
+  <app-exercice-feedback
+    [feedback__]="this.feedback__"
+    [displayScore]="this.showFeedBackScore"
+  ></app-exercice-feedback>
+
+  <nz-space nzSize="large" nzDirection="vertical" nzAlign="start" ></nz-space>
+
+  <!-- FORM -->
   <div #formLoader>
   </div>
 
-  <button nz-button nzShape="round" nzSize="large" nzType="primary" (click)="submitForm()">Submit</button>
+
+  <!-- BUTTONS ACTIONS -->
+  <div class="Exercice-Buttons-Actions">
+    <button
+      nz-button nzShape="round"
+      nzSize="large"
+      nzType="primary"
+      (click)="submitForm()"
+      [disabled]="this.loading">Submit
+    </button>
+
+    <button
+      nz-button nzShape="round"
+      nzSize="large"
+      nzType="primary"
+      (click)="switchScoreVisibilityStatus()"
+      >{{this.showFeedBackScore ? "Disable Score" : "Enable Score"}}
+    </button>
+  </div>
+
+
+  <!-- GRADER ANSWERS LOADING -->
+  <div class="Exercice-Grader-Answers">
+    <div *ngIf="this.loading" class="loadingBlock">
+      <nz-spin [nzTip]="'Waiting for the server answers ...'" [nzSpinning]="true"></nz-spin>
+    </div>
+
+    <div *ngIf="this.showAnswer">
+      <h3> Réponse Envoyée: </h3>
+      <code>{{this.formComponent?.state | json}}</code>
+    </div>
+  </div>
+
+
 </ng-container>
 
 
-<ng-template #loadingBlock>
+<!-- WAITING HANDLING -->
+<ng-template #noStateBlock>
   <nz-spin [nzTip]="'No exercice were found, waiting for one to load...'" [nzSpinning]="true"></nz-spin>
 </ng-template>
-
-
-
-
 
 
 <!--

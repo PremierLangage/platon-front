@@ -1,0 +1,36 @@
+nz-sider,
+nz-header,
+nz-footer {
+  background-color: rgba(255, 255, 255, 0);
+  text-align: center;
+}
+
+.fb-title {
+  position: relative;
+  font-family: Calibri;
+  font-size: 2vmax;
+}
+
+.fb-text {
+  margin: 1vmax;
+}
+
+.fb-score {
+  margin: 1vmax;
+  margin-right: 2vmax;
+}
+
+.fb-score-colorable * {
+  background: rgba(255, 255, 255, 0);
+}
+
+#tv {
+  position: relative;
+  border-radius: 0% 0% 0% 0% / 0% 0% 0% 0% ;
+  box-shadow: 20px 20px rgba(0,0,0,.15);
+  transition: all .4s ease;
+}
+#tv:hover {
+  border-radius: 0% 0% 50% 50% / 0% 0% 5% 5% ;
+  box-shadow: 1vmin 1vmin rgba(0,0,0,.25);
+}

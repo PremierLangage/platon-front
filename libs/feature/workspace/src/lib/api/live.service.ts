@@ -10,4 +10,9 @@ export class LiveService {
     render(id: number): Observable<LiveRender> {
         return this.provider.render(id);
     }
+
+    grader(id: number, answers : object) : Observable<any> {
+        return this.provider.grader(id, answers);
+    }
+
 }
