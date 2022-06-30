@@ -13,6 +13,44 @@ import { SortListState } from '../../forms/sort-list/sort-list';
 import { TextSelectState } from '../../forms/text-select/text-select';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
 
+
+// ===========================================
+// FLEX-MODULER
+// ===========================================
+
+export const testFlex = {
+    "order":"0",
+    "direction":"row",
+    "wrap":"wrap",
+    "grow":0,
+    "justify": "flex-start",
+    "alignItems":"flex-start",
+    "alignContent":"normal",
+    "alignSelf":"auto",
+}
+
+export interface FlexModuler {
+    order: 0|1|2|3|4|5|6|7|8|9;
+    direction: "row"|"row-reverse"|"column"|"colmun-reverse";
+    wrap: "nowrap"|"wrap"|"wrap-reverse";
+    grow: number;
+    justify: "flex-start"|"flex-end"|"center"|"space-between"|"space-around"|"space-evenly";
+    alignItems: "flex-start"|"flex-end"|"center"|"stretch"|"baseline";
+    alignContent: "normal"|"flex-start"|"flex-end"|"center"|"stretch"|"space-between"|"space-around"|"space-evenly";
+    alignSelf: "auto"|"flex-start"|"flex-end"|"center"|"stretch"|"baseline";
+}
+
+export interface ExerciceFlexModuler {
+    state: FlexModuler;
+    feedback: FlexModuler;
+    form: FlexModuler;
+    buttons: FlexModuler;
+}
+
+// ===========================================
+// FEEDBACK
+// ===========================================
+
 export interface ExerciceFeedBack {
     score: number;
     feedback : string;
@@ -22,6 +60,10 @@ export const ExampleFeedBack : ExerciceFeedBack = {
     score : 100,
     feedback: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
 }
+
+// ===========================================
+// FORM / STATE
+// ===========================================
 
 export interface ExerciceState extends IWebComponent {
     process: {
@@ -41,7 +83,9 @@ export interface ExerciceState extends IWebComponent {
             RadioGroupState |
             SortListState |
             TextSelectState
-    };
+    },
+    author: string;
+    version: string;
 }
 
 
@@ -62,16 +106,26 @@ export const ExerciceComponentDefinition = defineWebComponent({
                 type: 'object',
                 default: {},
                 description: 'Process json content'
+            },
+            author: {
+                type: 'string',
+                default: '',
+                description: 'Author of the Exercice'
+            },
+            version: {
+                type: 'string',
+                default: '0.1',
+                description: 'Version of the Exercice'
             }
         }
     },
     showcase: {
         process: {
             "title": "Titre Exercice Exemple",
-            "text": "Est-ce que le résultat de ce l'équation 1 + 1 = 3 est correcte ?",
+            "text": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
             "formState": {
 
-                items: ['Correcte', 'Incorrecte', 'Ne sais pas'],
+                items: ['Choix1', 'Choix2', 'Choix3'],
                 disable: false,
                 horizontal: false,
                 selection: "",
@@ -79,8 +133,10 @@ export const ExerciceComponentDefinition = defineWebComponent({
                 debug: false,
                 selector: "wc-radio-group"
             },
-        }
-    },
+        },
+        author: "Platon4Ever",
+        version: "42",
+    }
 });
 
 

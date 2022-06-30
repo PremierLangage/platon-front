@@ -1,34 +1,114 @@
-<ng-container *ngIf="state; else noStateBlock">
+<ng-container
+  *ngIf="state; else noStateBlock"
+>
+<div class="main">
+  <!-- BUTTONS ACTIONS
+  -->
+  <div class="Exercice-Buttons-Actions Upper-Button">
+    <button
+      nz-button nzShape="round"
+      nzSize="large"
+      nzType="primary"
+      nzGhost
+      (click)="submitForm()"
+      [disabled]="this.loading">Submit
+    </button>
+  </div>
+
+
   <!-- HEADER
     * TITLE
     * STATE
   -->
   <div class="Exercice-Header">
-    <h1>{{title}}</h1>
-    <nz-divider nzType="horizontal" nzText="Énoncé" nzOrientation="left" ></nz-divider>
-    <p>{{text}}</p>
+
+    <!-- TOP PART
+      * AUTHOR
+      * VERSION
+      * TITLE
+    -->
+    <div class="top">
+      <div class="author">
+        <i nz-icon nzType="solution" nzTheme="outline"></i>
+        <span nz-typography nzType="secondary">Author: {{this.author}}</span>
+      </div>
+      <div class="version">
+        <i nz-icon [nzType]="'number'" [style]="{'opacity': .5}"></i>
+        <span nz-typography nzType="secondary">v.{{this.version}}</span>
+      </div>
+    </div>
+    <div class="title"><h1 nz-typography><strong>{{this.title}}</strong></h1></div>
   </div>
 
 
-  <nz-divider nzType="horizontal"></nz-divider>
-  <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start" ></nz-space>
+  <!-- EXERCICE STATE
+  -->
+  <div class="Exercice-Body"
+    >
+    <div>
+      <div
+        class="body-line"
+        nz-row [nzGutter]="16"
+      >
+        <div
+          class="Exercice-State"
+          nz-col nzSpan="{{(this.feedback__ && this.showFeedBackScore) ? 18 : 24}}"
+        >
+          <nz-tabset >
+            <nz-tab
+              nzSelected
+              [nzTitle]="ENONCE"
+            >
+              <ng-template #ENONCE>
+                  <i  nz-icon nzType="read"></i>
+                  Énoncé
+              </ng-template>
+              <span nz-typography>{{this.text}}</span>
+            </nz-tab>
 
-  <!-- FEEDBACK -->
+            <nz-tab
+              nzSelected
+              [nzTitle]="FEEDBACK"
+              *ngIf="this.feedback__"
+            >
+            <ng-template #FEEDBACK>
+                <i  nz-icon nzType="solution"></i>
+                FeedBack
+            </ng-template>
+            <span nz-typography>{{this.feedback__.feedback}}</span>
+          </nz-tab>
+          </nz-tabset>
+        </div>
 
-  <app-exercice-feedback
-    [feedback__]="this.feedback__"
-    [displayScore]="this.showFeedBackScore"
-  ></app-exercice-feedback>
 
-  <nz-space nzSize="large" nzDirection="vertical" nzAlign="start" ></nz-space>
 
-  <!-- FORM -->
-  <div #formLoader>
+        <!-- FEEDBACK
+        -->
+        <div
+          class="Exercice-FeedBack"
+          *ngIf="this.feedback__ && this.showFeedBackScore"
+          nz-col nzSpan="6">
+          <app-exercice-feedback
+            [feedback__]="this.feedback__"
+          ></app-exercice-feedback>
+        </div>
+      </div>
+    </div>
+
+    <nz-divider nzType="horizontal"></nz-divider>
+    <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start" ></nz-space>
+
+    <!-- FORM
+    -->
+    <div #formLoader class="Exercice-Form">
+    </div>
+
   </div>
 
 
-  <!-- BUTTONS ACTIONS -->
-  <div class="Exercice-Buttons-Actions">
+  <!-- BUTTONS ACTIONS
+  -->
+  <div class="Exercice-Buttons-Actions Lower-Button">
     <button
       nz-button nzShape="round"
       nzSize="large"
@@ -47,7 +127,8 @@
   </div>
 
 
-  <!-- GRADER ANSWERS LOADING -->
+  <!-- GRADER ANSWERS LOADING
+  -->
   <div class="Exercice-Grader-Answers">
     <div *ngIf="this.loading" class="loadingBlock">
       <nz-spin [nzTip]="'Waiting for the server answers ...'" [nzSpinning]="true"></nz-spin>
@@ -59,7 +140,7 @@
     </div>
   </div>
 
-
+</div>
 </ng-container>
 
 
