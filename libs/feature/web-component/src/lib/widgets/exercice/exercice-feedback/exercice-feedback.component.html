@@ -16,8 +16,16 @@
     <div class="title"><h1 nz-typography><strong>Score</strong></h1></div>
     <nz-divider [nzText]="text">
       <ng-template #text>
-        <i nz-icon [nzType]="getScoreEmoji()"></i>
-        <h3 nz-typography>{{this.feedback__.score}} / 100 </h3>
+        <div class="confettis">
+          <div *ngIf="this.feedback__.score == 100">
+          <i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i>
+          <i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i>
+          <i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i>
+          <i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i>
+          </div>
+          <i nz-icon [nzType]="getScoreEmoji()" [ngClass]="getScoreEmojiAnimation()"></i>
+          <h3 nz-typography>{{this.feedback__.score}} / 100 </h3>
+        </div>
       </ng-template>
     </nz-divider>
     <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start"></nz-space>
@@ -30,3 +38,4 @@
       <!-- <nz-slider [(ngModel)]="this.feedback__.score"></nz-slider> -->
   </div>
 </div>
+

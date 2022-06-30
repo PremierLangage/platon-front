@@ -62,4 +62,19 @@ export class ExerciceFeedbackComponent implements OnInit {
         }
         return "loading"
     }
+
+    getScoreEmojiAnimation() {
+        if (this.feedback__) {
+            if (this.feedback__.score == 100) {
+                return "animate__pulse animate__infinite animate__animated animate__heartBeat text";
+            } else if (this.feedback__.score >= 80) {
+                return "animate__animated animate__infinite animate__bounce text";
+            } else if (this.feedback__.score >= 50) {
+                return "animate__animated animate__infinite animate__swing text";
+            } else {
+                return "animate__animated animate__infinite animate__rubberBand text";
+            }
+        }
+        return "loading"
+    }
 }
