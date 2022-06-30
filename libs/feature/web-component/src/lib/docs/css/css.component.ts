@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DialogService } from '@platon/shared/ui/dialog';
-import { ClipboardService } from '@mcisse/nge/services';
+import { ClipboardService } from '@cisstech/nge/services';
 
 @Component({
   selector: 'wc-editor-css',
@@ -35,10 +35,6 @@ export class CssComponent {
         private readonly dialog: DialogService,
         private readonly clipboard: ClipboardService,
     ) {}
-
-    animate(animation: string) {
-        this.activeAnimation = animation;
-    }
 
     copyCss(appearance: string) {
         this.clipboard.copy(

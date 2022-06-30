@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '@platon/shared/utils';
 import { AuthToken } from '../models/auth-token';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { lastValueFrom } from 'rxjs';
 
 const KEY = "auth-token";
 
@@ -41,10 +42,10 @@ export class RemoteTokenProvider {
      * @returns A promise that resolves with an auth token.
      */
     async obtain(username: string, password: string): Promise<AuthToken> {
-        const token = await this.http.post<AuthToken>('/api/v1/auth/sign-in/', {
+        const token = await lastValueFrom(this.http.post<AuthToken>('/api/v1/auth/sign-in/', {
             username: username,
             password
-        }).toPromise();
+        }))
 
         await this.storage.set(KEY, token).toPromise();
 
@@ -68,9 +69,9 @@ export class RemoteTokenProvider {
         }
 
         try {
-            const newToken = await this.http.post<AuthToken>('/api/v1/auth/refresh/', {
+            const newToken = await lastValueFrom(this.http.post<AuthToken>('/api/v1/auth/refresh/', {
                 refresh: token.refresh
-            }).toPromise();
+            }));
 
             token.access = newToken.access;
 

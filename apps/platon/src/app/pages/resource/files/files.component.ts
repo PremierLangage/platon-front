@@ -4,7 +4,6 @@ import {
     HttpRequest,
     HttpResponse,
 } from '@angular/common/http';
-import { elementEventFullName } from '@angular/compiler/src/view_compiler/view_compiler';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -30,15 +29,15 @@ export class FilesComponent implements OnInit, OnDestroy {
     description: string = "";
     desc: string = "aaa";
     foldername: string = "";
-    
-    
+
+
 
     context = this.presenter.defaultContext;
     tree?: FileTree;
 
     percent: number = 0;
     file: NzUploadFile[] = [];
-    
+
     selectedFolder!: FileEntry | undefined;
     parentFolder!: FileEntry;
     uploading = false;
@@ -126,7 +125,7 @@ export class FilesComponent implements OnInit, OnDestroy {
 
     handleUpload(): void {
         this.uploading = true;
-       
+
         this.presenter.upload(this.file, this.description, this.selectedFolder).then((request) => {
             request.subscribe(
                 (event) => {
@@ -160,7 +159,7 @@ export class FilesComponent implements OnInit, OnDestroy {
                 }
             );
         });
-        
+
         this.file = [];
         this.description = "";
     }
@@ -184,7 +183,7 @@ export class FilesComponent implements OnInit, OnDestroy {
         var l : FileEntry[] = [];
         if (this.tree !== undefined) {
             l = this.getFolders(this.tree?.files);
-        }  
-    return l; 
+        }
+    return l;
     }
 }

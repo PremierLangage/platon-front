@@ -5,7 +5,7 @@ import { CircleCompletion, CircleService, CircleFilters, Circle } from '@platon/
 import { SearchBar } from '@platon/shared/ui/search';
 import { PageResult } from '@platon/shared/utils';
 import Fuse from 'fuse.js';
-import { of, Subscription } from 'rxjs';
+import { lastValueFrom, of, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-search-circle',
@@ -61,7 +61,7 @@ export class SearchCircleComponent implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         const [user, completion] = await Promise.all([
             this.authService.ready(),
-            this.circleService.completion().toPromise()
+            lastValueFrom(this.circleService.completion())
         ]);
 
         this.user = user;
@@ -103,7 +103,7 @@ export class SearchCircleComponent implements OnInit, OnDestroy {
         });
 
         this.searching = true;
-        this.page = await this.circleService.search(this.filter).toPromise();
+        this.page = await lastValueFrom(this.circleService.search(this.filter));
         this.searching = false;
 
         this.changeDetectorRef.markForCheck();

@@ -1,0 +1,59 @@
+<div class="main rounded-edge"
+  *ngIf="this.feedback__"
+  @fadeSlideInOutUpward
+  [ngStyle]="{'background': 'linear-gradient(' + getScoreColor() + ', rgba(66,66,66,0.350))'}"
+  >
+  <nz-layout class="rounded-edge">
+
+    <!--
+      SCORE DISPLAYING
+    -->
+
+      <nz-sider
+        id="tv"
+        *ngIf="this.displayScore && this.showScore"
+        [@fadeSlideInOutLeftToRight]
+        class="fb-score fb-score-colorable visible hidden"
+        [ngStyle]="{'background': 'linear-gradient(' + getScoreColor() + ', rgba(0,0,0,0.350))'}"
+      >
+        <nz-layout>
+          <nz-header class="fb-title">Score:</nz-header>
+          <nz-content>
+            <nz-divider nzType="horizontal" nzText="{{this.feedback__.score}} / 100" nzOrientation="center" ></nz-divider>
+            <nz-progress
+              class="feedBack-body"
+              nzType="dashboard"
+              [nzStrokeColor]="getScoreColor()"
+              [nzPercent]="this.feedback__.score">
+            </nz-progress>
+            <nz-space nzSize="large" nzDirection="vertical" nzAlign="start" ></nz-space>
+          </nz-content>
+        </nz-layout>
+      </nz-sider>
+
+
+
+    <!--
+      FEEDBACK TEXT
+
+    -->
+      <nz-layout
+        class="fb-text">
+        <nz-header class="fb-title">FeedBack</nz-header>
+        <nz-content class="b-text">{{this.feedback__.feedback}}</nz-content>
+        <nz-footer *ngIf="this.displayScore">
+          <button
+            nz-button nzShape="round"
+            nzSize="large"
+            nzType="primary"
+            (click)="switchScoreDisplaying()"
+            >{{this.showScore ? "Cacher le Score" : "Voir le score"}}
+          </button>
+
+            <nz-slider [nzMin]="0" [nzMax]="100" [(ngModel)]="this.feedback__.score"></nz-slider>
+        </nz-footer>
+      </nz-layout>
+
+
+  </nz-layout>
+</div>

@@ -1,4 +1,4 @@
-<app-container-tabbed [state]="context.state" [tabs]="tabs">
+<app-tabs [state]="context.state" [tabs]="tabs">
   <ng-container *ngIf="context.state === 'READY'">
     <nz-breadcrumb>
       <nz-breadcrumb-item *ngIf="context.circle!.parent">
@@ -50,9 +50,9 @@
       <button nz-button nzType="primary" (click)="acceptInvitation()">
         Accepter l'invitation
       </button>
-      <button nz-button nzType="danger" (click)="declineInvitation()">
+      <button nz-button nzDanger (click)="declineInvitation()">
         Refuser l'invitation
       </button>
     </nz-button-group>
   </ng-container>
-</app-container-tabbed>
+</app-tabs>

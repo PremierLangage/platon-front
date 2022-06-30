@@ -25,7 +25,7 @@ import { HeaderComponent } from './header/header.component';
 import { DrawerComponent } from './drawer/drawer.component';
 import { ContentComponent } from './content/content.component';
 import { ContainerComponent } from './container/container.component';
-import { ContainerTabbedComponent } from './container-tabbed/container-tabbed.component';
+import { TabsComponent } from './tabs/tabs.component';
 
 
 const DECLARATIONS = [
@@ -35,7 +35,7 @@ const DECLARATIONS = [
     DrawerComponent,
     ContentComponent,
     ContainerComponent,
-    ContainerTabbedComponent,
+    TabsComponent,
 ];
 
 @NgModule({

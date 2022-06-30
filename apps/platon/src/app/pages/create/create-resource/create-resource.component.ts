@@ -6,6 +6,7 @@ import { AuthService } from '@platon/core/auth';
 import { Circle, CircleService, ResourceService, ResourceTypes } from '@platon/feature/workspace';
 import { zoomInOnEnterAnimation } from 'angular-animations';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-create-resource',
@@ -60,7 +61,7 @@ export class CreateResourceComponent implements OnInit {
         const user = (await this.authService.ready())!;
 
         this.circles = (
-            await this.circleService.findWatchedBy(user.username, 100).toPromise()
+            await lastValueFrom(this.circleService.findWatchedBy(user.username, 100))
         ).results;
 
         const { queryParamMap } = this.activatedRoute.snapshot;
@@ -79,7 +80,7 @@ export class CreateResourceComponent implements OnInit {
         try {
             const { name, desc } = this.formInfos.value;
             this.creating = true;
-            const resource = await this.resourceService.createResource({
+            const resource = await lastValueFrom(this.resourceService.createResource({
                 name,
                 desc,
                 type: this.selectedType,
@@ -94,7 +95,7 @@ export class CreateResourceComponent implements OnInit {
                         }, null, 4)
                     }
                 }
-            }).toPromise();
+            }));
 
             this.router.navigate(['/resource', resource.id], {
                 relativeTo: this.activatedRoute,

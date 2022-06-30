@@ -3,11 +3,10 @@ import {
     IWebComponent,
     WebComponentTypes,
 } from '../../web-component';
-import { Platon } from './platon';
 
 export interface PlatonViewerState extends IWebComponent {
-    platon: Platon;
-    items: Array<String>;
+    loading: boolean;
+    platon: object;
 }
 
 export const PlatonViewerComponentDefinition = defineWebComponent({
@@ -15,7 +14,7 @@ export const PlatonViewerComponentDefinition = defineWebComponent({
     name: 'PlatonViewer',
     icon: 'assets/images/components/widgets/platon-viewer/platon-viewer.svg',
     selector: 'wc-platon-viewer',
-    description: "Permet d'afficher un fichier pl de la plateforme.",
+    description: 'REMPLACEZ CE TEXTE PAR UNE DESCRIPTION DE VOTRE COMPOSANT',
     fullDescriptionUrl:
         'assets/docs/components/widgets/platon-viewer/platon-viewer.md',
     // https://json-schema.org/understanding-json-schema/
@@ -26,32 +25,13 @@ export const PlatonViewerComponentDefinition = defineWebComponent({
             platon: {
                 type: 'object',
                 default: {},
-                description: 'Fichier pl à afficher.',
+                description: 'Information du composant platon a afficher',
             },
-            items: {
-                type: 'array',
-                default: [],
-                description: 'List beta.',
+            loading: {
+                type: 'boolean',
+                default: true,
+                description: 'Chargement du composant',
             },
         },
-    },
-    showcase: {
-        platon: {
-            title: 'Demo',
-            text: '1+1=3',
-            form: '{{radio|component}}',
-            selector: 'wc-input-box',
-            general_feedback: '\n',
-            feedback_correct: "C'était bien la bonne réponse.",
-            feedback_wrong: 'Essaie encore',
-        },
-        items: [
-            {
-                content: 'Choix 1',
-            },
-            {
-                content: 'Choix 2',
-            },
-        ],
     },
 });

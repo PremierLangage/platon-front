@@ -5,27 +5,25 @@ import { IntroService } from '@platon/shared/utils';
 import { of } from 'rxjs';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-
     user?: AuthUser;
 
-    searchBar: SearchBar<any> =  {
+    searchBar: SearchBar<any> = {
         placeholder: 'Essayez un nom de cours...',
-        complete: item => item,
+        complete: (item) => item,
         filterer: {
             run: (_) => of([]),
         },
-    }
+    };
 
     constructor(
         private readonly authService: AuthService,
-        private readonly introService: IntroService,
-
-    ) { }
+        private readonly introService: IntroService
+    ) {}
 
     async ngOnInit() {
         this.user = await this.authService.ready();
@@ -71,5 +69,4 @@ export class DashboardComponent implements OnInit {
         });
         */
     }
-
 }

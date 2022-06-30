@@ -18,6 +18,8 @@ import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzCardModule } from 'ng-zorro-antd/card';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
@@ -32,7 +34,8 @@ import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
-
+import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
+import { PublisherItemComponent } from './components/publisher-item/publisher-item.component';
 
 @NgModule({
     imports: [
@@ -53,6 +56,8 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         NzDropDownModule,
         NzTreeViewModule,
         NzTimelineModule,
+        NzGridModule,
+        NzCardModule,
 
         SharedUiListModule,
     ],
@@ -69,6 +74,8 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
+        PublisherListComponent,
+        PublisherItemComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -84,6 +91,8 @@ import { FilesTreeComponent } from './components/files-tree/files-tree.component
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
+        PublisherListComponent,
+        PublisherItemComponent,
     ],
 })
-export class FeatureWorkspaceModule { }
+export class FeatureWorkspaceModule {}

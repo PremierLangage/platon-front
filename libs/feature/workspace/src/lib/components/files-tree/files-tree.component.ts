@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { ClipboardService } from '@mcisse/nge/services';
+import { ClipboardService } from '@cisstech/nge/services';
 import { FileEntry, FileTree } from '@platon/feature/workspace';
 import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzMessageService } from 'ng-zorro-antd/message';

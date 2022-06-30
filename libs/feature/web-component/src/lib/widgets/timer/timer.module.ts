@@ -1,6 +1,8 @@
 import { NgModule, Type } from '@angular/core';
-import { BaseModule } from '../../shared/components/base/base.module';
 
+import { IDynamicModule } from '@cisstech/nge/services';
+
+import { BaseModule } from '../../shared/components/base/base.module';
 import { TimerComponent } from './timer.component';
 
 @NgModule({
@@ -10,6 +12,6 @@ import { TimerComponent } from './timer.component';
     ],
     exports: [TimerComponent],
 })
-export class TimerModule {
-    customElementComponent: Type<any> = TimerComponent;
+export class TimerModule implements IDynamicModule {
+    component: Type<any> = TimerComponent;
 }

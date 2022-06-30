@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { WebComponentDocs } from '@platon/feature/web-component';
-import { NgeDocSettings } from '@mcisse/nge/doc';
+
+import { NgeDocSettings } from '@cisstech/nge/doc';
+import { createWebComponentDoc } from '@platon/feature/web-component';
+
 import { DocComponent } from './doc.component';
 
 const DeveloperDocs = {
@@ -10,7 +12,6 @@ const DeveloperDocs = {
         name: 'PLaTon pour les développeurs',
         root: '/doc/developers/',
         logo: 'assets/images/logo/platon.svg',
-        url: 'https://premierlangage.github.io/platon-front/',
         backUrl: '/doc',
         repo: {
             name: 'platon-front',
@@ -22,14 +23,18 @@ const DeveloperDocs = {
     ],
 } as NgeDocSettings;
 
+
 const routes: Routes = [
     { path: '', component: DocComponent },
     {
         path: '**',
-        loadChildren: () => import('@mcisse/nge/doc').then(m => m.NgeDocModule),
+        loadChildren: () => import('@cisstech/nge/doc').then(m => m.NgeDocModule),
         data: [
             DeveloperDocs,
-            WebComponentDocs,
+            createWebComponentDoc({
+                root: '/doc/components/',
+                backUrl: '/doc',
+            }),
         ],
     },
 ];

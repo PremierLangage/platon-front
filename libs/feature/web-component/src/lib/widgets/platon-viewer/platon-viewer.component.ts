@@ -1,26 +1,16 @@
-import {
-    ChangeDetectionStrategy,
-    Injector,
-    Component,
-    Input,
-    ViewChild,
-} from '@angular/core';
-import { RadioGroupComponent } from '../../forms/radio-group/radio-group.component';
+import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-component';
-import {
-    PlatonViewerComponentDefinition,
-    PlatonViewerState,
-} from './platon-viewer';
+import { PlatonViewerComponentDefinition, PlatonViewerState } from './platon-viewer';
+
 
 @Component({
     selector: 'wc-platon-viewer',
     templateUrl: 'platon-viewer.component.html',
     styleUrls: ['platon-viewer.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 @WebComponent(PlatonViewerComponentDefinition)
-export class PlatonViewerComponent
-    implements WebComponentHooks<PlatonViewerState> {
+export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerState> {
     /**
      * The state of the component.
      * The @WebComponent decorator create a getter and a setter during runtime to

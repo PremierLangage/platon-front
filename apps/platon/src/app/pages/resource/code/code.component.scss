@@ -1,0 +1,36 @@
+.popoverTitle {
+  display: flex;
+  justify-content: space-between;
+  min-width: 250px;
+}
+
+nz-list {
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+.list-item-left a {
+  margin-left: 10px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.list-header i {
+  margin-right: 10px;
+}
+
+.code-editor {
+  display: block;
+  width: 100%;
+}
+
+.code-header {
+  flex: none;
+}
+
+.code-header nz-breadcrumb {
+  margin-left: 10px;
+}

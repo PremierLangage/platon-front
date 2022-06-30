@@ -42,5 +42,4 @@ export class HeaderComponent implements OnInit {
     switchTheme(): void {
         this.themeService.switchTheme();
     }
-
 }

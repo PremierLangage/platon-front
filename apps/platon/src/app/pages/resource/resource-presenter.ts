@@ -4,17 +4,19 @@ import { AuthService, AuthUser } from '@platon/core/auth';
 import {
     Circle,
     CircleService,
-    CreateFileForm,
     FileEntry,
     FileService,
     FileTree,
+    Publisher,
+    PublisherForm,
+    PublisherService,
     Resource,
     ResourceService,
     UpdateResourceForm,
 } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -37,7 +39,8 @@ export class ResourcePresenter implements OnDestroy {
         private readonly circleService: CircleService,
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
-        private readonly resourceService: ResourceService
+        private readonly resourceService: ResourceService,
+        private readonly publisherService: PublisherService
     ) {
         this.subscriptions.push(
             this.activatedRoute.params.subscribe((params) => {
@@ -58,12 +61,41 @@ export class ResourcePresenter implements OnDestroy {
         throw new ReferenceError('missing resource');
     }
 
+    publisher(): Observable<Publisher> {
+        return this.publisherService.get();
+    }
+
+    async publish(form: Omit<PublisherForm, 'resource'>): Promise<boolean> {
+        const { resource } = this.context.value as Required<Context>;
+        try {
+            const asset = await this.publisherService
+                .post({
+                    resource,
+                    ...form,
+                })
+                .toPromise();
+            return true;
+        } catch {
+            this.alertError();
+            return false;
+        }
+    }
+
     async openInVsCodeUrl(): Promise<string> {
         const authToken = (await this.authService.token())!;
         const rid = this.context.value.resource?.id;
         const { access, refresh } = authToken;
         const origin = location.origin;
         return `vscode://PLaTon.platon-editor?origin=${origin}&resource=${rid}&access=${access}&refresh=${refresh}`;
+    }
+
+    async liveUrl(): Promise<string> {
+        const rid = this.context.value.resource?.id;
+        return `https://platon.dev/live/${rid}`;
+    }
+
+    async fileContent(file: FileEntry): Promise<string> {
+        return lastValueFrom(this.fileService.read(file));
     }
 
     async update(form: Omit<UpdateResourceForm, 'resource'>): Promise<boolean> {
@@ -136,12 +168,12 @@ export class ResourcePresenter implements OnDestroy {
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),
-            this.resourceService.findById(resourceId).toPromise(),
+            lastValueFrom(this.resourceService.findById(resourceId)),
         ]);
 
-        const circle = await this.circleService
-            .findById(resource.circle.id)
-            .toPromise();
+        const circle = await lastValueFrom(
+            this.circleService.findById(resource.circle.id)
+        );
         this.context.next({
             state: 'READY',
             user,
@@ -154,7 +186,7 @@ export class ResourcePresenter implements OnDestroy {
         try {
             this.refresh(circleId);
         } catch (error) {
-            const status = error.status || 500;
+            const status = (error as any).status || 500;
             if (status >= 400 && status < 500) {
                 this.context.next({ state: 'NOT_FOUND' });
             } else {
@@ -175,4 +207,5 @@ export interface Context {
     user?: AuthUser;
     circle?: Circle;
     resource?: Resource;
+    publisher?: Publisher;
 }

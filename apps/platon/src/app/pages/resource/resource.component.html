@@ -1,4 +1,4 @@
-<app-container-tabbed [state]="context.state" [tabs]="tabs">
+<app-tabs [state]="context.state" [tabs]="tabs">
   <ng-container *ngIf="context.state === 'READY'">
     <nz-breadcrumb>
       <nz-breadcrumb-item>
@@ -15,20 +15,24 @@
         *ngIf="canEditOnline"
         nz-button
         nzType="primary"
-        matTooltip="Éditer en ligne">
+        matTooltip="Éditer en ligne"
+      >
         <i nz-icon nzType="edit" nzTheme="outline"></i>
       </a>
       <a
         nz-button
         nzType="primary"
-        matTooltip="Prévisualiser">
+        matTooltip="Prévisualiser"
+        [href]="liveUrl | safe: 'url'"
+      >
         <i nz-icon nzType="play-circle" nzTheme="outline"></i>
       </a>
       <a
         *ngIf="canEditWithVSCode"
         nz-button
         matTooltip="Éditer avec Visual Studio Code"
-        [href]="openInVsCodeUrl | safe: 'url'">
+        [href]="openInVsCodeUrl | safe: 'url'"
+      >
         <img src="assets/images/vscode/vscode.svg" />
       </a>
     </nz-button-group>
@@ -40,13 +44,15 @@
         [(ngModel)]="context.resource!.status"
         (ngModelChange)="updateStatus($event)"
         nzPlaceHolder="Cliquez pour selectionner un status"
-        [nzDisabled]="false">
+        [nzDisabled]="false"
+      >
         <nz-option
           *ngFor="let item of status; trackBy: trackByValue"
-          [nzLabel]="item|statusLabel"
-          [nzValue]="item">
+          [nzLabel]="item | statusLabel"
+          [nzValue]="item"
+        >
         </nz-option>
       </nz-select>
     </nz-button-group>
   </ng-container>
-</app-container-tabbed>
+</app-tabs>

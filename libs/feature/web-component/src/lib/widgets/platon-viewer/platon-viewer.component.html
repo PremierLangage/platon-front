@@ -1,9 +1,9 @@
-<!--
-<nz-card nzTitle="{{ state.platon.title }}">
-  <p>{{ state.platon.text }}</p>
+<ng-container *ngIf="state.loading; else component">
+  <nz-skeleton [nzActive]="state.loading"></nz-skeleton>
+</ng-container>
 
-</nz-card>
--->
-<wc-radio-group cid="123456789" debug="true" horizontal="false" [state]="state">
-</wc-radio-group>
+<ng-template #component>
+  <div [innerHTML]="state.platon | component | safe: 'html'"></div>
+</ng-template>
+
 <wc-base [(state)]="state"></wc-base>
