@@ -11,15 +11,22 @@ import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSliderModule } from 'ng-zorro-antd/slider';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 
 import { BaseModule } from '../../shared/components/base/base.module';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
+
 import { PlatonViewerModule } from '../platon-viewer/platon-viewer.module';
 import { ExerciceComponent } from './exercice.component';
 import { ComponentExtractorPipe } from './component-extractor.pipe';
 import { RadioGroupModule } from '../../forms/radio-group/radio-group.module';
 import { ExerciceFeedbackComponent } from './exercice-feedback/exercice-feedback.component';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 @NgModule({
     declarations: [ExerciceComponent, ComponentExtractorPipe, ExerciceFeedbackComponent],
@@ -40,6 +47,10 @@ import { CommonModule } from '@angular/common';
         NzGridModule,
         NzProgressModule,
         NzSliderModule,
+        NzTypographyModule,
+        NzIconModule,
+        NzMenuModule,
+        NzTabsModule,
 
 
         RadioGroupModule,

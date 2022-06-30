@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, AfterVi
 import { LiveService } from '@platon/feature/workspace';
 import { catchError, throwError } from 'rxjs';
 import { IWebComponent, WebComponent, WebComponentHooks } from '../../web-component';
-import { ExampleFeedBack, ExerciceComponentDefinition, ExerciceFeedBack, ExerciceState } from './exercice';
+import { ExampleFeedBack, ExerciceComponentDefinition, ExerciceFeedBack, ExerciceState, testFlex, FlexModuler} from './exercice';
 
 @Component({
     selector: 'wc-exercice',
@@ -27,6 +27,8 @@ export class ExerciceComponent implements WebComponentHooks<ExerciceState>, Afte
 
     title?: string;
     text?: string;
+    author?: string;
+    version?: string;
 
     loading : boolean = false;
     showAnswer : boolean = false;
@@ -75,8 +77,12 @@ export class ExerciceComponent implements WebComponentHooks<ExerciceState>, Afte
      * - change detector is triggered right after the end of this method refresh the view.
      */
     onChangeState() {
-        this.title = (this.state.process as any).title;
-        this.text = (this.state.process as any).text;
+        if (this.state.process) {
+            this.title = this.state.process.title;
+            this.text = this.state.process.text;
+            this.author = this.state.author;
+            this.version = this.state.version;
+        }
     }
 
 
@@ -84,6 +90,7 @@ export class ExerciceComponent implements WebComponentHooks<ExerciceState>, Afte
         if (this.formComponent) {
             this.showAnswer = true;
             this.loading = true;
+
             this.loading = false;
             this.feedback__ = ExampleFeedBack;
         }
