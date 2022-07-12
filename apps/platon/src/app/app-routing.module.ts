@@ -72,9 +72,8 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         data: { roles: ['all'] },
         loadChildren: () => import(
-            /* webpackChunkName: "profile" */
-            './pages/profile/profile.module'
-        ).then(m => m.ProfileModule)
+            './pages/asset/asset.module'
+        ).then(m => m.AssetModule)
     },
 
     // PROTECTED EDITOR PAGES

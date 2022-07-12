@@ -1,0 +1,19 @@
+<app-container>
+  <app-content>
+    <ng-container *ngIf="context.state === 'LOADING'">
+      <h1>Loading...</h1>
+    </ng-container>
+    <ng-container *ngIf="context.state === 'READY'">
+      <!-- BREADCRUMB -->
+      <nz-breadcrumb>
+        <nz-breadcrumb-item *ngFor="let url of context.urls; let i = index">
+          <a [routerLink]="getSubPath(i)">{{url}}</a>
+        </nz-breadcrumb-item>
+      </nz-breadcrumb>
+
+    </ng-container>
+    <ng-container *ngIf="context.state === 'SERVER_ERROR'">
+      <h1>ERROR</h1>
+    </ng-container>
+  </app-content>
+</app-container>

@@ -27,10 +27,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     constructor(
         private readonly presenter: DashboardPresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
+        private readonly authService: AuthService,
         private readonly introService: IntroService
     ) { }
 
     async ngOnInit() {
+
+        await this.authService.ready();
+
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(context => {
                 this.context = context;

@@ -4,8 +4,6 @@ import { AssetService } from "@platon/feature/workspace";
 import { AssetList } from "libs/feature/workspace/src/lib/models/asset";
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
 
-
-
 @Injectable()
 export class DashboardPresenter implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
@@ -31,7 +29,6 @@ export class DashboardPresenter implements OnDestroy {
                 this.authService.ready(),
                 this.assetService.me().toPromise()
             ]);
-            console.log(assets);
             this.context.next({
                 state: 'READY',
                 user,
