@@ -2,7 +2,7 @@
   <app-content>
     <ui-search-banner
       [bannerTitle]="'Cours'"
-      [bannerImage]="'assets/images/illustrations/laptop2.svg'"
+      [bannerImage]="'assets/images/illustrations/network.png'"
       [bannerSearchBar]="searchBar"
       [bannerActions]="actions">
       <ng-template #actions>
@@ -13,10 +13,24 @@
       </ng-template>
     </ui-search-banner>
     <br/><br/>
-    <nz-empty [nzNotFoundContent]="content">
-      <ng-template #content>
-        <h2>Aucun cours</h2>
-      </ng-template>
-    </nz-empty>
+    <ng-container [ngSwitch]="context.state">
+      <ng-container *ngSwitchCase="'LOADING'">
+        <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+      </ng-container>
+      <ng-container *ngSwitchCase="'READY'">
+        <ng-container *ngIf="context.assets; else: empty">
+          <ws-cours-list [items]="context.assets">
+          </ws-cours-list>
+        </ng-container>
+        <ng-template #empty>
+          <nz-empty [nzNotFoundContent]="content">
+            <ng-template #content>
+              <h2>Aucun cours</h2>
+            </ng-template>
+          </nz-empty>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+
   </app-content>
 </app-container>

@@ -67,9 +67,17 @@ const routes: Routes = [
             './pages/profile/profile.module'
         ).then(m => m.ProfileModule)
     },
+    {
+        path: 'asset',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "profile" */
+            './pages/profile/profile.module'
+        ).then(m => m.ProfileModule)
+    },
 
     // PROTECTED EDITOR PAGES
-
     {
         path: 'circle',
         canActivate: [AuthGuard],

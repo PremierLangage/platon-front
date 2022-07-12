@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
 import { SearchBar } from '@platon/shared/ui/search';
 import { IntroService } from '@platon/shared/utils';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
+import { DashboardPresenter } from './dashboard-presenter';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  providers: [DashboardPresenter]
 })
-export class DashboardComponent implements OnInit {
-
-    user?: AuthUser;
+export class DashboardComponent implements OnInit, OnDestroy {
+    private readonly subscriptions: Subscription[] = [];
 
     searchBar: SearchBar<any> =  {
         placeholder: 'Essayez un nom de cours...',
@@ -21,14 +22,24 @@ export class DashboardComponent implements OnInit {
         },
     }
 
-    constructor(
-        private readonly authService: AuthService,
-        private readonly introService: IntroService,
+    context = this.presenter.defaultContext;
 
+    constructor(
+        private readonly presenter: DashboardPresenter,
+        private readonly changeDetectorRef: ChangeDetectorRef,
+        private readonly introService: IntroService
     ) { }
 
     async ngOnInit() {
-        this.user = await this.authService.ready();
+        this.subscriptions.push(
+            this.presenter.contextChange.subscribe(context => {
+                this.context = context;
+                this.changeDetectorRef.markForCheck();
+            })
+        );
+
+        await this.presenter.initContext();
+
         /*
         setTimeout(async () => {
             const intro = await this.introService.create();
@@ -70,6 +81,10 @@ export class DashboardComponent implements OnInit {
             intro.start();
         });
         */
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
 }
