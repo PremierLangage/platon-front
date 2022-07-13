@@ -1,0 +1,24 @@
+<ng-container *ngIf="state.content.items && state.content.items.length; else: empty">
+  <ui-list-item-article
+  *ngFor="let item of state.content.items"
+  [articleTitle]="item.type"
+  [articleUrl]="['/asset', item.name]"
+  [articleIconTemplate]="image"
+  [articleDescription]="item.name"
+  [articleTags]="['exercice', 'build', 'render']"
+>
+  <ng-template #image>
+  <mat-icon>{{item.type | assetIcon }}</mat-icon>
+  </ng-template>
+</ui-list-item-article>
+</ng-container>
+
+<ng-template #empty>
+  <nz-empty [nzNotFoundContent]="content">
+    <ng-template #content>
+      <h2>Aucun cours</h2>
+    </ng-template>
+  </nz-empty>
+</ng-template>
+
+<wc-base [(state)]="state"></wc-base>

@@ -5,10 +5,12 @@ export declare type AssetTypes =
     ;
 
 export interface Asset {
-    slugName: string;
+    path: string;
     type: AssetTypes;
     properties: Record<string, any>;
-    content: Record<string, any>;
+    content: {
+        items: AssetContent[]
+    };
 }
 
 export interface AssetList {
@@ -16,4 +18,10 @@ export interface AssetList {
     next: string;
     previous: string;
     results: Asset[];
+}
+
+export interface AssetContent {
+    position: number;
+    type: AssetTypes;
+    name: string;
 }

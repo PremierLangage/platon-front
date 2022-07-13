@@ -18,7 +18,7 @@
         <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
       </ng-container>
       <ng-container *ngSwitchCase="'READY'">
-        <ng-container *ngIf="context.assets; else: empty">
+        <ng-container *ngIf="context.assets && context.assets.results.length; else: empty">
           <ws-cours-list [items]="context.assets">
           </ws-cours-list>
         </ng-container>

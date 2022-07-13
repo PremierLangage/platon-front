@@ -11,6 +11,23 @@
         </nz-breadcrumb-item>
       </nz-breadcrumb>
 
+      <!-- INNER CONTENT -->
+      <nz-row [nzGutter]="[24, 24]" nzAlign="top">
+        <!-- CONTENT -->
+        <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="16" nzXl="16">
+          <nz-divider nzText="Vue d'ensemble" nzOrientation="left"></nz-divider>
+          <ng-container *ngIf="context.asset">
+            <div [innerHTML]="context.asset | asset | safe : 'html'"></div>
+          </ng-container>
+        </nz-col>
+        <!-- RIGHT PANEL -->
+        <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="8" nzXl="8">
+          <nz-divider nzText="A propos" nzOrientation="left"></nz-divider>
+          <div class="inner-content-panel">
+            <p>Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un imprimeur anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique, sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.</p>
+          </div>
+        </nz-col>
+      </nz-row>
     </ng-container>
     <ng-container *ngIf="context.state === 'SERVER_ERROR'">
       <h1>ERROR</h1>

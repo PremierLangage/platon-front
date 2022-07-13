@@ -12,10 +12,10 @@
       [nzActions]="[actionEdit,actionEllipsis]"
       [nzExtra]="extra"
     >
-      <p>{{item.slugName}}</p>
+      <p>{{item.path}}</p>
     </nz-card>
     <ng-template #extra>
-      <a [routerLink]="['/asset', item.slugName]">
+      <a [routerLink]="['/asset', item.path]">
         <i nz-icon nzType="right" nzTheme="outline"></i>
       </a>
     </ng-template>

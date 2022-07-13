@@ -14,8 +14,8 @@ export class AssetService {
         return this.provider.get();
     }
 
-    findBySlug(slug: string): Observable<Asset | undefined> {
-        return this.provider.findBySlug(slug);
+    findByPath(path: string): Observable<Asset | undefined> {
+        return this.provider.findByPath(path);
     }
 
     me(): Observable<AssetList> {

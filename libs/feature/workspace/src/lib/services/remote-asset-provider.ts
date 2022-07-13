@@ -16,12 +16,8 @@ export class RemoteAssetProvider extends AssetProvider {
         return this.http.get<AssetList>('/api/v1/asset/');
     }
 
-    findBySlug(slug: string): Observable<Asset | undefined> {
-        return this.http.get<Asset>(`/api/v1/asset/${slug}/`).pipe(
-            catchError(() => {
-                return of(undefined);
-            })
-        );
+    findByPath(path: string): Observable<Asset | undefined> {
+        return this.http.get<Asset>(`/api/v1/asset/${path}/`);
     }
 
     me(): Observable<AssetList> {

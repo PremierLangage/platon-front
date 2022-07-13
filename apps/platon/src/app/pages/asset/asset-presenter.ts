@@ -3,7 +3,7 @@ import { ActivatedRoute, UrlSegment } from "@angular/router";
 import { AuthService, AuthUser } from "@platon/core/auth";
 import { AssetService } from "@platon/feature/workspace";
 import { Asset } from "libs/feature/workspace/src/lib/models/asset";
-import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, Subscription } from "rxjs";
 
 
 @Injectable()
@@ -38,7 +38,7 @@ export class AssetPresenter implements OnDestroy {
     private async onChangeRoute(urls: UrlSegment[]): Promise<void> {
         try {
             const user = await this.authService.ready();
-            const asset = await lastValueFrom(this.assetService.findBySlug(urls.map(url => url.path).join('/')));
+            const asset = await firstValueFrom(this.assetService.findByPath(urls.map(url => url.path).join('/')));
             this.context.next({
                 state: 'READY',
                 user,
@@ -47,7 +47,7 @@ export class AssetPresenter implements OnDestroy {
             });
         } catch {
             // TODO
-            this.context.next({ state: 'NOT_FOUND' });
+            this.context.next({ state: 'SERVER_ERROR' });
         }
     }
 }
