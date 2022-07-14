@@ -15,6 +15,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 import { CoreAuthModule } from '@platon/core/auth';
 import { AppSharedErrorModule } from '../error/error.module';
@@ -30,6 +31,7 @@ import { SharedUiListModule } from '@platon/shared/ui/list';
 import { AssetCoursComponent } from './cours/cours.component';
 import { AssetIconPipeModule } from '@platon/shared/utils';
 import { AssetExerciceComponent } from './exercice/exercice.component';
+import { AssetFormComponent } from './form/form.component';
 
 
 const DECLARATIONS = [
@@ -41,6 +43,7 @@ const DECLARATIONS = [
     ContainerComponent,
     TabsComponent,
     AssetCoursComponent,
+    AssetFormComponent,
     AssetExerciceComponent,
 ];
 
@@ -63,6 +66,7 @@ const DECLARATIONS = [
         NzResultModule,
         NzSkeletonModule,
         NzEmptyModule,
+        NzButtonModule,
 
         SharedUiListModule,
         CoreAuthModule,

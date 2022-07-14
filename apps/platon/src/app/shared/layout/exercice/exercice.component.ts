@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import { Asset } from "libs/feature/workspace/src/lib/models/asset";
+import { AssetFormComponent } from "../form/form.component";
 
 @Component({
     selector: 'app-asset-exercice',
@@ -8,42 +10,19 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inpu
 })
 export class AssetExerciceComponent {
 
+    content!: Record<string, any>;
+
+    @ViewChild(AssetFormComponent) form!: AssetFormComponent;
+
     @Input()
-    set content(value: any) {
-        if (value) {
-            this.updateComponent(value);
-        }
+    set asset(value: Asset) {
+        this.content = value.content;
     }
 
-    constructor(
-        private elementRef: ElementRef,
-        private readonly changeDetectorRef: ChangeDetectorRef,
-    ) { }
+    @Output() getState = new EventEmitter<Record<string, any>>();
 
-    private updateComponent(content: Record<string, any>) {
-        const component: string = content.form
-                .replace('{{', '')
-                .replace('|component}}', '');
-        this.elementRef.nativeElement.innerHTML = this.getComponent(content[component]);
-        this.changeDetectorRef.markForCheck();
-    }
-
-    private getComponent(component: Record<string, any>): string {
-        const selector = component['selector'];
-        return `
-            <${selector} ${this.getComponentAttributes(component)}></${selector}>
-        `;
-    }
-
-    private getComponentAttributes(attributes: Omit<Record<string, any>, 'selector'>): string {
-        return Object.entries(attributes).map(entry => {
-            const [key, value] = entry;
-            if (typeof(value) === 'object') {
-                return `${key}='${JSON.stringify(value)}'`;
-            } else {
-                return `${key}='${value}'`;
-            }
-        }).join(' ');
+    submit() {
+        this.getState.emit(this.form.content);
     }
 
 }

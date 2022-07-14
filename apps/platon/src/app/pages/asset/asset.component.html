@@ -15,12 +15,12 @@
       <nz-row [nzGutter]="[24, 24]" nzAlign="top">
         <!-- CONTENT -->
         <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="16" nzXl="16">
-          <nz-divider nzText="Vue d'ensemble" nzOrientation="left"></nz-divider>
+          <nz-divider></nz-divider>
           <ng-container *ngIf="context.asset">
             <!-- ASSET WIDGET LOADER -->
             <span [ngSwitch]="context.asset.type">
               <app-asset-cours *ngSwitchCase="'COURS'" [asset]="context.asset"></app-asset-cours>
-              <app-asset-exercice *ngSwitchCase="'EXERCICE'" [content]="context.asset.content"></app-asset-exercice>
+              <app-asset-exercice *ngSwitchCase="'EXERCICE'" [asset]="context.asset" (getState)="postExericeState($event)"></app-asset-exercice>
               <p *ngSwitchDefault>Invalid asset</p>
             </span>
           </ng-container>
