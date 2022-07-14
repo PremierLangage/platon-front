@@ -1,14 +1,15 @@
-import { AssetTypes } from '../../shared/models/asset';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
 
 
 export interface AssetCoursContent {
     position: number;
-    type: AssetTypes;
+    type: string;
     name: string;
+    path: string;
 }
 
 export interface AssetCoursViewerState extends IWebComponent {
+    name: string;
     path: string;
     type: string;
     properties: object;
@@ -29,6 +30,11 @@ export const AssetCoursViewerComponentDefinition = defineWebComponent({
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
         properties: {
+            name: {
+                type: 'string',
+                default: '',
+                description: ''
+            },
             path: {
                 type: 'string',
                 default: '',

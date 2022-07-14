@@ -14,8 +14,12 @@ export class AssetService {
         return this.provider.get();
     }
 
-    findByPath(path: string): Observable<Asset | undefined> {
-        return this.provider.findByPath(path);
+    getAssetByPath(path: string): Observable<Asset> {
+        return this.provider.getAssetByPath(path);
+    }
+
+    getRunnableAssetByPath(path: string): Observable<any> {
+        return this.provider.getRunnbleAssetByPath(path);
     }
 
     me(): Observable<AssetList> {

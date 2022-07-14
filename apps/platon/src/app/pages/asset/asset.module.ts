@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { AssetPipeModule, SafePipeModule } from "@platon/shared/utils";
+import { SafePipeModule } from "@platon/shared/utils";
 
 
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
@@ -17,7 +17,6 @@ import { AssetComponent } from "./asset.component";
     imports: [
         CommonModule,
         SafePipeModule,
-        AssetPipeModule,
 
         NzGridModule,
         NzDividerModule,

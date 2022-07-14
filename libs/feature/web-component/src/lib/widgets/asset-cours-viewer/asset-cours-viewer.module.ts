@@ -9,13 +9,11 @@ import { SharedUiListModule } from '@platon/shared/ui/list';
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { AssetCoursViewerComponent } from './asset-cours-viewer.component';
-import { AssetIconPipeModule } from '../../shared/pipes/asset-icon.pipe';
 
 @NgModule({
     declarations: [AssetCoursViewerComponent],
     imports: [
         BaseModule,
-        AssetIconPipeModule,
 
         MatIconModule,
         NzEmptyModule,

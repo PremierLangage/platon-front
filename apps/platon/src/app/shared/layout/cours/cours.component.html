@@ -1,13 +1,13 @@
-<ng-container *ngIf="state.content.items && state.content.items.length; else: empty">
+<ng-container *ngIf="asset.content.items && asset.content.items.length; else: empty">
   <ui-list-item-article
-  *ngFor="let item of state.content.items"
+  *ngFor="let item of asset.content.items"
   [articleTitle]="item.type"
   [articleUrl]="['/asset'].concat(item.path.split('/'))"
   [articleIconTemplate]="image"
   [articleDescription]="item.name"
 >
   <ng-template #image>
-  <mat-icon>{{item.type}}</mat-icon>
+  <mat-icon>{{item.type | assetIcon }}</mat-icon>
   </ng-template>
 </ui-list-item-article>
 </ng-container>
@@ -19,5 +19,3 @@
     </ng-template>
   </nz-empty>
 </ng-template>
-
-<wc-base [(state)]="state"></wc-base>

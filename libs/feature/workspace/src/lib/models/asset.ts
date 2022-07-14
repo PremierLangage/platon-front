@@ -6,11 +6,10 @@ export declare type AssetTypes =
 
 export interface Asset {
     path: string;
+    name: string;
     type: AssetTypes;
     properties: Record<string, any>;
-    content: {
-        items: AssetContent[]
-    };
+    content: Record<string, any>;
 }
 
 export interface AssetList {
@@ -24,4 +23,5 @@ export interface AssetContent {
     position: number;
     type: AssetTypes;
     name: string;
+    path: string;
 }

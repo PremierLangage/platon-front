@@ -1,9 +1,11 @@
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
 
 export interface AssetExerciceViewerState extends IWebComponent {
-    type: string;
     name: string;
-    url: string;
+    path: string;
+    type: string;
+    properties: object;
+    content: object;
 }
 
 export const AssetExerciceViewerComponentDefinition = defineWebComponent({
@@ -18,20 +20,30 @@ export const AssetExerciceViewerComponentDefinition = defineWebComponent({
         $schema: 'http://json-schema.org/draft-07/schema',
         type: 'object',
         properties: {
-            type: {
-                type: 'string',
-                default: '',
-                description: `Type de l'asset qui doit être un EXERCICE.`
-            },
             name: {
                 type: 'string',
                 default: '',
-                description: `Nom de l'asset EXERCICE.`
+                description: ''
             },
-            url: {
+            path: {
                 type: 'string',
                 default: '',
-                description: `L'url de l'asset EXERCICE`
+                description: ''
+            },
+            type: {
+                type: 'string',
+                default: '',
+                description: ''
+            },
+            properties: {
+                type: 'object',
+                default: {},
+                description: ''
+            },
+            content: {
+                type: 'object',
+                default: {},
+                description: ''
             }
         },
     },

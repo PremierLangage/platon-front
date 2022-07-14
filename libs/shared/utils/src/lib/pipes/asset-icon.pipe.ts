@@ -1,5 +1,5 @@
 import { NgModule, Pipe, PipeTransform } from '@angular/core';
-import { AssetTypes } from '../models/asset';
+import { AssetTypes } from 'libs/feature/workspace/src/lib/models/asset';
 
 const ICONS: Record<AssetTypes, string> = {
     COURS: 'blue',

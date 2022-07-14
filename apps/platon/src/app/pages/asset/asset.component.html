@@ -17,7 +17,12 @@
         <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="16" nzXl="16">
           <nz-divider nzText="Vue d'ensemble" nzOrientation="left"></nz-divider>
           <ng-container *ngIf="context.asset">
-            <div [innerHTML]="context.asset | asset | safe : 'html'"></div>
+            <!-- ASSET WIDGET LOADER -->
+            <span [ngSwitch]="context.asset.type">
+              <app-asset-cours *ngSwitchCase="'COURS'" [asset]="context.asset"></app-asset-cours>
+              <app-asset-exercice *ngSwitchCase="'EXERCICE'" [content]="context.asset.content"></app-asset-exercice>
+              <p *ngSwitchDefault>Invalid asset</p>
+            </span>
           </ng-container>
         </nz-col>
         <!-- RIGHT PANEL -->

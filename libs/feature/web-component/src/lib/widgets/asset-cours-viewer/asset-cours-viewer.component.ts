@@ -23,6 +23,7 @@ export class AssetCoursViewerComponent implements WebComponentHooks<AssetCoursVi
     }
 
     onChangeState() {
+        this.changeDetectorRef.markForCheck();
     }
 
 }
