@@ -22,8 +22,6 @@ import { HintComponentDefinition } from './widgets/hint/hint';
 import { MarkdownComponentDefinition } from './widgets/markdown/markdown';
 import { TimerComponentDefinition } from './widgets/timer/timer';
 import { DragDropComponentDefinition } from './forms/drag-drop/drag-drop';
-import { AssetExerciceViewerComponentDefinition } from './widgets/asset-exercice-viewer/asset-exercice-viewer';
-import { AssetCoursViewerComponentDefinition } from './widgets/asset-cours-viewer/asset-cours-viewer';
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     { selector: 'wc-automaton-editor', module: () => import(/* webpackChunkName: "wc-automaton-editor" */ './forms/automaton-editor/automaton-editor.module').then(m => m.AutomatonEditorModule) },
@@ -45,8 +43,6 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     { selector: 'wc-text-select', module: () => import(/* webpackChunkName: "wc-text-select" */ './forms/text-select/text-select.module').then(m => m.TextSelectModule) },
     { selector: 'wc-timer', module: () => import(/* webpackChunkName: "wc-timer" */ './widgets/timer/timer.module').then(m => m.TimerModule) },
     { selector: 'wc-drag-drop', module: () => import( /* webpackChunkName: "wc-drag-drop" */ './forms/drag-drop/drag-drop.module').then(m => m.DragDropModule) },
-    { selector: 'wc-asset-exercice-viewer', module: () => import( /* webpackChunkName: "wc-asset-exercice-viewer" */ './widgets/asset-exercice-viewer/asset-exercice-viewer.module').then(m => m.AssetExerciceViewerModule) },
-    { selector: 'wc-asset-cours-viewer', module: () => import( /* webpackChunkName: "wc-asset-cours-viewer" */ './widgets/asset-cours-viewer/asset-cours-viewer.module').then(m => m.AssetCoursViewerModule) },
 ];
 
 export const WEB_COMPONENTS_REGISTRY: Provider[] = [
@@ -68,7 +64,5 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: SortListComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: TextSelectComponentDefinition },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: DragDropComponentDefinition },
-    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AssetExerciceViewerComponentDefinition },
-    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: AssetCoursViewerComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: TimerComponentDefinition },
 ];
