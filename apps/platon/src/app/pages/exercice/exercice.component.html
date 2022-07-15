@@ -1,0 +1,25 @@
+<div #target class="exercice-template-container">
+  <app-exercice-template-provider
+    [exercice]="this.exercice"
+    [feedback]="this.feedback"
+  >
+  </app-exercice-template-provider>
+</div>
+<button
+  nz-button
+  nzShape="round"
+  nzSize="large"
+  nzType="primary"
+  (click)="switchFeedBack()"
+>
+  {{ this.gotFeedBack ? "Disable FeedBack" : "Enable FeedBack" }}
+</button>
+<button
+  nz-button
+  nzShape="round"
+  nzSize="large"
+  nzType="primary"
+  (click)="logExo()"
+>
+  Display Exercice
+</button>
