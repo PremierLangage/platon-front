@@ -1,0 +1,50 @@
+<div class="code-tree">
+  <ng-container [ngSwitch]="context.state">
+
+    <ng-container *ngSwitchCase="'LOADING'">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'NOT_FOUND'">
+      <h1>Not found</h1>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'READY'">
+      <nz-list
+      [nzHeader]="header"
+      [nzBordered]="true"
+      nzSize="small">
+        <nz-list-item *ngIf="!context.node?.root">
+          <a (click)="didGoBack.emit()">..</a>
+        </nz-list-item>
+
+        <nz-list-item *ngFor="let item of context.node?.children">
+          <div class="nz-list-item-name">
+            <i nz-icon [nzType]="item.type" nzTheme="outline"></i>
+            <a (click)="didGoPath.emit(item.title)">{{item.title}}</a>
+          </div>
+          <div class="nz-list-item-size">
+            <span>{{item.size}}</span>
+          </div>
+
+        </nz-list-item>
+
+      </nz-list>
+
+      <!-- LIST HEADER -->
+      <ng-template #header>
+        <div class="nz-list-header">
+          <a>TODO</a>
+          <span>TODO Actions</span>
+        </div>
+      </ng-template>
+
+      <!-- LIST FOOTER -->
+      <ng-template #footer>
+
+      </ng-template>
+
+    </ng-container>
+
+  </ng-container>
+</div>

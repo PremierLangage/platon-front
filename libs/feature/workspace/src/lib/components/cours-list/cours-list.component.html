@@ -1,4 +1,4 @@
-<div nz-row [nzGutter]="[8, 8]">
+<!-- <div nz-row [nzGutter]="[8, 8]">
   <div
     nz-col
     [nzSpan]="24"
@@ -26,9 +26,48 @@
       <i nz-icon nzType="ellipsis"></i>
     </ng-template>
   </div>
+</div> -->
+
+<div nz-row [nzGutter]="[24,24]">
+  <div nz-col [nzSpan]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let item of items.results">
+    <nz-card nzHoverable [nzCover]="cover" [nzExtra]="extra" [nzTitle]="title">
+      <p><b>{{item.type}}</b></p>
+      <p>{{item.name}}</p>
+      <button nz-button nzType="default" nzBlock [routerLink]="['/asset', item.path]">Entrer</button>
+    </nz-card>
+  </div>
+
+  <!-- DRAFT COURS -->
+  <div nz-col [nzSpan]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+    <nz-card nzHoverable [nzCover]="cover" [nzExtra]="extra" [nzTitle]="betaTitle">
+      <p><b>Master 2 Logiciel</b></p>
+      <p>Cours spécifique pour les étudiants de M2.</p>
+      <button nz-button nzType="default" nzBlock>Entrer</button>
+    </nz-card>
+  </div>
 </div>
 
+<ng-template #title>
+  <nz-tag nzColor="success">
+    <i nz-icon nzType="check-circle"></i>
+    <span>Published</span>
+  </nz-tag>
+</ng-template>
+
+<ng-template #betaTitle>
+  <nz-tag nzColor="default">
+    <i nz-icon nzType="clock-circle"></i>
+    <span>Draft</span>
+  </nz-tag>
+</ng-template>
+
+<ng-template #extra>
+  <i nz-icon nzType="ellipsis"></i>
+</ng-template>
 
 
-
-
+<ng-template #cover>
+  <div class="card-cover">
+    <img src="https://assets.tryhackme.com/img/paths/completebeginner.jpg" alt="No set yet">
+  </div>
+</ng-template>

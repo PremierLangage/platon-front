@@ -16,6 +16,8 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
 
 import { CoreAuthModule } from '@platon/core/auth';
 import { AppSharedErrorModule } from '../error/error.module';
@@ -67,6 +69,8 @@ const DECLARATIONS = [
         NzSkeletonModule,
         NzEmptyModule,
         NzButtonModule,
+        NzMenuModule,
+        NzLayoutModule,
 
         SharedUiListModule,
         CoreAuthModule,

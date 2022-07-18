@@ -29,6 +29,12 @@ const routes: Routes = [
                     './files/files.module'
                 ).then(m => m.FilesModule)
             },
+            {
+                path: 'code',
+                loadChildren: () => import(
+                    './code/code.module'
+                ).then(m => m.CodeModule)
+            },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' }
         ]
     },

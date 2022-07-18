@@ -1,0 +1,38 @@
+<div nz-space nzAlign="baseline">
+  <!-- VERSION POPOVER -->
+  <button
+    nz-button
+    nz-popover
+    nzPopoverTitle="Changer de version"
+    [nzPopoverContent]="popOverContent"
+    nzPopoverPlacement="bottomLeft"
+  >
+    <i nz-icon nzType="branches" nzTheme="outline"></i>
+    <span>{{version}}</span>
+    <i nz-icon nzType="caret-down" nzTheme="outline"></i>
+  </button>
+  <ng-template #popOverContent>
+    <input nz-input placeholder="Trouver une version..."/>
+    <nz-list>
+      <nz-list-item>
+        <span>1</span>
+      </nz-list-item>
+      <nz-list-item>
+        <span>2</span>
+      </nz-list-item>
+    </nz-list>
+  </ng-template>
+  <!-- BREADCRUMB -->
+  <nz-breadcrumb>
+    <nz-breadcrumb-item *ngFor="let url of urls">
+      <a>{{url}}</a>
+    </nz-breadcrumb-item>
+  </nz-breadcrumb>
+</div>
+
+<!-- CODE TREE VIEW -->
+<ws-code-tree
+  [codeTree]="{node, urls}"
+  (didGoBack)="didGoBack()"
+  (didGoPath)="didGoPath($event)">
+</ws-code-tree>

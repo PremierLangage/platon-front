@@ -34,6 +34,11 @@ export class ResourceComponent implements OnInit, OnDestroy {
             title: 'Informations',
             link: ['informations']
         },
+        {
+            id: 'tab-code',
+            title: 'Code',
+            link: ['code']
+        },
     ];
 
     readonly status: ResourceStatus[] = [
