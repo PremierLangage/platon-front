@@ -1,38 +1,111 @@
-<div nz-space nzAlign="baseline">
-  <!-- VERSION POPOVER -->
-  <button
+<div class="code-header">
+
+  <div nz-space nzAlign="baseline" class="code-header-item">
+    <!-- VERSION POPOVER -->
+    <button
     nz-button
     nz-popover
     nzPopoverTitle="Changer de version"
     [nzPopoverContent]="popOverContent"
-    nzPopoverPlacement="bottomLeft"
-  >
-    <i nz-icon nzType="branches" nzTheme="outline"></i>
-    <span>{{version}}</span>
-    <i nz-icon nzType="caret-down" nzTheme="outline"></i>
-  </button>
-  <ng-template #popOverContent>
-    <input nz-input placeholder="Trouver une version..."/>
-    <nz-list>
-      <nz-list-item>
-        <span>1</span>
-      </nz-list-item>
-      <nz-list-item>
-        <span>2</span>
-      </nz-list-item>
-    </nz-list>
-  </ng-template>
-  <!-- BREADCRUMB -->
-  <nz-breadcrumb>
-    <nz-breadcrumb-item *ngFor="let url of urls">
-      <a>{{url}}</a>
-    </nz-breadcrumb-item>
-  </nz-breadcrumb>
+    nzPopoverPlacement="bottomLeft">
+      <i nz-icon nzType="branches" nzTheme="outline"></i>
+      <span>{{version}}</span>
+      <i nz-icon nzType="caret-down" nzTheme="outline"></i>
+    </button>
+    <ng-template #popOverContent>
+      <input nz-input placeholder="Trouver une version..."/>
+    </ng-template>
+    <!-- BREADCRUMB -->
+    <nz-breadcrumb>
+      <nz-breadcrumb-item>
+        <i nz-icon nzType="home" nzTheme="outline"></i>
+      </nz-breadcrumb-item>
+
+      <nz-breadcrumb-item *ngFor="let url of urls">
+        <a>{{url}}</a>
+      </nz-breadcrumb-item>
+    </nz-breadcrumb>
+  </div>
+
+  <div class="code-header-item">
+    <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight">
+      <span>Add file</span>
+      <i nz-icon nzType="caret-down" nzTheme="outline"></i>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu>
+        <li nz-menu-item>Créer un fichier</li>
+        <li nz-menu-item>Uploader un fichier</li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+
 </div>
 
 <!-- CODE TREE VIEW -->
 <ws-code-tree
   [codeTree]="{node, urls}"
   (didGoBack)="didGoBack()"
-  (didGoPath)="didGoPath($event)">
+  (didGoPath)="didGoPath($event)"
+  (didEitable)="didEditable($event)">
 </ws-code-tree>
+
+<!-- CODE EDITOR VIEW -->
+
+<ng-container [ngSwitch]="editor.state">
+  <ng-container *ngSwitchCase="'NO_FILE'">
+
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'LOADING'">
+    <nz-skeleton [nzActive]="true"></nz-skeleton>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'READ'">
+    <nz-list
+      [nzHeader]="header"
+      [nzBordered]="true"
+      nzSize="small">
+      <nz-list-item>
+        <nge-monaco-viewer [language]="editor.file?.path?.split('.')?.pop()" [code]="editor.content">
+        </nge-monaco-viewer>
+      </nz-list-item>
+    </nz-list>
+
+    <ng-template #header>
+      <div class="code-editor-header">
+        <span>File : {{editor.file?.path}} | size : {{editor.file?.size}}</span>
+        <button nz-button nzType="default" (click)="editor.state = 'EDIT'">
+          <i nz-icon nzType="edit" nzTheme="outline"></i>
+          <span>Edit</span>
+        </button>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'EDIT'">
+    <nz-list
+      [nzHeader]="header"
+      [nzBordered]="true"
+      nzSize="small">
+      <nz-list-item>
+        <nge-monaco-editor
+          style="--editor-height: 500px;"
+          (ready)="onCreateEditor($event)">
+        </nge-monaco-editor>
+      </nz-list-item>
+    </nz-list>
+
+    <ng-template #header>
+      <div class="code-editor-header">
+        <span>File : {{editor.file?.path}}</span>
+        <button nz-button nzType="primary">
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          <span>Save</span>
+        </button>
+      </div>
+    </ng-template>
+  </ng-container>
+
+
+</ng-container>

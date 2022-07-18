@@ -17,6 +17,11 @@ export class CodeTreeComponent {
 
         if (value.node && value.urls) {
             this.changeRoute(value.node, value.urls);
+            if (this.context.node?.isLeaf) {
+                this.didEitable.emit(this.context.node.key);
+            } else {
+                this.didEitable.emit(undefined);
+            }
             this.changeDetectionRef.markForCheck();
         }
 
@@ -25,6 +30,8 @@ export class CodeTreeComponent {
     @Output() didGoBack = new EventEmitter<void>();
 
     @Output() didGoPath = new EventEmitter<string>();
+
+    @Output() didEitable = new EventEmitter<string>();
 
     constructor(
         private readonly changeDetectionRef: ChangeDetectorRef,

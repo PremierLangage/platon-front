@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router";
 import { FileEntry, FileTree } from "@platon/feature/workspace";
-import { Subscription } from "rxjs";
+import { firstValueFrom, Subscription } from "rxjs";
 import { ResourcePresenter } from "../resource-presenter";
 
 
@@ -13,12 +13,18 @@ import { ResourcePresenter } from "../resource-presenter";
 })
 export class CodeComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
+    private readonly _index = new Map<string, FileEntry>();
+
+    private readonly disposables: monaco.IDisposable[] = [];
+    private model?: monaco.editor.ITextModel;
 
     context = this.presenter.defaultContext;
     version?: string = 'master';
 
     node!: Node;
     urls!: UrlSegment[];
+
+    editor: CodeEditor = { state: 'NO_FILE' };
 
     constructor(
         private readonly presenter: ResourcePresenter,
@@ -33,6 +39,7 @@ export class CodeComponent implements OnInit, OnDestroy {
                 this.context = context;
                 const tree = await this.presenter.fileTree().toPromise();
                 const createNode = (entry: FileEntry): any => {
+                    this._index.set(entry.path, entry);
                     return {
                         key: entry.path,
                         title: entry.path.split('/').pop(),
@@ -70,6 +77,7 @@ export class CodeComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+        this.disposables.forEach(d => d.dispose());
     }
 
     private compareNodes(a: Node, b: Node) {
@@ -87,6 +95,44 @@ export class CodeComponent implements OnInit, OnDestroy {
         this.router.navigate([path], {relativeTo: this.activatedRoute});
     }
 
+    async didEditable(editable: string | undefined) {
+        if (editable) {
+            this.editor = { state: 'LOADING' };
+            this.editor = await this.getEditorState(editable);
+        } else {
+            this.editor = { state: 'NO_FILE' };
+        }
+        this.changeDetectorRef.markForCheck();
+    }
+
+    private async getEditorState(editable: string): Promise<CodeEditor> {
+        const file = this._index.get(editable);
+        if (file === undefined) {
+            return { state: 'NOT_FOUND' };
+        }
+        const content = await this.presenter.getFileContent(file);
+
+        return {
+            state: content ? 'READ' : 'ERROR',
+            content: content,
+            file: file
+        };
+
+    }
+
+    onCreateEditor(editor: monaco.editor.IEditor) {
+
+        (editor as monaco.editor.IStandaloneCodeEditor)
+            .setModel(monaco.editor.createModel(this.editor.content || '',this.editor.file?.mime));
+
+    }
+
+}
+
+interface CodeEditor {
+    state: 'LOADING' | 'READ' | 'EDIT' | 'NO_FILE' | 'NOT_FOUND' | 'ERROR';
+    content?: string;
+    file?: FileEntry
 }
 
 interface CodeTree {

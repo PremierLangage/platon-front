@@ -1,9 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import { Circle, CircleService, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
+import { Circle, CircleService, FileEntry, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -74,6 +74,18 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
+    async getFileContent(file: FileEntry): Promise<string | undefined> {
+        try {
+            const [user, content] = await Promise.all([
+                this.authService.ready(),
+                firstValueFrom(this.fileService.read(file))
+            ]);
+            return content;
+        } catch {
+            this.alertError();
+            return;
+        }
+    }
 
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
