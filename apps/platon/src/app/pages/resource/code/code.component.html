@@ -99,7 +99,7 @@
     <ng-template #header>
       <div class="code-editor-header">
         <span>File : {{editor.file?.path}}</span>
-        <button nz-button nzType="primary">
+        <button nz-button nzType="primary" (click)="updateFileContent(editor.file)">
           <i nz-icon nzType="save" nzTheme="outline"></i>
           <span>Save</span>
         </button>

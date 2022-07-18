@@ -87,6 +87,20 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
+    async updateFileContent(file: FileEntry, content: string): Promise<boolean> {
+        try {
+            await this.authService.ready();
+            await this.fileService.update({
+                file: file,
+                content: content
+            }).toPromise();
+            return true;
+        } catch {
+            this.alertError();
+            return false;
+        }
+    }
+
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),

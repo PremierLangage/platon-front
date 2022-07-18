@@ -38,35 +38,7 @@ export class CodeComponent implements OnInit, OnDestroy {
             this.presenter.contextChange.subscribe(async context => {
                 this.context = context;
                 const tree = await this.presenter.fileTree().toPromise();
-                const createNode = (entry: FileEntry): any => {
-                    this._index.set(entry.path, entry);
-                    return {
-                        key: entry.path,
-                        title: entry.path.split('/').pop(),
-                        hexsha: entry.hexsha,
-                        size: entry.size,
-                        mime: entry.mime,
-                        isLeaf: !entry.children?.length,
-                        children: entry.children?.map(createNode).sort(this.compareNodes),
-                        root: false,
-                        type: entry.type
-                    }
-                }
-
-                if (tree) {
-                    this.node = {
-                        key: '',
-                        title: '',
-                        hexsha: tree.hexsha,
-                        size: -1,
-                        mime: '',
-                        isLeaf: false,
-                        children: tree.files.map(createNode).sort(this.compareNodes),
-                        root: true,
-                        type: 'folder'
-                    }
-                }
-                this.changeDetectorRef.markForCheck();
+                this.refreshTree(tree);
             }),
             this.activatedRoute.url.subscribe(urls => {
                 this.urls = urls;
@@ -78,6 +50,37 @@ export class CodeComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.disposables.forEach(d => d.dispose());
+    }
+
+    private refreshTree(tree?: FileTree): void {
+        const createNode = (entry: FileEntry): any => {
+            this._index.set(entry.path, entry);
+            return {
+                key: entry.path,
+                title: entry.path.split('/').pop(),
+                hexsha: entry.hexsha,
+                size: entry.size,
+                mime: entry.mime,
+                isLeaf: !entry.children?.length,
+                children: entry.children?.map(createNode).sort(this.compareNodes),
+                root: false,
+                type: entry.type
+            }
+        }
+        if (tree) {
+            this.node = {
+                key: '',
+                title: '',
+                hexsha: tree.hexsha,
+                size: -1,
+                mime: '',
+                isLeaf: false,
+                children: tree.files.map(createNode).sort(this.compareNodes),
+                root: true,
+                type: 'folder'
+            }
+        }
+        this.changeDetectorRef.markForCheck();
     }
 
     private compareNodes(a: Node, b: Node) {
@@ -122,9 +125,22 @@ export class CodeComponent implements OnInit, OnDestroy {
 
     onCreateEditor(editor: monaco.editor.IEditor) {
 
-        (editor as monaco.editor.IStandaloneCodeEditor)
-            .setModel(monaco.editor.createModel(this.editor.content || '',this.editor.file?.mime));
+        this.model = monaco.editor.createModel(this.editor.content || '', this.editor.file?.mime);
 
+        (editor as monaco.editor.IStandaloneCodeEditor)
+            .setModel(this.model);
+
+    }
+
+    async updateFileContent(file?: FileEntry) {
+        if (file && this.model) {
+            const succed = await this.presenter.updateFileContent(file, this.model.getValue());
+            if (succed) {
+                const tree = await this.presenter.fileTree().toPromise();
+                this.refreshTree(tree);
+                this.editor.state = 'LOADING';
+            }
+        }
     }
 
 }
