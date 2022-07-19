@@ -27,9 +27,32 @@
         </nz-col>
         <!-- RIGHT PANEL -->
         <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="8" nzXl="8">
-          <nz-divider nzText="A propos" nzOrientation="left"></nz-divider>
+          <nz-divider nzText="Responsable du cours" nzOrientation="left"></nz-divider>
           <div class="inner-content-panel">
-            <p>Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un imprimeur anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique, sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.</p>
+            <nz-list>
+              <ng-container *ngIf="context.user; else: userLoading">
+                <nz-list-item>
+                  <nz-list-item-meta
+                    nzDescription="Responsable du cours">
+
+                    <nz-list-item-meta-avatar [nzSrc]="context.user.avatar"></nz-list-item-meta-avatar>
+
+                    <nz-list-item-meta-title>
+                      <a>{{ context.user.firstName }} {{ context.user.lastName }}</a>
+                    </nz-list-item-meta-title>
+
+                  </nz-list-item-meta>
+                </nz-list-item>
+              </ng-container>
+              <ng-template #userLoading>
+                <nz-skeleton
+                  [nzAvatar]="true"
+                  [nzActive]="true"
+                  [nzTitle]="false"
+                  [nzLoading]="true"
+                ></nz-skeleton>
+              </ng-template>
+            </nz-list>
           </div>
         </nz-col>
       </nz-row>

@@ -4,8 +4,10 @@ import { SafePipeModule } from "@platon/shared/utils";
 
 
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzDividerModule } from "ng-zorro-antd/divider";
-import { NzGridModule } from "ng-zorro-antd/grid";
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 
 import { AppSharedLayoutModule } from "../../shared/layout";
 
@@ -21,6 +23,8 @@ import { AssetComponent } from "./asset.component";
         NzGridModule,
         NzDividerModule,
         NzBreadCrumbModule,
+        NzListModule,
+        NzSkeletonModule,
 
         AppSharedLayoutModule,
 
