@@ -3,7 +3,7 @@ import { AssetTypes } from 'libs/feature/workspace/src/lib/models/asset';
 
 const ICONS: Record<AssetTypes, string> = {
     COURS: 'blue',
-    EXERCICE: 'article',
+    EXERCISE: 'article',
     ACTIVITY: 'widgets'
 };
 

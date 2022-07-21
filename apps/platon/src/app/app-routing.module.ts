@@ -75,6 +75,14 @@ const routes: Routes = [
             './pages/asset/asset.module'
         ).then(m => m.AssetModule)
     },
+    {
+        path: 'live',
+        canActivate: [AuthGuard],
+        data: { roles: ['all'] },
+        loadChildren: () => import(
+            './pages/live/live.module'
+        ).then(m => m.LiveModule)
+    },
 
     // PROTECTED EDITOR PAGES
     {

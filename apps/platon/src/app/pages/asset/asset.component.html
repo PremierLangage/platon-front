@@ -20,7 +20,7 @@
             <!-- ASSET WIDGET LOADER -->
             <span [ngSwitch]="context.asset.type">
               <app-asset-cours *ngSwitchCase="'COURS'" [asset]="context.asset"></app-asset-cours>
-              <app-asset-exercice *ngSwitchCase="'EXERCICE'" [asset]="context.asset" (getState)="postExericeState($event)"></app-asset-exercice>
+              <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="context.asset" (getState)="postExericeState($event)"></app-asset-exercice>
               <p *ngSwitchDefault>Invalid asset</p>
             </span>
           </ng-container>

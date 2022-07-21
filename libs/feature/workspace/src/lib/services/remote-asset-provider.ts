@@ -20,6 +20,10 @@ export class RemoteAssetProvider extends AssetProvider {
         return this.http.get<Asset>(`/api/v1/asset/${path}/`);
     }
 
+    getLive(id: number) {
+        return this.http.get<Asset>(`/api/v1/live/resource/${id}/`);
+    }
+
     getRunnbleAssetByPath(path: string): Observable<any> {
         return this.http.get<Asset>(`/api/v1/play/asset/${path}/`);
     }

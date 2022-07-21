@@ -14,6 +14,10 @@ export class AssetService {
         return this.provider.get();
     }
 
+    getLive(id: number): Observable<Asset> {
+        return this.provider.getLive(id);
+    }
+
     getAssetByPath(path: string): Observable<Asset> {
         return this.provider.getAssetByPath(path);
     }

@@ -60,7 +60,7 @@ export class AssetPresenter implements OnDestroy {
     private async onChangeRoute(urls: UrlSegment[]): Promise<void> {
         try {
             await this.getAsset(urls);
-            if (this.context.value.asset?.type === 'EXERCICE') {
+            if (this.context.value.asset?.type === 'EXERCISE') {
                 await this.getRunnableAsset(urls);
             }
         } catch {

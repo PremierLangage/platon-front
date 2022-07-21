@@ -1,7 +1,7 @@
 export declare type AssetTypes =
     'COURS' |
     'ACTIVITY' |
-    'EXERCICE'
+    'EXERCISE'
     ;
 
 export interface Asset {
