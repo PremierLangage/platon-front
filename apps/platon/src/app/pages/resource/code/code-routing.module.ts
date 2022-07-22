@@ -10,6 +10,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzListModule } from "ng-zorro-antd/list";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { NzUploadModule } from 'ng-zorro-antd/upload';
 
 import { AppSharedErrorModule } from "../../../shared/error/error.module";
 
@@ -18,6 +19,7 @@ import { CodeEditComponent } from "./edit/code-edit.component";
 import { CodeNewComponent } from "./new/code-new.component";
 import { CodeTreeComponent } from "./tree/code-tree.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { CodeUploadComponent } from "./upload/code-upload.component";
 
 
 const routes: Routes = [
@@ -37,6 +39,10 @@ const routes: Routes = [
                 path: 'new',
                 children: [{ path: '**', component: CodeNewComponent }]
             },
+            {
+                path: 'upload',
+                children: [{ path: '**', component: CodeUploadComponent }]
+            },
             { path: '**', redirectTo: 'tree', pathMatch: 'full' }
         ]
     },
@@ -47,6 +53,7 @@ const routes: Routes = [
         CodeTreeComponent,
         CodeEditComponent,
         CodeNewComponent,
+        CodeUploadComponent,
     ],
     imports: [
         CommonModule,
@@ -59,6 +66,7 @@ const routes: Routes = [
         NzButtonModule,
         NzDropDownModule,
         NzInputModule,
+        NzUploadModule,
 
         HttpClientModule,
         NgeMonacoModule.forRoot({}),

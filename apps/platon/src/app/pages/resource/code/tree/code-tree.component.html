@@ -78,9 +78,13 @@
       <nz-dropdown-menu #menu="nzDropdownMenu">
         <ul nz-menu>
           <li nz-menu-item>
-            <a (click)="didGoNewFile(code.node?.key)">Create new file</a>
+            <a style="padding: 0 12px;"
+              (click)="didGoNewFile(code.node?.key)">Create new file</a>
           </li>
-          <li nz-menu-item>Upload files</li>
+          <li nz-menu-item>
+            <a style="padding: 0 12px;"
+              (click)="didGoUploadFile(code.node?.key)">Upload files</a>
+          </li>
         </ul>
       </nz-dropdown-menu>
     </ng-container>
