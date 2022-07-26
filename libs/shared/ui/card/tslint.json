@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tslint.json",
+  "rules": {
+    "directive-selector": [
+      true,
+      "attribute",
+      "uiCard",
+      "camelCase"
+    ],
+    "component-selector": [
+      true,
+      "element",
+      "ui-card",
+      "kebab-case"
+    ]
+  },
+  "linterOptions": {
+    "exclude": [
+      "!**/*"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+<div nz-row nzJustify="space-between">
+  <!-- HEADER -->
+  <div nz-col nzSpan="8" class="admin-title">
+    <h1>Cours</h1>
+  </div>
+  <div nz-col nzSpan="16" class="admin-action">
+    <button nz-button nzType="default" class="admin-action-item">
+      Selectionner
+    </button>
+    <button nz-button nzType="primary" class="admin-action-item">
+      Créer un cours
+    </button>
+  </div>
+  <!-- SEARCH BAR -->
+  <div nz-col nzSpan="24">
+    <nz-divider></nz-divider>
+    <nz-input-group [nzSuffix]="suffixIconSearch" class="admin-search-bar">
+      <input nz-input placeholder="Rechercher dans les cours" nzSize="large"/>
+    </nz-input-group>
+    <ng-template #suffixIconSearch>
+      <i nz-icon nzType="search"></i>
+    </ng-template>
+    <nz-divider></nz-divider>
+  </div>
+  <!-- CONTENT -->
+  <div nz-col nsSpan="24" class="admin-content">
+    <ui-card [display]="display">
+
+    </ui-card>
+  </div>
+  <!-- FOOTER -->
+  <div nz-col nsSpan="24" class="admin-footer">
+    <nz-divider></nz-divider>
+    <p>Footer</p>
+  </div>
+
+</div>

@@ -1,0 +1,30 @@
+.admin-title h1 {
+  margin-bottom: 0;
+}
+
+.admin-action {
+  display: flex;
+  justify-content: end;
+}
+
+.admin-action-item {
+  margin-left: 24px;
+}
+
+.admin-search-bar {
+  border: 0;
+  font-size: 20px;
+  box-shadow: none;
+}
+
+.admin-search-bar input {
+  font-size: 20px;
+}
+
+.admin-content {
+  font-size: medium;
+}
+
+.admin-footer {
+  background-color: gainsboro;
+}
