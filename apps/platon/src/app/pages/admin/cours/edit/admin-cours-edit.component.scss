@@ -25,6 +25,20 @@
   width: 100%;
 }
 
-.admin-footer {
-  width: 100%;
+.admin-content-section {
+  margin: 16px;
+}
+
+.admin-content .inner-sider {
+  padding: 24px 0;
+}
+
+.admin-content .inner-sider-menu {
+  height: 100%;
+}
+
+.admin-content .inner-content {
+  min-height: 100%;
+  padding: 24px;
+  background-color: white;
 }

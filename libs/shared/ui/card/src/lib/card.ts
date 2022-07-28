@@ -5,7 +5,7 @@ export interface CardItem {
 }
 
 export interface CardItemTags {
-    type?: string;
+    color?: CardItemTagColor;
     icon?: string;
     text?: string;
 }
@@ -13,3 +13,10 @@ export interface CardItemTags {
 export declare type CardDisplay =
     | 'row'
     | 'list';
+
+export declare type CardItemTagColor =
+    | 'success'
+    | 'processing'
+    | 'error'
+    | 'warning'
+    | 'default';

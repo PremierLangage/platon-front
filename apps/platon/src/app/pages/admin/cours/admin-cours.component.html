@@ -19,19 +19,28 @@
     </nz-input-group>
     <ng-template #suffixIconSearch>
       <i nz-icon nzType="search"></i>
+      <nz-divider nzType="vertical"></nz-divider>
+      <nz-button-group>
+        <button nz-button nzSize="large" [nzType]="(display === 'list') ? 'primary' : 'default'" (click)="display = 'list'">
+          <i nz-icon nzType="unordered-list" nzTheme="outline"></i>
+        </button>
+        <button nz-button nzSize="large" [nzType]="(display === 'row') ? 'primary' : 'default'" (click)="display = 'row'">
+          <i nz-icon nzType="appstore" nzTheme="outline"></i>
+        </button>
+      </nz-button-group>
     </ng-template>
     <nz-divider></nz-divider>
   </div>
   <!-- CONTENT -->
   <div nz-col nsSpan="24" class="admin-content">
-    <ui-card [display]="display">
-
-    </ui-card>
+    <ui-card [display]="display" [items]="items"></ui-card>
   </div>
   <!-- FOOTER -->
   <div nz-col nsSpan="24" class="admin-footer">
     <nz-divider></nz-divider>
-    <p>Footer</p>
+    <h2>Ressources</h2>
+    <p>Simple description for footer</p>
+    <p>Other link can be present here</p>
   </div>
 
 </div>

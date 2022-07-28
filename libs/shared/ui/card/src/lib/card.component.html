@@ -1,14 +1,12 @@
-<!-- ROW DISPLAY -->
-<ng-container *ngIf="display === 'row'">
-  <div class="container">
-    <h1>Card row</h1>
-  </div>
-</ng-container>
-
-<!-- LIST DISPLAY -->
-<ng-container *ngIf="display === 'list'">
-  <div class="container">
-    <h1>Card list</h1>
-  </div>
-</ng-container>
-
+<div nz-row nzJustify="space-between" [nzGutter]="[24,24]">
+  <ng-container *ngFor="let item of items">
+    <ui-card-item
+      nz-col
+      [nzSpan]="(display === 'list') ? 24 : 8"
+      [display]="display"
+      [title]="item.title"
+      [description]="item.description"
+      [tags]="item.tags">
+    </ui-card-item>
+  </ng-container>
+</div>

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
-import { CardItem, CardDisplay } from "../card";
+import { CardDisplay, CardItemTags } from "../card";
 
 
 
@@ -12,7 +12,10 @@ import { CardItem, CardDisplay } from "../card";
 export class CardItemComponent {
 
     @Input() display!: CardDisplay;
-    @Input() item?: CardItem;
+    @Input() title?: string;
+    @Input() description?: string;
+
+    @Input() tags?: CardItemTags[];
 
 }
 

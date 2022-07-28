@@ -1,0 +1,32 @@
+<article class="card-item">
+  <header>
+    <img src="https://mdn.github.io/css-examples/css-cookbook/balloons.jpg" alt="Hot air balloons">
+    <span class="status">
+      <nz-tag nzColor="default">
+        <i nz-icon nzType="clock-circle"></i>
+        <span>Draft</span>
+      </nz-tag>
+    </span>
+  </header>
+
+  <div class="tags">
+    <ng-container *ngFor="let tag of tags">
+      <nz-tag [nzColor]="tag.color">
+        <ng-container *ngIf="tag.icon">
+          <i nz-icon [nzType]="tag.icon"></i>
+        </ng-container>
+        <span>{{tag.text}}</span>
+      </nz-tag>
+    </ng-container>
+  </div>
+
+  <div class="content">
+    <h2>{{title}}</h2>
+    <p>{{description}}</p>
+  </div>
+
+  <footer>
+    <button nz-button nzType="default" nzBlock>Entrer</button>
+  </footer>
+
+</article>
