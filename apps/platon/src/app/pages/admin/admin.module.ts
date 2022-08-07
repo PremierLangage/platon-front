@@ -9,8 +9,6 @@ import { AdminComponent } from './admin.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AppSharedLayoutModule } from '../../shared/layout';
 
-
-
 @NgModule({
     declarations: [AdminComponent],
     imports: [

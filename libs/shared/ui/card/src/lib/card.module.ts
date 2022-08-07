@@ -8,10 +8,12 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 
 import { CardItemComponent } from "./card-item/card-item.component";
 import { CardComponent } from "./card.component";
+import { RouterModule } from "@angular/router";
 
 @NgModule({
     imports: [
         CommonModule,
+        RouterModule,
 
         NzGridModule,
         NzTagModule,

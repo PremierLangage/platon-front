@@ -1,51 +1,53 @@
-import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { CardDisplay, CardItem } from "@platon/shared/ui/card";
+import { Subscription } from "rxjs";
+import { AdminCoursPresenster } from "./admin-cours-presenter";
 
 
 @Component({
     selector: 'app-admin-cours',
     templateUrl: './admin-cours.component.html',
-    styleUrls: ['./admin-cours.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: [
+        './admin-cours.component.scss',
+        '../admin.component.scss'
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [AdminCoursPresenster]
 })
-export class AdminCoursComponent implements OnInit {
+export class AdminCoursComponent implements OnInit, OnDestroy {
+    private readonly subscriptions: Subscription[] = [];
+
+    context = this.presenter.defaultContext;
 
     display: CardDisplay = 'row';
 
-    items: CardItem[] = [
-        {
-            title: 'Hello World',
-            description: 'Simple description.',
-            tags: [
-                {
-                    icon: 'code-sandbox',
-                    text: 'Python',
-                    color: 'default'
-                },
-                {
-                    icon: 'code-sandbox',
-                    text: 'Devlopement',
-                    color: 'default'
-                },
-                {
-                    text: 'Other things',
-                    color: 'default'
-                }
-            ]
-        },
-        {
-            title: 'Other cours',
-            description: 'Other cours description.'
-        },
-        {
-            title: 'Programmation en C',
-            description: 'Loremp ipsum for prog c description, maybe longer than the others.'
-        }
-    ]
-    constructor() { }
+    constructor(
+        private readonly presenter: AdminCoursPresenster,
+        private readonly changeDetectorRef: ChangeDetectorRef,
+    ) { }
 
     ngOnInit(): void {
+        this.subscriptions.push(
+            this.presenter.contextChange.subscribe(context => {
+                this.context = context;
+                this.changeDetectorRef.markForCheck();
+            })
+        );
+        this.presenter.refresh();
+    }
 
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    getItems(): CardItem[] | undefined {
+        return this.context.cours?.map<CardItem>((cours,index) => {
+            return {
+                title: cours.name,
+                description: cours.path,
+                path: ['detail', cours.path]
+            };
+        });
     }
 
 }

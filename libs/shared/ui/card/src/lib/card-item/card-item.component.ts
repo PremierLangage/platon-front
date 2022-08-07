@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from "@angular/core";
 import { CardDisplay, CardItemTags } from "../card";
 
 
@@ -14,6 +14,8 @@ export class CardItemComponent {
     @Input() display!: CardDisplay;
     @Input() title?: string;
     @Input() description?: string;
+
+    @Input() cardLink?: string | any[];
 
     @Input() tags?: CardItemTags[];
 

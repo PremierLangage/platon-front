@@ -31,8 +31,7 @@ const routes: Routes = [
     // PROTECTED ADMIN PAGES
     {
         path: 'admin',
-        // DEV MOD
-        //canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         data: { roles: ['admin'] },
         loadChildren: () => import(
             /* webpackChunkName: "admin" */

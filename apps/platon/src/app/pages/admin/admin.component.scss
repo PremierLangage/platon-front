@@ -1,18 +1,59 @@
-.inner-layout {
+.admin-layout {
   min-height: 100%;
-  padding: 24px;
+  padding: 10px;
 }
 
-.inner-sider {
+.admin-sider {
   padding: 24px 0;
 }
 
-.inner-sider-menu {
+.admin-sider-menu {
   height: 100%;
 }
 
-.inner-content {
+.admin-content {
   min-height: 100%;
   padding: 24px;
   background-color: white;
 }
+
+/* CONTENT SHARED LAYOUT */
+
+.admin-title h1 {
+  margin-bottom: 0;
+}
+
+.admin-action {
+  display: flex;
+  justify-content: end;
+}
+
+.admin-action-item {
+  margin-left: 24px;
+}
+
+.admin-search-bar {
+  border: 0;
+  font-size: 20px;
+  box-shadow: none;
+}
+
+.admin-search-bar input {
+  font-size: 20px;
+}
+
+.admin-inner-content {
+  width: 100%;
+  min-height: 100%;
+  padding: 24px;
+  background-color: white;
+}
+
+.admin-inner-side-menu {
+  min-height: 100%;
+}
+
+.admin-footer {
+  width: 100%;
+}
+

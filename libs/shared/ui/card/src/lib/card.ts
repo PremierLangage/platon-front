@@ -1,6 +1,7 @@
 export interface CardItem {
     title?: string;
     description?: string;
+    path?: string | any[];
     tags?: CardItemTags[];
 }
 

@@ -32,8 +32,19 @@
     <nz-divider></nz-divider>
   </div>
   <!-- CONTENT -->
-  <div nz-col nsSpan="24" class="admin-content">
-    <ui-card [display]="display" [items]="items"></ui-card>
+  <div nz-col nsSpan="24" class="admin-inner-content">
+
+    <ng-container *ngIf="context.state === 'READY'">
+      <ui-card [display]="display" [items]="getItems()"></ui-card>
+    </ng-container>
+
+    <ng-container *ngIf="context.state === 'LOADING'">
+      <div style="text-align: center;">
+        <nz-spin nzSimple></nz-spin>
+      </div>
+    </ng-container>
+
+
   </div>
   <!-- FOOTER -->
   <div nz-col nsSpan="24" class="admin-footer">
