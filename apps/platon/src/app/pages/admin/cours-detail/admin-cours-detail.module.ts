@@ -12,10 +12,12 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from "ng-zorro-antd/menu";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzIconModule } from "ng-zorro-antd/icon";
+import { NzUploadModule } from 'ng-zorro-antd/upload';
 
 import { AdminCoursDetailComponent } from "./admin-cours-detail.component";
 import { AdminCoursDetailSettingsComponent } from "./settings/admin-cours-detail-settings.component";
 import { AdminCoursDetailSectionComponent } from "./sections/admin-cours-detail-section.component";
+import { NzMessageModule } from "ng-zorro-antd/message";
 
 
 
@@ -39,11 +41,13 @@ import { AdminCoursDetailSectionComponent } from "./sections/admin-cours-detail-
         NzIconModule,
         NzSpaceModule,
         NzInputModule,
+        NzUploadModule,
+        NzMessageModule,
 
 
         RouterModule.forChild([
             {
-                path: ':slug',
+                path: ':path',
                 component: AdminCoursDetailComponent,
                 children: [
                     {

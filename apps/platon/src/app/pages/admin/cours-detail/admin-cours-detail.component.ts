@@ -1,8 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
 import { AdminCoursDetailPresenter } from "./admin-cours-detail-presenter";
-import { AdminCoursDetailSectionService } from "./sections/admin-cours-detail-section.service";
-
 
 @Component({
     selector: 'app-admin-cours-detail',
@@ -12,20 +10,15 @@ import { AdminCoursDetailSectionService } from "./sections/admin-cours-detail-se
         '../admin.component.scss'
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        AdminCoursDetailPresenter,
-        AdminCoursDetailSectionService
-    ]
+    providers: [AdminCoursDetailPresenter]
 })
-export class AdminCoursDetailComponent implements OnInit {
+export class AdminCoursDetailComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     context = this.presenter.defaultContext;
-    sections = this.sectionsService.defaultSections;
 
     constructor(
         private readonly presenter: AdminCoursDetailPresenter,
-        private readonly sectionsService: AdminCoursDetailSectionService,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
@@ -33,18 +26,21 @@ export class AdminCoursDetailComponent implements OnInit {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(context => {
                 this.context = context;
-                this.sectionsService.setSections(context.cours?.content?.get('sections'));
                 this.changeDetectorRef.markForCheck();
             }),
-            this.sectionsService.sectionsChange.subscribe(sections => {
-                this.sections = sections;
-                this.changeDetectorRef.markForCheck();
-            })
         );
     }
 
-    didPushSection(): void {
-        this.sectionsService.pushSection();
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    didAddSection(): void {
+        this.presenter.addSection();
+    }
+
+    didSave(): void {
+        console.log(this.context);
     }
 
 }

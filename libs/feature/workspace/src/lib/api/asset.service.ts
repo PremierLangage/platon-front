@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Asset, AssetList } from "../models/asset";
+import { Asset, AssetList, UpdateAssetForm } from "../models/asset";
 import { AssetProvider } from "../models/asset-provider";
 
 
@@ -12,6 +12,10 @@ export class AssetService {
 
     get(): Observable<AssetList> {
         return this.provider.get();
+    }
+
+    patch(form: UpdateAssetForm): Observable<any> {
+        return this.provider.patch(form);
     }
 
     getLive(id: number): Observable<Asset> {

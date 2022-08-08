@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { Subscription } from "rxjs";
+import { AdminCoursDetailPresenter } from "../admin-cours-detail-presenter";
 
 
 @Component({
@@ -7,6 +9,35 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
     styleUrls: ['./admin-cours-detail-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminCoursDetailSettingsComponent {
+export class AdminCoursDetailSettingsComponent implements OnInit, OnDestroy {
+    private readonly subscriptions: Subscription[] = [];
+
+    context = this.presenter.defaultContext;
+
+    description!: string;
+
+    constructor(
+        private readonly presenter: AdminCoursDetailPresenter,
+        private readonly changeDetectorRef: ChangeDetectorRef,
+    ) { }
+
+    ngOnInit(): void {
+        this.subscriptions.push(
+            this.presenter.contextChange.subscribe(context => {
+                this.context = context;
+                this.description = context.cours?.content.description || '';
+                this.changeDetectorRef.markForCheck();
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    didChangeDescription(event: any): void {
+        this.presenter.changeDescription(event.target.value);
+    }
+
 
 }
