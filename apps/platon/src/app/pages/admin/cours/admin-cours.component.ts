@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { CardDisplay, CardItem } from "@platon/shared/ui/card";
+import { NzModalRef, NzModalService } from "ng-zorro-antd/modal";
 import { Subscription } from "rxjs";
 import { AdminCoursPresenster } from "./admin-cours-presenter";
 
@@ -21,9 +23,15 @@ export class AdminCoursComponent implements OnInit, OnDestroy {
 
     display: CardDisplay = 'row';
 
+    creation: boolean = false;
+    name: string = '';
+
     constructor(
+        private modal: NzModalService,
         private readonly presenter: AdminCoursPresenster,
         private readonly changeDetectorRef: ChangeDetectorRef,
+        private readonly activatedRoute: ActivatedRoute,
+        private router: Router
     ) { }
 
     ngOnInit(): void {
@@ -40,13 +48,48 @@ export class AdminCoursComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
 
+    didCreate(title: TemplateRef<{}>, content: TemplateRef<{}>, footer: TemplateRef<{}>): void {
+        this.modal.create({
+            nzTitle: title,
+            nzContent: content,
+            nzFooter: footer,
+            nzMaskClosable: false,
+            nzClosable: false,
+            nzComponentParams: {
+              value: 'Template Context'
+            },
+            nzOnOk: () => console.log('Click ok')
+          });
+    }
+
+    didCreateClose(modelRef: NzModalRef): void {
+        this.creation = true;
+        setTimeout(() => {
+            this.creation = false;
+            modelRef.destroy();
+        }, 1000);
+    }
+
+    async didCreateOk(modelRef: NzModalRef): Promise<void> {
+        this.creation = true;
+        const name = this.name;
+        const succed: boolean = await this.presenter.create(name);
+        this.creation = false;
+        modelRef.destroy();
+        if (succed) {
+            this.router.navigate(['detail', name], {
+                relativeTo: this.activatedRoute
+            });
+        }
+    }
+
     getItems(): CardItem[] | undefined {
-        return this.context.cours?.map<CardItem>((cours,index) => {
+        return this.context.assets?.results.map<CardItem>((asset, index) => {
             return {
-                title: cours.name,
-                description: cours.path,
-                path: ['detail', cours.path]
-            };
+                title: asset.name,
+                description: asset.name,
+                path: ['detail', asset.name]
+            }
         });
     }
 

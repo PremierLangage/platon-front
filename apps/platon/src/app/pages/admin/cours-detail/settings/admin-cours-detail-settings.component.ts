@@ -25,7 +25,7 @@ export class AdminCoursDetailSettingsComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(context => {
                 this.context = context;
-                this.description = context.cours?.content.description || '';
+                this.description = context.asset?.description || '';
                 this.changeDetectorRef.markForCheck();
             })
         );
@@ -36,7 +36,7 @@ export class AdminCoursDetailSettingsComponent implements OnInit, OnDestroy {
     }
 
     didChangeDescription(event: any): void {
-        this.presenter.changeDescription(event.target.value);
+        this.presenter.setDescription(event.target.value);
     }
 
 

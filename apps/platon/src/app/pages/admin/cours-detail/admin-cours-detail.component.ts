@@ -16,6 +16,7 @@ export class AdminCoursDetailComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
     context = this.presenter.defaultContext;
+    saving: boolean = false;
 
     constructor(
         private readonly presenter: AdminCoursDetailPresenter,
@@ -39,8 +40,10 @@ export class AdminCoursDetailComponent implements OnInit, OnDestroy {
         this.presenter.addSection();
     }
 
-    didSave(): void {
-        console.log(this.context);
+    async didSave(): Promise<void> {
+        this.saving = true;
+        await this.presenter.save();
+        this.saving = false;
     }
 
 }

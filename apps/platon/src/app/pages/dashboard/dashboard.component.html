@@ -19,8 +19,7 @@
       </ng-container>
       <ng-container *ngSwitchCase="'READY'">
         <ng-container *ngIf="context.assets && context.assets.results.length; else: empty">
-          <ws-cours-list [items]="context.assets">
-          </ws-cours-list>
+          <ui-card [display]="'row'" [items]="getItems()"></ui-card>
         </ng-container>
         <ng-template #empty>
           <nz-empty [nzNotFoundContent]="content">

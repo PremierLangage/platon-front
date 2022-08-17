@@ -13,6 +13,7 @@ import { FeatureWorkspaceModule } from '@platon/feature/workspace';
 
 import { DashboardComponent } from './dashboard.component';
 import { DashboardRoutingModule } from './dashboard-routing.module';
+import { SharedUiCardModule } from '@platon/shared/ui/card';
 
 @NgModule({
   imports: [
@@ -23,6 +24,7 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
     NzEmptyModule,
     NzSkeletonModule,
 
+    SharedUiCardModule,
     SharedUiSearchModule,
 
     AppSharedLayoutModule,

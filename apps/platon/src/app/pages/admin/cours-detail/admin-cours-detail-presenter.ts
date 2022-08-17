@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetService } from "@platon/feature/workspace";
+import { AssetCours, AssetCoursDetail, AssetCoursService, AssetService } from "@platon/feature/workspace";
 import { Asset, UpdateAssetForm } from "libs/feature/workspace/src/lib/models/asset";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject, firstValueFrom, Observable, Subscription } from "rxjs";
@@ -14,10 +14,9 @@ export class AdminCoursDetailPresenter implements OnDestroy {
     private readonly context = new BehaviorSubject<Context>(this.defaultContext);
 
     private path!: string;
-    private change: boolean = false;
 
     get defaultContext(): Context {
-        return { state: 'LOADING' };
+        return { state: 'LOADING', change: false};
     }
 
     get contextChange(): Observable<Context> {
@@ -28,6 +27,7 @@ export class AdminCoursDetailPresenter implements OnDestroy {
         private readonly activatedRoute: ActivatedRoute,
         private readonly authService: AuthService,
         private readonly assetService: AssetService,
+        private readonly assetCoursService: AssetCoursService,
         private readonly messageService: NzMessageService,
     ) {
         this.subscriptions.push(
@@ -43,15 +43,16 @@ export class AdminCoursDetailPresenter implements OnDestroy {
     }
 
     private async refresh(path: string): Promise<void> {
-        const [user, cours] = await Promise.all([
+        const [user, asset] = await Promise.all([
             this.authService.ready(),
-            firstValueFrom(this.assetService.getAssetByPath(path))
+            firstValueFrom(this.assetCoursService.getByName(path))
         ]);
 
         this.context.next({
             state: 'READY',
-            user,
-            cours,
+            user: user,
+            asset: asset,
+            change: false
         });
     }
 
@@ -61,25 +62,25 @@ export class AdminCoursDetailPresenter implements OnDestroy {
         } catch (error) {
             const status = (error as any).status || 500;
             if (status >= 400 && status < 500) {
-                this.context.next({ state: 'NOT_FOUND'});
+                this.context.next({ state: 'NOT_FOUND', change: false });
             } else {
-                this.context.next({ state: 'SERVER_ERROR' });
+                this.context.next({ state: 'SERVER_ERROR', change: false });
             }
         }
     }
 
     async update(form: Omit<UpdateAssetForm, 'path'>): Promise<void> {
-        const { cours } = this.context.value as Required<Context>;
+        //const { cours } = this.context.value as Required<Context>;
         try {
-            const newCours = await this.assetService.patch({
-                path: cours.path,
-                ...form
-            }).toPromise();
+            // const newCours = await this.assetService.patch({
+            //     path: cours.path,
+            //     ...form
+            // }).toPromise();
 
-            this.context.next({
-                ...this.context.value,
-                cours: newCours
-            });
+            // this.context.next({
+            //     ...this.context.value,
+            //     cours: newCours
+            // });
 
             this.messageService.success('Modification sauvegardé.')
         } catch {
@@ -87,63 +88,86 @@ export class AdminCoursDetailPresenter implements OnDestroy {
         }
     }
 
-    changeDescription(desc: string): void {
-        let { cours } = this.context.value as Required<Context>;
-        cours.content.description = desc;
-        this.context.next({
-            ...this.context.value,
-            cours: cours
-        });
+    async save(): Promise<boolean> {
+        const { asset } = this.context.value as Required<Context>;
+        try {
+            const newAsset = await this.assetCoursService.update({
+                name: asset.name,
+                description: asset.description,
+                content: asset.content
+            }).toPromise();
+
+            this.context.next({
+                ...this.context.value,
+                asset: newAsset
+            });
+
+            this.messageService.success('Modification sauvegardé.');
+            return true;
+        } catch {
+            this.messageService.error('Nous avons pas pu sauvegarder les modifications...');
+            return false;
+        }
     }
 
     getDescription() {
         if (this.context.value.state !== 'READY') {
             return;
         }
-        const { cours } = this.context.value as Required<Context>;
-        if (!cours.content.description) {
-            cours.content.description = '';
+        const { asset } = this.context.value as Required<Context>;
+        if (!asset.description) {
+            asset.description = '';
         }
-        return cours.content['description'];
+        return asset.description;
     }
 
-    setDescription(description: string) {
-        const { cours } = this.context.value as Required<Context>;
+    setDescription(value: string) {
+        const { asset } = this.context.value as Required<Context>;
+        asset.description = value;
         this.context.next({
             ...this.context.value,
-            cours: {
-                ...cours,
-                content: {
-                    ...cours.content,
-                    description: description
-                }
-            }
-        })
+            asset: asset,
+            change: true
+        });
     }
 
     getSection(id: number) {
-        const { cours } = this.context.value as Required<Context>;
-        if (!cours.content.sections || !cours.content.sections[id]) {
-            this.context.next({ state: 'NOT_FOUND' });
+        const { asset } = this.context.value as Required<Context>;
+        if (!asset.content.sections || !asset.content.sections[id]) {
+            this.context.next({ state: 'NOT_FOUND' , change: false });
             return;
         }
-        return cours.content.sections[id];
+        return asset.content.sections[id];
+    }
+
+    setSection(id: number, content: any) {
+        let { asset } = this.context.value as Required<Context>;
+        if (!asset.content.sections || !asset.content.sections[id]) {
+            this.context.next({ state: 'NOT_FOUND', change: false });
+        } else {
+            asset.content.sections[id].content = content;
+            this.context.next({
+                ...this.context.value,
+                asset: asset,
+                change: true
+            });
+        }
     }
 
     addSection(): void {
-        const { cours } = this.context.value as Required<Context>;
-        if (!cours.content.sections) {
-            cours.content.sections = [];
+        const { asset } = this.context.value as Required<Context>;
+        if (!asset.content.sections) {
+            asset.content.sections = [];
         }
-        cours.content.sections.push({
-            position: cours.content.sections.length,
-            name: '',
-            content: ''
+        asset.content.sections.push({
+            position: asset.content.sections.length,
+            name: ''
         });
 
         this.context.next({
             ...this.context.value,
-            cours: cours
+            asset: asset,
+            change: true
         });
     }
 
@@ -152,5 +176,6 @@ export class AdminCoursDetailPresenter implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    cours?: Asset;
+    asset?: AssetCoursDetail;
+    change: boolean;
 }

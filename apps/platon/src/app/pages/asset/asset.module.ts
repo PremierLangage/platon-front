@@ -1,35 +1,35 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { SafePipeModule } from "@platon/shared/utils";
-
-
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzListModule } from 'ng-zorro-antd/list';
-import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-
+import { RouterModule } from "@angular/router";
 import { AppSharedLayoutModule } from "../../shared/layout";
 
-import { AssetRoutingModule } from "./asset-routing.module";
 import { AssetComponent } from "./asset.component";
 
 
 @NgModule({
+    declarations: [
+        AssetComponent,
+    ],
     imports: [
         CommonModule,
-        SafePipeModule,
-
-        NzGridModule,
-        NzDividerModule,
-        NzBreadCrumbModule,
-        NzListModule,
-        NzSkeletonModule,
 
         AppSharedLayoutModule,
 
-        AssetRoutingModule,
-    ],
-    declarations: [AssetComponent]
+        RouterModule.forChild([
+            {
+                path: '',
+                component: AssetComponent,
+                children: [
+                    {
+                        path: 'cours',
+                        loadChildren: () => import(
+                            './cours/asset-cours.module'
+                        ).then(m => m.AssetCoursModule)
+                    },
+                    { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
+                ]
+            },
+        ])
+    ]
 })
 export class AssetModule { }

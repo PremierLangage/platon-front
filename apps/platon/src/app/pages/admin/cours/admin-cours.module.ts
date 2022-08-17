@@ -1,4 +1,5 @@
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { SharedUiCardModule } from "@platon/shared/ui/card";
@@ -12,6 +13,8 @@ import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMenuModule } from "ng-zorro-antd/menu";
 import { NzSpaceModule } from "ng-zorro-antd/space";
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzMessageServiceModule } from "ng-zorro-antd/message";
 
 import { AdminCoursComponent } from "./admin-cours.component";
 
@@ -19,6 +22,7 @@ import { AdminCoursComponent } from "./admin-cours.component";
     declarations: [AdminCoursComponent],
     imports: [
         CommonModule,
+        FormsModule,
 
         NzGridModule,
         NzButtonModule,
@@ -29,6 +33,8 @@ import { AdminCoursComponent } from "./admin-cours.component";
         NzMenuModule,
         NzSpaceModule,
         NzSpinModule,
+        NzModalModule,
+        NzMessageServiceModule,
 
         SharedUiCardModule,
 

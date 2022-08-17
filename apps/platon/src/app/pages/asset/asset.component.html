@@ -1,64 +1,7 @@
 <app-container>
   <app-content>
-    <ng-container *ngIf="context.state === 'LOADING'">
-      <h1>Loading...</h1>
-    </ng-container>
-    <ng-container *ngIf="context.state === 'READY'">
-      <!-- BREADCRUMB -->
-      <nz-breadcrumb>
-        <nz-breadcrumb-item *ngFor="let url of context.urls; let i = index">
-          <a [routerLink]="getSubPath(i)">{{url}}</a>
-        </nz-breadcrumb-item>
-      </nz-breadcrumb>
 
-      <!-- INNER CONTENT -->
-      <nz-row [nzGutter]="[24, 24]" nzAlign="top">
-        <!-- CONTENT -->
-        <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="16" nzXl="16">
-          <nz-divider></nz-divider>
-          <ng-container *ngIf="context.asset">
-            <!-- ASSET WIDGET LOADER -->
-            <span [ngSwitch]="context.asset.type">
-              <app-asset-cours *ngSwitchCase="'COURS'" [asset]="context.asset"></app-asset-cours>
-              <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="context.asset" (getState)="postExericeState($event)"></app-asset-exercice>
-              <p *ngSwitchDefault>Invalid asset</p>
-            </span>
-          </ng-container>
-        </nz-col>
-        <!-- RIGHT PANEL -->
-        <nz-col nzXs="24" nzSm="24" nzMd="24" nzLg="8" nzXl="8">
-          <nz-divider nzText="Responsable du cours" nzOrientation="left"></nz-divider>
-          <div class="inner-content-panel">
-            <nz-list>
-              <ng-container *ngIf="context.user; else: userLoading">
-                <nz-list-item>
-                  <nz-list-item-meta
-                    nzDescription="Responsable du cours">
+    <router-outlet></router-outlet>
 
-                    <nz-list-item-meta-avatar [nzSrc]="context.user.avatar"></nz-list-item-meta-avatar>
-
-                    <nz-list-item-meta-title>
-                      <a>{{ context.user.firstName }} {{ context.user.lastName }}</a>
-                    </nz-list-item-meta-title>
-
-                  </nz-list-item-meta>
-                </nz-list-item>
-              </ng-container>
-              <ng-template #userLoading>
-                <nz-skeleton
-                  [nzAvatar]="true"
-                  [nzActive]="true"
-                  [nzTitle]="false"
-                  [nzLoading]="true"
-                ></nz-skeleton>
-              </ng-template>
-            </nz-list>
-          </div>
-        </nz-col>
-      </nz-row>
-    </ng-container>
-    <ng-container *ngIf="context.state === 'SERVER_ERROR'">
-      <h1>ERROR</h1>
-    </ng-container>
   </app-content>
 </app-container>

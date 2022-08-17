@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, AuthUser } from '@platon/core/auth';
+import { CardItem } from '@platon/shared/ui/card';
 import { SearchBar } from '@platon/shared/ui/search';
 import { IntroService } from '@platon/shared/utils';
 import { of, Subscription } from 'rxjs';
@@ -9,7 +10,8 @@ import { DashboardPresenter } from './dashboard-presenter';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  providers: [DashboardPresenter]
+  providers: [DashboardPresenter],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
@@ -89,6 +91,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    getItems(): CardItem[] | undefined {
+        return this.context.assets?.results.map<CardItem>((asset, index) => {
+            return {
+                title: asset.name,
+                description: asset.name,
+                path: ['..', 'asset', 'cours', asset.name]
+            }
+        });
     }
 
 }

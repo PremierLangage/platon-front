@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetService } from "@platon/feature/workspace";
-import { Asset, AssetList } from "libs/feature/workspace/src/lib/models/asset";
+import { AssetCoursList, AssetCoursService, AssetService } from "@platon/feature/workspace";
+import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
 
 @Injectable()
@@ -20,13 +20,29 @@ export class AdminCoursPresenster implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly assetService: AssetService,
+        private readonly assetCoursService: AssetCoursService,
+        private readonly messageService: NzMessageService,
     ) {
 
     }
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    async create(name: string): Promise<boolean> {
+        try {
+            const user = await this.authService.ready().then(async () => {
+                const newCours = await this.assetCoursService.create({
+                    name: name
+                }).toPromise();
+                this.messageService.success('Cours ' + name + ' a été crée.');
+            });
+            return true;
+        } catch (error) {
+            this.messageService.error('Une erreur est survenue au cours de la création...');
+            return false;
+        }
     }
 
     async refresh(): Promise<void> {
@@ -43,15 +59,15 @@ export class AdminCoursPresenster implements OnDestroy {
     }
 
     private async initContext(): Promise<void> {
-        const [user, cours] = await Promise.all([
+        const [user, assets] = await Promise.all([
             this.authService.ready(),
-            lastValueFrom(this.assetService.get())
+            lastValueFrom(this.assetCoursService.get())
         ]);
 
         this.context.next({
             state: 'READY',
             user: user,
-            cours: cours?.results.filter(c => c.type === 'COURS')
+            assets: assets
         });
     }
 
@@ -60,5 +76,5 @@ export class AdminCoursPresenster implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    cours?: Asset[];
+    assets?: AssetCoursList;
 }
