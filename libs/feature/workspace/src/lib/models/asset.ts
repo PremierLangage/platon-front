@@ -12,6 +12,11 @@ export interface Asset {
     content: Record<string, any>;
 }
 
+export interface UpdateAssetForm {
+    path: string;
+    content: Record<string, any>;
+}
+
 export interface AssetList {
     count: number;
     next: string;

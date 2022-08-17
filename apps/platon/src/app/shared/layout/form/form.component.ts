@@ -45,7 +45,7 @@ export class AssetFormComponent {
         return Object.entries(attributes).map(entry => {
             const [key, value] = entry;
             if (typeof(value) === 'object') {
-                return `${key}='${JSON.stringify(value)}'`;
+                return `${key}='${JSON.stringify(value).replace(/'/g, '&#39;')}'`;
             } else {
                 return `${key}='${value}'`;
             }

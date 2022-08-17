@@ -1,0 +1,26 @@
+.code-tree {
+  margin: 24px 0;
+}
+
+nz-list {
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+nz-list i {
+  margin-right: 5px;
+}
+
+.nz-list-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nz-list-item-name {
+  display: inline;
+}
+
+.nz-list-item-size {
+  width: 100px;
+  text-align: end;
+}

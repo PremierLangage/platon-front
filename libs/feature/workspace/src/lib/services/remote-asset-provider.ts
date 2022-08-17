@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { Asset, AssetList } from "../models/asset";
+import { Asset, AssetList, UpdateAssetForm } from "../models/asset";
 import { AssetProvider } from "../models/asset-provider";
 
 
@@ -14,6 +14,12 @@ export class RemoteAssetProvider extends AssetProvider {
 
     get(): Observable<AssetList> {
         return this.http.get<AssetList>('/api/v1/asset/');
+    }
+
+    patch(form: UpdateAssetForm): Observable<any> {
+        return this.http.patch<Asset>(`/api/v1/asset/${form.path}/`, {
+            content: form.content
+        });
     }
 
     getAssetByPath(path: string): Observable<Asset> {

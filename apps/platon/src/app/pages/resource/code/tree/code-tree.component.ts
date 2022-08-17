@@ -60,5 +60,13 @@ export class CodeTreeComponent implements OnInit, OnDestroy{
         }
         this.router.navigate(route, { relativeTo: this.activatedRoute.parent?.parent });
     }
+
+    didGoUploadFile(path?: string): void {
+        let route = ['upload'];
+        if (path) {
+            path.split('/').forEach(p => route.push(p));
+        }
+        this.router.navigate(route, { relativeTo: this.activatedRoute.parent?.parent });
+    }
 }
 

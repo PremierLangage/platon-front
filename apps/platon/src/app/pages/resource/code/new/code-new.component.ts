@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { Subscription } from "rxjs";
@@ -9,9 +9,10 @@ import { CodeContext, CodeService } from "../code.service";
 @Component({
     selector: 'app-resource-code-new',
     templateUrl: './code-new.component.html',
-    styleUrls: ['./code-new.component.scss']
+    styleUrls: ['./code-new.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CodeNewComponent {
+export class CodeNewComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
     private readonly disposables: monaco.IDisposable[] = [];
     private model?: monaco.editor.ITextModel;

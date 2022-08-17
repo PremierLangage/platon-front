@@ -39,6 +39,8 @@ import { CircleTreeComponent } from './components/circle-tree/circle-tree.compon
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
 import { CoursListComponent } from './components/cours-list/cours-list.component';
 import { CodeTreeComponent } from './components/code-tree/code-tree.component';
+import { CoursCardComponent } from './components/cours-card/cours-card.component';
+import { SharedUiCardModule } from '@platon/shared/ui/card';
 
 
 @NgModule({
@@ -83,6 +85,8 @@ import { CodeTreeComponent } from './components/code-tree/code-tree.component';
         FilesTreeComponent,
         CoursListComponent,
         CodeTreeComponent,
+
+        CoursCardComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -100,6 +104,8 @@ import { CodeTreeComponent } from './components/code-tree/code-tree.component';
         FilesTreeComponent,
         CoursListComponent,
         CodeTreeComponent,
+
+        CoursCardComponent,
     ],
 })
 export class FeatureWorkspaceModule { }

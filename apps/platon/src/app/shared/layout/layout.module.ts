@@ -30,7 +30,6 @@ import { ContentComponent } from './content/content.component';
 import { ContainerComponent } from './container/container.component';
 import { TabsComponent } from './tabs/tabs.component';
 import { SharedUiListModule } from '@platon/shared/ui/list';
-import { AssetCoursComponent } from './cours/cours.component';
 import { AssetIconPipeModule } from '@platon/shared/utils';
 import { AssetExerciceComponent } from './exercice/exercice.component';
 import { AssetFormComponent } from './form/form.component';
@@ -44,7 +43,6 @@ const DECLARATIONS = [
     ContentComponent,
     ContainerComponent,
     TabsComponent,
-    AssetCoursComponent,
     AssetFormComponent,
     AssetExerciceComponent,
 ];
