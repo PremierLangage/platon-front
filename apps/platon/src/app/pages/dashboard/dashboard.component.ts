@@ -98,7 +98,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             return {
                 title: asset.name,
                 description: asset.name,
-                path: ['..', 'asset', 'cours', asset.name]
+                path: ['/', 'asset', 'cours', asset.name]
             }
         });
     }

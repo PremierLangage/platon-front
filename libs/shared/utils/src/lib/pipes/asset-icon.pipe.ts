@@ -1,10 +1,11 @@
 import { NgModule, Pipe, PipeTransform } from '@angular/core';
-import { AssetTypes } from 'libs/feature/workspace/src/lib/models/asset';
+import { AssetTypes } from '@platon/feature/workspace';
+
 
 const ICONS: Record<AssetTypes, string> = {
     COURS: 'blue',
-    EXERCISE: 'article',
-    ACTIVITY: 'widgets'
+    EXERSICE: 'article',
+    ACTIVITY: 'widgets',
 };
 
 @Pipe({

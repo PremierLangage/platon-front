@@ -1,13 +1,13 @@
 <app-container>
   <app-content>
-    <ng-container *ngIf="context.state === 'READY' && context.asset">
+    <ng-container *ngIf="context.state === 'READY' && context.form">
 
       <!-- HEADER -->
       <div nz-row nzAlign="bottom">
         <!-- HEADER-BREADCRUMB -->
         <div nz-col nzSpan="24">
           <nz-breadcrumb>
-            <nz-breadcrumb-item *ngFor="let path of context.asset.path.split('/')">
+            <nz-breadcrumb-item *ngFor="let path of context.form.asset.path.split('/')">
               <a>{{path}}</a>
             </nz-breadcrumb-item>
           </nz-breadcrumb>
@@ -52,8 +52,8 @@
 
       <div nz-row nzJustify="space-around" nzAlign="top" style="min-height: 50vh;">
         <div nz-col nzSpan="18">
-          <span [ngSwitch]="context.asset.type">
-            <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="context.asset" (getState)="getState($event)"></app-asset-exercice>
+          <span [ngSwitch]="context.form.asset.type">
+            <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="context.form" (getState)="getState($event)"></app-asset-exercice>
             <p *ngSwitchDefault>Invalid asset</p>
           </span>
         </div>

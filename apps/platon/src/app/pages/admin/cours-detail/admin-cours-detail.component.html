@@ -5,7 +5,7 @@
       <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 0 }"></nz-skeleton>
     </ng-container>
     <ng-container *ngIf="context.state === 'READY'">
-      <h1>{{context.asset?.name}}</h1>
+      <h1>{{context.cours?.asset?.name}}</h1>
     </ng-container>
   </div>
   <div nz-col nzSpan="16" class="admin-action">
@@ -31,7 +31,7 @@
           <li nz-menu-item [nzDisabled]="true">
             <nz-row nzJustify="space-between" nzAlign="middle" style="width: 100%;">
               <nz-col nzFlex="4" nz-space nzAlign="baseline">
-                <ng-container *nzSpaceItem><b>Sections </b> {{context.asset?.content?.sections?.length}} </ng-container>
+                <ng-container *nzSpaceItem><b>Sections </b> {{context.cours?.content?.sections?.length}} </ng-container>
               </nz-col>
               <nz-col nzFlex="1" nz-space nzAlign="baseline">
                 <button *nzSpaceItem nz-button nzType="default" (click)="didAddSection()">
@@ -41,7 +41,7 @@
             </nz-row>
           </li>
 
-          <ng-container *ngFor="let section of context.asset?.content?.sections; let i = index">
+          <ng-container *ngFor="let section of context.cours?.content?.sections; let i = index">
             <li nz-menu-item [routerLink]="['section', i]">
               <ng-container *ngIf="section.name; else : noName">{{section.name}}</ng-container>
               <ng-template #noName>Section {{i}}</ng-template>

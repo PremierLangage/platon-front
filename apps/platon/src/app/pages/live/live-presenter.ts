@@ -1,8 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetService } from "@platon/feature/workspace";
-import { Asset } from "libs/feature/workspace/src/lib/models/asset";
+import { AssetService, ExersiceDetail } from "@platon/feature/workspace";
 import { BehaviorSubject, firstValueFrom, Observable, Subscription } from "rxjs";
 
 
@@ -36,16 +35,16 @@ export class LivePresenter implements OnDestroy {
     }
 
     private async getLiveContent(resourceId: number): Promise<void> {
-        const [user, asset] = await Promise.all([
-            this.authService.ready(),
-            firstValueFrom(this.assetService.getLive(resourceId))
-        ]);
+        // const [user, asset] = await Promise.all([
+        //     this.authService.ready(),
+        //     firstValueFrom(this.assetService.getLive(resourceId))
+        // ]);
 
-        this.context.next({
-            state: 'READY',
-            user,
-            asset
-        });
+        // this.context.next({
+        //     state: 'READY',
+        //     user,
+        //     asset
+        // });
     }
 
     private async onChangeRoute(resrouceId: number): Promise<void> {
@@ -66,5 +65,5 @@ export class LivePresenter implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    asset?: Asset;
+    form?: ExersiceDetail;
 }
