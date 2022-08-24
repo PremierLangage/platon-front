@@ -149,6 +149,10 @@
               {
                 "bundleName": "editorjs-simple-image",
                 "input": "node_modules/@editorjs/simple-image/dist/bundle.js"
+              },
+              {
+                "bundleName": "editorjs-image",
+                "input": "node_modules/@editorjs/image/dist/bundle.js"
               }
             ],
             "allowedCommonJsDependencies": [
