@@ -1,20 +1,19 @@
+import { AuthUser } from "@platon/core/auth";
+
 export declare type AssetTypes =
     'COURS' |
     'ACTIVITY' |
-    'EXERCISE'
+    'EXERSICE'
     ;
 
 export interface Asset {
     path: string;
     name: string;
     type: AssetTypes;
-    properties: Record<string, any>;
-    content: Record<string, any>;
-}
-
-export interface UpdateAssetForm {
-    path: string;
-    content: Record<string, any>;
+    created_at: string;
+    updated_at: string;
+    parent?: string;
+    author?: AuthUser;
 }
 
 export interface AssetList {
@@ -22,11 +21,4 @@ export interface AssetList {
     next: string;
     previous: string;
     results: Asset[];
-}
-
-export interface AssetContent {
-    position: number;
-    type: AssetTypes;
-    name: string;
-    path: string;
 }

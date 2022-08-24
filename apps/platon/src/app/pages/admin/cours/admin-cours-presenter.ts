@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetCoursList, AssetCoursService, AssetService } from "@platon/feature/workspace";
+import { CoursList, CoursService } from "@platon/feature/workspace";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
 
@@ -20,7 +20,7 @@ export class AdminCoursPresenster implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly assetCoursService: AssetCoursService,
+        private readonly coursService: CoursService,
         private readonly messageService: NzMessageService,
     ) {
 
@@ -32,12 +32,12 @@ export class AdminCoursPresenster implements OnDestroy {
 
     async create(name: string): Promise<boolean> {
         try {
-            const user = await this.authService.ready().then(async () => {
-                const newCours = await this.assetCoursService.create({
-                    name: name
-                }).toPromise();
-                this.messageService.success('Cours ' + name + ' a été crée.');
-            });
+            // const user = await this.authService.ready().then(async () => {
+            //     const newCours = await this.coursService.create({
+            //         name: name
+            //     }).toPromise();
+            //     this.messageService.success('Cours ' + name + ' a été crée.');
+            // });
             return true;
         } catch (error) {
             this.messageService.error('Une erreur est survenue au cours de la création...');
@@ -61,7 +61,7 @@ export class AdminCoursPresenster implements OnDestroy {
     private async initContext(): Promise<void> {
         const [user, assets] = await Promise.all([
             this.authService.ready(),
-            lastValueFrom(this.assetCoursService.get())
+            lastValueFrom(this.coursService.get())
         ]);
 
         this.context.next({
@@ -76,5 +76,5 @@ export class AdminCoursPresenster implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    assets?: AssetCoursList;
+    assets?: CoursList;
 }

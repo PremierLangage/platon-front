@@ -1,0 +1,43 @@
+nz-breadcrumb {
+  font-size: 1.5em;
+  &::ng-deep {
+    .ant-breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      mat-icon {
+        margin: 0 8px;
+      }
+    }
+  }
+}
+
+.progress-card {
+  display: flex;
+  padding: 12px;
+  flex: none;
+  border: solid;
+  border-width: 2px;
+  border-color: #f4f4f4;
+}
+
+.progress-card-circle {
+  display: inline-block;
+}
+
+.progress-card-title {
+  display: inline-block;
+  padding: 12px;
+  width: 100%;
+}
+
+.progress-card-title p {
+  margin: 0;
+}
+
+.progress-card-title h1 {
+  margin-bottom: 0;
+}
+
+.asset-content {
+  min-height: 50vh;
+}

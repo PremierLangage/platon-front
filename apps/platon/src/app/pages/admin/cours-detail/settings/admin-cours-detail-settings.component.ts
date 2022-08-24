@@ -25,7 +25,7 @@ export class AdminCoursDetailSettingsComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(context => {
                 this.context = context;
-                this.description = context.asset?.description || '';
+                this.description = context.cours?.description || '';
                 this.changeDetectorRef.markForCheck();
             })
         );

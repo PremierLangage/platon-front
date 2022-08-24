@@ -1,7 +1,52 @@
 <app-container>
   <app-content>
 
-    <router-outlet></router-outlet>
+    <!-- HEADER -->
+    <nz-row nzAlign="bottom" [nzGutter]="[24, 8]">
+
+      <!-- HEADER-BREADCRUMB -->
+      <nz-col nzSpan="24">
+        <nz-breadcrumb>
+          <nz-breadcrumb-item *ngFor="let p of path">
+            <a [routerLink]="p.path">{{p.name}}</a>
+          </nz-breadcrumb-item>
+        </nz-breadcrumb>
+      </nz-col>
+
+      <!-- HEADER DETAILS -->
+      <nz-col nzSpan="18">
+        <span>
+          <p>TODO description</p>
+        </span>
+        <nz-tag nzColor="warning">
+          <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+          <span>Draft</span>
+        </nz-tag>
+      </nz-col>
+
+      <!-- HEADER-PROGRESS -->
+      <nz-col nzSpan="6">
+        <div class="progress-card">
+          <div class="progress-card-circle">
+            <nz-progress [nzPercent]="0" nzType="circle" [nzWidth]="80"></nz-progress>
+          </div>
+          <div class="progress-card-title">
+            <p>Progression</p>
+            <h1>0 / 0 Sections</h1>
+          </div>
+        </div>
+      </nz-col>
+
+    </nz-row>
+
+    <nz-divider></nz-divider>
+
+    <!-- CONTENT -->
+    <div class="asset-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <nz-divider></nz-divider>
 
   </app-content>
 </app-container>

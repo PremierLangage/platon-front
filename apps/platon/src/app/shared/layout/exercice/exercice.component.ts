@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
-import { Asset } from "libs/feature/workspace/src/lib/models/asset";
+import { ExersiceDetail } from "@platon/feature/workspace";
 import { AssetFormComponent } from "../form/form.component";
 
 @Component({
@@ -15,7 +15,7 @@ export class AssetExerciceComponent {
     @ViewChild(AssetFormComponent) form!: AssetFormComponent;
 
     @Input()
-    set asset(value: Asset) {
+    set asset(value: ExersiceDetail) {
         this.content = value.content;
     }
 

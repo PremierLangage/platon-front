@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetCoursList, AssetCoursService } from "@platon/feature/workspace";
+import { CoursList, CoursService } from "@platon/feature/workspace";
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
 
 @Injectable()
@@ -18,7 +18,7 @@ export class DashboardPresenter implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly assetCoursService: AssetCoursService
+        private readonly coursService: CoursService,
     ) {
     }
 
@@ -26,7 +26,7 @@ export class DashboardPresenter implements OnDestroy {
         try {
             const [user, assets] = await Promise.all([
                 this.authService.ready(),
-                this.assetCoursService.get().toPromise()
+                this.coursService.get().toPromise()
             ]);
             this.context.next({
                 state: 'READY',
@@ -53,5 +53,5 @@ export class DashboardPresenter implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    assets?: AssetCoursList;
+    assets?: CoursList;
 }
