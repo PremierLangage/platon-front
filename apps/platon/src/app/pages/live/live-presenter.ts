@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService, AuthUser } from "@platon/core/auth";
-import { AssetService, ExersiceDetail } from "@platon/feature/workspace";
-import { BehaviorSubject, firstValueFrom, Observable, Subscription } from "rxjs";
+import { AssetService, Live, LiveService } from "@platon/feature/workspace";
+import { BehaviorSubject, lastValueFrom, Observable, Subscription } from "rxjs";
 
 
 @Injectable()
@@ -20,7 +20,7 @@ export class LivePresenter implements OnDestroy {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly assetService: AssetService,
+        private readonly liveService: LiveService,
         private readonly activatedRoute: ActivatedRoute,
     ) {
         this.subscriptions.push(
@@ -35,16 +35,16 @@ export class LivePresenter implements OnDestroy {
     }
 
     private async getLiveContent(resourceId: number): Promise<void> {
-        // const [user, asset] = await Promise.all([
-        //     this.authService.ready(),
-        //     firstValueFrom(this.assetService.getLive(resourceId))
-        // ]);
+        const [user, live] = await Promise.all([
+            this.authService.ready(),
+            lastValueFrom(this.liveService.get(resourceId))
+        ]);
 
-        // this.context.next({
-        //     state: 'READY',
-        //     user,
-        //     asset
-        // });
+        this.context.next({
+            state: 'READY',
+            user,
+            live
+        });
     }
 
     private async onChangeRoute(resrouceId: number): Promise<void> {
@@ -65,5 +65,5 @@ export class LivePresenter implements OnDestroy {
 export interface Context {
     state: 'LOADING' | 'READY' | 'SERVER_ERROR' | 'NOT_FOUND' | 'UNAUTHORIZED';
     user?: AuthUser;
-    form?: ExersiceDetail;
+    live?: Live;
 }

@@ -9,6 +9,7 @@ import { OutputData } from '@editorjs/editorjs';
 declare var Header: any;
 declare var List: any;
 declare var SimpleImage: any;
+declare var ImageTool: any;
 
 @Component({
     selector: 'app-admin-cours-detail-settings',
@@ -28,14 +29,14 @@ export class AdminCoursDetailSectionComponent implements OnInit, OnDestroy {
             blocks: []
         },
         tools: {
+            image: {
+                class: ImageTool
+            },
             header: {
                 class: Header
             },
             list: {
                 class: List
-            },
-            image: {
-                class: SimpleImage
             }
         },
         onChange: async (api, event) => {

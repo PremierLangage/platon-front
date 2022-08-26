@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
 import { ExersiceDetail } from "@platon/feature/workspace";
 import { AssetFormComponent } from "../form/form.component";
 
@@ -15,11 +15,16 @@ export class AssetExerciceComponent {
     @ViewChild(AssetFormComponent) form!: AssetFormComponent;
 
     @Input()
-    set asset(value: ExersiceDetail) {
-        this.content = value.content;
+    set asset(value: Record<string, any>) {
+        this.content = value;
+        this.changeDetectorRef.markForCheck();
     }
 
     @Output() getState = new EventEmitter<Record<string, any>>();
+
+    constructor(
+        private readonly changeDetectorRef: ChangeDetectorRef,
+    ) { }
 
     submit() {
         this.getState.emit(this.form.content);

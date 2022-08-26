@@ -13,8 +13,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 
 import { AppSharedLayoutModule } from "../../shared/layout";
 
-import { LiveRoutingModule } from "./live-routing.module";
 import { LiveComponent } from "./live.component";
+import { RouterModule } from "@angular/router";
 
 @NgModule({
     declarations: [LiveComponent],
@@ -33,7 +33,12 @@ import { LiveComponent } from "./live.component";
 
         AppSharedLayoutModule,
 
-        LiveRoutingModule
+        RouterModule.forChild([
+            {
+                path: ':id',
+                component: LiveComponent
+            }
+        ])
     ],
 
 })
