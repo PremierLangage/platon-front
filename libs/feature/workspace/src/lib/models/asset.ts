@@ -22,3 +22,9 @@ export interface AssetList {
     previous: string;
     results: Asset[];
 }
+
+export interface CreateAssetForm {
+    type: AssetTypes;
+    name: string;
+    parent?: string;
+}

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
-import { ExersiceDetail } from "@platon/feature/workspace";
 import { AssetFormComponent } from "../form/form.component";
 
 @Component({

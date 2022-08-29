@@ -3,7 +3,7 @@
     <ng-container *ngIf="context.state === 'READY' && context.live">
 
       <!-- HEADER -->
-      <div nz-row nzAlign="bottom">
+      <div nz-row nzAlign="bottom" [nzGutter]="[0, 24]">
         <!-- HEADER-BREADCRUMB -->
         <div nz-col nzSpan="24">
           <nz-breadcrumb>
@@ -35,7 +35,7 @@
         </div>
 
         <!-- HEADER-PROGRESS -->
-        <div nz-col nzSpan="6">
+        <!-- <div nz-col nzSpan="6">
           <div class="progress-card">
             <div class="progress-card-circle">
               <nz-progress [nzPercent]="0" nzType="circle" [nzWidth]="80"></nz-progress>
@@ -45,7 +45,8 @@
               <h1>1 / 1 Questions</h1>
             </div>
           </div>
-        </div>
+        </div> -->
+
       </div>
 
       <!-- <nz-progress [nzPercent]="75" nzType="circle" [nzWidth]="80"></nz-progress>

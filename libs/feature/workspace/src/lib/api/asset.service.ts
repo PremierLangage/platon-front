@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Asset, AssetList } from "../models/asset";
+import { Asset, AssetList, CreateAssetForm } from "../models/asset";
 import { AssetProvider } from "../models/asset-provider";
 
 
@@ -17,6 +17,10 @@ export class AssetService {
 
     getByPath(path: string[]): Observable<Asset> {
         return this.provider.getByPath(path);
+    }
+
+    create(form: CreateAssetForm): Observable<Asset> {
+        return this.provider.create(form);
     }
 
 }
