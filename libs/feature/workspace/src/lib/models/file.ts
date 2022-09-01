@@ -27,9 +27,8 @@ export interface FileTree {
 
 export interface CreateFileForm {
     owner: Resource | Circle;
-    files: NzUploadFile[];
+    files: Record<string, { type: 'file' | 'folder', content?: string }>;
     description : string;
-    //files: Record<string, { type: 'file' | 'folder'; content?: string }>;
 }
 
 export interface CreateFolderForm {

@@ -1,12 +1,102 @@
 <app-container>
   <app-content>
+<<<<<<< HEAD
     <ng-container *ngIf="context.state === 'LOADING'; else finish">
       <nz-spin nzTip="Chargement..."> </nz-spin>
     </ng-container>
     <ng-template #finish>
       <h1>{{ context.live?.title }}</h1>
       <h2>{{ context.live?.text }}</h2>
-      <div [innerHTML]="context.live | component | safe: 'html'"></div>
+
+      <wc-platon-viewer [state]="init" debug="'true'">
+
+      </wc-platon-viewer>
+
+      <button nz-button nzType="primary" (click)="grader()">Submit</button>
+
+
+
     </ng-template>
+=======
+    <!-- HEADER -->
+    <div nz-row nzAlign="bottom" [nzGutter]="[0, 24]">
+      <!-- HEADER-BREADCRUMB -->
+      <div nz-col nzSpan="24">
+        <nz-breadcrumb>
+          <nz-breadcrumb-item>
+            <a>{{live?.name}}</a>
+          </nz-breadcrumb-item>
+
+          <nz-breadcrumb-item>
+            <a>{{live?.env}}</a>
+          </nz-breadcrumb-item>
+        </nz-breadcrumb>
+      </div>
+
+      <!-- HEADER-TAGS -->
+      <div nz-col nzSpan="18">
+        <nz-tag nzColor="warning">
+          <i nz-icon nzType="play-circle" nzTheme="outline"></i>
+          <span>Live</span>
+        </nz-tag>
+        <nz-tag nzColor="default">Créé: 20 Juillet 2022</nz-tag>
+        <nz-tag nzColor="default">
+          <i nz-icon nzType="eye" nzTheme="outline"></i>
+          <span>Public</span>
+        </nz-tag>
+        <nz-tag nzColor="default">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          <span>Type: Exercice</span>
+        </nz-tag>
+      </div>
+
+      <!-- HEADER-PROGRESS -->
+      <!-- <div nz-col nzSpan="6">
+        <div class="progress-card">
+          <div class="progress-card-circle">
+            <nz-progress [nzPercent]="0" nzType="circle" [nzWidth]="80"></nz-progress>
+          </div>
+          <div class="progress-card-title">
+            <p>Progression</p>
+            <h1>1 / 1 Questions</h1>
+          </div>
+        </div>
+      </div> -->
+
+    </div>
+
+    <!-- <nz-progress [nzPercent]="75" nzType="circle" [nzWidth]="80"></nz-progress>
+    <p>Progression</p>
+    <h2>1 / 1 Questions</h2> -->
+
+    <nz-divider></nz-divider>
+
+    <div nz-row nzJustify="space-around" nzAlign="top" style="min-height: 50vh;">
+      <div nz-col nzSpan="18">
+        <span [ngSwitch]="live.type" *ngIf="live">
+          <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="live.content" (getState)="getState($event)"></app-asset-exercice>
+          <p *ngSwitchDefault>Invalid asset</p>
+        </span>
+      </div>
+    </div>
+
+    <nz-divider></nz-divider>
+
+    <div nz-row nzJustify="space-between" nzAlign="top">
+      <div nz-col nzSpan="4">
+        <button nz-button nzType="default" nzSize="large" disabled>
+          <i nz-icon nzType="left"></i>
+          Question précedente
+        </button>
+      </div>
+      <div nz-col nzSpan="4" style="justify-content: end; display: inherit;">
+        <button nz-button nzType="primary" nzSize="large">
+          Terminer
+          <i nz-icon nzType="right"></i>
+        </button>
+      </div>
+    </div>
+
+>>>>>>> develop-asset-update
   </app-content>
 </app-container>

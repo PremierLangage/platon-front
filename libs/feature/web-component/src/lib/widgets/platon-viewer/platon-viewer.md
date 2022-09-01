@@ -1,3 +1,4 @@
 # PlatonViewer
 
-<wc-platon-viewer></wc-platon-viewer>
+
+Ce composant permet d'afficher un composant PLaTon.

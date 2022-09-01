@@ -1,0 +1,13 @@
+<div nz-row nzJustify="start" [nzGutter]="[24,24]">
+  <ng-container *ngFor="let item of items">
+    <ui-card-item
+      nz-col
+      [nzSpan]="(display === 'list') ? 24 : 8"
+      [display]="display"
+      [title]="item.title"
+      [description]="item.description"
+      [tags]="item.tags"
+      [cardLink]="item.path">
+    </ui-card-item>
+  </ng-container>
+</div>

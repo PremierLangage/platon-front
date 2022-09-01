@@ -33,6 +33,7 @@ const routes: Routes = [
                     ).then((m) => m.FilesModule),
             },
             {
+<<<<<<< HEAD
                 path: 'publisher',
                 loadChildren: () =>
                     import('./publisher/publisher.module').then(
@@ -46,6 +47,15 @@ const routes: Routes = [
             },
             { path: '**', redirectTo: 'overview', pathMatch: 'full' },
         ],
+=======
+                path: 'code',
+                loadChildren: () => import(
+                    './code/code.module'
+                ).then(m => m.CodeModule)
+            },
+            { path: '**', redirectTo: 'overview', pathMatch: 'full' }
+        ]
+>>>>>>> develop-asset-update
     },
 ];
 

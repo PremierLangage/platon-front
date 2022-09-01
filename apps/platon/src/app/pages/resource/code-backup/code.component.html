@@ -1,0 +1,110 @@
+<ws-git-panel
+  [repository]="this.context.resource"
+  [path]="path"
+  ></ws-git-panel>
+
+<ws-git-tree
+  [tree]="current"
+  (didGoPath)="addNodeToPath($event)"
+  (didGoBack)="popNodeToPath()"
+  >
+</ws-git-tree>
+
+
+
+<!-- <div nz-space nzAlign="baseline" class="code-header">
+  <button
+    nz-button
+    nz-popover
+    [(nzPopoverVisible)]="branchPopOverVisibile"
+    [nzPopoverTitle]="popoverTitle"
+    [nzPopoverContent]="popoverContent"
+    nzPopoverPlacement="bottomLeft"
+    nzPopoverTrigger="click"
+  >
+    <i nz-icon nzType="branches" nzTheme="outline"></i>
+    master
+    <i nz-icon nzType="caret-down" nzTheme="outline"></i>
+  </button>
+  <ng-template #popoverTitle>
+    <div class="popoverTitle">
+      <b>Switch branch</b>
+      <a (click)="popOverClose()">
+        <i nz-icon nzType="close" nzTheme="outline"></i>
+      </a>
+    </div>
+  </ng-template>
+
+  <ng-template #popoverContent>
+    <div>
+      <p>Content</p>
+      <p>Content</p>
+    </div>
+  </ng-template>
+
+  <nz-breadcrumb>
+    <nz-breadcrumb-item>{{ context.resource?.name }}</nz-breadcrumb-item>
+    <nz-breadcrumb-item *ngFor="let folder of path">
+      {{ folder }}
+    </nz-breadcrumb-item>
+  </nz-breadcrumb>
+</div>
+
+<nz-list [nzBordered]="true" nzSize="small" [nzHeader]="listHeader">
+  <nz-list-item *ngIf="path && path.length">
+    <a (click)="popTreeRoot()">...</a>
+  </nz-list-item>
+
+  <nz-list-item *ngFor="let item of render">
+    <div class="list-item-left">
+      <i nz-icon [nzType]="item.type" nzTheme="outline"></i>
+      <a (click)="addTreeRoot(item.path)">{{ item.path }}</a>
+    </div>
+    <div class="list-item-center">{{ item.mime }} : {{ item.type }}</div>
+    <div class="list-item-right">{{ item.size }}</div>
+  </nz-list-item>
+</nz-list>
+
+<ng-template #listHeader>
+  <div class="list-header">
+    <div class="list-header-title">Update file : main.pl</div>
+    <div class="list-header-action">
+      <i nz-icon nzType="history" nzTheme="outline"></i>
+      <a href="#">49 commits</a>
+    </div>
+  </div>
+</ng-template>
+
+<nz-list
+  [nzBordered]="true"
+  nzSize="small"
+  [nzHeader]="editHeader"
+  *ngIf="path && path.length !== 0 && render && render.length === 1"
+>
+  <nz-list-item>
+    <ng-container *ngIf="codeStatus === 'LOADING'; else editor">
+      <div></div>
+      <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+      <div></div>
+    </ng-container>
+    <ng-template #editor>
+      <nge-monaco-editor class="code-editor"
+        style="--editor-height: 500px;"
+        (ready)="onCreateEditor($event)">
+      </nge-monaco-editor>
+    </ng-template>
+  </nz-list-item>
+</nz-list>
+
+<ng-template #editHeader>
+  <div class="list-header">
+    <div class="list-header-title">
+      <i nz-icon nzType="edit" nzTheme="outline"></i>
+      Edit
+    </div>
+    <div class="list-header-action">
+      <i nz-icon nzType="history" nzTheme="outline"></i>
+      <a href="#">49 commits</a>
+    </div>
+  </div>
+</ng-template> -->

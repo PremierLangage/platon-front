@@ -1,36 +1,33 @@
-.popoverTitle {
-  display: flex;
-  justify-content: space-between;
-  min-width: 250px;
-}
-
-nz-list {
-  margin-top: 20px;
-  border-radius: 10px;
-}
-
-.list-item-left a {
+nz-breadcrumb {
   margin-left: 10px;
 }
 
-.list-header {
-  display: flex;
-  justify-content: space-between;
+nz-list {
+  border-radius: 10px;
 }
 
-.list-header i {
-  margin-right: 10px;
+nge-monaco-viewer {
+  width: 100%;
 }
 
-.code-editor {
-  display: block;
+nge-monaco-editor {
   width: 100%;
 }
 
 .code-header {
-  flex: none;
+  display: flex;
+  justify-content: space-between;
 }
 
-.code-header nz-breadcrumb {
-  margin-left: 10px;
+.code-header-item {
+  display: flex;
+}
+
+.code-editor {
+
+}
+
+.code-editor-header {
+  display: flex;
+  justify-content: space-between;
 }

@@ -21,6 +21,10 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzCardModule } from 'ng-zorro-antd/card';
 
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 import { ResourceNamePipe } from './pipes/resource-name.pipe';
@@ -34,8 +38,11 @@ import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
-import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
-import { PublisherItemComponent } from './components/publisher-item/publisher-item.component';
+
+import { CoursListComponent } from './components/cours-list/cours-list.component';
+import { CodeTreeComponent } from './components/code-tree/code-tree.component';
+import { CoursCardComponent } from './components/cours-card/cours-card.component';
+import { SharedUiCardModule } from '@platon/shared/ui/card';
 
 @NgModule({
     imports: [
@@ -58,6 +65,9 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         NzTimelineModule,
         NzGridModule,
         NzCardModule,
+        NzTagModule,
+        NzListModule,
+        NzSkeletonModule,
 
         SharedUiListModule,
     ],
@@ -74,8 +84,10 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        PublisherListComponent,
-        PublisherItemComponent,
+        CoursListComponent,
+        CodeTreeComponent,
+
+        CoursCardComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -91,8 +103,10 @@ import { PublisherItemComponent } from './components/publisher-item/publisher-it
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        PublisherListComponent,
-        PublisherItemComponent,
+        CoursListComponent,
+        CodeTreeComponent,
+
+        CoursCardComponent,
     ],
 })
 export class FeatureWorkspaceModule {}

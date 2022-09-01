@@ -36,6 +36,7 @@
       "@platon/shared/ui/search": ["libs/shared/ui/search/src/index.ts"],
       "@platon/shared/ui/stepper": ["libs/shared/ui/stepper/src/index.ts"],
       "@platon/shared/ui/tree": ["libs/shared/ui/tree/src/index.ts"],
+      "@platon/shared/ui/card": ["libs/shared/ui/card/src/index.ts"],
       "@platon/shared/utils": ["libs/shared/utils/src/index.ts"],
       "@platon/shared/vendors": ["libs/shared/vendors/src/index.ts"]
     }

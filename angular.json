@@ -24,36 +24,141 @@
             "assets": [
               "apps/platon/src/favicon.ico",
               "apps/platon/src/assets",
-              { "glob": "**/*",  "input": "assets", "output": "./assets" },
-              { "glob": "**/*", "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/", "output": "/assets/vendors/@ant-design/assets/" },
-              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
-              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
-              { "glob": "**/*", "input": "./node_modules/intro.js/", "output": "./assets/vendors/intro.js/" },
-              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
-              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
-              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
-              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/",  "output": "./assets/vendors/jsxgraph/" },
-              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
-              { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
-              { "glob": "**/*", "input": "./node_modules/@cisstech/nge/assets/", "output": "./assets/vendors/nge/" },
-              { "glob": "**/*", "input": "./node_modules/monaco-editor/min", "output": "./assets/vendors/nge/monaco/min" },
-              { "glob": "**/*", "input": "./node_modules/monaco-editor/min-maps", "output": "./assets/vendors/nge/monaco/min-maps" },
-              { "glob": "**/*.js",  "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
-              { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/"  }
+              {
+                "glob": "**/*",
+                "input": "assets",
+                "output": "./assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/vendors/@ant-design/assets/"
+              },
+              {
+                "glob": "**/*.md",
+                "input": "libs/feature/web-component/src/lib",
+                "output": "./assets/docs/components"
+              },
+              {
+                "glob": "**/*.svg",
+                "input": "libs/feature/web-component/src/lib",
+                "output": "./assets/images/components"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/intro.js/",
+                "output": "./assets/vendors/intro.js/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/katex/dist/",
+                "output": "./assets/vendors/katex/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsplumb/dist/",
+                "output": "./assets/vendors/jsplumb/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsplumb/css/",
+                "output": "./assets/vendors/jsplumb/css/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsxgraph/distrib/",
+                "output": "./assets/vendors/jsxgraph/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/mathlive/dist/",
+                "output": "./assets/vendors/mathlive/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsoneditor/dist/",
+                "output": "./assets/vendors/jsoneditor/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@cisstech/nge/assets/",
+                "output": "./assets/vendors/nge/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min",
+                "output": "./assets/vendors/nge/monaco/min"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min-maps",
+                "output": "./assets/vendors/nge/monaco/min-maps"
+              },
+              {
+                "glob": "**/*.js",
+                "input": "./node_modules/emoji-toolkit/lib/js/",
+                "output": "./assets/vendors/emoji-toolkit/"
+              },
+              {
+                "glob": "viz.js",
+                "input": "./node_modules/viz.js/",
+                "output": "./assets/vendors/viz/"
+              }
             ],
             "styles": [
               "styles/app.scss",
               "apps/platon/src/styles.scss",
-              { "input": "styles/ng-zorro/dark.less", "bundleName": "styles.ng-zorro.dark", "inject": false },
-              { "input": "styles/ng-zorro/light.less", "bundleName": "styles.ng-zorro.light", "inject": false },
-              { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark", "inject": false },
-              { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
+              {
+                "input": "styles/ng-zorro/dark.less",
+                "bundleName": "styles.ng-zorro.dark",
+                "inject": false
+              },
+              {
+                "input": "styles/ng-zorro/light.less",
+                "bundleName": "styles.ng-zorro.light",
+                "inject": false
+              },
+              {
+                "input": "styles/material/dark.scss",
+                "bundleName": "styles.material.dark",
+                "inject": false
+              },
+              {
+                "input": "styles/material/light.scss",
+                "bundleName": "styles.material.light",
+                "inject": false
+              }
             ],
             "scripts": [
-              { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
-              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" }
+              {
+                "bundleName": "polyfill-webcomp-es5",
+                "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
+              },
+              {
+                "bundleName": "polyfill-webcomp",
+                "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js"
+              },
+              {
+                "bundleName": "editorjs-header",
+                "input": "node_modules/@editorjs/header/dist/bundle.js"
+              },
+              {
+                "bundleName": "editorjs-list",
+                "input": "node_modules/@editorjs/list/dist/bundle.js"
+              },
+              {
+                "bundleName": "editorjs-simple-image",
+                "input": "node_modules/@editorjs/simple-image/dist/bundle.js"
+              },
+              {
+                "bundleName": "editorjs-image",
+                "input": "node_modules/@editorjs/image/dist/bundle.js"
+              }
             ],
-            "allowedCommonJsDependencies": ["hammerjs", "d3-graphviz"]
+            "allowedCommonJsDependencies": [
+              "hammerjs",
+              "d3-graphviz"
+            ]
           },
           "configurations": {
             "production": {
@@ -115,7 +220,9 @@
           }
         }
       },
-      "tags": ["scope:platon"]
+      "tags": [
+        "scope:platon"
+      ]
     },
     "platon-e2e": {
       "root": "apps/platon-e2e",
@@ -135,7 +242,9 @@
         }
       },
       "tags": [],
-      "implicitDependencies": ["platon"]
+      "implicitDependencies": [
+        "platon"
+      ]
     },
     "premierlangage": {
       "projectType": "application",
@@ -160,36 +269,125 @@
             "assets": [
               "apps/premierlangage/src/favicon.ico",
               "apps/premierlangage/src/assets",
-              { "glob": "**/*",  "input": "assets", "output": "./assets" },
-              { "glob": "**/*", "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/", "output": "/assets/vendors/@ant-design/assets/" },
-              { "glob": "**/*.md", "input": "libs/feature/web-component/src/lib", "output": "./assets/docs/components" },
-              { "glob": "**/*.svg", "input": "libs/feature/web-component/src/lib", "output": "./assets/images/components" },
-              { "glob": "**/*", "input": "./node_modules/intro.js/", "output": "./assets/vendors/intro.js/" },
-              { "glob": "**/*", "input": "./node_modules/katex/dist/", "output": "./assets/vendors/katex/" },
-              { "glob": "**/*", "input": "./node_modules/jsplumb/dist/", "output": "./assets/vendors/jsplumb/" },
-              { "glob": "**/*", "input": "./node_modules/jsplumb/css/", "output": "./assets/vendors/jsplumb/css/" },
-              { "glob": "**/*", "input": "./node_modules/jsxgraph/distrib/",  "output": "./assets/vendors/jsxgraph/" },
-              { "glob": "**/*", "input": "./node_modules/mathlive/dist/", "output": "./assets/vendors/mathlive/" },
-              { "glob": "**/*", "input": "./node_modules/jsoneditor/dist/", "output": "./assets/vendors/jsoneditor/" },
-              { "glob": "**/*", "input": "./node_modules/@cisstech/nge/assets/", "output": "./assets/vendors/nge/" },
-              { "glob": "**/*", "input": "./node_modules/monaco-editor/min", "output": "./assets/vendors/nge/monaco/min" },
-              { "glob": "**/*", "input": "./node_modules/monaco-editor/min-maps", "output": "./assets/vendors/nge/monaco/min-maps" },
-              { "glob": "**/*.js",  "input": "./node_modules/emoji-toolkit/lib/js/", "output": "./assets/vendors/emoji-toolkit/" },
-              { "glob": "viz.js", "input": "./node_modules/viz.js/", "output": "./assets/vendors/viz/"  }
+              {
+                "glob": "**/*",
+                "input": "assets",
+                "output": "./assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/vendors/@ant-design/assets/"
+              },
+              {
+                "glob": "**/*.md",
+                "input": "libs/feature/web-component/src/lib",
+                "output": "./assets/docs/components"
+              },
+              {
+                "glob": "**/*.svg",
+                "input": "libs/feature/web-component/src/lib",
+                "output": "./assets/images/components"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/intro.js/",
+                "output": "./assets/vendors/intro.js/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/katex/dist/",
+                "output": "./assets/vendors/katex/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsplumb/dist/",
+                "output": "./assets/vendors/jsplumb/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsplumb/css/",
+                "output": "./assets/vendors/jsplumb/css/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsxgraph/distrib/",
+                "output": "./assets/vendors/jsxgraph/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/mathlive/dist/",
+                "output": "./assets/vendors/mathlive/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/jsoneditor/dist/",
+                "output": "./assets/vendors/jsoneditor/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@cisstech/nge/assets/",
+                "output": "./assets/vendors/nge/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min",
+                "output": "./assets/vendors/nge/monaco/min"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min-maps",
+                "output": "./assets/vendors/nge/monaco/min-maps"
+              },
+              {
+                "glob": "**/*.js",
+                "input": "./node_modules/emoji-toolkit/lib/js/",
+                "output": "./assets/vendors/emoji-toolkit/"
+              },
+              {
+                "glob": "viz.js",
+                "input": "./node_modules/viz.js/",
+                "output": "./assets/vendors/viz/"
+              }
             ],
             "styles": [
               "styles/app.scss",
               "apps/premierlangage/src/styles.scss",
-              { "input": "styles/ng-zorro/dark.less", "bundleName": "styles.ng-zorro.dark", "inject": false },
-              { "input": "styles/ng-zorro/light.less", "bundleName": "styles.ng-zorro.light", "inject": false },
-              { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark",  "inject": false },
-              { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
+              {
+                "input": "styles/ng-zorro/dark.less",
+                "bundleName": "styles.ng-zorro.dark",
+                "inject": false
+              },
+              {
+                "input": "styles/ng-zorro/light.less",
+                "bundleName": "styles.ng-zorro.light",
+                "inject": false
+              },
+              {
+                "input": "styles/material/dark.scss",
+                "bundleName": "styles.material.dark",
+                "inject": false
+              },
+              {
+                "input": "styles/material/light.scss",
+                "bundleName": "styles.material.light",
+                "inject": false
+              }
             ],
             "scripts": [
-              { "bundleName": "polyfill-webcomp-es5", "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js" },
-              { "bundleName": "polyfill-webcomp", "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js" }
+              {
+                "bundleName": "polyfill-webcomp-es5",
+                "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
+              },
+              {
+                "bundleName": "polyfill-webcomp",
+                "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js"
+              }
             ],
-            "allowedCommonJsDependencies": ["hammerjs", "d3-graphviz"]
+            "allowedCommonJsDependencies": [
+              "hammerjs",
+              "d3-graphviz"
+            ]
           },
           "configurations": {
             "production": {
@@ -251,7 +449,9 @@
           }
         }
       },
-      "tags": ["scope:premierlangage"]
+      "tags": [
+        "scope:premierlangage"
+      ]
     },
     "premierlangage-e2e": {
       "root": "apps/premierlangage-e2e",
@@ -272,14 +472,17 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["apps/premierlangage-e2e/**/*.ts"]
+            "lintFilePatterns": [
+              "apps/premierlangage-e2e/**/*.ts"
+            ]
           }
         }
       },
       "tags": [],
-      "implicitDependencies": ["premierlangage"]
+      "implicitDependencies": [
+        "premierlangage"
+      ]
     },
-
     "core-auth": {
       "projectType": "library",
       "root": "libs/core/auth",
@@ -300,7 +503,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:core", "type:auth"]
+      "tags": [
+        "scope:core",
+        "type:auth"
+      ]
     },
     "core-config": {
       "projectType": "library",
@@ -322,9 +528,11 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:core", "type:config"]
+      "tags": [
+        "scope:core",
+        "type:config"
+      ]
     },
-
     "feature-web-component": {
       "projectType": "library",
       "root": "libs/feature/web-component",
@@ -345,7 +553,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:feature", "type:web-component"]
+      "tags": [
+        "scope:feature",
+        "type:web-component"
+      ]
     },
     "feature-workspace": {
       "projectType": "library",
@@ -367,9 +578,11 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:feature", "type:workspace"]
+      "tags": [
+        "scope:feature",
+        "type:workspace"
+      ]
     },
-
     "shared-ui-dialog": {
       "projectType": "library",
       "root": "libs/shared/ui/dialog",
@@ -390,7 +603,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-ui-icon": {
       "projectType": "library",
@@ -412,7 +628,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-ui-list": {
       "projectType": "library",
@@ -434,7 +653,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-ui-search": {
       "projectType": "library",
@@ -456,7 +678,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-ui-stepper": {
       "projectType": "library",
@@ -478,7 +703,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-ui-tree": {
       "projectType": "library",
@@ -500,7 +728,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:ui"]
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ]
     },
     "shared-utils": {
       "projectType": "library",
@@ -522,7 +753,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:utils"]
+      "tags": [
+        "scope:shared",
+        "type:utils"
+      ]
     },
     "shared-vendors": {
       "projectType": "library",
@@ -544,7 +778,10 @@
           "style": "scss"
         }
       },
-      "tags": ["scope:shared", "type:vendors"]
+      "tags": [
+        "scope:shared",
+        "type:vendors"
+      ]
     }
   },
   "schematics": {

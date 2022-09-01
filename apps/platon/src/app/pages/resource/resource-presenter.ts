@@ -1,22 +1,12 @@
 import { Injectable, OnDestroy, ɵclearResolutionOfComponentResourcesQueue } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-import {
-    Circle,
-    CircleService,
-    FileEntry,
-    FileService,
-    FileTree,
-    Publisher,
-    PublisherForm,
-    PublisherService,
-    Resource,
-    ResourceService,
-    UpdateResourceForm,
-} from '@platon/feature/workspace';
+import { Circle, CircleService, FileEntry, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
 import { NzMessageService } from 'ng-zorro-antd/message';
+
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
+
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -24,6 +14,8 @@ export class ResourcePresenter implements OnDestroy {
     private readonly context = new BehaviorSubject<Context>(
         this.defaultContext
     );
+
+    private id!: number;
 
     get defaultContext(): Context {
         return { state: 'LOADING' };
@@ -45,6 +37,7 @@ export class ResourcePresenter implements OnDestroy {
         this.subscriptions.push(
             this.activatedRoute.params.subscribe((params) => {
                 this.onChangeRoute(Number.parseInt(params.id + '', 10));
+                this.id = Number.parseInt(params.id + '', 10);
             })
         );
     }
@@ -61,24 +54,8 @@ export class ResourcePresenter implements OnDestroy {
         throw new ReferenceError('missing resource');
     }
 
-    publisher(): Observable<Publisher> {
-        return this.publisherService.get();
-    }
-
-    async publish(form: Omit<PublisherForm, 'resource'>): Promise<boolean> {
-        const { resource } = this.context.value as Required<Context>;
-        try {
-            const asset = await this.publisherService
-                .post({
-                    resource,
-                    ...form,
-                })
-                .toPromise();
-            return true;
-        } catch {
-            this.alertError();
-            return false;
-        }
+    async openInLiveUrl(): Promise<string> {
+        return `/live/${this.id}`;
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -91,7 +68,7 @@ export class ResourcePresenter implements OnDestroy {
 
     async liveUrl(): Promise<string> {
         const rid = this.context.value.resource?.id;
-        return `https://platon.dev/live/${rid}`;
+        return `https://platon.org/live/${rid}`;
     }
 
     async fileContent(file: FileEntry): Promise<string> {
@@ -121,6 +98,51 @@ export class ResourcePresenter implements OnDestroy {
             this.alertError();
             return false;
         }
+    }
+
+    async getFileContent(file: FileEntry): Promise<string | undefined> {
+        try {
+            const [user, content] = await Promise.all([
+                this.authService.ready(),
+                firstValueFrom(this.fileService.read(file))
+            ]);
+            return content;
+        } catch {
+            this.alertError();
+            return;
+        }
+    }
+
+    async updateFileContent(file: FileEntry, content: string): Promise<boolean> {
+        try {
+            await this.authService.ready();
+            await this.fileService.update({
+                file: file,
+                content: content
+            }).toPromise();
+            return true;
+        } catch {
+            this.alertError();
+        }
+        return false;
+    }
+
+    async createFile(files: Record<string, { type: 'file' | 'folder', content?: string }>): Promise<boolean> {
+        try {
+            await this.authService.ready();
+            const { resource } = this.context.value;
+            if (resource) {
+                await this.fileService.create({
+                    owner: resource,
+                    files: files,
+                    description: ''
+                }).toPromise();
+                return true;
+            }
+        } catch {
+            this.alertError();
+        }
+        return false;
     }
 
     async upload(files : NzUploadFile[], description : string, selectedFolder: FileEntry | undefined): Promise<Observable<any>> {
@@ -164,7 +186,7 @@ export class ResourcePresenter implements OnDestroy {
         const { resource } = this.context.value as Required<Context>;
         return this.fileService.options(resource);
     }
-
+    
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),

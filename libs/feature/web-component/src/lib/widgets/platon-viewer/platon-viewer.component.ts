@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Injector, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Injector, Component, Input, ViewChild, EventEmitter, Output } from '@angular/core';
 import { WebComponent, WebComponentHooks } from '../../web-component';
 import { PlatonViewerComponentDefinition, PlatonViewerState } from './platon-viewer';
+import { PlatonViewerHandler } from './platon-viewer.directive';
 
 
 @Component({
@@ -19,7 +20,27 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      */
     @Input() state!: PlatonViewerState;
 
-    constructor(readonly injector: Injector) {}
+    @ViewChild(PlatonViewerHandler) component !: PlatonViewerHandler;
+
+    private _componentState: any = {};
+    @Output() componentStateChange: EventEmitter<Record<string, any>> = new EventEmitter<Record<string, any>>();
+
+    @Input()
+    set componentState(state: any) {
+        this._componentState = this.component.getComponentState();
+        this.componentStateChange.emit(this._componentState);
+    }
+
+    get componentState(): any {
+        this._componentState = this.component.getComponentState();
+        return this._componentState;
+    }
+
+    loaded: boolean = false;
+
+    constructor(
+        readonly injector: Injector
+    ) {}
 
     /**
      * This method is called immediately after the `state` getter runs with the object that
@@ -30,6 +51,7 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      * @returns the state or a computed version of the state.
      */
     onGetState(state: PlatonViewerState) {
+        this.loaded = true;
         return state;
     }
 

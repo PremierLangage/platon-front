@@ -1,20 +1,25 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { LiveRender } from '../models/live';
-import { LiveProvider } from '../models/live-provider';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { Live } from "../models/live";
+import { LiveProvider } from "../models/live-provider";
+
 
 @Injectable()
 export class RemoteLiveProvider extends LiveProvider {
-    constructor(private readonly http: HttpClient) {
+
+    constructor(
+        private readonly http: HttpClient
+    ) {
         super();
     }
 
-    render(id: number): Observable<LiveRender> {
-        return this.http.get<LiveRender>(`api/v1/runner/live/resource:${id}`);
+    build(id: number): Observable<Live> {
+        return this.http.get<Live>(`/api/v1/live/resource/${id}/`);
     }
 
-    grader(id: number, answers: object): Observable<any> {
-        return this.http.post<any>(`api/v1/runner/live/resource:${id}`, answers);
+    get(id: number, session: string): Observable<Live> {
+        return this.http.get<Live>(`/api/v1/live/resource/${id}/${session}`);
     }
+
 }

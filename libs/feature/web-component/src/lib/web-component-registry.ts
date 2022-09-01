@@ -159,8 +159,7 @@ export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
                 /* webpackChunkName: "wc-drag-drop" */ './forms/drag-drop/drag-drop.module'
             ).then((m) => m.DragDropModule),
     },
-    { selector: 'wc-platon-viewer', module: () => import( /* webpackChunkName: "wc-platon-viewer" */ './widgets/platon-viewer/platon-viewer.module').then(m => m.PlatonViewerModule) },
-    { selector: 'wc-exercice', module: () => import( /* webpackChunkName: "wc-exercice" */ './widgets/exercice/exercice.module').then(m => m.ExerciceModule) },
+    { selector: 'wc-platon-viewer', module: () => import( /* webpackChunkName: "wc-platon-viewer" */ './widgets/platon-viewer/platon-viewer.module').then(m => m.PlatonViewerModule) }
 ];
 
 export const WEB_COMPONENTS_REGISTRY: Provider[] = [

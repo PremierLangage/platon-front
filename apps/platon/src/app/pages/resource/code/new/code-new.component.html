@@ -1,0 +1,39 @@
+<div class="code-tree">
+  <ng-container [ngSwitch]="code.state">
+
+    <ng-container *ngSwitchCase="'LOADING'">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'NOT_FOUND'">
+      <app-error-404 style="width: 100%;"></app-error-404>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'READY'">
+      <nz-list
+          [nzHeader]="nodeFileHeader"
+          [nzBordered]="true"
+          nzSize="small">
+          <nz-list-item>
+            <nge-monaco-editor
+              style="--editor-height: 650px;"
+              (ready)="onCreateEditor($event)">
+            </nge-monaco-editor>
+          </nz-list-item>
+        </nz-list>
+    </ng-container>
+
+  </ng-container>
+</div>
+
+<ng-template #nodeFileHeader>
+  <div class="nz-list-header">
+    <span>
+      <input nz-input placeholder="Nom du fichier..." [(ngModel)]="fileName" />
+    </span>
+    <button nz-button nzType="primary" [nzLoading]="save" (click)="onCreateNewFile()">
+      <i nz-icon nzType="file-add" nzTheme="outline"></i>
+      <span>Create new file</span>
+    </button>
+  </div>
+</ng-template>
