@@ -1,0 +1,26 @@
+.rounded-edge {
+  border-radius: 25px;
+}
+
+nz-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5%;
+}
+
+.title {
+  display: flex;
+  justify-content: center;
+}
+
+#tv {
+  position: relative;
+  border-radius: 0% 0% 0% 0% / 0% 0% 0% 0% ;
+  box-shadow: 4px 4px rgba(0,0,0,.15);
+  transition: all .4s ease;
+}
+#tv:hover {
+  border-radius: 0% 0% 50% 50% / 0% 0% 5% 5% ;
+  box-shadow: 1vmin 1vmin rgba(0,0,0,.25);
+}

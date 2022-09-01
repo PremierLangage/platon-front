@@ -1,25 +1,12 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, ɵclearResolutionOfComponentResourcesQueue } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-<<<<<<< HEAD
-import {
-    Circle,
-    CircleService,
-    FileEntry,
-    FileService,
-    FileTree,
-    Publisher,
-    PublisherForm,
-    PublisherService,
-    Resource,
-    ResourceService,
-    UpdateResourceForm,
-} from '@platon/feature/workspace';
-=======
 import { Circle, CircleService, FileEntry, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
->>>>>>> develop-asset-update
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, Subscription } from 'rxjs';
+
+import { NzUploadFile } from 'ng-zorro-antd/upload';
+import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
+
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -67,29 +54,8 @@ export class ResourcePresenter implements OnDestroy {
         throw new ReferenceError('missing resource');
     }
 
-<<<<<<< HEAD
-    publisher(): Observable<Publisher> {
-        return this.publisherService.get();
-    }
-
-    async publish(form: Omit<PublisherForm, 'resource'>): Promise<boolean> {
-        const { resource } = this.context.value as Required<Context>;
-        try {
-            const asset = await this.publisherService
-                .post({
-                    resource,
-                    ...form,
-                })
-                .toPromise();
-            return true;
-        } catch {
-            this.alertError();
-            return false;
-        }
-=======
     async openInLiveUrl(): Promise<string> {
         return `/live/${this.id}`;
->>>>>>> develop-asset-update
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -134,8 +100,6 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
-<<<<<<< HEAD
-=======
     async getFileContent(file: FileEntry): Promise<string | undefined> {
         try {
             const [user, content] = await Promise.all([
@@ -181,7 +145,48 @@ export class ResourcePresenter implements OnDestroy {
         return false;
     }
 
->>>>>>> develop-asset-update
+    async upload(files : NzUploadFile[], description : string, selectedFolder: FileEntry | undefined): Promise<Observable<any>> {
+        const { resource } = this.context.value as Required<Context>;
+        return this.fileService.create({
+            owner: resource,
+            files: files,
+            description: description,
+        }, selectedFolder);
+    }
+
+    async delete(file : FileEntry, description : string = ""): Promise<Observable<any>> {
+        return this.fileService.delete(file);
+    }
+
+    async addFolder(foldername : string, description : string = "aaah",myfiles : any): Promise<Observable<any>> {
+        const { resource } = this.context.value as Required<Context>;
+        return this.fileService.createFolder({
+            owner: resource,
+            description: description,
+            files: myfiles
+        });
+    }
+
+    // async upload(
+    //     files: Record<string, { type: 'file' | 'folder'; content?: string }>
+    // ): Promise<void> {
+    //     const { resource } = this.context.value as Required<Context>;
+    //     //const authToken = (await this.authService.token())!;
+    //     try {
+    //         this.fileService.create({
+    //             owner: resource,
+    //             files: files,
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
+
+    options(): Observable<any> {
+        const { resource } = this.context.value as Required<Context>;
+        return this.fileService.options(resource);
+    }
+    
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),

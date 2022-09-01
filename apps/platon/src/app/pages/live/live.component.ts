@@ -71,6 +71,7 @@ export class LiveComponent implements OnInit, OnDestroy {
                 this.live = data.live;
 >>>>>>> develop-asset-update
                 this.changeDetectorRef.markForCheck();
+                console.log(this.context);
             })
         );
     }

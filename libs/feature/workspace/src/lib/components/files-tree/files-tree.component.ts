@@ -17,8 +17,10 @@ export class FilesTreeComponent {
     private _tree?: FileTree;
     private _selection?: FileEntry;
     _loading = true;
+    isDisplay = false;
 
     @Output() didRefresh = new EventEmitter<void>();
+    @Output() deleteFile = new EventEmitter<FileEntry>();
 
     nodes: Node[] = [];
 
@@ -31,7 +33,7 @@ export class FilesTreeComponent {
             return {
                 key: entry.path,
                 title: entry.path.split('/').pop(),
-                isLeaf: !entry.children?.length,
+                isLeaf: (entry.type == 'file'),
                 children: entry.children?.map(createNode).sort(this.compareNodes)
             };
         };
@@ -74,6 +76,14 @@ export class FilesTreeComponent {
     download(): void {
         if (this._selection) {
             window.open(this._selection.downloadUrl, '_blank');
+        }
+    }
+
+    delete(node: NzTreeNode): void {
+        this._selection = this._index.get(node.key);
+
+        if (this._selection) {
+            this.deleteFile.emit(this._selection);
         }
     }
 

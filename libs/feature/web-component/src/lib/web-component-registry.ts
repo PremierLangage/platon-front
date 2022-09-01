@@ -23,6 +23,7 @@ import { MarkdownComponentDefinition } from './widgets/markdown/markdown';
 import { TimerComponentDefinition } from './widgets/timer/timer';
 import { DragDropComponentDefinition } from './forms/drag-drop/drag-drop';
 import { PlatonViewerComponentDefinition } from './widgets/platon-viewer/platon-viewer';
+import { ExerciceComponentDefinition } from './widgets/exercice/exercice';
 
 export const WEB_COMPONENTS_BUNDLES: NgeElementDef[] = [
     {
@@ -249,5 +250,6 @@ export const WEB_COMPONENTS_REGISTRY: Provider[] = [
         useValue: DragDropComponentDefinition,
     },
     { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: PlatonViewerComponentDefinition },
+    { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: ExerciceComponentDefinition },
     // { provide: WEB_COMPONENT_DEFINITIONS, multi: true, useValue: TimerComponentDefinition },
 ];

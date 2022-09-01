@@ -3,20 +3,19 @@ import { Observable } from 'rxjs';
 import { Resource } from '../models/resource';
 import {
     CreateFileForm,
+    CreateFolderForm,
     MoveFileForm,
     RenameFileForm,
     FileEntry,
     FileTree,
-    UpdateFileForm
-} from "../models/file";
+    UpdateFileForm,
+} from '../models/file';
 import { FileProvider } from '../models/file-provider';
 import { Circle } from '../models/circle';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
-    constructor(
-        private readonly provider: FileProvider
-    ) { }
+    constructor(private readonly provider: FileProvider) {}
 
     tree(owner: Resource | Circle): Observable<FileTree> {
         return this.provider.tree(owner);
@@ -30,8 +29,12 @@ export class FileService {
         return this.provider.delete(file);
     }
 
-    create(form: CreateFileForm): Observable<any> {
-        return this.provider.create(form);
+    create(form: CreateFileForm, selectedFolder: FileEntry | undefined): Observable<any> {
+        return this.provider.create(form, selectedFolder);
+    }
+
+    createFolder(form: CreateFolderForm): Observable<any> {
+        return this.provider.createFolder(form);
     }
 
     move(form: MoveFileForm): Observable<any> {
@@ -44,5 +47,9 @@ export class FileService {
 
     rename(form: RenameFileForm): Observable<any> {
         return this.provider.rename(form);
+    }
+
+    options(owner: Resource | Circle): Observable<any> {
+        return this.provider.options(owner);
     }
 }

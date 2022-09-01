@@ -2,7 +2,7 @@ import { stripIndent } from 'common-tags';
 import { defineWebComponent, IWebComponent, WebComponentTypes } from '../../web-component';
 
 export interface AutomatonViewerState extends IWebComponent {
-  automaton: string;
+    automaton: string;
 }
 
 export const AutomatonViewerComponentDefinition = defineWebComponent({

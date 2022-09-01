@@ -1,0 +1,32 @@
+<div id="main"
+  *ngIf="this.feedback__"
+
+  class="rounded-edge"
+  @fadeSlideInOutUpward
+  [ngStyle] = "{'margin' : '10px'}"
+>
+
+  <!--
+    SCORE DISPLAYING
+  -->
+  <div id="tv"
+    [@fadeSlideInOutLeftToRight]
+    [ngStyle]="{'background': getScoreColor('0.05')}"
+  >
+    <div class="title"><h1 nz-typography><strong>Score</strong></h1></div>
+    <nz-divider [nzText]="text">
+      <ng-template #text>
+        <i nz-icon [nzType]="getScoreEmoji()"></i>
+        <h3 nz-typography>{{this.feedback__.score}} / 100 </h3>
+      </ng-template>
+    </nz-divider>
+    <nz-space nzSize="middle" nzDirection="vertical" nzAlign="start"></nz-space>
+    <nz-progress
+        nzType="dashboard"
+        [nzPercent]="this.feedback__.score"
+        [nzStrokeColor]="getScoreColor('1.0')"
+      ></nz-progress>
+
+      <!-- <nz-slider [(ngModel)]="this.feedback__.score"></nz-slider> -->
+  </div>
+</div>

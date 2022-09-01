@@ -3,6 +3,7 @@ import { WebComponent, WebComponentHooks } from '../../web-component';
 import { PlatonViewerComponentDefinition, PlatonViewerState } from './platon-viewer';
 import { PlatonViewerHandler } from './platon-viewer.directive';
 
+
 @Component({
     selector: 'wc-platon-viewer',
     templateUrl: 'platon-viewer.component.html',
@@ -62,10 +63,5 @@ export class PlatonViewerComponent implements WebComponentHooks<PlatonViewerStat
      * - `ngOnInit` hook is always called before this one.
      * - change detector is triggered right after the end of this method refresh the view.
      */
-    onChangeState() {
-
-    }
-
-
-
+    onChangeState() {}
 }

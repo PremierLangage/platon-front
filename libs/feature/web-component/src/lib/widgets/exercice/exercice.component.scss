@@ -1,0 +1,65 @@
+.main {
+  display: flex;
+  flex-direction:column;
+}
+
+.Exercice-Header {
+  order: -10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  .top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .author {
+      font-weight: bold;
+    }
+
+    .version {
+      font-style: italic;
+      opacity: 0.4;
+    }
+  }
+
+
+  .title {
+    align-self:center;
+    font-weight: bold;
+  }
+}
+
+.Exercice-Body {
+  .body-line {
+    .Exercice-State {
+      order: 0;
+    }
+
+    .Exercice-FeedBack {
+      order: 1;
+    }
+  }
+
+  .Exercice-Form {
+    order: 2;
+  }
+}
+
+
+
+.Exercice-Buttons-Actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.Upper-Button {
+  order: -5;
+  padding: 15px;
+}
+
+.Lower-Button {
+  order: 10;
+}
