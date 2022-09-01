@@ -115,7 +115,8 @@ export class ResourcePresenter implements OnDestroy {
             if (resource) {
                 await this.fileService.create({
                     owner: resource,
-                    files: files
+                    files: files,
+                    description: ''
                 }).toPromise();
                 return true;
             }

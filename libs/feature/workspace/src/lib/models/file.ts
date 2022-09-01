@@ -1,7 +1,6 @@
 import { Circle } from "./circle";
 import { Resource } from "./resource";
 
-
 export interface FileEntry {
     path: string;
     parent: string;
@@ -28,6 +27,7 @@ export interface FileTree {
 export interface CreateFileForm {
     owner: Resource | Circle;
     files: Record<string, { type: 'file' | 'folder', content?: string }>;
+    description : string;
 }
 
 export interface UpdateFileForm {
