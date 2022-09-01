@@ -4,6 +4,7 @@ import { AuthService } from "@platon/core/auth";
 import { Asset, CoursDetail, CoursService } from "@platon/feature/workspace";
 import { lastValueFrom, Subscription } from "rxjs";
 import { AssetEvents } from "../asset-events.models";
+import { AssetResolver } from "../asset.resolver";
 
 
 @Component({
@@ -24,7 +25,8 @@ export class CoursComponent implements OnInit, OnDestroy {
         private readonly activatedRoute: ActivatedRoute,
         private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly authService: AuthService,
-        private readonly coursService: CoursService
+        private readonly coursService: CoursService,
+        private readonly assetResolver: AssetResolver
     ) {
         this.subscriptions.push(
             this.activatedRoute.data.subscribe(data => {
@@ -46,6 +48,7 @@ export class CoursComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.routerSubscriptions.forEach(s => s.unsubscribe());
+        this.assetResolver.popToPath();
     }
 
     routerSubscribe(elementRef: AssetEvents): void {

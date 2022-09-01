@@ -19,7 +19,7 @@
       </ng-container>
       <ng-container *ngSwitchCase="'READY'">
         <ng-container *ngIf="context.assets && context.assets.results.length; else: empty">
-          <ui-card [display]="'row'" [items]="getItems()"></ui-card>
+          <ui-card [display]="'row'" [items]="cards"></ui-card>
         </ng-container>
         <ng-template #empty>
           <nz-empty [nzNotFoundContent]="content">

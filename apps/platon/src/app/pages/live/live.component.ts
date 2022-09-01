@@ -1,28 +1,27 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { Live } from "@platon/feature/workspace";
 import { Subscription } from "rxjs";
-import { LivePresenter } from "./live-presenter";
-
 
 @Component({
     selector: 'app-live',
     templateUrl: './live.component.html',
     styleUrls: ['./live.component.scss'],
-    providers: [LivePresenter]
 })
 export class LiveComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    context = this.presenter.defaultContext;
+    live?: Live;
 
     constructor(
-        private readonly presenter: LivePresenter,
+        private readonly activatedRoute: ActivatedRoute,
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.presenter.contextChange.subscribe(context => {
-                this.context = context;
+            this.activatedRoute.data.subscribe(data => {
+                this.live = data.live;
                 this.changeDetectorRef.markForCheck();
             })
         );

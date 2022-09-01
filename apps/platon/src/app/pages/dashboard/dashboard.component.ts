@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     context = this.presenter.defaultContext;
+    cards?: CardItem[];
 
     constructor(
         private readonly presenter: DashboardPresenter,
@@ -40,6 +41,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.presenter.contextChange.subscribe(context => {
                 this.context = context;
+                this.cards = context.assets?.results.map<CardItem>((item, index) => {
+                    return {
+                        title: item.name,
+                        description: item.name,
+                        path: ['/', 'asset', 'cours', item.name]
+                    }
+                });
                 this.changeDetectorRef.markForCheck();
             })
         );
@@ -91,16 +99,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    getItems(): CardItem[] | undefined {
-        return this.context.assets?.results.map<CardItem>((asset, index) => {
-            return {
-                title: asset.name,
-                description: asset.name,
-                path: ['/', 'asset', 'cours', asset.name]
-            }
-        });
     }
 
 }

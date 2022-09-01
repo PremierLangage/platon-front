@@ -11,8 +11,12 @@ export class LiveService {
         private readonly provider: LiveProvider
     ) { }
 
-    get(id: number): Observable<Live> {
-        return this.provider.get(id);
+    build(id: number): Observable<Live> {
+        return this.provider.build(id);
+    }
+
+    get(id: number, session: string): Observable<Live> {
+        return this.provider.get(id, session);
     }
 
 }

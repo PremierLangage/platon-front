@@ -14,8 +14,12 @@ export class RemoteLiveProvider extends LiveProvider {
         super();
     }
 
-    get(id: number): Observable<Live> {
+    build(id: number): Observable<Live> {
         return this.http.get<Live>(`/api/v1/live/resource/${id}/`);
+    }
+
+    get(id: number, session: string): Observable<Live> {
+        return this.http.get<Live>(`/api/v1/live/resource/${id}/${session}`);
     }
 
 }
