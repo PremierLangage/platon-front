@@ -1,5 +1,6 @@
-export class LiveRender {
-    form!: string;
-    text!: string;
-    title!: string;
+export interface Live {
+    env: string;
+    name: string;
+    type: string;
+    content: Record<string, any>;
 }

@@ -1,0 +1,21 @@
+<nz-row nzJustify="space-between">
+  <!-- HEADER -->
+  <nz-col nzSpan="24">
+    <nz-input-group [nzSuffix]="suffixIconSearch" class="section-name">
+      <input nz-input placeholder="Entrez le nom de la section" nzSize="large" [(ngModel)]="section.name"/>
+    </nz-input-group>
+    <ng-template #suffixIconSearch>
+      <nz-divider nzType="vertical"></nz-divider>
+      <button nz-button nzType="text" nzBlock nzSize="large">
+        <i nz-icon nzType="setting" nzTheme="outline"></i>
+        <span>Menu</span>
+      </button>
+    </ng-template>
+    <nz-divider></nz-divider>
+  </nz-col>
+
+  <!-- CONTENT -->
+  <nz-col nzSpan="24">
+    <div id="editor-js"></div>
+  </nz-col>
+</nz-row>

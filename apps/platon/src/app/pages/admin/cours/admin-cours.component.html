@@ -1,0 +1,81 @@
+<div nz-row nzJustify="space-between">
+  <!-- HEADER -->
+  <div nz-col nzSpan="8" class="admin-title">
+    <h1>Cours</h1>
+  </div>
+  <div nz-col nzSpan="16" class="admin-action">
+    <button nz-button nzType="default" class="admin-action-item">
+      Selectionner
+    </button>
+    <!-- <button nz-button nzType="primary" class="admin-action-item" (click)="didCreate()">
+      Créer un cours
+    </button>
+    <nz-modal [(nzVisible)]="creation" nzTitle="Créer un cours" (nzOnCancel)="didCreateCancel()" (nzOnOk)="didCreateOk()">
+      <ng-container *nzModalContent>
+        <p><b>Entrez un cours :</b></p>
+        <input nz-input placeholder="Nom du cours" nzSize="large"/>
+      </ng-container>
+    </nz-modal> -->
+
+    <button nz-button nzType="primary" class="admin-action-item" (click)="didCreate(modalTitle, modalContent, modalFooter)">
+      <span>Créer un cours</span>
+    </button>
+
+    <ng-template #modalTitle>
+      <span>Creation de cours</span>
+    </ng-template>
+    <ng-template #modalContent>
+      <input nz-input placeholder="Entrez un nom pour le cours..." nzSize="large" [(ngModel)]="name"/>
+    </ng-template>
+    <ng-template #modalFooter let-ref="modalRef">
+      <button nz-button (click)="ref.destroy()">Annuler</button>
+      <button nz-button nzType="primary" (click)="didCreateOk(ref)" [nzLoading]="creation">
+        Créer
+      </button>
+    </ng-template>
+
+  </div>
+  <!-- SEARCH BAR -->
+  <div nz-col nzSpan="24">
+    <nz-divider></nz-divider>
+    <nz-input-group [nzSuffix]="suffixIconSearch" class="admin-search-bar">
+      <input nz-input placeholder="Rechercher dans les cours" nzSize="large"/>
+    </nz-input-group>
+    <ng-template #suffixIconSearch>
+      <i nz-icon nzType="search"></i>
+      <nz-divider nzType="vertical"></nz-divider>
+      <nz-button-group>
+        <button nz-button nzSize="large" [nzType]="(display === 'list') ? 'primary' : 'default'" (click)="display = 'list'">
+          <i nz-icon nzType="unordered-list" nzTheme="outline"></i>
+        </button>
+        <button nz-button nzSize="large" [nzType]="(display === 'row') ? 'primary' : 'default'" (click)="display = 'row'">
+          <i nz-icon nzType="appstore" nzTheme="outline"></i>
+        </button>
+      </nz-button-group>
+    </ng-template>
+    <nz-divider></nz-divider>
+  </div>
+  <!-- CONTENT -->
+  <div nz-col nsSpan="24" class="admin-inner-content">
+
+    <ng-container *ngIf="context.state === 'READY'">
+      <ui-card [display]="display" [items]="getItems()"></ui-card>
+    </ng-container>
+
+    <ng-container *ngIf="context.state === 'LOADING'">
+      <div style="text-align: center;">
+        <nz-spin nzSimple></nz-spin>
+      </div>
+    </ng-container>
+
+
+  </div>
+  <!-- FOOTER -->
+  <div nz-col nsSpan="24" class="admin-footer">
+    <nz-divider></nz-divider>
+    <h2>Ressources</h2>
+    <p>Simple description for footer</p>
+    <p>Other link can be present here</p>
+  </div>
+
+</div>

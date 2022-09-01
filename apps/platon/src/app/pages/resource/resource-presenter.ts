@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
+<<<<<<< HEAD
 import {
     Circle,
     CircleService,
@@ -14,8 +15,11 @@ import {
     ResourceService,
     UpdateResourceForm,
 } from '@platon/feature/workspace';
+=======
+import { Circle, CircleService, FileEntry, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
+>>>>>>> develop-asset-update
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, lastValueFrom, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable()
 export class ResourcePresenter implements OnDestroy {
@@ -23,6 +27,8 @@ export class ResourcePresenter implements OnDestroy {
     private readonly context = new BehaviorSubject<Context>(
         this.defaultContext
     );
+
+    private id!: number;
 
     get defaultContext(): Context {
         return { state: 'LOADING' };
@@ -44,6 +50,7 @@ export class ResourcePresenter implements OnDestroy {
         this.subscriptions.push(
             this.activatedRoute.params.subscribe((params) => {
                 this.onChangeRoute(Number.parseInt(params.id + '', 10));
+                this.id = Number.parseInt(params.id + '', 10);
             })
         );
     }
@@ -60,6 +67,7 @@ export class ResourcePresenter implements OnDestroy {
         throw new ReferenceError('missing resource');
     }
 
+<<<<<<< HEAD
     publisher(): Observable<Publisher> {
         return this.publisherService.get();
     }
@@ -78,6 +86,10 @@ export class ResourcePresenter implements OnDestroy {
             this.alertError();
             return false;
         }
+=======
+    async openInLiveUrl(): Promise<string> {
+        return `/live/${this.id}`;
+>>>>>>> develop-asset-update
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -122,6 +134,54 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
+<<<<<<< HEAD
+=======
+    async getFileContent(file: FileEntry): Promise<string | undefined> {
+        try {
+            const [user, content] = await Promise.all([
+                this.authService.ready(),
+                firstValueFrom(this.fileService.read(file))
+            ]);
+            return content;
+        } catch {
+            this.alertError();
+            return;
+        }
+    }
+
+    async updateFileContent(file: FileEntry, content: string): Promise<boolean> {
+        try {
+            await this.authService.ready();
+            await this.fileService.update({
+                file: file,
+                content: content
+            }).toPromise();
+            return true;
+        } catch {
+            this.alertError();
+        }
+        return false;
+    }
+
+    async createFile(files: Record<string, { type: 'file' | 'folder', content?: string }>): Promise<boolean> {
+        try {
+            await this.authService.ready();
+            const { resource } = this.context.value;
+            if (resource) {
+                await this.fileService.create({
+                    owner: resource,
+                    files: files,
+                    description: ''
+                }).toPromise();
+                return true;
+            }
+        } catch {
+            this.alertError();
+        }
+        return false;
+    }
+
+>>>>>>> develop-asset-update
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),

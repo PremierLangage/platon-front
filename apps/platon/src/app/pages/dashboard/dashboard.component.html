@@ -13,6 +13,28 @@
         </button>
       </ng-template>
     </ui-search-banner>
+<<<<<<< HEAD
     <br /><br />
+=======
+    <br/><br/>
+    <ng-container [ngSwitch]="context.state">
+      <ng-container *ngSwitchCase="'LOADING'">
+        <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+      </ng-container>
+      <ng-container *ngSwitchCase="'READY'">
+        <ng-container *ngIf="context.assets && context.assets.results.length; else: empty">
+          <ui-card [display]="'row'" [items]="cards"></ui-card>
+        </ng-container>
+        <ng-template #empty>
+          <nz-empty [nzNotFoundContent]="content">
+            <ng-template #content>
+              <h2>Aucun cours</h2>
+            </ng-template>
+          </nz-empty>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+
+>>>>>>> develop-asset-update
   </app-content>
 </app-container>

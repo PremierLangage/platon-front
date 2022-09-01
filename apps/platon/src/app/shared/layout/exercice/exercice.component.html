@@ -1,0 +1,11 @@
+<ng-container *ngIf="content; else: waiting">
+  <h1>{{content.title}}</h1>
+  <h2>{{content.text}}</h2>
+  <app-asset-form [content]="content"></app-asset-form>
+  <button nz-button nzType="primary" (click)="submit()" >Submit</button>
+</ng-container>
+
+<ng-template #waiting>
+  <nz-skeleton [nzActive]="true"></nz-skeleton>
+</ng-template>
+

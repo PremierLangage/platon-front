@@ -1,0 +1,29 @@
+<div class="code-tree">
+  <ng-container [ngSwitch]="code.state">
+
+    <ng-container *ngSwitchCase="'LOADING'">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'NOT_FOUND'">
+      <app-error-404 style="width: 100%;"></app-error-404>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'READY'">
+      <nz-upload
+        nzType="drag"
+        [nzMultiple]="true"
+        nzListType="picture"
+        [(nzFileList)]="fileList"
+      >
+        <br>
+        <p class="ant-upload-drag-icon">
+          <i nz-icon nzType="inbox"></i>
+        </p>
+        <h1>Drag files here to add them to your repository</h1>
+        <h3>Or choose your files</h3>
+      </nz-upload>
+    </ng-container>
+
+  </ng-container>
+</div>

@@ -1,0 +1,44 @@
+.card-item {
+  display: grid;
+  grid-template-rows: 200px max-content 1fr;
+  width: 100%;
+  background-color: #f0f2f5;
+  transition: all 300ms ease;
+  position: relative;
+}
+
+.card-item:hover {
+  transform: scale(1.01);
+  box-shadow: 0 0 10px black;
+}
+
+.card-item header img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.card-item .content {
+  padding: 0 10px;
+}
+
+.card-item footer {
+  padding: 0 10px;
+  padding-bottom: 10px;
+}
+
+.card-item .status {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
+
+.card-item .tags {
+  padding: 0 10px;
+  padding-top: 10px;
+}
+
+.card-item .tags nz-tag {
+  margin-bottom: 10px;
+}

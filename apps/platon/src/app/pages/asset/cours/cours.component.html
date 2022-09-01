@@ -1,0 +1,37 @@
+<ng-container *ngIf="overview">
+  <nz-row nzJustify="space-between" nzAlign="top" class="asset-content" [nzGutter]="[24, 0]">
+    <nz-col nzSpan="16">
+      <h2>Contenue du cours</h2>
+      <ui-list-item-article
+        *ngFor="let section of cours?.content?.sections; index as i"
+        [articleTitle]="i + '-  ' + section.name"
+        [articleUrl]="['section', i]"
+        [articleIconTemplate]="image"
+      >
+        <ng-template #image>
+          <mat-icon>filter_none</mat-icon>
+        </ng-template>
+      </ui-list-item-article>
+    </nz-col>
+
+    <nz-col nzSpan="8">
+      <nz-comment [nzAuthor]="asset.author?.username">
+        <nz-avatar
+          nz-comment-avatar
+          nzIcon="user"
+          [nzSrc]="asset.author?.avatar"
+        ></nz-avatar>
+        <nz-comment-content>
+          <p><b>Auteur : </b>{{asset.author?.lastName + ' ' + asset.author?.firstName}}</p>
+        </nz-comment-content>
+      </nz-comment>
+    </nz-col>
+  </nz-row>
+
+</ng-container>
+
+
+<router-outlet
+  (activate)="routerSubscribe($event)"
+  (deactivate)="routerUnsubscribe()"
+></router-outlet>

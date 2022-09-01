@@ -15,6 +15,9 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
 
 import { CoreAuthModule } from '@platon/core/auth';
 import { AppSharedErrorModule } from '../error/error.module';
@@ -26,6 +29,10 @@ import { DrawerComponent } from './drawer/drawer.component';
 import { ContentComponent } from './content/content.component';
 import { ContainerComponent } from './container/container.component';
 import { TabsComponent } from './tabs/tabs.component';
+import { SharedUiListModule } from '@platon/shared/ui/list';
+import { AssetIconPipeModule } from '@platon/shared/utils';
+import { AssetExerciceComponent } from './exercice/exercice.component';
+import { AssetFormComponent } from './form/form.component';
 
 
 const DECLARATIONS = [
@@ -36,6 +43,8 @@ const DECLARATIONS = [
     ContentComponent,
     ContainerComponent,
     TabsComponent,
+    AssetFormComponent,
+    AssetExerciceComponent,
 ];
 
 @NgModule({
@@ -56,9 +65,15 @@ const DECLARATIONS = [
         NzTabsModule,
         NzResultModule,
         NzSkeletonModule,
+        NzEmptyModule,
+        NzButtonModule,
+        NzMenuModule,
+        NzLayoutModule,
 
+        SharedUiListModule,
         CoreAuthModule,
         AppSharedErrorModule,
+        AssetIconPipeModule
     ],
     exports: [
         ...DECLARATIONS,

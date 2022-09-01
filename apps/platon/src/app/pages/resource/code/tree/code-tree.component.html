@@ -1,0 +1,103 @@
+<div class="code-tree">
+  <ng-container [ngSwitch]="code.state">
+
+    <ng-container *ngSwitchCase="'LOADING'">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'NOT_FOUND'">
+      <app-error-404 style="width: 100%;"></app-error-404>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'READY'">
+
+      <!-- NODE VIEW -->
+      <nz-list
+        [nzHeader]="nodeTreeHeader"
+        [nzBordered]="true"
+        nzSize="small">
+        <!-- NODE GO BACK -->
+        <nz-list-item *ngIf="!code.node?.root">
+          <a (click)="didGoBack()">..</a>
+        </nz-list-item>
+
+        <!-- NODE LIST -->
+        <nz-list-item *ngFor="let item of code.node?.children">
+          <div class="nz-list-item-name">
+            <i nz-icon [nzType]="item.type" nzTheme="outline"></i>
+            <a (click)="didGoPath(item.title)">{{item.title}}</a>
+          </div>
+          <div class="nz-list-item-size">
+            <span>{{item.size}}</span>
+          </div>
+        </nz-list-item>
+      </nz-list>
+
+      <!-- FILE VIEW -->
+      <ng-container *ngIf="code.node?.isLeaf">
+        <nz-list
+          [nzHeader]="nodeFileHeader"
+          [nzBordered]="true"
+          nzSize="small">
+          <nz-list-item>
+            <!-- FILE VIEW CONTENT -->
+            <ng-container [ngSwitch]="code.file?.state">
+              <ng-container *ngSwitchCase="'LOADING'">
+                <nz-skeleton [nzActive]="true"></nz-skeleton>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'READY'">
+                <nge-monaco-viewer
+                  [language]="code.file?.entry?.path?.split('/')?.pop()?.split('.')?.pop()"
+                  [code]="code.file?.content">
+                </nge-monaco-viewer>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'ERROR'">
+                <app-error-404 style="width: 100%;"></app-error-404>
+              </ng-container>
+
+            </ng-container>
+          </nz-list-item>
+        </nz-list>
+      </ng-container>
+    </ng-container>
+
+  </ng-container>
+</div>
+
+
+<ng-template #nodeTreeHeader>
+  <div class="nz-list-header">
+    <a>TODO</a>
+    <ng-container *ngIf="!code.node?.isLeaf">
+      <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight">
+        Add file
+        <i nz-icon nzType="caret-down" nzTheme="outline"></i>
+      </button>
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item>
+            <a style="padding: 0 12px;"
+              (click)="didGoNewFile(code.node?.key)">Create new file</a>
+          </li>
+          <li nz-menu-item>
+            <a style="padding: 0 12px;"
+              (click)="didGoUploadFile(code.node?.key)">Upload files</a>
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template #nodeFileHeader>
+  <div class="nz-list-header">
+    <span>File : {{code.file?.entry?.path?.split('/')?.pop()}}</span>
+    <button nz-button nzType="text" (click)="didGoEdit(code.node?.key)">
+      <i nz-icon nzType="edit" nzTheme="outline"></i>
+      <span>Edit</span>
+    </button>
+  </div>
+</ng-template>
+

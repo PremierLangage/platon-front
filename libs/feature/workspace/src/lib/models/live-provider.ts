@@ -1,6 +1,11 @@
-import { Observable } from 'rxjs';
-import { LiveRender } from './live';
+import { Observable } from "rxjs";
+import { Live } from "./live";
+
 
 export abstract class LiveProvider {
-    abstract render(id: number): Observable<LiveRender>;
+
+    abstract build(id: number): Observable<Live>;
+
+    abstract get(id: number, session: string): Observable<Live>;
+
 }

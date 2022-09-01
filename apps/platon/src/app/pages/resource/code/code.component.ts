@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -9,12 +10,22 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FileEntry, FileTree, Resource } from '@platon/feature/workspace';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { ResourcePresenter } from '../resource-presenter';
+=======
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Router, UrlSegment } from "@angular/router";
+import { FileEntry, FileTree } from "@platon/feature/workspace";
+import { firstValueFrom, Subscription } from "rxjs";
+import { ResourcePresenter } from "../resource-presenter";
+import { CodeService } from "./code.service";
+
+>>>>>>> develop-asset-update
 
 @Component({
     selector: 'app-resource-code',
     templateUrl: './code.component.html',
     styleUrls: ['./code.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+<<<<<<< HEAD
 })
 export class CodeComponent implements OnInit, OnDestroy {
 
@@ -23,10 +34,20 @@ export class CodeComponent implements OnInit, OnDestroy {
     context = this.presenter.defaultContext;
     tree?: FileTree;
     route?: Route[];
+=======
+    providers: [CodeService]
+})
+export class CodeComponent implements OnInit, OnDestroy {
+    private readonly subscriptions: Subscription[] = [];
+
+    code = this.codeService.defaultCode;
+    context = this.presenter.defaultContext;
+>>>>>>> develop-asset-update
 
     constructor(
         private readonly presenter: ResourcePresenter,
         private readonly changeDetectorRef: ChangeDetectorRef,
+<<<<<<< HEAD
         private readonly activatedRoute: ActivatedRoute,
     ) {
     }
@@ -54,3 +75,27 @@ export class CodeComponent implements OnInit, OnDestroy {
 interface Route {
     path: string;
 }
+=======
+        private readonly codeService: CodeService
+    ) { }
+
+    ngOnInit(): void {
+        this.subscriptions.push(
+            this.presenter.contextChange.subscribe(async context => {
+                this.context = context;
+                await this.codeService.onContextChange();
+                this.changeDetectorRef.markForCheck();
+            }),
+            this.codeService.codeChange.subscribe(code => {
+                this.code = code;
+                this.changeDetectorRef.markForCheck();
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+}
+>>>>>>> develop-asset-update

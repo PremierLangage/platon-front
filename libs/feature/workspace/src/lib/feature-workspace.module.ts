@@ -20,8 +20,10 @@ import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzListModule } from 'ng-zorro-antd/list';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 
 import { StatusColorPipe } from './pipes/status-color.pipe';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
@@ -36,11 +38,11 @@ import { ListItemComponent } from './components/list-item/list-item.component';
 import { EventListComponent } from './components/event-list/event-list.component';
 import { CircleTreeComponent } from './components/circle-tree/circle-tree.component';
 import { FilesTreeComponent } from './components/files-tree/files-tree.component';
-import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
-import { PublisherItemComponent } from './components/publisher-item/publisher-item.component';
-import { GitTreeComponent } from './components/git-tree/git-tree.component';
-import { GitPanelComponent } from './components/git-panel/git-panel.component';
-import { GitCloneComponent } from './components/git-clone/git-clone.component';
+
+import { CoursListComponent } from './components/cours-list/cours-list.component';
+import { CodeTreeComponent } from './components/code-tree/code-tree.component';
+import { CoursCardComponent } from './components/cours-card/cours-card.component';
+import { SharedUiCardModule } from '@platon/shared/ui/card';
 
 @NgModule({
     imports: [
@@ -63,8 +65,9 @@ import { GitCloneComponent } from './components/git-clone/git-clone.component';
         NzTimelineModule,
         NzGridModule,
         NzCardModule,
-        NzBreadCrumbModule,
+        NzTagModule,
         NzListModule,
+        NzSkeletonModule,
 
         SharedUiListModule,
     ],
@@ -81,12 +84,10 @@ import { GitCloneComponent } from './components/git-clone/git-clone.component';
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        PublisherListComponent,
-        PublisherItemComponent,
+        CoursListComponent,
+        CodeTreeComponent,
 
-        GitCloneComponent,
-        GitTreeComponent,
-        GitPanelComponent,
+        CoursCardComponent,
     ],
     declarations: [
         StatusColorPipe,
@@ -102,12 +103,10 @@ import { GitCloneComponent } from './components/git-clone/git-clone.component';
         CircleItemComponent,
         ResourceItemComponent,
         FilesTreeComponent,
-        PublisherListComponent,
-        PublisherItemComponent,
+        CoursListComponent,
+        CodeTreeComponent,
 
-        GitCloneComponent,
-        GitTreeComponent,
-        GitPanelComponent,
+        CoursCardComponent,
     ],
 })
 export class FeatureWorkspaceModule {}

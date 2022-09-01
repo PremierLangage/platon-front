@@ -50,9 +50,7 @@ export class BaseComponent implements OnInit, OnDestroy {
     private createStateFromAttributes() {
         const native: HTMLElement = this.elementRef.nativeElement;
         const parent = native.parentElement as HTMLElement;
-        if (!parent) {
-            return;
-        }
+        if (!parent) return;
         const attributes = parent.attributes;
         const state: Record<string, any> = {};
         const properties = this.definition?.schema?.properties || {};
