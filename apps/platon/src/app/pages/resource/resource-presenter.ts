@@ -1,23 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '@platon/core/auth';
-<<<<<<< HEAD
-import {
-    Circle,
-    CircleService,
-    FileEntry,
-    FileService,
-    FileTree,
-    Publisher,
-    PublisherForm,
-    PublisherService,
-    Resource,
-    ResourceService,
-    UpdateResourceForm,
-} from '@platon/feature/workspace';
-=======
 import { Circle, CircleService, FileEntry, FileService, FileTree, Resource, ResourceService, UpdateResourceForm } from '@platon/feature/workspace';
->>>>>>> develop-asset-update
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, Subscription } from 'rxjs';
 
@@ -45,7 +29,6 @@ export class ResourcePresenter implements OnDestroy {
         private readonly activatedRoute: ActivatedRoute,
         private readonly messageService: NzMessageService,
         private readonly resourceService: ResourceService,
-        private readonly publisherService: PublisherService
     ) {
         this.subscriptions.push(
             this.activatedRoute.params.subscribe((params) => {
@@ -67,29 +50,8 @@ export class ResourcePresenter implements OnDestroy {
         throw new ReferenceError('missing resource');
     }
 
-<<<<<<< HEAD
-    publisher(): Observable<Publisher> {
-        return this.publisherService.get();
-    }
-
-    async publish(form: Omit<PublisherForm, 'resource'>): Promise<boolean> {
-        const { resource } = this.context.value as Required<Context>;
-        try {
-            const asset = await this.publisherService
-                .post({
-                    resource,
-                    ...form,
-                })
-                .toPromise();
-            return true;
-        } catch {
-            this.alertError();
-            return false;
-        }
-=======
     async openInLiveUrl(): Promise<string> {
         return `/live/${this.id}`;
->>>>>>> develop-asset-update
     }
 
     async openInVsCodeUrl(): Promise<string> {
@@ -134,8 +96,6 @@ export class ResourcePresenter implements OnDestroy {
         }
     }
 
-<<<<<<< HEAD
-=======
     async getFileContent(file: FileEntry): Promise<string | undefined> {
         try {
             const [user, content] = await Promise.all([
@@ -181,7 +141,6 @@ export class ResourcePresenter implements OnDestroy {
         return false;
     }
 
->>>>>>> develop-asset-update
     private async refresh(resourceId: number): Promise<void> {
         const [user, resource] = await Promise.all([
             this.authService.ready(),
@@ -224,5 +183,4 @@ export interface Context {
     user?: AuthUser;
     circle?: Circle;
     resource?: Resource;
-    publisher?: Publisher;
 }

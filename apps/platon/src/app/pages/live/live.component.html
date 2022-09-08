@@ -1,23 +1,5 @@
 <app-container>
   <app-content>
-<<<<<<< HEAD
-    <ng-container *ngIf="context.state === 'LOADING'; else finish">
-      <nz-spin nzTip="Chargement..."> </nz-spin>
-    </ng-container>
-    <ng-template #finish>
-      <h1>{{ context.live?.title }}</h1>
-      <h2>{{ context.live?.text }}</h2>
-
-      <wc-platon-viewer [state]="init" debug="'true'">
-
-      </wc-platon-viewer>
-
-      <button nz-button nzType="primary" (click)="grader()">Submit</button>
-
-
-
-    </ng-template>
-=======
     <!-- HEADER -->
     <div nz-row nzAlign="bottom" [nzGutter]="[0, 24]">
       <!-- HEADER-BREADCRUMB -->
@@ -97,6 +79,5 @@
       </div>
     </div>
 
->>>>>>> develop-asset-update
   </app-content>
 </app-container>

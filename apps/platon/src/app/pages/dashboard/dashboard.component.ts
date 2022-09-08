@@ -7,14 +7,6 @@ import { of, Subscription } from 'rxjs';
 import { DashboardPresenter } from './dashboard-presenter';
 
 @Component({
-<<<<<<< HEAD
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-})
-export class DashboardComponent implements OnInit {
-    user?: AuthUser;
-=======
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -23,7 +15,6 @@ export class DashboardComponent implements OnInit {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     private readonly subscriptions: Subscription[] = [];
->>>>>>> develop-asset-update
 
     searchBar: SearchBar<any> = {
         placeholder: 'Essayez un nom de cours...',
@@ -41,11 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly authService: AuthService,
         private readonly introService: IntroService
-<<<<<<< HEAD
-    ) {}
-=======
     ) { }
->>>>>>> develop-asset-update
 
     async ngOnInit() {
 
@@ -109,12 +96,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
         */
     }
-<<<<<<< HEAD
-=======
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
 
->>>>>>> develop-asset-update
 }

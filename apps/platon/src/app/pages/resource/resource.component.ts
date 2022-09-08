@@ -58,11 +58,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
 
     context = this.presenter.defaultContext;
     openInVsCodeUrl = '';
-<<<<<<< HEAD
     liveUrl = '';
-=======
-    openInLiveUrl = '';
->>>>>>> develop-asset-update
 
     get circleLink(): any[] {
         return ['/circle', this.context.resource!.circle.id];
@@ -92,11 +88,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
             this.presenter.contextChange.subscribe(async (context) => {
                 this.context = context;
                 this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
-<<<<<<< HEAD
                 this.liveUrl = await this.presenter.liveUrl();
-=======
-                this.openInLiveUrl = await this.presenter.openInLiveUrl();
->>>>>>> develop-asset-update
                 this.changeDetectorRef.markForCheck();
             })
         );
