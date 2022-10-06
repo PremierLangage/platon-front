@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input } from "@angular/core";
+import { WebComponentHooks } from "@platon/feature/web-component";
 
 @Component({
     selector: 'app-asset-form',

@@ -16,7 +16,8 @@ import { AppSharedLayoutModule } from "../../shared/layout";
 import { LiveComponent } from "./live.component";
 import { RouterModule } from "@angular/router";
 import { LiveBuildResolver } from "./resolver/build.resolver";
-import { LiveRetrieveResolver } from "./resolver/retrieve.resolver";
+import { LiveProcessResolver } from "./resolver/process.resolver";
+import { LiveAnswersResolver } from "./resolver/answers.resolver";
 
 @NgModule({
     declarations: [LiveComponent],
@@ -38,19 +39,24 @@ import { LiveRetrieveResolver } from "./resolver/retrieve.resolver";
         RouterModule.forChild([
             {
                 path: ':id',
-                component: LiveComponent,
                 resolve: { live: LiveBuildResolver }
             },
             {
-                path: ':id/:session',
+                path: ':id/process/:env',
                 component: LiveComponent,
-                resolve: { live: LiveRetrieveResolver }
+                resolve: { live: LiveProcessResolver }
+            },
+            {
+                path: ':id/answers/:env',
+                component: LiveComponent,
+                resolve: { live: LiveAnswersResolver }
             }
         ])
     ],
     providers: [
         LiveBuildResolver,
-        LiveRetrieveResolver
+        LiveProcessResolver,
+        LiveAnswersResolver
     ]
 })
 export class LiveModule { }

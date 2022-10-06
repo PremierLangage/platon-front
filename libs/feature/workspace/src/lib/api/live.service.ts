@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Live } from "../models/live";
+import { Live, LiveAction } from "../models/live";
 import { LiveProvider } from "../models/live-provider";
 
 
@@ -11,12 +11,20 @@ export class LiveService {
         private readonly provider: LiveProvider
     ) { }
 
-    build(id: number): Observable<Live> {
+    build(id: number): Observable<LiveAction> {
         return this.provider.build(id);
     }
 
-    get(id: number, session: string): Observable<Live> {
-        return this.provider.get(id, session);
+    process(id: number, env: string): Observable<Live> {
+        return this.provider.retrieve(id, env, 'process.json');
+    }
+
+    answers(id: number, env: string): Observable<Live> {
+        return this.provider.retrieve(id, env, 'processed.json');
+    }
+
+    grade(id: number, env: string, form: Record<string, any>): Observable<LiveAction> {
+        return this.provider.grade(id, env, form);
     }
 
 }

@@ -56,7 +56,7 @@
     <div nz-row nzJustify="space-around" nzAlign="top" style="min-height: 50vh;">
       <div nz-col nzSpan="18">
         <span [ngSwitch]="live.type" *ngIf="live">
-          <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="live.content" (getState)="getState($event)"></app-asset-exercice>
+          <app-asset-exercice *ngSwitchCase="'EXERCISE'" [asset]="live.content"></app-asset-exercice>
           <p *ngSwitchDefault>Invalid asset</p>
         </span>
       </div>
@@ -72,7 +72,7 @@
         </button>
       </div>
       <div nz-col nzSpan="4" style="justify-content: end; display: inherit;">
-        <button nz-button nzType="primary" nzSize="large">
+        <button nz-button nzType="primary" nzSize="large" (click)="submit()">
           Terminer
           <i nz-icon nzType="right"></i>
         </button>

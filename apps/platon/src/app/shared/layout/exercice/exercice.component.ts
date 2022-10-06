@@ -21,6 +21,11 @@ export class AssetExerciceComponent {
 
     @Output() getState = new EventEmitter<Record<string, any>>();
 
+    @Output()
+    get state() {
+        return this.form.content;
+    }
+
     constructor(
         private readonly changeDetectorRef: ChangeDetectorRef,
     ) { }
