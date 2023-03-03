@@ -15,6 +15,7 @@
         "polyfills": ["zone.js"],
         "tsConfig": "apps/platon-app/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
+        "namedChunks": true,
         "assets": [
           "apps/platon-app/src/favicon.ico",
           "apps/platon-app/src/assets",
@@ -43,7 +44,13 @@
           { "input": "styles/material/dark.scss", "bundleName": "styles.material.dark", "inject": false },
           { "input": "styles/material/light.scss", "bundleName": "styles.material.light", "inject": false }
         ],
-        "scripts": []
+        "scripts": [],
+        "allowedCommonJsDependencies": [
+          "jsplumb",
+          "fast-deep-equal",
+          "rfdc",
+          "jsoneditor"
+        ]
       },
       "configurations": {
         "production": {
