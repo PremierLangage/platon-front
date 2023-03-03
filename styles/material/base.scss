@@ -21,7 +21,8 @@ $input: mat-typography-level(inherit, 1.125, 400)
 */
 //#endregion
 
-@include mat-core($mat-typography);
+// @include mat-core($mat-typography);
+@include mat-core();
 
 //#region LIGHT THEME
 

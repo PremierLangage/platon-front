@@ -14,12 +14,14 @@ import { FieldArrayType } from '@ngx-formly/core';
     </div>
 
     <div *ngFor="let field of field.fieldGroup;let i = index;" class="row align-items-center">
-      <formly-field class="col" [field]="field"></formly-field>
-      <div *ngIf="field.templateOptions?.removable !== false" class="col-2 text-right">
-        <button nz-button nzShape="circle" nzType="primary" (click)="remove(i)">
-            <i nz-icon nzType="minus" nzTheme="outline"></i>
-        </button>
-      </div>
+        <formly-field class="col" [field]="field"></formly-field>
+        <ng-container *ngIf="field.templateOptions">
+            <div *ngIf="field.templateOptions['removable'] !== false" class="col-2 text-right">
+                <button nz-button nzShape="circle" nzType="primary" (click)="remove(i)">
+                    <i nz-icon nzType="minus" nzTheme="outline"></i>
+                </button>
+            </div>
+        </ng-container>
     </div>
 
     <div class="d-flex flex-row-reverse">

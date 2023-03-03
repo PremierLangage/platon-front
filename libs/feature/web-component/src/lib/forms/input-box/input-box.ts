@@ -10,7 +10,8 @@ export interface InputBoxState extends IWebComponent {
     value: string | number;
     prefix: string;
     suffix: string;
-    appearance: 'legacy' | 'standard' | 'fill' | 'outline';
+    //appearance: 'legacy' | 'standard' | 'fill' | 'outline';
+    appearance: 'fill' | 'outline';
     placeholder: string;
     disabled: boolean;
     completion: string[];
