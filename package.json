@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "license": "CeCILL-B",
   "scripts": {
-    "start": "nx serve"
+    "start": "nx serve",
+    "start:local": "nx run platon-app:serve:development --host 0.0.0.0 --disable-host-check",
+    "build:prod": "nx build platon-app --stats-json --configuration production"
   },
   "private": true,
   "dependencies": {
