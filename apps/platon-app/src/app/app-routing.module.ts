@@ -69,7 +69,15 @@ const routes: Routes = [
     },
 
     // PROTECTED EDITOR PAGES
-
+    {
+        path: 'editor',
+        canActivate: [AuthGuard],
+        data: { roles: ['editor'] },
+        loadChildren: () => import(
+            /* webpackChunkName: "editor" */
+            './pages/editor/editor.module'
+        ).then(m => m.EditorModule)
+    },
     {
         path: 'circle',
         canActivate: [AuthGuard],

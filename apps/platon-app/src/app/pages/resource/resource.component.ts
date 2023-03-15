@@ -1,7 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from '@platon/core/auth';
 import { ResourceStatus } from '@platon/feature/workspace';
-import { AuthToken } from 'libs/core/auth/src/lib/models/auth-token';
 import { Subscription } from 'rxjs';
 import { LayoutTab } from '../../shared/layout';
 import { ResourcePresenter } from './resource-presenter';
@@ -46,13 +44,14 @@ export class ResourceComponent implements OnInit, OnDestroy {
 
     context = this.presenter.defaultContext;
     openInVsCodeUrl = '';
+    openInOnlineEditor = '';
 
     get circleLink(): any[] {
-        return ['/circle', this.context.resource!.circle.id];
+        return ['/circle', this.context.resource?.circle.id];
     }
 
     get circleName(): string {
-        return this.context.resource!.circle.name;
+        return this.context.resource?.circle.name as Required<string>;
     }
 
     get canEditOnline(): boolean {
@@ -75,6 +74,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
             this.presenter.contextChange.subscribe(async context => {
                 this.context = context;
                 this.openInVsCodeUrl = await this.presenter.openInVsCodeUrl();
+                this.openInOnlineEditor = `/editor/resource/${context.resource?.id}`;
                 this.changeDetectorRef.markForCheck();
             })
         );
