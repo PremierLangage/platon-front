@@ -29,9 +29,9 @@
         <ng-container *ngSwitchCase="'textarea'">
             <textarea
                 matInput
+                matTextareaAutosize
                 type="multiline"
-                [formControl]="form"
-                [matTextareaAutosize]="true">
+                [formControl]="form">
             </textarea>
         </ng-container>
         <ng-container *ngSwitchDefault>

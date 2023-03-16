@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { IDynamicModule } from '@cisstech/nge/services';
+
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
 
@@ -25,6 +27,6 @@ import { MatrixResizerComponent } from './matrix-resizer/matrix-resizer.componen
     ],
     exports: [MatrixComponent],
 })
-export class MatrixModule {
-    customElementComponent: Type<any> = MatrixComponent;
+export class MatrixModule implements IDynamicModule {
+    component: Type<any> = MatrixComponent;
 }

@@ -1,31 +1,27 @@
-@import '~@angular/material/_theming.scss';
+$brand-color-primary: #171C8F;
+$brand-color-primary-rgb: 23,28,143;
+$brand-color-primary-contrast: #ffffff;
+$brand-color-primary-contrast-rgb: 255,255,255;
+$brand-color-primary-shade: #14197e;
+$brand-color-primary-tint: #2e339a;
 
-//#region Fonts
-$mat-typography: mat-typography-config(
-    $font-family: var(--brand-font),
-);
-/*
-$display-4: mat-typography-level(112px, 112px, 300),
-$display-3: mat-typography-level(56px, 56px, 400),
-$display-2: mat-typography-level(45px, 48px, 400),
-$display-1: mat-typography-level(34px, 40px, 400),
-$headline: mat-typography-level(24px, 32px, 400),
-$title: mat-typography-level(20px, 32px, 500),
-$subheading-2: mat-typography-level(16px, 28px, 400),
-$subheading-1: mat-typography-level(15px, 24px, 500),
-$body-2: mat-typography-level(14px, 24px, 500),
-$body-1: mat-typography-level(14px, 20px, 400),
-$button: mat-typography-level(14px, 14px, 500),
-$caption: mat-typography-level(12px, 20px, 400),
-$input: mat-typography-level(inherit, 1.125, 400)
-*/
-//#endregion
+$brand-color-secondary: #3466fe;
+$brand-color-secondary-rgb: 52, 102, 254;
+$brand-color-secondary-contrast: #ffffff;
+$brand-color-secondary-contrast-rgb: 255, 255, 255;
+$brand-color-secondary-shade: #2e5ae0;
+$brand-color-secondary-tint: #4875fe;
 
-@include mat-core($mat-typography);
+$brand-color-tertiary: #7044ff;
+$brand-color-tertiary-rgb: 112, 68, 255;
+$brand-color-tertiary-contrast: #ffffff;
+$brand-color-tertiary-contrast-rgb: 255, 255, 255;
+$brand-color-tertiary-shade: #633ce0;
+$brand-color-tertiary-tint: #7e57ff;
 
-//#region LIGHT THEME
 
-// FOREGROUND
+// FOREGROUND LIGHT
+
 $dark-text: #24292e;
 $dark-primary-text: rgba($dark-text, 0.87);
 $dark-accent-text: rgba($dark-primary-text, 0.54);
@@ -52,7 +48,8 @@ $mat-light-theme-foreground: (
   slider-off-active: $dark-disabled-text
 );
 
-// BACKGROUND
+// BACKGROUND LIGHT
+
 $light-background: #FFFFFF;
 $light-bg-darker-5: darken($light-background, 5%);
 $light-bg-darker-10: darken($light-background, 10%);
@@ -80,11 +77,8 @@ $mat-light-theme-background: (
   tooltip: $dark-bg-alpha-4,
 );
 
-//#endregion
+// FOREGROUND DARK
 
-//#region DARK THEME
-
-// FOREGROUND
 $light-text: #adbac7;
 $light-primary-text: $light-text;
 $light-accent-text: rgba($light-primary-text, 0.7);
@@ -111,7 +105,8 @@ $mat-dark-theme-foreground: (
   slider-off-active: rgba($light-text, 0.3)
 );
 
-// BACKGROUND
+// BACKGROUND DARK
+
 $dark-background: #22272e;
 $dark-bg-lighter-5: lighten($dark-background, 5%);
 $dark-bg-lighter-10: lighten($dark-background, 10%);
@@ -137,59 +132,14 @@ $mat-dark-theme-background: (
   disabled-list-option: $dark-bg-lighter-10,
   tooltip: $dark-bg-lighter-30,
 );
-//#endregion
 
-//#region PALETTES
-
-/*
-  $my-palette-color: (
-    // Non-accent Backgrounds
-    // General
-    50: #ede7f6,   // Most far away
-    100: #d1c4e9,  // Far far away
-    200: #b39ddb,  // Far away
-    300: #9575cd,  // Middle far
-    400: #7e57c2,  // Middle
-    500: #673ab7,  // Middle close
-    600: #5e35b1,  // Close
-    700: #512da8,  // Very close
-    800: #4527a0,  // Very very Close
-    900: #311b92,  // Closest
-    // Accent Background (calling for user action, notice, feedback/response)
-    // Texts, fields, cursors, selections, progress, buttons
-    A100: #b388ff,  // Most far
-    A200: #7c4dff,  // Middle
-    A400: #651fff,  // Close
-    A700: #6200ea,  // Closest
-    // Non-accent Texts - it's a contrast array opposite to the background for
-    // text coloring.
-    // General
-    contrast: (
-      50: $dark-primary-text,   // Most far away
-      100: $dark-primary-text,  // Far far away
-      200: $dark-primary-text,  // Far away
-      300: $light-primary-text, // Middle far
-      400: $light-primary-text, // Middle
-      500: $light-primary-text, // Middle close
-      600: $light-primary-text, // Close
-      700: $light-primary-text, // Very close
-      800: $light-primary-text, // Very very Close
-      900: $light-primary-text, // Closest
-      // Accent Texts (calling for user action, notice, feedback/response)
-      // Texts, fields, cursors, selections, progress, buttons
-      A100: $dark-primary-text,   // Most far
-      A200: $light-primary-text,  // Middle
-      A400: $light-primary-text,  // Close
-      A700: $light-primary-text,  // Closest
-    )
-  );
-*/
+// PALETTES
 
 $mat-primary: (
-  main: var(--brand-color-primary),
-  lighter: var(--brand-color-primary-tint),
-  darker: var(--brand-color-primary-shade),
-  200: var(--brand-color-primary), // SLIDE TOGGLE COLOR
+  main: $brand-color-primary,
+  lighter: $brand-color-primary-tint,
+  darker: $brand-color-primary-shade,
+  200: $brand-color-primary, // SLIDE TOGGLE COLOR
   contrast: (
     main: $light-primary-text,
     lighter: $light-primary-text,
@@ -197,34 +147,31 @@ $mat-primary: (
   )
 );
 
-$theme-primary: mat-palette($mat-primary, main, lighter, darker);
-
 $mat-accent: (
-  main: var(--brand-color-secondary),
-  lighter: var(--brand-color-secondary-tint),
-  darker: var(--brand-color-secondary-shade),
-  200: var(--brand-color-primary), // SLIDE TOGGLE COLOR
+  main: $brand-color-secondary,
+  lighter: $brand-color-secondary-tint,
+  darker: $brand-color-secondary-shade,
+  200: $brand-color-primary, // SLIDE TOGGLE COLOR
   contrast: (
     main: $light-primary-text,
     lighter: $dark-primary-text,
     darker: $light-primary-text
   )
 );
-$theme-accent: mat-palette($mat-accent, main, lighter, darker);
 
 $mat-warn: (
-  main: var(--brand-color-tertiary),
-  lighter: var(--brand-color-tertiary-tint),
-  darker: var(--brand-color-tertiary-shade),
-  200: var(--brand-color-primary), // SLIDE TOGGLE COLOR
+  main: $brand-color-tertiary,
+  lighter: $brand-color-tertiary-tint,
+  darker: $brand-color-tertiary-shade,
+  200: $brand-color-primary, // SLIDE TOGGLE COLOR
   contrast: (
     main: $light-primary-text,
     lighter: $dark-primary-text,
     darker: $light-primary-text
   )
 );
-$theme-warn: mat-palette($mat-warn, main, lighter, darker);
-//#endregion
 
-$mat-dark-theme: mat-dark-theme($theme-primary, $theme-accent, $theme-warn);
-$mat-light-theme: mat-light-theme($theme-primary, $theme-accent, $theme-warn);
+$theme-primary: mat.define-palette($mat-primary, main, lighter, darker);
+$theme-accent: mat.define-palette($mat-accent, main, lighter, darker);
+$theme-warn: mat.define-palette($mat-warn, main, lighter, darker);
+

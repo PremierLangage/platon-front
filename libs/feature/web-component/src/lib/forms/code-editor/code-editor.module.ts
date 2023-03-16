@@ -1,6 +1,9 @@
 import { NgModule, Type } from '@angular/core';
-import { NgeMonacoModule } from '@mcisse/nge/monaco';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { IDynamicModule } from '@cisstech/nge/services';
+import { NgeMonacoModule } from '@cisstech/nge/monaco';
+
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CodeEditorComponent } from './code-editor.component';
 
@@ -8,11 +11,11 @@ import { CodeEditorComponent } from './code-editor.component';
     declarations: [CodeEditorComponent],
     imports: [
         BaseModule,
-        MatTooltipModule,
+        MatTooltipModule,
         NgeMonacoModule,
     ],
     exports: [CodeEditorComponent],
 })
-export class CodeEditorModule {
-    customElementComponent: Type<any> = CodeEditorComponent;
+export class CodeEditorModule implements IDynamicModule {
+    component: Type<any> = CodeEditorComponent;
 }

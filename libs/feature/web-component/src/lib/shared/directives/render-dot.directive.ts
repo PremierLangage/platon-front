@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, NgModule, OnChanges, OnInit } from '@angular/core';
-import { ResourceLoaderService } from '@mcisse/nge/services';
+import { ResourceLoaderService } from '@cisstech/nge/services';
 import { graphviz } from 'd3-graphviz';
 import { take } from 'rxjs/operators';
 

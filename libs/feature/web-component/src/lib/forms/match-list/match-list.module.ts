@@ -1,5 +1,8 @@
 import { NgModule, Type } from '@angular/core';
-import { NgeMarkdownModule } from '@mcisse/nge/markdown';
+
+import { IDynamicModule } from '@cisstech/nge/services';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
 import { BaseModule } from '../../shared/components/base/base.module';
 import { MatchListComponent } from './match-list.component';
 
@@ -12,6 +15,6 @@ import { MatchListComponent } from './match-list.component';
     ],
     exports: [MatchListComponent],
 })
-export class MatchListModule {
-    customElementComponent: Type<any> = MatchListComponent;
+export class MatchListModule implements IDynamicModule {
+    component: Type<any> = MatchListComponent;
 }
