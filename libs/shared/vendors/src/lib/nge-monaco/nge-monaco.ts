@@ -1,4 +1,4 @@
-import { NgeMonacoModule, NGE_MONACO_THEMES } from '@mcisse/nge/monaco';
+import { NgeMonacoModule, NGE_MONACO_THEMES } from '@cisstech/nge/monaco';
 
 export const NgeMonacoImports = [
     NgeMonacoModule.forRoot({

@@ -1,12 +1,15 @@
 import { NgModule, Type } from '@angular/core';
 
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { CheckboxGroupComponent } from './checkbox-group.component';
+
+import { IDynamicModule } from '@cisstech/nge/services';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
 
 import { BaseModule } from '../../shared/components/base/base.module';
 import { CssPipeModule } from '../../shared/pipes/css.pipe';
 
-import { NgeMarkdownModule } from '@mcisse/nge/markdown';
+import { CheckboxGroupComponent } from './checkbox-group.component';
 
 @NgModule({
     declarations: [CheckboxGroupComponent],
@@ -18,6 +21,6 @@ import { NgeMarkdownModule } from '@mcisse/nge/markdown';
     ],
     exports: [CheckboxGroupComponent],
 })
-export class CheckboxGroupModule {
-    customElementComponent: Type<any> = CheckboxGroupComponent;
+export class CheckboxGroupModule implements IDynamicModule {
+    component: Type<any> = CheckboxGroupComponent;
 }

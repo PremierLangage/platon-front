@@ -1,16 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-// required by Angular Material https://www.npmjs.com/package/@angular/material
-import 'hammerjs';
-
 import { MaterialImports } from './material/material';
 import { NgeDocProviders } from './nge-doc/nge-doc';
 import { NgeMonacoImports } from './nge-monaco/nge-monaco';
 import { NgeMarkdownProviders } from './nge-markdown/nge-markdown';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 
 import { FormlyModule } from '@ngx-formly/core';
 import { ObjectTypeComponent } from './formly/object.type';
@@ -26,11 +22,11 @@ import { ArrayTypeComponent } from './formly/array.type';
     ],
     imports: [
         CommonModule,
+
         ...MaterialImports,
         ...NgeMonacoImports,
 
-        NzIconModule,
-        NzButtonModule,
+        NzIconModule.forRoot([]),
 
         FormlyModule.forRoot({
             types: [
@@ -61,6 +57,7 @@ import { ArrayTypeComponent } from './formly/array.type';
         })
     ],
     exports: [
+        ...MaterialImports
     ],
     providers: [
         ...NgeDocProviders,

@@ -15,5 +15,6 @@
     "alexiv.vscode-angular2-files",
     "formulahendry.auto-rename-tag",
     "vivaxy.vscode-conventional-commits",
+    "firsttris.vscode-jest-runner"
   ]
 }

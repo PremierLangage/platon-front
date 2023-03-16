@@ -72,7 +72,7 @@ export class MatchListComponent implements OnInit, AfterViewChecked, OnDestroy, 
             ],
             DragOptions: { cursor: 'pointer', zIndex: 2000 },
         });
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
             this.jsPlumb.ready(() => {
                 this.addListeners();
                 resolve();

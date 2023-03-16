@@ -10,7 +10,8 @@ export interface InputBoxState extends IWebComponent {
     value: string | number;
     prefix: string;
     suffix: string;
-    appearance: 'legacy' | 'standard' | 'fill' | 'outline';
+    //appearance: 'legacy' | 'standard' | 'fill' | 'outline';
+    appearance: 'fill' | 'outline';
     placeholder: string;
     disabled: boolean;
     completion: string[];
@@ -31,8 +32,7 @@ export const InputBoxComponentDefinition = defineWebComponent({
             hint: {
                 type: 'string',
                 default: '',
-                description:
-                    'Une indication à afficher en bas du champ de saisi.',
+                description: 'Une indication à afficher en bas du champ de saisi.',
             },
             type: {
                 type: 'string',
@@ -76,8 +76,7 @@ export const InputBoxComponentDefinition = defineWebComponent({
                 items: {
                     type: 'string',
                 },
-                description:
-                    'Une liste de suggestions à proposer automatiquement lors de la saisi.',
+                description:  'Une liste de suggestions à proposer automatiquement lors de la saisi.',
             },
         },
     },

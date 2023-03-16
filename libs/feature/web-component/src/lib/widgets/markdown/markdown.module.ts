@@ -1,5 +1,8 @@
 import { NgModule, Type } from '@angular/core';
-import { NgeMarkdownModule } from '@mcisse/nge/markdown';
+
+import { IDynamicModule } from '@cisstech/nge/services';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
 import { BaseModule } from '../../shared/components/base/base.module';
 
 import { MarkdownComponent } from './markdown.component';
@@ -12,6 +15,6 @@ import { MarkdownComponent } from './markdown.component';
     ],
     exports: [MarkdownComponent],
 })
-export class MarkdownModule {
-    customElementComponent: Type<any> = MarkdownComponent;
+export class MarkdownModule implements IDynamicModule {
+    component: Type<any> = MarkdownComponent;
 }
